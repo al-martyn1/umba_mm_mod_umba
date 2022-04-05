@@ -34,9 +34,32 @@
 // umba::filesys::
 namespace umba{
 //! Прослойка абстракций для работы с файловой системой
-namespace filesys{}
-}
+namespace filesys{
+} // namespace umba
+} // namespace filesys
 //----------------------------------------------------------------------------
+
+
+
+namespace umba{
+namespace filename{
+
+#if !defined(UMBA_FILENAME_MAKE_CANONICAL_DECLARED)
+#define UMBA_FILENAME_MAKE_CANONICAL_DECLARED
+    template<typename StringType>
+    StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
+#endif
+
+#if !defined(UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED)
+#define UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED
+    template<typename CharType>
+    CharType getNativePathSep( );
+#endif
+
+} // namespace umba
+} // namespace filename
+//----------------------------------------------------------------------------
+
 
 
 
@@ -744,8 +767,8 @@ StringType getCurrentDrive()
 
     namespace ustrp = umba::string_plus;
 
-    StringType curDir = filename::makeCanonical<StringType>(getCurrentDirectory<StringType>());
-    std::vector< StringType > parts = ustrp::split(curDir, filename::getNativePathSep<typename StringType::value_type>(), true /* skipEmpty */ );
+    StringType curDir = umba::filename::makeCanonical(getCurrentDirectory<StringType>());
+    std::vector< StringType > parts = ustrp::split(curDir, umba::filename::template getNativePathSep<typename StringType::value_type>(), true /* skipEmpty */ );
     if (!parts.empty())
         return ustrp::toupper_copy(parts[0]);
     return StringType();

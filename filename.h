@@ -29,6 +29,18 @@ namespace umba
 namespace filename
 {
 
+#if !defined(UMBA_FILENAME_MAKE_CANONICAL_DECLARED)
+#define UMBA_FILENAME_MAKE_CANONICAL_DECLARED
+    template<typename StringType>
+    StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
+#endif
+
+#if !defined(UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED)
+#define UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED
+    template<typename CharType>
+    CharType getNativePathSep( );
+#endif
+
 
 //-----------------------------------------------------------------------------
 template<typename StringType> inline  StringType getNativeParentDirAlias( )  { return umba::string_plus::make_string<StringType>(".."); } //!< Возвращает строку с алиасом родительского каталога, как это принято в целевой системе. Обычно это ".."
@@ -208,7 +220,7 @@ StringType hasPathSeparators( const StringType &fileName )
 //-----------------------------------------------------------------------------
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и ".")
 template<typename StringType> inline
-StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep  /* = getNativePathSep<typename StringType::value_type>() */  )
 {
     std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
 
@@ -237,7 +249,7 @@ StringType makeCanonical( StringType fileName, typename StringType::value_type p
     StringType nativeCurrentDirAlias = getNativeCurrentDirAlias<StringType>();
     StringType nativeParentDirAlias  = getNativeParentDirAlias<StringType>();
 
-    std::vector< StringType >::iterator pit = parts.begin();
+    typename std::vector< StringType >::iterator pit = parts.begin();
     for(; pit != parts.end(); ++pit)
     {
         if (*pit==nativeCurrentDirAlias)
