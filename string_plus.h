@@ -1824,7 +1824,7 @@ void split_against_braces( std::vector<StringType>               &splits  //!< [
 //-----------------------------------------------------------------------------
 //! Удаление пустых элементов
 template<typename StringType> inline
-void eraseEmptiesHelper( std::vector<StringType> v /*!< Вектор элементов */)
+void eraseEmptiesHelper( std::vector<StringType> &v /*!< Вектор элементов */)
 {
     
     // Чукич, стр 62
@@ -1859,9 +1859,10 @@ std::vector<StringType> split( const StringType &str                  //!< Вх�
     if (skipEmpty)
     {
         // Чукич, стр 62
-        #if 0 // В 2005 студии оно не работает
+        // #if 0 // В 2005 студии оно не работает
+        // eraseEmptiesHelper( splits );
+        // #endif
         eraseEmptiesHelper( splits );
-        #endif
     }
 
     return splits;
@@ -1884,17 +1885,18 @@ std::vector<StringType> split( const StringType &str    //!< Входная ст
     if (skipEmpty)
     {
         // Чукич, стр 62
-        #if 0 // В 2005 студии оно не работает
-        splits.erase( std::remove_if( splits.begin()
-                                    , splits.end()
-                                    #ifdef UMBA_CXX_HAS_STD11
-                                    , []( const StringType &s) { return s.empty(); }
-                                    #else
-                                    , lambda_is_empty<StringType>()
-                                    #endif
-                                    )
-                    );
-        #endif
+        // #if 0 // В 2005 студии оно не работает
+        // splits.erase( std::remove_if( splits.begin()
+        //                             , splits.end()
+        //                             #ifdef UMBA_CXX_HAS_STD11
+        //                             , []( const StringType &s) { return s.empty(); }
+        //                             #else
+        //                             , lambda_is_empty<StringType>()
+        //                             #endif
+        //                             )
+        //             );
+        // #endif
+        eraseEmptiesHelper( splits );
     }
 
     return splits;
