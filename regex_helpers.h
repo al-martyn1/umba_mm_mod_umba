@@ -137,6 +137,20 @@ StringType expandSimpleMaskToEcmaRegex( StringType s, bool useAnchoring = false,
 }
 
 //----------------------------------------------------------------------------
+inline
+std::string expandSimpleMaskToEcmaRegex( const char* s, bool useAnchoring = false, bool allowRawRegexes = true )
+{
+    return expandSimpleMaskToEcmaRegex<std::string>( std::string(s), useAnchoring, allowRawRegexes );
+}
+
+//----------------------------------------------------------------------------
+inline
+std::wstring expandSimpleMaskToEcmaRegex( const wchar_t* s, bool useAnchoring = false, bool allowRawRegexes = true )
+{
+    return expandSimpleMaskToEcmaRegex<std::wstring>( std::wstring(s), useAnchoring, allowRawRegexes );
+}
+
+//----------------------------------------------------------------------------
 // https://en.cppreference.com/w/cpp/regex/match_results
 // Хз, что быстрее, match_results или regex_match
 
@@ -157,7 +171,7 @@ bool regexMatch(const StringType &text, const std::basic_regex<typename StringTy
 #endif
 
 template< typename CharType > inline
-bool regexMatch(const std::basic_string<CharType> &text, const std::basic_regex<CharType> &r
+bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
@@ -172,7 +186,7 @@ bool regexMatch(const std::basic_string<CharType> &text, const std::basic_regex<
 }
 
 template< typename CharType > inline
-bool regexMatch(const std::vector<CharType> &text, const std::basic_regex<CharType> &r
+bool regexMatch( const std::vector<CharType> &text, const std::basic_regex<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
@@ -189,7 +203,7 @@ bool regexMatch(const std::vector<CharType> &text, const std::basic_regex<CharTy
 
 //----------------------------------------------------------------------------
 template< typename CharType > inline
-bool regexMatch(const std::basic_string<CharType> &text, const std::basic_string<CharType> &r
+bool regexMatch( const std::basic_string<CharType> &text, const std::basic_string<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
@@ -198,7 +212,7 @@ bool regexMatch(const std::basic_string<CharType> &text, const std::basic_string
 
 //----------------------------------------------------------------------------
 template< typename CharType > inline
-bool regexMatch(const std::vector<CharType> &text, const std::basic_string<CharType> &r
+bool regexMatch( const std::vector<CharType> &text, const std::basic_string<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
@@ -212,12 +226,30 @@ bool regexMatch( const StringType                                               
                , StringType                                                                *pMatchedRegexText
                )
 {
-    for(auto [key,val] : regexes)
+    for( const auto& [key,val] : regexes)
     {
         if (regexMatch(text,val))
         {
             if (pMatchedRegexText)
                *pMatchedRegexText = key;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+template< typename StringType > inline
+bool regexMatch( const StringType                                                          &text
+               , const std::vector< std::basic_regex<typename StringType::value_type> >    &regexes
+               , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
+               )
+{
+    for(const auto& r : regexes)
+    {
+        if (regexMatch(text,r, flags))
+        {
             return true;
         }
     }

@@ -29,16 +29,16 @@ namespace umba
 namespace filename
 {
 
-#if !defined(UMBA_FILENAME_MAKE_CANONICAL_DECLARED)
-#define UMBA_FILENAME_MAKE_CANONICAL_DECLARED
-    template<typename StringType>
-    StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
-#endif
-
 #if !defined(UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED)
 #define UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED
     template<typename CharType>
     CharType getNativePathSep( );
+#endif
+
+#if !defined(UMBA_FILENAME_MAKE_CANONICAL_DECLARED)
+#define UMBA_FILENAME_MAKE_CANONICAL_DECLARED
+    template<typename StringType>
+    StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
 #endif
 
 
