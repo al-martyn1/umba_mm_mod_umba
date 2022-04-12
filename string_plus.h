@@ -2010,6 +2010,61 @@ bool is_quoted( const StringType &s                        //!< Строка д�
 }
 
 //-----------------------------------------------------------------------------
+//! Возвращает раскавыченную строку
+/*! 
+    Строка заключена в одинаковые символы кавычек, внутри они дублируются
+ */
+template<typename StringType> inline
+bool unquoteSimpleQuoted( StringType &str //!< Строка для раскавычивания
+                        )
+{
+    if (str.size()<2)
+        return str;
+
+    const typename StringType::value_type quotChar = str.front();
+
+    if (str.front()!=quotChar || str.back()!=quotChar)
+        return str;
+
+    std::string::size_type pos = 1, endPos = str.size()-1;
+
+    std::string res; res.reserve(endPos-pos);
+
+    bool prevQuot = false;
+
+    for( ; pos!=endPos; ++pos )
+    {
+        auto ch = str[pos];
+
+        if (prevQuot)
+        {
+            if (ch==quotChar)
+            {
+                res.append(1,quotChar); // remove diplicated quots
+            }
+            else
+            {
+                res.append(1,quotChar);
+                res.append(1,ch); // не знаю, что это, просто игнорим
+            }
+            prevQuot = false;
+        }
+        else
+        {
+            res.append(1,ch);
+        }
+    }
+
+    if (prevQuot)
+    {
+        res.append(1,quotChar);
+    }
+
+    return res;
+
+}
+
+//-----------------------------------------------------------------------------
 //! Возвращает true, если строка была закавычена, и раскавычивает её. 
 /*! 
     Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
