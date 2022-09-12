@@ -1336,7 +1336,7 @@ inline wchar_t get_pair( wchar_t brCh )  { return get_pair((char)brCh); }
 
 //------------------------------
 //! Возвращает true, если входной символ - скобка (только из диапазона ASCII)
-template<typename CharType> inline CharType is_brace( CharType brCh )
+template<typename CharType> inline bool is_brace( CharType brCh )
 {
     CharType pr = get_pair(brCh);
     return pr != 0;
@@ -1349,6 +1349,35 @@ template<typename CharType> inline int compare( CharType br1, CharType br2 )
     if (br1==br2) return 0;
     else return br1<br2 ? -1 : 1;
 }
+
+//-----------------------------------------------------------------------------
+template<typename CharType> inline bool has_pair( CharType brCh )
+{
+    CharType pr = get_pair(brCh);
+    return pr != 0;
+}
+
+//-----------------------------------------------------------------------------
+template<typename CharType> inline bool is_openclose_char( CharType brCh )
+{
+    CharType pr = get_pair(brCh);
+    return pr!=0 && pr!=brCh;
+}
+
+//-----------------------------------------------------------------------------
+template<typename CharType> inline bool is_open_brace_char( CharType brCh )
+{
+    CharType pr = get_pair(brCh);
+
+    if (pr==0)
+        return false;
+
+    if (pr==brCh) // такая же, а не парная
+        return false;
+
+    return brCh < pr; // Символ переданный аргументом - левее найденного в ASCII - значит открывающая
+}
+
 
 //------------------------------
 //! Возвращает true, если переданный символ - парный (один из видов скобки) или апостроф, кавычка, или %, $, @, # - они тоже считаются парными
@@ -2013,6 +2042,7 @@ bool is_quoted( const StringType &s                        //!< Строка д�
 //! Возвращает раскавыченную строку
 /*! 
     Строка заключена в одинаковые символы кавычек, внутри они дублируются
+    Используется в bat-файлах, и тп
  */
 template<typename StringType> inline
 bool unquoteSimpleQuoted( StringType &str //!< Строка для раскавычивания
