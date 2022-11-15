@@ -172,8 +172,17 @@ struct MacroTextGetterProxy : public IMacroTextGetter<StringType>
 
     virtual bool operator()(const StringType &name, StringType &text) const override
     {
-        if (getMacroTextFromMap(m, name, text))
+        // что-то от старой версии, пусть пока полежит
+        // if (getMacroTextFromMap(m, name, text))
+        //     return true;
+
+        std::map<StringType,StringType>::const_iterator it = m.find(name);
+        if (it!=m.end())
+        {
+            text = it->second;
             return true;
+        }
+
         return orgGetter(name, text);
     }
 
