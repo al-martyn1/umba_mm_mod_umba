@@ -1867,8 +1867,8 @@ void eraseEmptiesHelper( std::vector<StringType> &v /*!< Вектор элеме
     #else
 
     std::vector<StringType>::iterator rmIt = std::remove_if( v.begin(), v.end(), lambda_is_empty<StringType>() );
-    if (rmIt!=)
-        v.erase( rmIt );
+    //if (rmIt!=)
+    v.erase(rmIt, , v.end());
 
     #endif
 }
