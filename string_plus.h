@@ -1860,7 +1860,9 @@ void eraseEmptiesHelper( std::vector<StringType> &v /*!< Вектор элеме
     #ifdef UMBA_CXX_HAS_STD11 
     
     // В 2005 студии оно не работает
-    v.erase( std::remove_if( v.begin(), v.end(), []( const StringType &s) { return s.empty(); } ) );
+    std::vector<StringType>::iterator rmIt = std::remove_if(v.begin(), v.end(), [](const StringType& s) { return s.empty(); });
+    //if (rmIt!=v.end())
+    v.erase(rmIt, v.end());
 
     #else
 
