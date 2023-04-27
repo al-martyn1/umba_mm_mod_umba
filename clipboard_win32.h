@@ -122,8 +122,24 @@ bool clipboardTextGet(StringType &text, HWND hWndNewOwner=0)
          return false;
     }
 
+    std::size_t numTextChars = dataLen;
+
+    if (sizeof(char_type)>sizeof(char))
+    {
+        // cfText = CF_UNICODETEXT;
+        // dataLen
+        // 78/2 = 39
+        // 16+18+2+2 = 38
+        numTextChars /= sizeof(char_type);
+    }
+
+    if (numTextChars>0 && lpClpText[numTextChars]==0)
+    {
+        --numTextChars; // remove Z-terminator
+    }
+
     text.clear();
-    text.assign(lpClpText, dataLen);
+    text.assign(lpClpText, numTextChars);
 
     ::GlobalUnlock(hglb);
 
@@ -137,10 +153,13 @@ bool clipboardTextSet(const StringType &text, HWND hWndNewOwner=0)
 {
     typedef typename StringType::value_type     char_type;
 
+    DWORD numBytes = text.size()+1;
+
     UINT cfText = CF_TEXT;
     if (sizeof(char_type)>sizeof(char))
     {
         cfText = CF_UNICODETEXT;
+        numBytes *= sizeof(char_type);
     }
 
     if (!::OpenClipboard( hWndNewOwner ))
@@ -150,7 +169,7 @@ bool clipboardTextSet(const StringType &text, HWND hWndNewOwner=0)
 
     ClipboardAutoCloser autoCloser;
 
-    HGLOBAL hglb = ::GlobalAlloc(GMEM_MOVEABLE, text.size()+1 ); 
+    HGLOBAL hglb = ::GlobalAlloc(GMEM_MOVEABLE, numBytes );
     if (!hglb)
     {
         return false;
