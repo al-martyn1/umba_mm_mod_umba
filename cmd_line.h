@@ -1359,12 +1359,12 @@ struct CommandLineOption
         // need parsing
         std::string optArgLower = umba::string_plus::tolower_copy(optArg);
 
-        if (optArgLower=="-" || optArgLower=="0" || optArgLower=="false" || optArgLower=="no")
+        if (optArgLower=="-" || optArgLower=="0" || optArgLower=="false" || optArgLower=="no" || optArgLower == "n")
         {
             val = false;
             return true;
         }
-        else if (optArgLower=="+" || optArgLower=="1" || optArgLower=="true" || optArgLower=="yes")
+        else if (optArgLower=="+" || optArgLower=="1" || optArgLower=="true" || optArgLower=="yes" || optArgLower == "y")
         {
             val = true;
             return true;
