@@ -2032,7 +2032,7 @@ struct CommandLineOptionInfo
 
             if (optInfo.optType==OptionType::optFlag)
             {
-                descExtraOss<<"Flag option";
+                descExtraOss<<"Flag option, allowed values: '+'/'1'/'Y(es)'/'True' or '-'/'0'/'N(o)'/'False'";
             }
 
             if (optInfo.hasMinMax)
