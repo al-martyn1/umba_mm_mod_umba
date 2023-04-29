@@ -191,6 +191,47 @@ bool clipboardTextSet(const StringType &text, HWND hWndNewOwner=0)
 
 
 //----------------------------------------------------------------------------
+template<typename ToUtfConverter> inline
+bool clipboardTextGet(std::string &text, const ToUtfConverter &toUtfConverter, bool *pUtf, HWND hWndNewOwner=0)
+{
+    std::wstring wstr;
+    if (umba::win32::clipboardTextGet(wstr, hWndNewOwner))
+    {
+        //text = encoding::toUtf8(wstr);
+        text = toUtfConverter(wstr);
+        if (pUtf)
+           *pUtf = true;
+    }
+    else if (umba::win32::clipboardTextGet(text, hWndNewOwner))
+    {
+        if (pUtf)
+           *pUtf = false;
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//------------------------------
+template<typename FromUtfConverter> inline
+bool clipboardTextSet(const std::string &text, const FromUtfConverter &fromUtfConverter, bool utf, HWND hWndNewOwner=0)
+{
+    if (utf)
+    {
+        //return umba::win32::clipboardTextSet(encoding::fromUtf8(text), umba::win32::clipboardGetConsoleHwnd());
+        return umba::win32::clipboardTextSet(fromUtfConverter(text), hWndNewOwner);
+    }
+    else
+    {
+        return umba::win32::clipboardTextSet(text, hWndNewOwner);
+    }
+}
+
+//----------------------------------------------------------------------------
+
 
 
 
