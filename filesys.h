@@ -20,6 +20,8 @@
 #include <stdexcept>
 #include <iostream>
 #include <ctime>
+#include <cstddef>
+
 
 #if defined(WIN32) || defined(_WIN32)
     #include <Shlobj.h>
@@ -87,6 +89,63 @@ enum FileType
 };
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename DataType>
+bool readFile(std::istream &fileIn, std::vector<DataType> &filedata)
+{
+    filedata.clear();
+
+    DataType buf[4096];
+    while (fileIn.read(buf, sizeof(buf)))
+    {
+        size_t readedBytes = fileIn.gcount();
+        size_t readedItems = readedBytes/sizeof(DataType);
+        filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
+    }
+
+    size_t readedBytes = fileIn.gcount();
+    size_t readedItems = readedBytes/sizeof(DataType);
+    filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
+
+    // filedata.append(buffer, fileIn.gcount());
+    
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<typename DataType>
+bool writeFile(std::ostream &fileOut, const DataType *pData, size_t dataSize)
+{
+    if (!dataSize)
+         return true;
+
+    const size_t itemSize = sizeof(DataType);
+    const size_t numRawBytesToWrite = dataSize*itemSize;
+
+    if (!fileOut.write(pData, numRawBytesToWrite))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<typename DataType>
+bool writeFile(std::ostream &fileOut, const std::vector<DataType> &data)
+{
+    auto dataSize = data.size();
+    if (!dataSize)
+        return true;
+
+    return writeFile(fileOut, &data[0], data.size());
+}
+
+//----------------------------------------------------------------------------
+
 
 
 
@@ -337,6 +396,44 @@ HANDLE openFileForReadingWin32(const std::wstring &filename)
                       );
 }
 
+//! Хелпер (std::string) для генерик открытия файла для записи
+inline
+HANDLE openFileForWrittingWin32(const std::string &filename, bool bOverwrite)
+{
+    if (filename.empty()) return INVALID_HANDLE_VALUE;
+
+    DWORD dwCreationDisposition = bOverwrite
+                                ? CREATE_ALWAYS // Creates a new file, always. If the specified file exists and is writable, the function overwrites the file
+                                : CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
+                                ;
+
+    return CreateFileA( filename.c_str(), GENERIC_WRITE
+                      , FILE_SHARE_READ
+                      , 0 // lpSecurityAttributes
+                      , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
+                      , 0 // hTemplateFile
+                      );
+}
+
+//! Хелпер (std::wstring) для генерик открытия файла для записи
+inline
+HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
+{
+    if (filename.empty()) return INVALID_HANDLE_VALUE;
+
+    DWORD dwCreationDisposition = bOverwrite
+                                ? CREATE_ALWAYS // Creates a new file, always. If the specified file exists and is writable, the function overwrites the file
+                                : CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
+                                ;
+
+    return CreateFileW( filename.c_str(), GENERIC_WRITE
+                      , FILE_SHARE_READ
+                      , 0 // lpSecurityAttributes
+                      , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
+                      , 0 // hTemplateFile
+                      );
+}
+
 // https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time
 
 //! Хелпер конвертации юниксового filetime_t в виндовый
@@ -580,6 +677,57 @@ bool readFile( const StringType &filename       //!< Имя файла
 }
 
 //------------------------------
+template<typename StringType, typename DataType> inline
+bool writeFile( const StringType &filename       //!< Имя файла
+              , const DataType   *pData          //!< Данные
+              , size_t            dataSize
+              , bool bOverwrite
+              )
+{
+    HANDLE hFile = openFileForWrittingWin32(filename.c_str(), bOverwrite);
+    if (hFile==INVALID_HANDLE_VALUE)
+    {
+        DWORD err = GetLastError();
+        return false;
+    }
+
+    if (!dataSize)
+    {
+        CloseHandle(hFile);
+        return true;
+    }
+
+    const size_t itemSize = sizeof(DataType);
+    const size_t numRawBytesToWrite = dataSize*itemSize;
+
+    DWORD lpNumberOfBytesWritten = 0;
+
+    BOOL bRes = WriteFile(hFile, (LPCVOID)pData, (DWORD)numRawBytesToWrite, &lpNumberOfBytesWritten, 0);
+    CloseHandle(hFile);
+
+    if (!bRes)
+        return false;
+
+    if (numRawBytesToWrite!=(size_t)lpNumberOfBytesWritten)
+        return false;
+
+    return true;
+}
+
+//------------------------------
+template<typename StringType, typename DataType> inline
+bool writeFile( const StringType            &filename    //!< Имя файла
+              , const std::vector<DataType> &filedata    //!< Вектор для данных
+              , bool                        bOverwrite
+              )
+{
+    if (filedata.empty())
+        return true;
+
+    return writeFile(filename, &filedata[0], filedata.size());
+}
+
+//------------------------------
 //! Получение текущего рабочего каталога - специализация для std::string
 template<> inline
 std::string getCurrentDirectory<std::string>()
@@ -649,12 +797,6 @@ bool readFile( const StringType &filename, std::vector<DataType> &filedata
     if (!isFileReadable( filename ))
         return false;
 
-    const size_t itemSize = sizeof(DataType);
-    const size_t numItems = (size_t)(fileStat.fileSize / itemSize);
-    filedata.resize( numItems ); // We can read files which are always can fit to memory
-    const size_t numRawBytesToRead = filedata.size()*itemSize;
-
-
     // Here starts "no exceptions" (exception safe) zone
     std::ifstream ifs;
 
@@ -666,7 +808,12 @@ bool readFile( const StringType &filename, std::vector<DataType> &filedata
         return false;
     }
 
-    ifs.read( (char*)&filedata[0], (size_t)numRawBytesToRead );
+    const size_t itemSize = sizeof(DataType);
+    const size_t numItems = (size_t)(fileStat.fileSize / itemSize);
+    filedata.resize( numItems ); // We can read files which are always can fit to memory
+    const size_t numRawBytesToRead = filedata.size()*itemSize;
+
+    ifs.read( (char*)&filedata[0], (std::size_t)numRawBytesToRead );
 
     if (ifs.fail())
     {
@@ -694,6 +841,23 @@ bool readFile( const StringType &filename, std::vector<DataType> &filedata
 
 }
 
+#if 0
+// Not currently implemented
+//------------------------------
+template<typename StringType, typename DataType> inline
+bool writeFile( const StringType            &filename    //!< Имя файла
+              , const std::vector<DataType> &filedata    //!< Вектор для данных
+              , bool                        bOverwrite
+              )
+
+//------------------------------
+template<typename StringType, typename DataType> inline
+bool writeFile( const StringType &filename       //!< Имя файла
+              , const DataType   *pData          //!< Данные
+              , size_t            dataSize
+              , bool bOverwrite
+              )
+#endif
 //----------------------------------------------------------------------------
 //! Проверка доступности файла на чтение - специализация для std::string
 template<> inline
