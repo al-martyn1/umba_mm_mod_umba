@@ -79,7 +79,7 @@ IoFileType detectFilenameType(const std::string &n, bool bInput=false)
 
 //----------------------------------------------------------------------------
 inline
-bool checkIoFileType(IoFileType ioFt, std::string &msg, bool bInput=false)
+bool checkIoFileType(IoFileType ioFt, std::string &msg, bool bInput /* =false */, bool enableClipboard=true  )
 {
     if (ioFt==IoFileType::nameEmpty)
     {
@@ -102,6 +102,12 @@ bool checkIoFileType(IoFileType ioFt, std::string &msg, bool bInput=false)
             msg = "can't use STDIN for output";
             return false;
         }
+    }
+
+    if (ioFt==IoFileType::clipboard && !enableClipboard)
+    {
+        msg = bInput ? "input from clipboard not supported" : "output to clipboard not supported";
+        return false;
     }
 
     return true;
