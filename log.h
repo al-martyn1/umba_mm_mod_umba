@@ -67,7 +67,7 @@ bool isWarningDisabled(const std::string &warnType)
     const std::unordered_map<std::string, bool> &m = getWarningDisabledMap();
     std::unordered_map<std::string, bool>::const_iterator it = m.find(warnType);
     if (it==m.end())
-        return true; // not explicitly disabled
+        return false; // not explicitly disabled
     return it->second;
 }
 
