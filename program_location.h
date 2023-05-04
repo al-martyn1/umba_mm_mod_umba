@@ -364,11 +364,11 @@ struct ProgramLocation
 
         // Global std options file
         if (flags&BuiltinOptionsLocationFlag::appGlobal)
-            res.push_back( appendPath( programLocationInfo.confPath, appendExt( programLocationInfo.exeName, make_string<StringType>("options") ) ) );
+            res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ exeName, make_string<StringType>("options") ) ) );
 
         // Global user options file
         if (flags&BuiltinOptionsLocationFlag::customGlobal)
-            res.push_back( appendPath( programLocationInfo.confPath, appendExt( programLocationInfo.exeName, make_string<StringType>("custom.options") ) ) );
+            res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ exeName, make_string<StringType>("custom.options") ) ) );
 
         // Local user options file
         // $(HOME)\.$(AppExeName).options
@@ -378,11 +378,11 @@ struct ProgramLocation
         {
             if (!_useUserFolder /* userConfFileOnly */ )
             {
-                res.push_back( appendExt( programLocationInfo.userConf, make_string<StringType>(".options") ) );
+                res.push_back( appendExt(  /* programLocationInfo. */ userConf, make_string<StringType>(".options") ) );
             }
             else
             {
-                res.push_back( appendPath( programLocationInfo.userConf, make_string<StringType>(".options") ) );
+                res.push_back( appendPath(  /* programLocationInfo. */ userConf, make_string<StringType>(".options") ) );
             }
         }
 
@@ -407,6 +407,15 @@ struct ProgramLocation
     {
         return getBuiltinOptionsFilename( flag, useUserFolder );
     }
+
+    StringType getConfFilename( StringType fileName // name relative to conf root
+                              , bool useUserConf
+                              ) const
+    {
+        StringType confRoot = useUserConf ? userConf : confPath;
+        return umba::filename::appendPath(/* programLocationInfo. */ confRoot, fileName);
+    }
+
 
 
     template<typename StreamType>
