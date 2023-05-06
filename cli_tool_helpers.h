@@ -56,7 +56,7 @@ IoFileType detectFilenameType(const std::string &n, bool bInput=false)
     if (n.empty())
         return IoFileType::nameEmpty;
 
-    std::string N = marty_cpp::toUpper(n);
+    std::string N = umba::string_plus::toupper_copy(n);
 
     if (N=="-")
     {

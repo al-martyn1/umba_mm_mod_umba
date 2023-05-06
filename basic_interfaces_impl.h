@@ -84,9 +84,10 @@ struct SimplePollCapable : public SimplePollCapableImplBase
 
     //! Полировка
     virtual
-    void poll() override
+    bool poll() override
     {
         m_handler();
+        return true;
     }
 
     //! Готовность к полировке
