@@ -3,6 +3,7 @@
 
 #include "umba.h"
 #include "umba/simple_formatter.h"
+#include "info_log.h"
 
 #include <string>
 #include <iostream>
