@@ -17,7 +17,9 @@
 #include <set>
 
 #include "filename.h"
+#include "filesys.h"
 #include "regex_helpers.h"
+
 
 
 // umba::scanners::
@@ -25,7 +27,40 @@ namespace umba {
 namespace scanners {
 
 
+
+
 //----------------------------------------------------------------------------
+//! Сканирует каталоги начиная с заданного и выше, в поисках конфиг файла flagsFileName
+template<typename StringType> inline
+StringType scanForFlagsFile( const StringType &flagsFileName, StringType basePath)
+{
+    while(!basePath.empty())
+    {
+        StringType testName = umba::filename::appendPath(basePath,flagsFileName);
+        if (umba::filesys::isFileReadable(testName))
+        {
+            return testName;
+        }
+
+        std::string nextBasePath = umba::filename::getPath(basePath);
+        if (basePath==nextBasePath)
+            nextBasePath.clear();
+
+        basePath = nextBasePath;
+    }
+
+    return StringType();
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+//! Сканирует каталоги в поисках файлов, заданных масками инклюд и эксклюд - appConfig.includeFilesMaskList и appConfig.excludeFilesMaskList
+/*! Если инклюд маски пусты, этап пропускается. Эксклюд маски обрабатываются в любом случае
+*/
 template<typename AppConfigType, typename LogMsgType> inline
 void scanFolders( const AppConfigType      &appConfig        // with includeFilesMaskList and excludeFilesMaskList 
                 , LogMsgType               &logMsg           // logMsg or logNul

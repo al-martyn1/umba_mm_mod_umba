@@ -16,6 +16,7 @@
 
 //#include "encoding/encoding.h"
 #include "umba/filesys.h"
+#include "umba/filename.h"
 
 #if defined(WIN32) || defined(_WIN32)
 
@@ -88,8 +89,6 @@ StreamType& printBuildDateTime( StreamType &os, const std::string &indent = "" )
 }
 
 //----------------------------------------------------------------------------
-
-
 
 
 
