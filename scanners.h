@@ -162,7 +162,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
             {
                 bFound = true;
 
-                if (appConfig.testVerbosity(VerbosityLevel::detailed))
+                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
                 {
                     umba::info_log::printSectionHeader(logMsg, "Found Files");
                     // logMsg << "---------------------\nFound Files:" << endl << "------------" << endl;
@@ -218,7 +218,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 
                 foundExtentions.insert(ext);
 
-                if (appConfig.testVerbosity(VerbosityLevel::detailed))
+                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
                 {
                     if (ext.empty())
                         ext = "<EMPTY>";
@@ -247,7 +247,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
             {
                 excludedFiles.push_back(entryName);
 
-                if (appConfig.testVerbosity(VerbosityLevel::detailed))
+                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
                 {
                     if (excludedByIncludeMask)
                     {
