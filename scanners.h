@@ -170,7 +170,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
             }
 
 
-            if (appConfig.testVerbosity(VerbosityLevel::detailed))
+            // if (appConfig.testVerbosity(VerbosityLevel::detailed))
             {
                 logMsg << entryName << " - ";
             }
