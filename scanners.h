@@ -32,7 +32,7 @@ namespace scanners {
 //----------------------------------------------------------------------------
 //! Сканирует каталоги начиная с заданного и выше, в поисках конфиг файла flagsFileName
 template<typename StringType> inline
-StringType scanForFlagsFile( const StringType &flagsFileName, StringType basePath)
+StringType scanForOptionsFile( const StringType &flagsFileName, StringType basePath)
 {
     while(!basePath.empty())
     {
@@ -50,6 +50,46 @@ StringType scanForFlagsFile( const StringType &flagsFileName, StringType basePat
     }
 
     return StringType();
+}
+
+//----------------------------------------------------------------------------
+//! Сканирует каталоги начиная с заданного и выше, в поисках конфиг файлов flagsFileNames
+template<typename StringType> inline
+StringType scanForOptionsFile( const std::vector<StringType> &flagsFileNames, StringType basePath)
+{
+    while(!basePath.empty())
+    {
+        for(const auto fileName : flagsFileNames)
+        {
+            StringType testName = umba::filename::appendPath(basePath,fileName);
+            if (umba::filesys::isFileReadable(testName))
+            {
+                return testName;
+            }
+        }
+
+        std::string nextBasePath = umba::filename::getPath(basePath);
+        if (basePath==nextBasePath)
+            nextBasePath.clear();
+
+        basePath = nextBasePath;
+    }
+
+    return StringType();
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType scanForFlagsFile( const StringType &flagsFileName, StringType basePath)
+{
+    return scanForOptionsFile(flagsFileName, basePath);
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType scanForFlagsFile( const std::vector<StringType> &flagsFileNames, StringType basePath)
+{
+    return scanForOptionsFile(flagsFileNames, basePath);
 }
 
 //----------------------------------------------------------------------------
