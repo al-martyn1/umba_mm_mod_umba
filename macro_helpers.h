@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "string_plus.h"
 #include "env.h"
@@ -15,10 +16,9 @@ namespace macros{
 
 
 
-
 //----------------------------------------------------------------------------
 template<typename StringType>
-bool getMacroTextFromMap(const std::map<StringType,StringType> &m, const StringType &name, StringType &text)
+bool getMacroTextFromMap(const StringStringMap<StringType> &m, const StringType &name, StringType &text)
 {
     std::map<StringType,StringType>::const_iterator it = m.find(name);
     if (it==m.end())
@@ -34,21 +34,13 @@ bool getMacroTextFromMap(const std::map<StringType,StringType> &m, const StringT
 
 
 
-
-
-//----------------------------------------------------------------------------
-
-
-
-
-
 //----------------------------------------------------------------------------
 template<typename StringType>
 struct MacroTextFromMap : public IMacroTextGetter<StringType>
 {
-    std::map<StringType,StringType> m;
+    StringStringMap<StringType> m;
 
-    MacroTextFromMap(const std::map<StringType,StringType> &_m) : m(_m) {}
+    MacroTextFromMap(const StringStringMap<StringType> &_m) : m(_m) {}
 
     virtual bool operator()(const StringType &name, StringType &text) const override
     {
@@ -63,9 +55,9 @@ struct MacroTextFromMap : public IMacroTextGetter<StringType>
 template<typename StringType>
 struct MacroTextFromMapRef : public IMacroTextGetter<StringType>
 {
-    const std::map<StringType,StringType> &m;
+    const StringStringMap<StringType> &m;
 
-    MacroTextFromMapRef(const std::map<StringType,StringType> &_m) : m(_m) {}
+    MacroTextFromMapRef(const StringStringMap<StringType> &_m) : m(_m) {}
 
     virtual bool operator()(const StringType &name, StringType &text) const override
     {
@@ -95,10 +87,10 @@ struct MacroTextFromEnv : public IMacroTextGetter<StringType>
 template<typename StringType>
 struct MacroTextFromMapOrEnv : public IMacroTextGetter<StringType>
 {
-    std::map<StringType,StringType> m;
+    StringStringMap<StringType>     m;
     bool                            envAllowed = true; // To allow control in runtime
 
-    MacroTextFromMapOrEnv(const std::map<StringType,StringType> &_m, bool _envAllowed = true) : m(_m), envAllowed(_envAllowed) {}
+    MacroTextFromMapOrEnv(const StringStringMap<StringType> &_m, bool _envAllowed = true) : m(_m), envAllowed(_envAllowed) {}
 
     virtual bool operator()(const StringType &name, StringType &text) const override
     {
@@ -119,10 +111,10 @@ struct MacroTextFromMapOrEnv : public IMacroTextGetter<StringType>
 template<typename StringType>
 struct MacroTextFromMapOrEnvRef : public IMacroTextGetter<StringType>
 {
-    const std::map<StringType,StringType> &m;
-    bool                            envAllowed = true; // To allow control in runtime
+    const StringStringMap<StringType> &m;
+    bool                              envAllowed = true; // To allow control in runtime
 
-    MacroTextFromMapOrEnvRef(const std::map<StringType,StringType> &_m, bool _envAllowed = true) : m(_m), envAllowed(_envAllowed) {}
+    MacroTextFromMapOrEnvRef(const StringStringMap<StringType> &_m, bool _envAllowed = true) : m(_m), envAllowed(_envAllowed) {}
 
     virtual bool operator()(const StringType &name, StringType &text) const override
     {
@@ -146,9 +138,9 @@ struct MacroTextFromMapOrEnvRef : public IMacroTextGetter<StringType>
 
 //----------------------------------------------------------------------------
 template<typename StreamType, typename StringType>
-StreamType& printMacros( StreamType &oss, const StringType &prefix, const std::map<StringType,StringType> &macros )
+StreamType& printMacros( StreamType &oss, const StringType &prefix, const StringStringMap<StringType> &macros )
 {
-    std::map<StringType,StringType>::const_iterator it = macros.begin();
+    StringStringMap<StringType>::const_iterator it = macros.begin();
 
     std::size_t maxName = 0;
 
