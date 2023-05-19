@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 
 
 #include "string_plus.h"
@@ -40,6 +41,33 @@ $(CONDITIONAL_TEST_EXISTENCE:) expands to B
 // umba::macros::
 namespace umba{
 namespace macros{
+
+
+
+// https://en.cppreference.com/w/cpp/language/type_alias
+#if defined(DEBUG) || defined(_DEBUG)
+
+    // При отладке удобнее разглядывать std::map
+
+    template<typename StringType>
+    using StringStringMap = std::map<StringType,StringType>;
+
+    template<typename StringType>
+    using StringSet = std::set<StringType>;
+
+#else
+
+    // В релизе std::unordered_map быстрее
+    template<typename StringType>
+    using StringStringMap = std::unordered_map<StringType,StringType>;
+
+    template<typename StringType>
+    using StringSet = std::unordered_set<StringType>;
+
+    template<typename StringType>
+    using StringSet = std::unordered_set<StringType>;
+
+#endif
 
 
 
@@ -162,11 +190,11 @@ template < typename CharType
 template<typename StringType /* , typename OrgGetter */ >
 struct MacroTextGetterProxy : public IMacroTextGetter<StringType>
 {
-    const std::map<StringType,StringType> &m;
+    const StringStringMap<StringType>     &m;
     //const OrgGetter                       &orgGetter;
     const IMacroTextGetter<StringType>    &orgGetter;
 
-    MacroTextGetterProxy( const std::map<StringType,StringType> &_m
+    MacroTextGetterProxy( const StringStringMap<StringType>     &_m
                         , const IMacroTextGetter<StringType>    &_orgGetter
                         ) : m(_m), orgGetter(_orgGetter) {}
 
@@ -176,7 +204,7 @@ struct MacroTextGetterProxy : public IMacroTextGetter<StringType>
         // if (getMacroTextFromMap(m, name, text))
         //     return true;
 
-        std::map<StringType,StringType>::const_iterator it = m.find(name);
+        StringStringMap<StringType>::const_iterator it = m.find(name);
         if (it!=m.end())
         {
             text = it->second;
@@ -187,6 +215,10 @@ struct MacroTextGetterProxy : public IMacroTextGetter<StringType>
     }
 
 }; // struct MacroTextGetterProxy
+
+//-----------------------------------------------------------------------------
+
+
 
 //-----------------------------------------------------------------------------
 template<typename StringType, typename IntType> inline
@@ -220,7 +252,7 @@ template < typename CharType
 substMacros( const ::std::basic_string<CharType, Traits, Allocator>                          &str
            , const IMacroTextGetter< ::std::basic_string<CharType, Traits, Allocator> >      &getMacroText
            , int                                                                             flags
-           , std::set< ::std::basic_string<CharType, Traits, Allocator> >                    &usedMacros
+           , StringSet< ::std::basic_string<CharType, Traits, Allocator> >                   &usedMacros
            )
    {
     namespace util = ::umba::macros::util;
@@ -321,7 +353,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                         continue; // macro not found
                        }
 
-                    std::set< StringType > usedMacrosCopy = usedMacros;
+                    StringSet< StringType > usedMacrosCopy = usedMacros;
                     usedMacrosCopy.insert(macroNameChanged);
                     res.append((flags&smf_DisableRecursion) ? macroText : substMacros(macroText, getMacroText, flags, usedMacrosCopy));
                     continue;
@@ -342,16 +374,16 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                     if (!getMacroText(macroNameChanged, macroText))
                        continue; // macro not found
 
-                    std::set< StringType > usedMacrosCopy = usedMacros;
+                    StringSet< StringType > usedMacrosCopy = usedMacros;
                     usedMacrosCopy.insert(macroNameChanged);
 
-                    std::map< StringType, StringType > tmpMacros; // = macros;
+                    StringStringMap<StringType> tmpMacros; // = macros;
                     
                     typename StringType::size_type pi = 1, piSize = parts.size();
 
                     for(; pi<piSize; ++pi)
                        {
-                        std::set< StringType > usedMacrosCopy2 = usedMacrosCopy;
+                        StringSet< StringType > usedMacrosCopy2 = usedMacrosCopy;
                         parts[pi] = substMacros(parts[pi], getMacroText, flags, usedMacrosCopy2);
                        }
 
@@ -461,7 +493,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator> &str
            , int                                                     flags = smf_KeepUnknownVars // smf_ArgsAllowed|smf_ConditionAllowed
            )
    {
-    std::set< ::std::basic_string<CharType, Traits, Allocator> > usedMacros;
+    StringSet< ::std::basic_string<CharType, Traits, Allocator> > usedMacros;
     return substMacros(str, getMacroText, flags, usedMacros);
    }
 
