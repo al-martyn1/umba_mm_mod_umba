@@ -20,7 +20,7 @@ namespace macros{
 template<typename StringType>
 bool getMacroTextFromMap(const StringStringMap<StringType> &m, const StringType &name, StringType &text)
 {
-    std::map<StringType,StringType>::const_iterator it = m.find(name);
+    StringStringMap<StringType>::const_iterator it = m.find(name);
     if (it==m.end())
         return false;
 
