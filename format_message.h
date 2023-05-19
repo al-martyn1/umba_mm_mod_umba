@@ -1,3 +1,4 @@
+#pragma once
 /*! 
     \file
     \brief Форматирование сообщений при помощи макросов
@@ -210,7 +211,7 @@ public:
     static inline EFormatAlign  alignRight  = EFormatAlign::right ;
 
 
-    FormatMessage( const StringType &msg )
+    FormatMessage( const StringType &msg, const std::string &ltag=std::string() )
     : macros()
     , messageText(msg)
     {}
@@ -274,7 +275,9 @@ public:
 
     //TODO: !!! Не реализовано
     //! Установка нац особенностей форматирования десятичных чисел, делает decSep и decGroup
-    FormatMessage& locale(const std::string) { return *this; }
+    virtual FormatMessage& locale(const std::string &ltag) { return *this; }
+
+
 
     FormatMessage& arg(const StringType &argName, const StringType &val, std::size_t fieldWidth=0, EFormatAlign align=EFormatAlign::left)
     {
@@ -425,22 +428,23 @@ StreamType& operator<<(StreamType &s, const FormatMessage<StringType> &fm)
     
 
 template<typename StringType> inline
-FormatMessage<StringType> formatMessage(const StringType &msg)
+FormatMessage<StringType> formatMessage(const StringType &msg, const std::string &ltag=std::string())
 {
-    return FormatMessage<StringType>(msg);
+    return FormatMessage<StringType>(msg, ltag);
 }
 
 inline
-FormatMessage<std::string> formatMessage(const char *msg)
+FormatMessage<std::string> formatMessage(const char *msg, const std::string &ltag=std::string())
 {
-    return FormatMessage<std::string>(msg);
+    return FormatMessage<std::string>(msg, ltag);
 }
 
 inline
-FormatMessage<std::wstring> formatMessage(const wchar_t *msg)
+FormatMessage<std::wstring> formatMessage(const wchar_t *msg, const std::string &ltag=std::string())
 {
-    return FormatMessage<std::wstring>(msg);
+    return FormatMessage<std::wstring>(msg, ltag);
 }
+
 
 
 
