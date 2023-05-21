@@ -425,14 +425,32 @@ bool isSubPathName( StringType commonPath
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
 template<typename StringType> inline 
-StringType makeRelPath( StringType commonPath
-                      , StringType fullName
+StringType makeRelPath( const StringType &commonPath
+                      , const StringType &fullName
                       , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
                       )
 {
     StringType res;
     if (isSubPathName(commonPath, fullName, &res, pathSep))
         return res;
+
+    return fullName;
+}
+
+//-----------------------------------------------------------------------------
+//! Удаляет префикс пути - делает имя относительным
+template<typename StringType> inline 
+StringType makeRelPath( const std::vector<StringType> &commonPaths
+                      , const StringType &fullName
+                      , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
+                      )
+{
+    StringType res;
+    for(const StringType &commonPath : commonPaths)
+    {
+        if (isSubPathName(commonPath, fullName, &res, pathSep))
+            return res;
+    }
 
     return fullName;
 }
@@ -528,6 +546,25 @@ StringType getFileName( const StringType &path )
 
 inline std::string  getFileName( const char    *p ) { return getFileName<std::string> ( p ); } //!< Извлекает из полного пути имя файла + расширение
 inline std::wstring getFileName( const wchar_t *p ) { return getFileName<std::wstring>( p ); } //!< Извлекает из полного пути имя файла + расширение
+
+//-----------------------------------------------------------------------------
+//! Извлекает из полного пути путь и  имя файла без расширения
+template<typename StringType> inline
+StringType getPathFile( const StringType &path )
+{
+    auto lastPathSepRevIt = find_if( path.rbegin(), path.rend(), isPathSep<typename StringType::value_type>); // .base();
+    auto lastExtSepIt = find_if( path.rbegin(), lastPathSepRevIt, isExtSep<typename StringType::value_type>).base();
+    if (lastExtSepIt==lastPathSepRevIt.base())
+        lastExtSepIt = path.end();
+
+    if (lastExtSepIt!=path.begin() && lastExtSepIt!=path.end())
+       --lastExtSepIt;
+
+    return StringType(path.begin(), lastExtSepIt);
+}
+
+inline std::string  getPathFile( const char    *p ) { return getPathFile<std::string> ( p ); } //!< Извлекает из полного пути имя файла + расширение
+inline std::wstring getPathFile( const wchar_t *p ) { return getPathFile<std::wstring>( p ); } //!< Извлекает из полного пути имя файла + расширение
 
 //-----------------------------------------------------------------------------
 //! Извлекает из имени расширение
