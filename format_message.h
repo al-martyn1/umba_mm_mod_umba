@@ -15,16 +15,7 @@
 #include <sstream>
 #include <iomanip>
 
-// MacroTextFromMapRef
 
-// umba::macros::
-
-// substMacros( const ::std::basic_string<CharType, Traits, Allocator> &str
-//            , const MacroTextGetter                                  &getMacroText
-//            , int                                                     flags = smf_KeepUnknownVars // smf_ArgsAllowed|smf_ConditionAllowed
-//            )
-
-// smf_DisableRecursion
 
 
 namespace umba {
@@ -379,40 +370,6 @@ public:
 
         return arg(argName, str, fieldWidth, align);
     }
-
-
-/*
-
-    bool                                       fShowbase  ;
-    bool                                       fShowsign  ;
-    unsigned                                   uBase      ;
-    static StringType formatUnsigned(UnsignedType u, UnsignedType base, std::size_t width)
-    static StringType formatIntDecimal(IntType intVal, bool showSign = false)
-    static StringType getUnsignedPrefix(UnsignedType base)
-    static std::size_t getUnsignedPrefixLen(UnsignedType base)
-    static std::size_t getCorrectBase(UnsignedType base)
-
-        https://en.cppreference.com/w/cpp/types/enable_if
-
-        using TUnder = typename std::underlying_type<TEnum>::type;                             \
-
-        https://en.cppreference.com/w/cpp/types/make_signed
-
-        #include <type_traits>
-        typedef std::make_signed<unsigned int>::type int_type;
-
-        https://en.cppreference.com/w/cpp/types/is_integral
-        SHOW( std::is_integral<A>::value );
-        SHOW( std::is_integral_v<E> );
-
-*/
-
-// enum class EFormatAlign
-// {
-//     left,
-//     center,
-//     right
-// };
 
 
 }; // class FormatMessage
