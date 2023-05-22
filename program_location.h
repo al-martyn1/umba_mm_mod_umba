@@ -327,7 +327,7 @@ struct ProgramLocation
         return m;
     }
 
-    std::map<StringType, StringType> mergeProgramLocationMacros( umba::macros::StringStringMap<StringType> mergeTo ) const
+    umba::macros::StringStringMap<StringType> mergeProgramLocationMacros( umba::macros::StringStringMap<StringType> mergeTo ) const
     {
          auto locationMacros = getProgramLocationMacros();
 
