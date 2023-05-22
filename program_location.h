@@ -233,7 +233,7 @@ struct ProgramLocation
     umba::macros::StringStringMap<StringType> getProgramLocationMacros() const
     {
         // std::map<StringType, StringType> m;
-        umba::macros::StringStringMap<StringType> m
+        umba::macros::StringStringMap<StringType> m;
 
         m[umba::string_plus::make_string<StringType>("AppName")] = exeName;
 
