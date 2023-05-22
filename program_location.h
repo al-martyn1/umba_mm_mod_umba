@@ -5,6 +5,7 @@
 #include "string_plus.h"
 #include "filename.h"
 #include "filesys.h"
+#include "macros.h"
 
 
 #include <map>
@@ -229,9 +230,10 @@ struct ProgramLocation
     bool        useUserFolder = false; //!< If false single file(s) used
 
 
-    std::map<StringType, StringType> getProgramLocationMacros() const
+    umba::macros::StringStringMap<StringType> getProgramLocationMacros() const
     {
-        std::map<StringType, StringType> m;
+        // std::map<StringType, StringType> m;
+        umba::macros::StringStringMap<StringType> m
 
         m[umba::string_plus::make_string<StringType>("AppName")] = exeName;
 
@@ -325,7 +327,7 @@ struct ProgramLocation
         return m;
     }
 
-    std::map<StringType, StringType> mergeProgramLocationMacros( std::map<StringType, StringType> mergeTo ) const
+    std::map<StringType, StringType> mergeProgramLocationMacros( umba::macros::StringStringMap<StringType> mergeTo ) const
     {
          auto locationMacros = getProgramLocationMacros();
 
