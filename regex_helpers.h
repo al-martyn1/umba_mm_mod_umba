@@ -137,6 +137,7 @@ StringType expandSimpleMaskToEcmaRegex( StringType s, bool useAnchoring = false,
 }
 
 //----------------------------------------------------------------------------
+//! Легким движением руки простая маска превращается в регэксп - версия для сырого char*
 inline
 std::string expandSimpleMaskToEcmaRegex( const char* s, bool useAnchoring = false, bool allowRawRegexes = true )
 {
@@ -144,6 +145,7 @@ std::string expandSimpleMaskToEcmaRegex( const char* s, bool useAnchoring = fals
 }
 
 //----------------------------------------------------------------------------
+//! Легким движением руки простая маска превращается в регэксп - версия для сырого wchar_t*
 inline
 std::wstring expandSimpleMaskToEcmaRegex( const wchar_t* s, bool useAnchoring = false, bool allowRawRegexes = true )
 {
@@ -170,6 +172,7 @@ bool regexMatch(const StringType &text, const std::basic_regex<typename StringTy
 }
 #endif
 
+//! Просто завернули std::regex_match в try/catch, версия для строки
 template< typename CharType > inline
 bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
@@ -185,6 +188,8 @@ bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex
     return false;
 }
 
+//----------------------------------------------------------------------------
+//! Просто завернули std::regex_match в try/catch, версия для вектора CharType'ов
 template< typename CharType > inline
 bool regexMatch( const std::vector<CharType> &text, const std::basic_regex<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
@@ -202,8 +207,10 @@ bool regexMatch( const std::vector<CharType> &text, const std::basic_regex<CharT
 
 
 //----------------------------------------------------------------------------
+//! На входе вместо regex строка с regex-выражением, версия для строки
 template< typename CharType > inline
-bool regexMatch( const std::basic_string<CharType> &text, const std::basic_string<CharType> &r
+bool regexMatch( const std::basic_string<CharType>     &text
+               , const std::basic_string<CharType>     &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
@@ -211,8 +218,10 @@ bool regexMatch( const std::basic_string<CharType> &text, const std::basic_strin
 }
 
 //----------------------------------------------------------------------------
+//! На входе вместо regex строка с regex-выражением, версия для вектора CharType'ов
 template< typename CharType > inline
-bool regexMatch( const std::vector<CharType> &text, const std::basic_string<CharType> &r
+bool regexMatch( const std::vector<CharType>           &text
+               , const std::basic_string<CharType>     &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
@@ -220,15 +229,17 @@ bool regexMatch( const std::vector<CharType> &text, const std::basic_string<Char
 }
 
 //----------------------------------------------------------------------------
+//! На входе - map, ключ - трока с выражением, значение - regex, чтобы прогонять regex'ы пачками и уметь получать исходную строку regex-выражения
 template< typename StringType > inline
-bool regexMatch( const StringType                                                          &text
+bool regexMatch( const StringType                                                                &text
                , const std::map< StringType, std::basic_regex<typename StringType::value_type> > &regexes
-               , StringType                                                                *pMatchedRegexText
+               , StringType                                                                      *pMatchedRegexText = 0
+               , std::regex_constants::match_flag_type                                           flags = std::regex_constants::match_default
                )
 {
     for( const auto& [key,val] : regexes)
     {
-        if (regexMatch(text,val))
+        if (regexMatch(text, val, flags))
         {
             if (pMatchedRegexText)
                *pMatchedRegexText = key;
@@ -240,18 +251,26 @@ bool regexMatch( const StringType                                               
 }
 
 //----------------------------------------------------------------------------
+//! Прогоняет по выражению вектор regex'ов, возвращает true, если хоть один сработал
 template< typename StringType > inline
 bool regexMatch( const StringType                                                          &text
                , const std::vector< std::basic_regex<typename StringType::value_type> >    &regexes
-               , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
+               , std::size_t                                                               *pMatchIndex = 0
+               , std::regex_constants::match_flag_type                                      flags = std::regex_constants::match_default
                )
 {
+    std::size_t idx = 0;
     for(const auto& r : regexes)
     {
-        if (regexMatch(text,r, flags))
+        if (regexMatch(text, r, flags))
         {
+            if (pMatchIndex)
+                *pMatchIndex = idx;
+
             return true;
         }
+
+        ++idx;
     }
 
     return false;

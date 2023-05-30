@@ -98,6 +98,39 @@ StringType scanForFlagsFile( const std::vector<StringType> &flagsFileNames, Stri
 
 
 //----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector< std::basic_regex<typename StringType::value_type> >
+fromSimpleMaskToRegexVector(const std::vector<StringType> &regexStrings, bool useAnchoring = false, bool allowRawRegexes = true)
+{
+    std::vector< std::basic_regex<typename StringType::value_type> > resVec; resVec.reserve(regexStrings.size());
+
+    for(const auto &s : regexStrings)
+    {
+        resVec.emplace_back(std::basic_regex<StringType::value_type>(umba::regex_helpers::expandSimpleMaskToEcmaRegex(s, useAnchoring, allowRawRegexes)));
+    }
+
+    return resVec;
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector< std::basic_regex<typename StringType::value_type> >
+fromSimpleMaskToRegexMap(const std::vector<StringType> &regexStrings, bool useAnchoring = false, bool allowRawRegexes = true)
+{
+    std::map< StringType, std::basic_regex<typename StringType::value_type> > resMap;
+
+    for(const auto &s : regexStrings)
+    {
+        resMap[s] = std::basic_regex<StringType::value_type>(umba::regex_helpers::expandSimpleMaskToEcmaRegex(s, useAnchoring, allowRawRegexes));
+    }
+
+    return resMap;
+}
+
+//auto normalizedEntryName = umba::filename::normalizePathSeparators(entryName,'/');
+
+//----------------------------------------------------------------------------
+
 //! Сканирует каталоги в поисках файлов, заданных масками инклюд и эксклюд - appConfig.includeFilesMaskList и appConfig.excludeFilesMaskList
 /*! Если инклюд маски пусты, этап пропускается. Эксклюд маски обрабатываются в любом случае
 */
