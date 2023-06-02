@@ -24,8 +24,13 @@
 //! Простанство имён библиотеки UMBA
 namespace umba{}
 
+//
 #include "umba/preprocessor.h"
+//
 #include "umba/assert.h"
+//
 #include "umba/autolock.h"
+//
 #include "umba/critical_section.h"
+//
 #include "umba/umba_cpp.h"
