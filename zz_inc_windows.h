@@ -18,7 +18,9 @@
         #define _WINSOCKAPI_
     #endif
 
+    //
     #include <winsock2.h>
+    //
     #include "windows.h"
 
     #if defined(min)

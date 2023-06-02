@@ -9,6 +9,8 @@
 
 //-----------------------------------------------------------------------------
 
+#include "umba/umba.h"
+//
 #include "umba/stl.h"
 #include "umba/alloca.h"
 #include "umba/env.h"
@@ -16,10 +18,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <utility>
 #include <exception>
 #include <stdexcept>
 #include <iostream>
 #include <ctime>
+#include <cstddef>
 #include <cstddef>
 
 
@@ -93,7 +97,7 @@ enum FileType
 
 
 //----------------------------------------------------------------------------
-template<typename DataType>
+template<typename DataType> inline
 bool readFile(std::istream &fileIn, std::vector<DataType> &filedata)
 {
     filedata.clear();
@@ -101,22 +105,40 @@ bool readFile(std::istream &fileIn, std::vector<DataType> &filedata)
     DataType buf[4096];
     while (fileIn.read(buf, sizeof(buf)))
     {
-        size_t readedBytes = fileIn.gcount();
-        size_t readedItems = readedBytes/sizeof(DataType);
+        std::size_t readedBytes = fileIn.gcount();
+        std::size_t readedItems = readedBytes/sizeof(DataType);
         filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
     }
 
-    size_t readedBytes = fileIn.gcount();
-    size_t readedItems = readedBytes/sizeof(DataType);
+    std::size_t readedBytes = fileIn.gcount();
+    std::size_t readedItems = readedBytes/sizeof(DataType);
     filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
+    
+    return true;
+}
 
-    // filedata.append(buffer, fileIn.gcount());
+inline
+bool readFile(std::istream &fileIn, std::string &filedata)
+{
+    filedata.clear();
+
+    char buf[4096];
+    while (fileIn.read(buf, sizeof(buf)))
+    {
+        std::size_t readedBytes = fileIn.gcount();
+        std::size_t readedItems = readedBytes/sizeof(char);
+        filedata.append(&buf[0], readedItems);
+    }
+
+    std::size_t readedBytes = fileIn.gcount();
+    std::size_t readedItems = readedBytes/sizeof(char);
+    filedata.append(&buf[0], readedItems);
     
     return true;
 }
 
 //----------------------------------------------------------------------------
-template<typename DataType>
+template<typename DataType> inline
 bool writeFile(std::ostream &fileOut, const DataType *pData, size_t dataSize)
 {
     if (!dataSize)
@@ -134,19 +156,31 @@ bool writeFile(std::ostream &fileOut, const DataType *pData, size_t dataSize)
 }
 
 //----------------------------------------------------------------------------
-template<typename DataType>
+template<typename DataType> inline
 bool writeFile(std::ostream &fileOut, const std::vector<DataType> &data)
 {
     auto dataSize = data.size();
     if (!dataSize)
         return true;
 
-    return writeFile(fileOut, &data[0], data.size());
+    if (data.empty())
+    {
+        DataType d;
+        return writeFile(fileOut, &d, 0);
+    }
+    else
+    {
+        return writeFile(fileOut, &data[0], data.size());
+    }
+    
 }
 
 //----------------------------------------------------------------------------
-
-
+inline
+bool writeFile(std::ostream &fileOut, const std::string &data)
+{
+    return writeFile(fileOut, data.data(), data.size());
+}
 
 
 //----------------------------------------------------------------------------
@@ -663,7 +697,10 @@ bool readFile( const StringType &filename       //!< Имя файла
     {
         if (ignoreSizeErrors)
         {
-            fileStat.fileSize = (filesize_t)filedata.size(); // сохраняем консистенцию размера вектора и fileStat'а. Или не надо?
+            filedata.resize((std::size_t)(readedBytes/numItems), (DataType)0);
+            fileStat.fileSize = (filesize_t)readedBytes; // сохраняем консистенцию размера вектора и fileStat'а. Или не надо?
+            if (pFileStat)
+                *pFileStat = fileStat;
             return true;
         }
 
@@ -674,6 +711,97 @@ bool readFile( const StringType &filename       //!< Имя файла
 
     // Вроде всё хорошоу
     return true;
+}
+
+//------------------------------
+template<typename StringType> inline
+bool readFile( const StringType &filename       //!< Имя файла
+             , std::string      &filedata       //!< Строка для данных
+             , FileStat *pFileStat = 0          //!< [out] Статистика файла
+             , bool ignoreSizeErrors = true     //!< Игнорировать разночтения из статистики файла и реально прочитанного размера
+             )
+{
+    #ifdef UMBA_CXX_HAS_STD17
+
+        filedata.clear();
+    
+        FileStat fileStat = getFileStat( filename );
+        if (fileStat.fileType!=FileTypeFile)
+            return false;
+    
+        if (pFileStat)
+            *pFileStat = fileStat;
+    
+        if (fileStat.fileSize==0)
+            return true; // no data for reading at all
+    
+        if (!isFileReadable( filename ))
+            return false;
+    
+        const size_t itemSize = sizeof(char);
+        const size_t numItems = (size_t)(fileStat.fileSize / itemSize);
+        {
+            std::string strTmp = std::string(numItems, (char)0);
+            std::swap(strTmp, filedata);
+            // filedata.resize( numItems ); // We can read files which are always can fit to memory
+        }
+        
+        const size_t numRawBytesToRead = filedata.size()*itemSize;
+    
+        // Here starts "no exceptions" (exception safe) zone
+    
+        HANDLE hFile = openFileForReadingWin32( filename.c_str() );
+        if (hFile==INVALID_HANDLE_VALUE)
+        {
+            DWORD err = GetLastError();
+            return false;
+        }
+    
+        DWORD readedBytes = 0;
+    
+        BOOL bReadRes = ReadFile( hFile, filedata.data(), (DWORD)filedata.size(), &readedBytes, 0 );
+    
+        CloseHandle(hFile);
+    
+        if (!bReadRes)
+        {
+            filedata.clear(); // Ошибка. Если вектор не временный, то неплохо бы его обнулить, чтобы место в памяти не хавал.
+            return false;
+        }
+    
+        if (readedBytes!=(DWORD)fileStat.fileSize)
+        {
+            if (ignoreSizeErrors)
+            {
+                filedata.resize((std::size_t)readedBytes, (char)0);
+                fileStat.fileSize = (filesize_t)filedata.size(); // сохраняем консистенцию размера вектора и fileStat'а. Или не надо?
+                if (pFileStat)
+                    *pFileStat = fileStat;
+                return true;
+            }
+    
+            // Чистим вектор, и возвращаем ошибку
+            filedata.clear();
+            return false;
+        }
+    
+        // Вроде всё хорошоу
+        return true;
+
+
+    #else // pre C++ 17
+
+        std::vector<char> filedataVec;
+        if (readFile(filename, filedataVec, pFileStat, ignoreSizeErrors))
+        {
+            filedata.assign(filedataVec.begin(), filedataVec.end());
+            return true;
+        }
+
+        return false;
+
+    #endif
+
 }
 
 //------------------------------
@@ -722,9 +850,24 @@ bool writeFile( const StringType            &filename    //!< Имя файла
               )
 {
     if (filedata.empty())
-        return true;
+    {
+        DataType d;
+        return writeFile(filename, &d, 0);
+    }
+    else
+    {
+        return writeFile(filename, &filedata[0], filedata.size());
+    }
+}
 
-    return writeFile(filename, &filedata[0], filedata.size());
+//------------------------------
+template<typename StringType> inline
+bool writeFile( const StringType            &filename    //!< Имя файла
+              , const std::string           &filedata    //!< Вектор для данных
+              , bool                        bOverwrite
+              )
+{
+    return writeFile(filename, filedata.data(), filedata.size());
 }
 
 //------------------------------
