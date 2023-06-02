@@ -310,7 +310,7 @@ namespace std
   template<typename _Tp>
     struct is_member_object_pointer
     : public __is_member_object_pointer_helper<
-				typename remove_cv<_Tp>::type>::type
+                typename remove_cv<_Tp>::type>::type
     { };
 
   template<typename>
@@ -325,7 +325,7 @@ namespace std
   template<typename _Tp>
     struct is_member_function_pointer
     : public __is_member_function_pointer_helper<
-				typename remove_cv<_Tp>::type>::type
+                typename remove_cv<_Tp>::type>::type
     { };
 
   /// is_enum
@@ -488,7 +488,7 @@ namespace std
   template<typename _Tp>
     struct is_fundamental
     : public __or_<is_arithmetic<_Tp>, is_void<_Tp>,
-		   is_null_pointer<_Tp>>::type
+           is_null_pointer<_Tp>>::type
     { };
 
   /// is_object
@@ -623,7 +623,7 @@ namespace std
     { };
 
   template<typename _Tp,
-	   bool = is_arithmetic<_Tp>::value>
+       bool = is_arithmetic<_Tp>::value>
     struct __is_signed_helper
     : public false_type { };
 
@@ -802,7 +802,7 @@ namespace std
   template<typename _Tp>
     struct __is_default_constructible_safe<_Tp, true>
     : public __and_<__is_array_known_bounds<_Tp>,
-		    __is_default_constructible_atom<typename
+            __is_default_constructible_atom<typename
                       remove_all_extents<_Tp>::type>>
     { };
 
@@ -855,7 +855,7 @@ namespace std
   template<typename _From, typename _To>
     struct __is_static_castable
     : public integral_constant<bool, (__is_static_castable_safe<
-				      _From, _To>::value)>
+                      _From, _To>::value)>
     { };
 
   // Implementation for non-reference types. To meet the proper
@@ -866,7 +866,7 @@ namespace std
   struct __do_is_direct_constructible_impl
   {
     template<typename _Tp, typename _Arg, typename
-	     = decltype(::new _Tp(declval<_Arg>()))>
+         = decltype(::new _Tp(declval<_Arg>()))>
       static true_type __test(int);
 
     template<typename, typename>
@@ -914,8 +914,8 @@ namespace std
       typedef typename remove_cv<typename remove_reference<_To
         >::type>::type __dst_t;
       typedef __and_<__not_<is_same<__src_t, __dst_t>>,
-		     is_base_of<__src_t, __dst_t>,
-		     __not_<is_constructible<__dst_t, _From>>> type;
+             is_base_of<__src_t, __dst_t>,
+             __not_<is_constructible<__dst_t, _From>>> type;
       static constexpr bool value = type::value;
     };
 
@@ -940,7 +940,7 @@ namespace std
         _To>::type>::type __dst_t;
       typedef __and_<__not_<is_function<__src_t>>, 
         __or_<is_same<__src_t, __dst_t>,
-		    is_base_of<__dst_t, __src_t>>> type;
+            is_base_of<__dst_t, __src_t>>> type;
       static constexpr bool value = type::value;
     };
 
@@ -966,9 +966,9 @@ namespace std
   template<typename _Tp, typename _Arg>
     struct __is_direct_constructible_new
     : public conditional<is_reference<_Tp>::value,
-			 __is_direct_constructible_ref_cast<_Tp, _Arg>,
-			 __is_direct_constructible_new_safe<_Tp, _Arg>
-			 >::type
+             __is_direct_constructible_ref_cast<_Tp, _Arg>,
+             __is_direct_constructible_new_safe<_Tp, _Arg>
+             >::type
     { };
 
   template<typename _Tp, typename _Arg>
@@ -1074,7 +1074,7 @@ namespace std
   template<typename _Tp>
     struct __is_nt_default_constructible_impl<_Tp, true>
     : public __and_<__is_array_known_bounds<_Tp>,
-		    __is_nt_default_constructible_atom<typename
+            __is_nt_default_constructible_atom<typename
                       remove_all_extents<_Tp>::type>>
     { };
 
@@ -1110,7 +1110,7 @@ namespace std
   template<typename _Tp, typename... _Args>
     struct is_nothrow_constructible
     : public __and_<is_constructible<_Tp, _Args...>,
-		    __is_nt_constructible_impl<_Tp, _Args...>>
+            __is_nt_constructible_impl<_Tp, _Args...>>
     { };
 
   template<typename _Tp, bool = __is_referenceable<_Tp>::value>
@@ -1153,13 +1153,13 @@ namespace std
     class __is_assignable_helper
     {
       template<typename _Tp1, typename _Up1,
-	       typename = decltype(declval<_Tp1>() = declval<_Up1>())>
-	static true_type
-	__test(int);
+           typename = decltype(declval<_Tp1>() = declval<_Up1>())>
+    static true_type
+    __test(int);
 
       template<typename, typename>
-	static false_type
-	__test(...);
+    static false_type
+    __test(...);
 
     public:
       typedef decltype(__test<_Tp, _Up>(0)) type;
@@ -1216,7 +1216,7 @@ namespace std
   template<typename _Tp, typename _Up>
     struct is_nothrow_assignable
     : public __and_<is_assignable<_Tp, _Up>,
-		    __is_nt_assignable_impl<_Tp, _Up>>
+            __is_nt_assignable_impl<_Tp, _Up>>
     { };
 
   template<typename _Tp, bool = __is_referenceable<_Tp>::value>
@@ -1259,7 +1259,7 @@ namespace std
   template<typename _Tp, typename... _Args>
     struct is_trivially_constructible
     : public __and_<is_constructible<_Tp, _Args...>, integral_constant<bool,
-			__is_trivially_constructible(_Tp, _Args...)>>
+            __is_trivially_constructible(_Tp, _Args...)>>
     { };
   
   /// is_trivially_default_constructible
@@ -1302,47 +1302,47 @@ namespace std
   template<typename _Tp>
     struct is_trivially_copy_constructible
     : public __and_<is_copy_constructible<_Tp>, 
-		    integral_constant<bool,
-			__is_trivially_constructible(_Tp, const _Tp&)>>
+            integral_constant<bool,
+            __is_trivially_constructible(_Tp, const _Tp&)>>
     { };
   
   /// is_trivially_move_constructible
   template<typename _Tp>
     struct is_trivially_move_constructible
     : public __and_<is_move_constructible<_Tp>, 
-		    integral_constant<bool,
-			__is_trivially_constructible(_Tp, _Tp&&)>>
+            integral_constant<bool,
+            __is_trivially_constructible(_Tp, _Tp&&)>>
     { };
 
   /// is_trivially_assignable
   template<typename _Tp, typename _Up>
     struct is_trivially_assignable
     : public __and_<is_assignable<_Tp, _Up>, 
-		    integral_constant<bool,
-			__is_trivially_assignable(_Tp, _Up)>>
+            integral_constant<bool,
+            __is_trivially_assignable(_Tp, _Up)>>
     { };
 
   /// is_trivially_copy_assignable
   template<typename _Tp>
     struct is_trivially_copy_assignable
     : public __and_<is_copy_assignable<_Tp>, 
-		    integral_constant<bool,
-			__is_trivially_assignable(_Tp&, const _Tp&)>>
+            integral_constant<bool,
+            __is_trivially_assignable(_Tp&, const _Tp&)>>
     { };
 
   /// is_trivially_move_assignable
   template<typename _Tp>
     struct is_trivially_move_assignable
     : public __and_<is_move_assignable<_Tp>, 
-		    integral_constant<bool,
-			__is_trivially_assignable(_Tp&, _Tp&&)>>
+            integral_constant<bool,
+            __is_trivially_assignable(_Tp&, _Tp&&)>>
     { };
 
   /// is_trivially_destructible
   template<typename _Tp>
     struct is_trivially_destructible
     : public __and_<is_destructible<_Tp>, integral_constant<bool,
-			      __has_trivial_destructor(_Tp)>>
+                  __has_trivial_destructor(_Tp)>>
     { };
 
   /// has_trivial_default_constructor (temporary legacy)
@@ -1398,15 +1398,15 @@ namespace std
   template<typename _Tp, unsigned _Uint, std::size_t _Size>
     struct extent<_Tp[_Size], _Uint>
     : public integral_constant<std::size_t,
-			       _Uint == 0 ? _Size : extent<_Tp,
-							   _Uint - 1>::value>
+                   _Uint == 0 ? _Size : extent<_Tp,
+                               _Uint - 1>::value>
     { };
 
   template<typename _Tp, unsigned _Uint>
     struct extent<_Tp[], _Uint>
     : public integral_constant<std::size_t,
-			       _Uint == 0 ? 0 : extent<_Tp,
-						       _Uint - 1>::value>
+                   _Uint == 0 ? 0 : extent<_Tp,
+                                          _Uint - 1>::value>
     { };
 
 
@@ -1437,16 +1437,16 @@ namespace std
     class __is_convertible_helper<_From, _To, false>
     {
        template<typename _To1>
-	static void __test_aux(_To1);
+    static void __test_aux(_To1);
 
       template<typename _From1, typename _To1,
-	       typename = decltype(__test_aux<_To1>(std::declval<_From1>()))>
-	static true_type
-	__test(int);
+           typename = decltype(__test_aux<_To1>(std::declval<_From1>()))>
+    static true_type
+    __test(int);
 
       template<typename, typename>
-	static false_type
-	__test(...);
+    static false_type
+    __test(...);
 
     public:
       typedef decltype(__test<_From, _To>(0)) type;
@@ -1617,8 +1617,8 @@ namespace std
     { typedef const volatile _Unqualified __type; };
 
   template<typename _Qualified, typename _Unqualified,
-	   bool _IsConst = is_const<_Qualified>::value,
-	   bool _IsVol = is_volatile<_Qualified>::value>
+       bool _IsConst = is_const<_Qualified>::value,
+       bool _IsVol = is_volatile<_Qualified>::value>
     class __match_cv_qualifiers
     {
       typedef __cv_selector<_Unqualified, _IsConst, _IsVol> __match;
@@ -1659,8 +1659,8 @@ namespace std
 
   // Select between integral and enum: not possible to be both.
   template<typename _Tp, 
-	   bool _IsInt = is_integral<_Tp>::value,
-	   bool _IsEnum = is_enum<_Tp>::value>
+       bool _IsInt = is_integral<_Tp>::value,
+       bool _IsEnum = is_enum<_Tp>::value>
     class __make_unsigned_selector;
 
   template<typename _Tp>
@@ -1691,7 +1691,7 @@ namespace std
       typedef typename __cond1::type __cond1_type;
 
       typedef typename conditional<__b0, __smallest, __cond1_type>::type
-	__unsigned_type;
+    __unsigned_type;
       typedef __match_cv_qualifiers<_Tp, __unsigned_type> __cv_unsigned;
 
     public:
@@ -1743,8 +1743,8 @@ namespace std
 
   // Select between integral and enum: not possible to be both.
   template<typename _Tp, 
-	   bool _IsInt = is_integral<_Tp>::value,
-	   bool _IsEnum = is_enum<_Tp>::value>
+       bool _IsInt = is_integral<_Tp>::value,
+       bool _IsEnum = is_enum<_Tp>::value>
     class __make_signed_selector;
 
   template<typename _Tp>
@@ -1845,7 +1845,7 @@ namespace std
 
   /// add_pointer
   template<typename _Tp, bool = __or_<__is_referenceable<_Tp>,
-				      is_void<_Tp>>::value>
+                      is_void<_Tp>>::value>
     struct __add_pointer_helper
     { typedef _Tp     type; };
 
@@ -1874,8 +1874,8 @@ namespace std
     { 
       union __type
       {
-	unsigned char __data[_Len];
-	struct __attribute__((__aligned__)) { } __align; 
+          unsigned char __data[_Len];
+          struct __attribute__((__aligned__)) { } __align; 
       };
     };
 */
@@ -1891,13 +1891,13 @@ namespace std
   */
 /*
   template<std::size_t _Len, std::size_t _Align =
-	   __alignof__(typename __aligned_storage_msa<_Len>::__type)>
+       __alignof__(typename __aligned_storage_msa<_Len>::__type)>
     struct aligned_storage
     { 
       union type
       {
-	unsigned char __data[_Len];
-	struct __attribute__((__aligned__((_Align)))) { } __align; 
+          unsigned char __data[_Len];
+          struct __attribute__((__aligned__((_Align)))) { } __align; 
       };
     };
 */
@@ -1915,10 +1915,10 @@ namespace std
     {
       static const size_t _S_alignment =
         alignof(_Tp) > __strictest_alignment<_Types...>::_S_alignment
-	? alignof(_Tp) : __strictest_alignment<_Types...>::_S_alignment;
+    ? alignof(_Tp) : __strictest_alignment<_Types...>::_S_alignment;
       static const size_t _S_size =
         sizeof(_Tp) > __strictest_alignment<_Types...>::_S_size
-	? sizeof(_Tp) : __strictest_alignment<_Types...>::_S_size;
+    ? sizeof(_Tp) : __strictest_alignment<_Types...>::_S_size;
     };
 */
   /**
@@ -1940,7 +1940,7 @@ namespace std
 
       using __strictest = __strictest_alignment<_Types...>;
       static const size_t _S_len = _Len > __strictest::_S_size
-	? _Len : __strictest::_S_size;
+    ? _Len : __strictest::_S_size;
     public:
       /// The value of the strictest alignment of _Types.
       static const size_t alignment_value = __strictest::_S_alignment;
@@ -1954,8 +1954,8 @@ namespace std
   // Decay trait for arrays and functions, used for perfect forwarding
   // in make_pair, make_tuple, etc.
   template<typename _Up, 
-	   bool _IsArray = is_array<_Up>::value,
-	   bool _IsFunction = is_function<_Up>::value> 
+       bool _IsArray = is_array<_Up>::value,
+       bool _IsFunction = is_function<_Up>::value> 
     struct __decay_selector;
 
   // NB: DR 705.
@@ -2000,8 +2000,8 @@ namespace std
   template<typename _Tp>
     struct __decay_and_strip
     {
-      typedef typename __strip_reference_wrapper<
-	typename decay<_Tp>::type>::__type __type;
+        typedef typename __strip_reference_wrapper<
+        typename decay<_Tp>::type>::__type __type;
     };
 
 
@@ -2040,8 +2040,8 @@ namespace std
   {
     template<typename _Tp, typename _Up>
       static __success_type<typename decay<decltype
-			    (true ? std::declval<_Tp>()
-			     : std::declval<_Up>())>::type> _S_test(int);
+                (true ? std::declval<_Tp>()
+                 : std::declval<_Up>())>::type> _S_test(int);
 
     template<typename, typename>
       static __failure_type _S_test(...);
@@ -2114,7 +2114,7 @@ namespace std
     declval() noexcept
     {
       static_assert(__declval_protector<_Tp>::__stop,
-		    "declval() must not be used!");
+            "declval() must not be used!");
       return __declval_protector<_Tp>::__delegate();
     }
 
@@ -2281,25 +2281,25 @@ namespace std
 
   template<typename _Res, typename _Class, typename _Arg, typename... _Args>
     struct __result_of_memfun<_Res _Class::*, reference_wrapper<_Arg>&,
-			      _Args...>
+                    _Args...>
     : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
     { };
 
   template<typename _Res, typename _Class, typename _Arg, typename... _Args>
     struct __result_of_memfun<_Res _Class::*, const reference_wrapper<_Arg>&,
-			      _Args...>
+                  _Args...>
     : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
     { };
 
   template<typename _Res, typename _Class, typename _Arg, typename... _Args>
     struct __result_of_memfun<_Res _Class::*, reference_wrapper<_Arg>&&,
-			      _Args...>
+                  _Args...>
     : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
     { };
 
   template<typename _Res, typename _Class, typename _Arg, typename... _Args>
     struct __result_of_memfun<_Res _Class::*, const reference_wrapper<_Arg>&&,
-			      _Args...>
+                  _Args...>
     : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
     { };
 
@@ -2347,7 +2347,7 @@ namespace std
         is_member_function_pointer<
           typename remove_reference<_Functor>::type
         >::value,
-	    _Functor, _ArgTypes...
+        _Functor, _ArgTypes...
       >::type
     { };
 
@@ -2355,7 +2355,7 @@ namespace std
   /// Alias template for aligned_storage
 /*
   template<size_t _Len, size_t _Align =
-	    __alignof__(typename __aligned_storage_msa<_Len>::__type)>
+        __alignof__(typename __aligned_storage_msa<_Len>::__type)>
     using aligned_storage_t = typename aligned_storage<_Len, _Align>::type;
 
   template <size_t _Len, typename... _Types>
@@ -2396,7 +2396,7 @@ namespace std
 
   /// Implementation of the detection idiom (negative case).
   template<typename _Default, typename _AlwaysVoid,
-	   template<typename...> class _Op, typename... _Args>
+        template<typename...> class _Op, typename... _Args>
     struct __detector
     {
       using value_t = false_type;
@@ -2405,7 +2405,7 @@ namespace std
 
   /// Implementation of the detection idiom (positive case).
   template<typename _Default, template<typename...> class _Op,
-	    typename... _Args>
+        typename... _Args>
     struct __detector<_Default, __void_t<_Op<_Args...>>, _Op, _Args...>
     {
       using value_t = true_type;
@@ -2414,12 +2414,12 @@ namespace std
 
   // Detect whether _Op<_Args...> is a valid type, use _Default if not.
   template<typename _Default, template<typename...> class _Op,
-	   typename... _Args>
+        typename... _Args>
     using __detected_or = __detector<_Default, void, _Op, _Args...>;
 
   // _Op<_Args...> if that is a valid type, otherwise _Default.
   template<typename _Default, template<typename...> class _Op,
-	   typename... _Args>
+        typename... _Args>
     using __detected_or_t
       = typename __detected_or<_Default, _Op, _Args...>::type;
 
@@ -2456,7 +2456,7 @@ namespace std
                       >::value>::type
     swap(_Tp&, _Tp&)
     noexcept(__and_<is_nothrow_move_constructible<_Tp>,
-	            is_nothrow_move_assignable<_Tp>>::value);
+                is_nothrow_move_assignable<_Tp>>::value);
 
   template<typename _Tp, size_t _Nm>
     inline
