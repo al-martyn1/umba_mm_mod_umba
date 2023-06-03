@@ -11,16 +11,16 @@
 
 #include "stl.h"
 
-#include "umba/umba.h"
 #include "umba/preprocessor.h"
+#include "umba/umba.h"
 
 #include <cstddef>
 #include <cstring>
 
 #if !defined(UMBA_MCU_USED)
+    #include <map>
     #include <string>
     #include <vector>
-    #include <map>
 #endif
 
 #if defined(UMBA_QT_USED)

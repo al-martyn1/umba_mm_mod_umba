@@ -96,16 +96,16 @@
 
 #endif
 
-#include <utility>
 #include <algorithm>
 #include <cstddef>
+#include <utility>
 
 #if defined(UMBA_KEIL_ARMCC_COMPILER_USED)
     #include "stl_keil.h"
 #else
     #if defined(UMBA_CXX_HAS_STD11)
-        #include <type_traits>
         #include <initializer_list>
+        #include <type_traits>
     #else
         #include "stl_keil.h"
     #endif

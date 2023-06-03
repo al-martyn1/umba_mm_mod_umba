@@ -7,14 +7,13 @@
 
 
 #include "exception.h"
-
-#include <string>
-#include <vector>
-#include <iterator>
-#include <memory>
-
 #include "linefeedtype.h"
 #include "lineposinfo.h"
+
+#include <iterator>
+#include <memory>
+#include <string>
+#include <vector>
 
 
 namespace umba

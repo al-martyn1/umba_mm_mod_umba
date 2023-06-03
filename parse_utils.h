@@ -8,8 +8,8 @@
 
 //----------------------------------------------------------------------------
 
-#include <stdint.h>
 #include <cstring>
+#include <stdint.h>
 #include <string.h>
 
 // #include "const_string.h"

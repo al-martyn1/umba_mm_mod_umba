@@ -21,9 +21,9 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/zz_detect_environment.h"
 #include "umba/preprocessor.h"
 #include "umba/user_literals.h"
+#include "umba/zz_detect_environment.h"
 
 #include <stdint.h>
 

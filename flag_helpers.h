@@ -1,10 +1,11 @@
 #pragma once
 
-#include "umba/umba.h"
-#include "umba/preprocessor.h"
 #include "stl.h"
-#include "umba/string_plus.h"
+
 #include "umba/enum_helpers.h"
+#include "umba/preprocessor.h"
+#include "umba/string_plus.h"
+#include "umba/umba.h"
 
 #include <vector>
 

@@ -4,13 +4,13 @@
     \brief Манипуляции с битами 
 */
 
-#include <limits.h>
-#include <stdint.h>
 #include "umba/i_char_writer.h"
 #include "umba/stl.h"
 
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <limits.h>
+#include <stdint.h>
 
 
 

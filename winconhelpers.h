@@ -23,17 +23,20 @@
 
 #if defined(WIN32) || defined(_WIN32)
 
-    #include <sys/types.h>
-    #include <sys/stat.h>
-    #include <stdio.h>
     #include <io.h>
+    #include <stdio.h>
+
+    #include <sys/stat.h>
+    #include <sys/types.h>
 
 #else
 
-    #include <sys/types.h>
-    #include <sys/stat.h>
-    #include <unistd.h>   // for isatty()
     #include <stdio.h>    // for fileno()
+
+    #include <unistd.h>   // for isatty()
+
+    #include <sys/stat.h>
+    #include <sys/types.h>
 
     //! Compatibility macro - возвращает true (1), если хэндл относится к терминалу
     #define _isatty isatty
@@ -54,16 +57,17 @@
 #endif
 
 
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 #ifdef DEBUG_WINCONHELPERS
     
-    #include <io.h>
     #include <fcntl.h>
-    #include <sys/types.h>
+    #include <io.h>
+
     #include <sys/stat.h>
+    #include <sys/types.h>
 
     #ifndef _MSC_VER
         #define _write write

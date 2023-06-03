@@ -1,14 +1,14 @@
 #pragma once
 
+#include "umba/string_plus.h"
+
+#include <exception>
+#include <map>
+#include <regex>
+#include <set>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <map>
-#include <set>
-#include <regex>
-#include <exception>
-#include <stdexcept>
-
-#include "umba/string_plus.h"
 
 //----------------------------------------------------------------------------
 

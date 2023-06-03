@@ -10,15 +10,14 @@
 //-----------------------------------------------------------------------------
 
 #include "exception.h"
-
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-
-#include "lineview.h"
 #include "linefeedtype.h"
 #include "lineposinfo.h"
+#include "lineview.h"
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 //-----------------------------------------------------------------------------
 

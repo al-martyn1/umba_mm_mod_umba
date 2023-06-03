@@ -5,18 +5,17 @@
 
 //----------------------------------------------------------------------------
 
-#include <iostream>
+#include <exception>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <exception>
-#include <stdexcept>
 
 //#include "encoding/encoding.h"
-#include "umba/filesys.h"
 #include "umba/filename.h"
+#include "umba/filesys.h"
 
 #if defined(WIN32) || defined(_WIN32)
 

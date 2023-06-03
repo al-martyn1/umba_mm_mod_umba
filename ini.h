@@ -9,25 +9,25 @@
 
 //----------------------------------------------------------------------------
 
-#include <iostream>
-#include <string>
-#include <cstring>
-#include <vector>
+#include "exception.h"
+#include "name_version.h"
+#include "numeric_version.h"
+#include "rgbquad.h"
+#include "string_plus.h"
+
 #include <algorithm> 
 #include <cctype>
-#include <locale>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
+#include <cstring>
 #include <exception>
-#include <stdexcept>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <locale>
 #include <map>
-
-#include "string_plus.h"
-#include "exception.h"
-#include "numeric_version.h"
-#include "name_version.h"
-#include "rgbquad.h"
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 //----------------------------------------------------------------------------
 

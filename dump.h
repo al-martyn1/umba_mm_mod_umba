@@ -9,8 +9,8 @@
 //----------------------------------------------------------------------------
 
 #if !defined(UMBA_MCU_USED)
-    #include <string>
     #include <cstring>
+    #include <string>
     #include <vector>
 #endif
 

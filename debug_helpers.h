@@ -8,9 +8,8 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba.h"
 #include "assert.h"
-
+#include "umba.h"
 #include "zz_inc_windows.h"
 
 #if defined(UMBA_WIN32_USED)

@@ -8,8 +8,8 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/umba.h"
 #include "umba/string_plus.h"
+#include "umba/umba.h"
 
 #if !defined(_INC_STDLIB) && !defined(_STDLIB_H_) && !defined(_STDLIB_H)
     #include <stdlib.h>
