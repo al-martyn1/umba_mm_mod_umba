@@ -1,5 +1,4 @@
-@set BRIEF_OPTS=--verbose=normal ^
---quet ^
+@set BRIEF_OPTS=--verbose=quet ^
 --split-group ^
 --filename-width=40 ^
 --text-width=140 ^
