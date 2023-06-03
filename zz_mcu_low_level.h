@@ -1,9 +1,9 @@
-/*!
-\file
-\brief Microcontroller Unit Low Level definitions
+/*! \file
+    \brief ZZ Microcontroller Unit Low Level definitions
 
-Всяческие общие штуки, относящиеяся к МК.
-В данный момент только для STM32
+    Всяческие общие штуки, относящиеяся к МК.
+    В данный момент только для STM32
+
 */
 
 #pragma once

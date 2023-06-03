@@ -1,3 +1,8 @@
+/*! 
+    \file
+    \brief Разная шляпа по разбору командной строки для консольных утилит
+ */
+
 #pragma once
 
 #include "format_utils.h"

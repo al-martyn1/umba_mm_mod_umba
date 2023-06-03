@@ -1,3 +1,8 @@
+/*! 
+    \file
+    \brief Какие-то хелперы для enum флагов. Выпочковалось в итоге в часть marty_cpp
+ */
+
 #pragma once
 
 #include "enum_helpers.h"
@@ -12,7 +17,7 @@
 
 
 //----------------------------------------------------------------------------
-//! ��������� ������� �������� ��� ��������� enum-����
+//! Реализует битовые операции для флагового enum-типа
 #define UMBA_ENUM_CLASS_IMPLEMENT_FLAG_OPERATORS(FlagType)                             \
              UMBA_ENUM_CLASS_IMPLEMENT_BIT_OPERATORS( FlagType )                       \
              UMBA_ENUM_CLASS_IMPLEMENT_UNDERLYING_TYPE_BIT_OPERATORS( FlagType )       \

@@ -1,5 +1,5 @@
 /*! \file
-\brief Коды ошибок
+    \brief ZZ Коды ошибок
 */
 UMBA_DECLARE_ERROR_CODE      (ok                      ,  0, "Ok, no error")
 UMBA_DECLARE_ERROR_CODE_ALIAS(success                 , ok, "Ok, operation successfully completed")

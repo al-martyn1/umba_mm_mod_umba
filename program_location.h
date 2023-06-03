@@ -1,3 +1,7 @@
+/*! \file
+    \brief Поиск месторасположения self EXE-шника 
+*/
+
 #pragma once
 
 #include "filename.h"

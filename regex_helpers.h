@@ -1,3 +1,8 @@
+/*! 
+    \file
+    \brief Помощяки для плюсовых регулярок. В тч (простая_маска_*_?) -> ECMA Regex
+ */
+
 #pragma once
 
 #include "string_plus.h"

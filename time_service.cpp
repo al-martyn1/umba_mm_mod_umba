@@ -1,3 +1,9 @@
+/*! 
+    \file
+    \brief На базе кода под STM32, адаптация для кроссплатформы, реализация
+
+ */
+
 #include "assert.h"
 #include "critical_section.h"
 #include "time_service.h"

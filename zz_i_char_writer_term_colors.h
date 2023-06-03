@@ -1,3 +1,7 @@
+/*! \file
+    \brief ZZ Цветочки для терминала
+*/
+
 #pragma once
 
 #if !defined(UMBA_I_CHAR_WRITER_H)

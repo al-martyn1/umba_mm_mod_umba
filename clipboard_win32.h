@@ -1,3 +1,7 @@
+/*! \file
+    \brief Хелперы для виндового клипборда
+*/
+
 #pragma once
 
 #if defined(_WIN32) || defined(WIN32)

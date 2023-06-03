@@ -1,7 +1,7 @@
 #pragma once
 /*! 
     \file
-    \brief Форматирование сообщений при помощи макросов
+    \brief Форматирование сообщений при помощи макросов $(Macro)
  */
 
 #include "macro_helpers.h"

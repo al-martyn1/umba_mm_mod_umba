@@ -1,3 +1,8 @@
+/*! 
+    \file
+    \brief Хелперы для лога
+ */
+
 #pragma once
 
 #include "string_plus.h"
