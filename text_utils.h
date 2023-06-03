@@ -1,3 +1,8 @@
+/*! 
+    \file
+    \brief Шляпы с текстом
+ */
+
 #pragma once
 
 // #include "isa.h"

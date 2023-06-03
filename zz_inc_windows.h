@@ -1,3 +1,7 @@
+/*! \file
+    \brief ZZ Правильный порядок инклюдов для винды
+*/
+
 #pragma once
 
 #if defined(UMBA_WIN32_USED) || defined(WIN32) || defined(_WIN32)

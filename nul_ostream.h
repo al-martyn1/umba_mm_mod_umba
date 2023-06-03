@@ -1,3 +1,7 @@
+/*! \file
+    \brief Пустопорожний Ostream, никуда ничего не выводит
+*/
+
 #pragma once
 
 

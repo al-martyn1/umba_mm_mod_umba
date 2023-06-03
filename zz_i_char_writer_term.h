@@ -1,3 +1,7 @@
+/*! \file
+    \brief ZZ Утилиты для вывода в терминал
+*/
+
 #pragma once
 
 #if !defined(UMBA_I_CHAR_WRITER_H)

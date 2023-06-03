@@ -1,3 +1,8 @@
+/*! 
+    \file
+    \brief Перетащенное под старый Кейл type_traits из GCC
+ */
+
 #pragma once
 
 #if defined(UMBA_CXX_HAS_STD11)
