@@ -8,13 +8,13 @@
 
 //----------------------------------------------------------------------------
 
+#include "umba/stl.h"
+
+#include <algorithm> 
+#include <cctype>
+#include <iterator>
 #include <string>
 #include <vector>
-#include <algorithm> 
-#include <iterator>
-#include <cctype>
-
-#include "umba/stl.h"
 
 
 // umba::utility::

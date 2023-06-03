@@ -21,8 +21,8 @@
 
 #if defined(UMBA_CXX_HAS_STD11)
 
-    #include <cstdint>
     #include <cstddef>
+    #include <cstdint>
 
     //! Зачем-то сделано
     #define UMBA_STD_SIZE_T    std::size_t

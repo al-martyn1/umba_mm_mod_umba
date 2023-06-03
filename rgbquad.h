@@ -8,8 +8,8 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba.h"
 #include "format_utils.h"
+#include "umba.h"
 
 #if !defined(UMBA_MCU_USED)
     #include "string_plus.h"
@@ -25,8 +25,8 @@
 
 /*
 Must be included before this file
-#include <QColor>
 #include <QBrush>
+#include <QColor>
 */
 
 #if !defined(UMBA_MCU_USED)
@@ -34,8 +34,8 @@ Must be included before this file
 #endif
 
 
-#include "parse_utils.h"
 #include "const_string.h"
+#include "parse_utils.h"
 
 #include <cstring>
 

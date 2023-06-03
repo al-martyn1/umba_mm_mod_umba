@@ -9,17 +9,15 @@
 
 //----------------------------------------------------------------------------
 
-#include <QObject>
-#include <QMessageBox>
-#include <QString>
-
-#include <string>
-
-#include "umba/umba.h"
+#include "umba/exception.h"
 #include "umba/i_char_writer.h"
 #include "umba/simple_formatter.h"
+#include "umba/umba.h"
 
-#include "umba/exception.h"
+#include <QMessageBox>
+#include <QObject>
+#include <QString>
+#include <string>
 
 //----------------------------------------------------------------------------
 

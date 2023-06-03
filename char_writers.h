@@ -960,9 +960,9 @@ protected:
 
 #if __CC_ARM || ( (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) )
 
-    #include <stdio.h>
-    #include <rt_sys.h>
     #include <rt_misc.h>
+    #include <rt_sys.h>
+    #include <stdio.h>
 
 #endif
 
@@ -1077,9 +1077,9 @@ struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
 #include "umba/stl.h"
 
 // std::strlen
-#include <cstring>
-
 #include "critical_section.h"
+
+#include <cstring>
 
 // UMBA_IS_IN_ISR()
 
@@ -1529,9 +1529,9 @@ protected:
 
 #if __CC_ARM || ( (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) )
 
-    #include <stdio.h>
-    #include <rt_sys.h>
     #include <rt_misc.h>
+    #include <rt_sys.h>
+    #include <stdio.h>
 
 #endif
 
@@ -1598,9 +1598,9 @@ struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
 #include "umba/stl.h"
 
 // std::strlen
-#include <cstring>
-
 #include "critical_section.h"
+
+#include <cstring>
 
 // UMBA_IS_IN_ISR()
 

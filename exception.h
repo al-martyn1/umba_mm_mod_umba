@@ -14,12 +14,12 @@
     \addtogroup UMBA_INTERNALS
 */
 
+#include "umba/char_writers.h"
+#include "umba/i_char_writer.h"
+#include "umba/umba.h"
+
 #include <exception>
 #include <iostream>
-
-#include "umba/umba.h"
-#include "umba/i_char_writer.h"
-#include "umba/char_writers.h"
 //#include "umba/simple_formatter.h"
 
 

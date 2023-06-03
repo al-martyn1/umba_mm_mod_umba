@@ -5,15 +5,15 @@
  */
 
 #include "macro_helpers.h"
-#include "undef_FormatMessage.h"
 #include "stl.h"
+#include "undef_FormatMessage.h"
 
-#include <cstdint>
 #include <algorithm>
+#include <cstdint>
 #include <exception>
-#include <stdexcept>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+#include <stdexcept>
 
 
 

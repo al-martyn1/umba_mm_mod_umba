@@ -18,8 +18,8 @@ namespace term
 {
 
 
-#include "zz_i_char_writer_term_console_type.h"
 #include "zz_i_char_writer_term_colors.h"
+#include "zz_i_char_writer_term_console_type.h"
 #include "zz_i_char_writer_term_utils.h"
 
 

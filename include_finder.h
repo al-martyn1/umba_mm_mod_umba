@@ -8,16 +8,16 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/umba.h"
-#include "umba/stl.h"
+#include "umba/env.h"
 #include "umba/filename.h"
 #include "umba/filesys.h"
-#include "umba/env.h"
+#include "umba/stl.h"
+#include "umba/umba.h"
 
-#include <string>
 #include <map>
-#include <vector>
 #include <set>
+#include <string>
+#include <vector>
 
 //-----------------------------------------------------------------------------
 

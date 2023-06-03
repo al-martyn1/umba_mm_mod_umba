@@ -9,22 +9,21 @@
 
 //----------------------------------------------------------------------------
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <iterator>
-#include <algorithm> 
-#include <cctype>
-#include <locale>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <exception>
-#include <stdexcept>
-#include <algorithm>
-
 #include "umba/alloca.h"
 #include "umba/exception.h"
+
+#include <algorithm> 
+#include <cctype>
+#include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <locale>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 //----------------------------------------------------------------------------
 
 

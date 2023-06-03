@@ -10,16 +10,15 @@
 
 #include "umba/stl.h"
 //#include "microcode_tokenizer.h"
-#include "umba/lineinfo.h"
 #include "umba/exception.h"
+#include "umba/lineinfo.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #ifndef WIN32
     #include <unistd.h>

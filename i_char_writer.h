@@ -15,11 +15,11 @@
     #include <stdint.h>
 #endif
 
-#include <stddef.h>
-#include <cstring>
-
-#include "umba.h"
 #include "interface.h"
+#include "umba.h"
+
+#include <cstring>
+#include <stddef.h>
 
 #if !defined(UMBA_MCU_USED)
     #include <iostream>

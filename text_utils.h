@@ -4,8 +4,9 @@
 // #include "splits.h"
 // #include "case.h"
 
-#include <string>
 #include "string_plus.h"
+
+#include <string>
 
 // umba::text_utils::
 namespace umba{

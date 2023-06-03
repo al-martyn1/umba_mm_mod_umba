@@ -8,14 +8,14 @@
 
 //----------------------------------------------------------------------------
 
+#include "umba/string_plus.h"
+#include "umba/utility.h"
+
+#include <algorithm> 
+#include <cctype>
+#include <iterator>
 #include <string>
 #include <vector>
-#include <algorithm> 
-#include <iterator>
-#include <cctype>
-
-#include "umba/utility.h"
-#include "umba/string_plus.h"
 
 
 // umba::algoritms::
