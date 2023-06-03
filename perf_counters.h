@@ -81,8 +81,8 @@
 
 #pragma once
 
-#include "umba/preprocessor.h"
-#include "umba/zz_detect_environment.h"
+#include "preprocessor.h"
+#include "zz_detect_environment.h"
 
 #include <stdint.h>
 

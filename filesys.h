@@ -9,11 +9,11 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/umba.h"
+#include "umba.h"
 //
-#include "umba/alloca.h"
-#include "umba/env.h"
-#include "umba/stl.h"
+#include "alloca.h"
+#include "env.h"
+#include "stl.h"
 
 #include <cstddef>
 #include <ctime>

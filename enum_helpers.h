@@ -9,10 +9,9 @@
 //-----------------------------------------------------------------------------
 
 
+#include "preprocessor.h"
 #include "stl.h"
-
-#include "umba/preprocessor.h"
-#include "umba/umba.h"
+#include "umba.h"
 
 #include <cstddef>
 #include <cstring>

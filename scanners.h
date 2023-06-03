@@ -7,8 +7,6 @@
 #include "regex_helpers.h"
 #include "umba.h"
 
-#include "umba/simple_formatter.h"
-
 #include <exception>
 #include <filesystem>
 #include <iostream>

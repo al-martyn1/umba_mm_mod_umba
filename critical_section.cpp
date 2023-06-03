@@ -1,7 +1,7 @@
 /*! \file
 \brief Реализация критической секции
 */
-#include "umba/critical_section.h"
+#include "critical_section.h"
 
 namespace umba{
 

@@ -9,7 +9,8 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/bits.h"
+#include "bits.h"
+
 #include "umba/simple_formatter.h"
 
 

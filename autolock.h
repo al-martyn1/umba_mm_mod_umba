@@ -7,9 +7,9 @@
 #pragma once
 
 //
-#include "umba/zz_detect_environment.h"
+#include "zz_detect_environment.h"
 //
-#include "umba/stl.h"
+#include "stl.h"
 
 
 namespace umba{

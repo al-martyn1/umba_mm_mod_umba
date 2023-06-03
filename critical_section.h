@@ -39,21 +39,21 @@
 #pragma once
 
 //
-#include "umba/zz_detect_environment.h"
+#include "zz_detect_environment.h"
 //
-#include "umba/preprocessor.h"
+#include "preprocessor.h"
 //
-#include "umba/assert.h"
+#include "assert.h"
 //
-#include "umba/autolock.h"
+#include "autolock.h"
 //
-#include "umba/stl.h"
+#include "stl.h"
 //
 
 
 
 #if defined(UMBA_MCU_USED) || defined(UMBA_FREERTOS_USED)
-    #include "umba/x_mcu_low_level.h"
+    #include "x_mcu_low_level.h"
 #endif
 
 
