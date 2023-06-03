@@ -14,13 +14,13 @@
 #include <vector>
 
 //#include "encoding/encoding.h"
-#include "umba/filename.h"
-#include "umba/filesys.h"
+#include "filename.h"
+#include "filesys.h"
 
 #if defined(WIN32) || defined(_WIN32)
 
     #define HAS_CLIPBOARD_SUPPORT 1
-    #include "umba/clipboard_win32.h"
+    #include "clipboard_win32.h"
 
 #endif
 

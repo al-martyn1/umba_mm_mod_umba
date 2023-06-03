@@ -3,7 +3,7 @@
 */
 
 #pragma once
-#include "umba/umba.h"
+#include "umba.h"
 
 #if defined(UMBA_CXX_HAS_STD11)
     #include <stdint.h>

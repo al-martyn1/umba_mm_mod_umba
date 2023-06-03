@@ -8,8 +8,8 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/preprocessor.h"
-#include "umba/stl.h"
+#include "preprocessor.h"
+#include "stl.h"
 
 #if defined(UMBA_WIN32_USED)
     #include <stdio.h>

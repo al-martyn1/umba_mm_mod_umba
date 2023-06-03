@@ -4,8 +4,8 @@
     \brief Манипуляции с битами 
 */
 
-#include "umba/i_char_writer.h"
-#include "umba/stl.h"
+#include "i_char_writer.h"
+#include "stl.h"
 
 #include <algorithm>
 #include <cstring>

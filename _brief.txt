@@ -1,0 +1,98 @@
+Brief Description for Project Sources
+-------------------------------------
+
+
+
+# 
+algoritms.h                              - Различные колхозные алгоритмы.
+alloca.h                                 - Совместимая версия alloca/_alloca.
+arithmetic_strong_typedef.h              - 
+assert.h                                 - Универсальная реализация UMBA_ASSERT.
+autolock.h                               - Автоматический захват и освобождение ресурса.  Объект-ресурс должен
+                                           предоставлять методы lock и unlock.
+basic_interfaces.h                       - Базовые интерфейсы.
+basic_interfaces_impl.h                  - Реализация некоторых базовых интерфейсов.
+bits.h                                   - Манипуляции с битами.
+bits_fmt.h                               - Вывод битсетов в поток.
+char_writers.h                           - 
+cli_tool_helpers.h                       - Хелперы для утилит командной строки (CLI).
+clipboard_win32.h                        - 
+cmd_line.h                               - 
+const_string.h                           - Константные строки - обёртка для строковых литералов.
+critical_section.cpp                     - Реализация критической секции.
+critical_section.h                       - Реализация критической секции.
+debug_helpers.h                          - Поддержка отладки.
+dump.h                                   - Хелперы для дампа.
+enum_helpers.h                           - Хелперы для enum'ов.
+env.h                                    - Работа с переменными окружения.
+errors.h                                 - Ошибки, и связанные с ними определения.
+exception.h                              - Umba-исключения.
+file_helpers.h                           - Файловые хелперы. Они разъехались по разным местам. А хидер остался для
+                                           совместимости.
+filecache.h                              - Файловый кеш.
+filename.h                               - Утилиты для работы с именами файлов.
+filesys.h                                - Прослойка абстракций для работы с файловой системой.
+flag_helpers.h                           - 
+format_message.h                         - Форматирование сообщений при помощи макросов.
+format_utils.h                           - Утилиты для форматирования.
+hr_counter.h                             - Подсистема hr_counter - счетчики высокого разрешения.
+i_char_writer.h                          - Интерфейс для использования в форматном выводе.
+include_finder.h                         - Поиск подключаемых файлов.
+info_log.h                               - 
+ini.h                                    - Разбор INI-файла.
+interface.h                              - Базовые определения для интерфейсов, и связанные с ним определения.
+legacy.h                                 - Подключение классических хидеров скопом.
+linefeedtype.h                           - Объявление типа перевода строки и разные хелперы.
+lineinfo.h                               - LineInfo и сопутствующее. Устаревшая (непосредственно содержащая строку)
+                                           версия API.
+lineposinfo.h                            - Типы для указания положения в текстовом файле.
+lineview.h                               - Структура LineView и соответствующие функции.
+log.h                                    - Хелперы для утилит командной строки (CLI).
+macro_helpers.h                          - 
+macros.h                                 - 
+name_version.h                           - Работа с именоваными номерами версий.
+nul_ostream.h                            - 
+numeric_version.h                        - Работа с номерами версий.
+optimize_pop.h                           - Восстанавливает предыдущий уровень оптимизации.
+optimize_speed.h                         - Включает режим оптимизации по скорости.
+packpop.h                                - Восстановление значения по умолчанию для упаковки структур.
+parse_utils.h                            - Утилиты для парсинга.
+perf_counters.h                          - Подсистема perf_counters - счетчики производительности.
+preprocessor.h                           - Различные общие макросы препроцессора.
+program_location.h                       - 
+properties.h                             - Реализация properties на чистом C++.
+pushpack1.h                              - Сохранение текущих настроек и установка упаковки структур по 1.
+pushpack2.h                              - Сохранение текущих настроек и установка упаковки структур по 2.
+pushpack4.h                              - Сохранение текущих настроек и установка упаковки структур по 4.
+pushpack8.h                              - Сохранение текущих настроек и установка упаковки структур по 8.
+qtui-show-simple-message.h               - Qt-хелпер для отображения MessageBox.
+regex_helpers.h                          - 
+rgbquad.h                                - Реализация RGB четвертяка. Хранит RGB и Alpha-канал компоненты цвета.
+scanners.h                               - 
+scope_exec.h                             - 
+stl.h                                    - Совместимое со всеми компиляторами подключение стандартных заголовков.
+stl_keil.h                               - Некоторые фичи C++11, которые не реализованы библиотеке компилятора Keil.
+stl_keil_initializer_list.h              - Return an iterator pointing to the first element of.
+stl_keil_type_traits.h                   - 
+string_plus.h                            - Разная всячина для строк в C++ стиле.
+text_utils.h                             - 
+time_service.cpp                         - 
+time_service.h                           - Подсистема time_service.
+timestamp.h                              - Представление временного интервала в сутках, часах, минутах, секундах и
+                                           милисекундах.
+umba.h                                   - Подключение базовых файлов UMBA.
+umba_cpp.h                               - Разная всячина в C++ стиле.
+undef_FormatMessage.h                    - 
+undef_min_max.h                          - 
+user_literals.h                          - Типа пользовательские литералы.
+utility.h                                - Утилитки в C++ стиле.
+variadic_helpers.h                       - Хелперы для вариадик-шаблонов.
+winconhelpers.h                          - Хелперы для работы с консолью под Windows.
+zz_detect_environment.h                  - Определение сборочного окружения и целевой платформы.
+zz_error_codes.h                         - Коды ошибок.
+zz_i_char_writer_term.h                  - 
+zz_i_char_writer_term_colors.h           - 
+zz_i_char_writer_term_console_type.h     - 
+zz_i_char_writer_term_utils.h            - 
+zz_inc_windows.h                         - 
+zz_mcu_low_level.h                       - Microcontroller Unit Low Level definitions.

@@ -8,8 +8,8 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/filename.h"
-#include "umba/filesys.h"
+#include "filename.h"
+#include "filesys.h"
 
 #include <map>
 

@@ -8,8 +8,8 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/string_plus.h"
-#include "umba/utility.h"
+#include "string_plus.h"
+#include "utility.h"
 
 #include <algorithm> 
 #include <cctype>

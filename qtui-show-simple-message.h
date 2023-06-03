@@ -9,10 +9,11 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/exception.h"
-#include "umba/i_char_writer.h"
+#include "exception.h"
+#include "i_char_writer.h"
+#include "umba.h"
+
 #include "umba/simple_formatter.h"
-#include "umba/umba.h"
 
 #include <QMessageBox>
 #include <QObject>

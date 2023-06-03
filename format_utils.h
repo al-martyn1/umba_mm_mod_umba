@@ -8,8 +8,8 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/parse_utils.h"
-#include "umba/umba.h"
+#include "parse_utils.h"
+#include "umba.h"
 
 #include <algorithm>
 

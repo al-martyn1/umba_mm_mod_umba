@@ -5,8 +5,7 @@
 #pragma once
 
 #include "interface.h"
-
-#include "umba/time_service.h"
+#include "time_service.h"
 
 //-----------------------------------------------------------------------------
 

@@ -8,11 +8,11 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/critical_section.h"
-#include "umba/env.h"
-#include "umba/filesys.h"
-#include "umba/stl.h"
-#include "umba/string_plus.h"
+#include "critical_section.h"
+#include "env.h"
+#include "filesys.h"
+#include "stl.h"
+#include "string_plus.h"
 
 #include <algorithm>
 

@@ -8,11 +8,11 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/env.h"
-#include "umba/filename.h"
-#include "umba/filesys.h"
-#include "umba/stl.h"
-#include "umba/umba.h"
+#include "env.h"
+#include "filename.h"
+#include "filesys.h"
+#include "stl.h"
+#include "umba.h"
 
 #include <map>
 #include <set>

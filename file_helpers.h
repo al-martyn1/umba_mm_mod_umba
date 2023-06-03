@@ -8,10 +8,10 @@
 
 //-----------------------------------------------------------------------------
 
-#include "umba/stl.h"
+#include "stl.h"
 //#include "microcode_tokenizer.h"
-#include "umba/exception.h"
-#include "umba/lineinfo.h"
+#include "exception.h"
+#include "lineinfo.h"
 
 #include <fstream>
 #include <iostream>

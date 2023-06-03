@@ -1074,7 +1074,7 @@ struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
 } // namespace umba
 
 // На самом деле нам нужен <algorithm>, но он подключается в umba/stl.h
-#include "umba/stl.h"
+#include "stl.h"
 
 // std::strlen
 #include "critical_section.h"
@@ -1595,7 +1595,7 @@ struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
 } // namespace umba
 
 // На самом деле нам нужен <algorithm>, но он подключается в umba/stl.h
-#include "umba/stl.h"
+#include "stl.h"
 
 // std::strlen
 #include "critical_section.h"

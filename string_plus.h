@@ -9,8 +9,8 @@
 
 //----------------------------------------------------------------------------
 
-#include "umba/alloca.h"
-#include "umba/exception.h"
+#include "alloca.h"
+#include "exception.h"
 
 #include <algorithm> 
 #include <cctype>
