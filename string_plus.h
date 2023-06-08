@@ -1380,7 +1380,7 @@ template<typename CharType> inline bool is_open_brace_char( CharType brCh )
 
 //------------------------------
 //! Возвращает true, если переданный символ - парный (один из видов скобки) или апостроф, кавычка, или %, $, @, # - они тоже считаются парными
-template<typename CharType> inline bool is_paired    ( CharType brCh ) { return compare ( brCh  , get_pair(brCh) ) == 0; }
+template<typename CharType> inline bool is_paired    ( CharType brCh ) { return compare ( brCh  , get_pair(brCh) ) != 0; }
 //! Возвращает true, если символ - открывающий - левый
 template<typename CharType> inline bool is_left      ( CharType brCh ) { return compare ( brCh  , get_pair(brCh) )  < 0; }
 //! Возвращает true, если символ - закрывающий - правый
