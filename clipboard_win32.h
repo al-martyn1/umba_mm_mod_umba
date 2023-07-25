@@ -98,7 +98,7 @@ bool clipboardTextGet(StringType &text, HWND hWndNewOwner=0)
     typedef typename StringType::value_type     char_type;
 
     UINT cfText = CF_TEXT;
-    if (sizeof(char_type)>sizeof(char))
+    if constexpr (sizeof(char_type)>sizeof(char))
     {
         cfText = CF_UNICODETEXT;
     }
@@ -134,7 +134,7 @@ bool clipboardTextGet(StringType &text, HWND hWndNewOwner=0)
 
     std::size_t numTextChars = dataLen;
 
-    if (sizeof(char_type)>sizeof(char))
+    if constexpr (sizeof(char_type)>sizeof(char))
     {
         // cfText = CF_UNICODETEXT;
         // dataLen
@@ -163,10 +163,10 @@ bool clipboardTextSet(const StringType &text, HWND hWndNewOwner=0)
 {
     typedef typename StringType::value_type     char_type;
 
-    DWORD numBytes = text.size()+1;
+    DWORD numBytes = (DWORD)(text.size()+1u);
 
     UINT cfText = CF_TEXT;
-    if (sizeof(char_type)>sizeof(char))
+    if constexpr (sizeof(char_type)>sizeof(char))
     {
         cfText = CF_UNICODETEXT;
         numBytes *= sizeof(char_type);

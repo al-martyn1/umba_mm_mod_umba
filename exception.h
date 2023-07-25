@@ -215,6 +215,9 @@ protected:
     //! Хелпер формирования строки с дампом
     std::string strGetDumpHelper( const uint8_t *pData, size_t numBytes ) const
     {
+        UMBA_USED(pData);
+        UMBA_USED(numBytes);
+
         #ifdef UMBA_SIMPLE_FORMATTER_H
         ::umba::StringCharWriter charWritter;
         ::umba::SimpleFormatter  ss(&charWritter);

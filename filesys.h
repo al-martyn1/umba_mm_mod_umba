@@ -105,12 +105,13 @@ bool readFile(std::istream &fileIn, std::vector<DataType> &filedata)
     DataType buf[4096];
     while (fileIn.read(buf, sizeof(buf)))
     {
-        std::size_t readedBytes = fileIn.gcount();
+        // Except in the constructors of std::strstreambuf, negative values of std::streamsize are never used.
+        std::size_t readedBytes = (size_t)fileIn.gcount();
         std::size_t readedItems = readedBytes/sizeof(DataType);
         filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
     }
 
-    std::size_t readedBytes = fileIn.gcount();
+    std::size_t readedBytes = (size_t)fileIn.gcount();
     std::size_t readedItems = readedBytes/sizeof(DataType);
     filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
     
@@ -125,12 +126,13 @@ bool readFile(std::istream &fileIn, std::string &filedata)
     char buf[4096];
     while (fileIn.read(buf, sizeof(buf)))
     {
-        std::size_t readedBytes = fileIn.gcount();
+        // Except in the constructors of std::strstreambuf, negative values of std::streamsize are never used.
+        std::size_t readedBytes = (std::size_t)fileIn.gcount();
         std::size_t readedItems = readedBytes/sizeof(char);
         filedata.append(&buf[0], readedItems);
     }
 
-    std::size_t readedBytes = fileIn.gcount();
+    std::size_t readedBytes = (std::size_t)fileIn.gcount();
     std::size_t readedItems = readedBytes/sizeof(char);
     filedata.append(&buf[0], readedItems);
     
@@ -147,7 +149,7 @@ bool writeFile(std::ostream &fileOut, const DataType *pData, size_t dataSize)
     const size_t itemSize = sizeof(DataType);
     const size_t numRawBytesToWrite = dataSize*itemSize;
 
-    if (!fileOut.write(pData, numRawBytesToWrite))
+    if (!fileOut.write(pData, (std::streamsize)numRawBytesToWrite))
     {
         return false;
     }
@@ -374,10 +376,10 @@ struct FileStat
 inline 
 void parseStatToFileStat( const struct_file_stat &statBuf, FileStat &fileStat )
 {
-    fileStat.fileSize         = statBuf.st_size;
-    fileStat.timeCreation     = statBuf.st_ctime;
-    fileStat.timeLastModified = statBuf.st_mtime;
-    fileStat.timeLastAccess   = statBuf.st_atime;
+    fileStat.fileSize         = (filesize_t)statBuf.st_size;
+    fileStat.timeCreation     =             statBuf.st_ctime;
+    fileStat.timeLastModified =             statBuf.st_mtime;
+    fileStat.timeLastAccess   =             statBuf.st_atime;
 
     fileStat.fileType = FileTypeUnknown;
 
@@ -437,8 +439,8 @@ HANDLE openFileForWrittingWin32(const std::string &filename, bool bOverwrite)
     if (filename.empty()) return INVALID_HANDLE_VALUE;
 
     DWORD dwCreationDisposition = bOverwrite
-                                ? CREATE_ALWAYS // Creates a new file, always. If the specified file exists and is writable, the function overwrites the file
-                                : CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
+                                ? (DWORD)CREATE_ALWAYS // Creates a new file, always. If the specified file exists and is writable, the function overwrites the file
+                                : (DWORD)CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
                                 ;
 
     return CreateFileA( filename.c_str(), GENERIC_WRITE
@@ -456,8 +458,8 @@ HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
     if (filename.empty()) return INVALID_HANDLE_VALUE;
 
     DWORD dwCreationDisposition = bOverwrite
-                                ? CREATE_ALWAYS // Creates a new file, always. If the specified file exists and is writable, the function overwrites the file
-                                : CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
+                                ? (DWORD)CREATE_ALWAYS // Creates a new file, always. If the specified file exists and is writable, the function overwrites the file
+                                : (DWORD)CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
                                 ;
 
     return CreateFileW( filename.c_str(), GENERIC_WRITE
@@ -490,7 +492,7 @@ inline filetime_t convertWindowsFiletime( FILETIME ft )
 
     filetime_t wndFt = (ftH<<32)+ftL;
 
-    return (wndFt - 116444736000000000ull) / 10000000ull;
+    return (filetime_t)((wndFt - 116444736000000000ull) / 10000000ull);
 }
 
 //! Хелпер получения статистики файла
@@ -509,7 +511,7 @@ FileStat getFileStat( const StringType &fileName )
     HANDLE hFile = openFileForReadingWin32( fileName.c_str() );
     if (hFile==INVALID_HANDLE_VALUE) 
     {
-        DWORD err = GetLastError();
+        // DWORD err = GetLastError();
         return fileStat;
     }
 
@@ -753,7 +755,7 @@ bool readFile( const StringType &filename       //!< Имя файла
         HANDLE hFile = openFileForReadingWin32( filename.c_str() );
         if (hFile==INVALID_HANDLE_VALUE)
         {
-            DWORD err = GetLastError();
+            // DWORD err = GetLastError();
             return false;
         }
     
@@ -815,7 +817,7 @@ bool writeFile( const StringType &filename       //!< Имя файла
     HANDLE hFile = openFileForWrittingWin32(filename.c_str(), bOverwrite);
     if (hFile==INVALID_HANDLE_VALUE)
     {
-        DWORD err = GetLastError();
+        // DWORD err = GetLastError(); // not used
         return false;
     }
 
@@ -964,6 +966,7 @@ bool readFile( const StringType &filename, std::vector<DataType> &filedata
         return false;
     }
 
+    // Except in the constructors of std::strstreambuf, negative values of std::streamsize are never used.
     size_t readedBytes = (size_t)ifs.gcount();
 
     if (readedBytes!=(size_t)fileStat.fileSize)

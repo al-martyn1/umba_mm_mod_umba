@@ -16,6 +16,9 @@
 #endif
 
 
+#include "warnings/push_disable_fn_or_var_unsafe.h"
+
+
 namespace umba
 {
 
@@ -33,11 +36,6 @@ bool getVar(const ::std::string &varName, ::std::string &val)
     val = pval;
     return true;
    }
-
-#if defined(_MSC_VER) && _MSC_VER>=1300
-    #pragma warning( push )
-    #pragma warning( disable : 4996 ) // Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
-#endif
 
 //! Установка переменной окружения
 inline
@@ -60,9 +58,6 @@ bool putVar(const ::std::string &varName, const ::std::string &val)
     #endif
     return true;
    }
-#if defined(_MSC_VER) && _MSC_VER>=1300
-    #pragma warning( pop )
-#endif
 
 
 #if defined(WIN32) || defined(_WIN32)
@@ -101,11 +96,6 @@ bool getVar(const ::std::string &varName, ::std::wstring &val)
    }
 
 //------------------------------
-#if defined(_MSC_VER) && _MSC_VER>=1300
-    #pragma warning( push )
-    #pragma warning( disable : 4996 ) // Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
-#endif
-
 inline
 bool putVar(const ::std::wstring &varName, const ::std::wstring &val)
    {
@@ -119,16 +109,13 @@ bool putVar(const ::std::wstring &varName, const ::std::wstring &val)
     return true;
    }
 
-#if defined(_MSC_VER) && _MSC_VER>=1300
-    #pragma warning( pop )
+
 #endif
 
 
-#endif
+#include "warnings/pop.h"
 
 
 }; // namespace env
 }; // namespace umba
-
-
 

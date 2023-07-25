@@ -150,6 +150,12 @@ struct not_pred
     not_pred( const ActualPred &a /*!< предикат для отрицания */ ) : actualPred(a) {}
     //! Оператор функционального объекта
     bool operator()( ParamType ch ) const { return !actualPred(ch); }
+
+    // not_pred(const not_pred&) = delete;
+    // not_pred(not_pred&&) = delete;
+    // not_pred& operator=(const not_pred&) = delete;
+    // not_pred& operator=(not_pred&&) = delete;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -164,6 +170,13 @@ struct space_pred
 {
     //! Оператор функционального объекта
     bool operator()( CharType  ch ) const { return is_space(ch); }
+
+    // space_pred() = default;
+    // space_pred(const space_pred&) = default;
+    // space_pred(space_pred&&) = default;
+    // space_pred& operator=(const space_pred&) = delete;
+    // space_pred& operator=(space_pred&&) = default;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -173,6 +186,13 @@ struct space_or_tab_pred
 {
     //! Оператор функционального объекта
     bool operator()( CharType ch )  const { return is_space_ot_tab(ch); }
+
+    // space_or_tab_pred() = default;
+    // space_or_tab_pred(const space_or_tab_pred&) = default;
+    // space_or_tab_pred(space_or_tab_pred&&) = default;
+    // space_or_tab_pred& operator=(const space_or_tab_pred&) = delete;
+    // space_or_tab_pred& operator=(space_or_tab_pred&&) = default;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -182,6 +202,13 @@ struct whitespace_pred
 {
     //! Оператор функционального объекта
     bool operator()( CharType ch )  const { return is_whitespace(ch); }
+
+    // whitespace_pred() = default;
+    // whitespace_pred(const whitespace_pred&) = default;
+    // whitespace_pred(whitespace_pred&&) = default;
+    // whitespace_pred& operator=(const whitespace_pred&) = delete;
+    // whitespace_pred& operator=(whitespace_pred&&) = default;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -191,6 +218,13 @@ struct linefeed_pred
 {
     //! Оператор функционального объекта
     bool operator()( CharType ch )  const { return is_linefeed(ch); }
+
+    // linefeed_pred() = default;
+    // linefeed_pred(const linefeed_pred&) = default;
+    // linefeed_pred(linefeed_pred&&) = default;
+    // linefeed_pred& operator=(const linefeed_pred&) = delete;
+    // linefeed_pred& operator=(linefeed_pred&&) = default;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -200,6 +234,13 @@ struct dec_digit_pred
 {
     //! Оператор функционального объекта
     bool operator()( CharType ch )  const { return is_digit(ch); }
+
+    // dec_digit_pred() = default;
+    // dec_digit_pred(const dec_digit_pred&) = default;
+    // dec_digit_pred(dec_digit_pred&&) = default;
+    // dec_digit_pred& operator=(const dec_digit_pred&) = delete;
+    // dec_digit_pred& operator=(dec_digit_pred&&) = default;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -237,6 +278,12 @@ struct is_one_of
     {
         return m_str.find(ch)!=m_str.npos;
     }
+
+    is_one_of(const is_one_of&) = default;
+    is_one_of(is_one_of&&) = default;
+    is_one_of& operator=(const is_one_of&) = delete;
+    is_one_of& operator=(is_one_of&&) = default;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -1331,7 +1378,7 @@ inline char get_pair( char brCh )
 
 //------------------------------
 //! Возвращает парный символ для своего аргумента (только из диапазона ASCII)
-inline wchar_t get_pair( wchar_t brCh )  { return get_pair((char)brCh); }
+inline wchar_t get_pair( wchar_t brCh )  { return (wchar_t)get_pair((char)brCh); }
 
 //------------------------------
 //! Возвращает true, если входной символ - скобка (только из диапазона ASCII)
@@ -1682,9 +1729,9 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
 
 //------------------------------
 //! Возвращает размер входного разделителя
-inline size_t util_get_sep_size( const char &sep )         { return 1; }
+inline size_t util_get_sep_size(const char& sep)           { UMBA_USED(sep); return 1; }
 //! Возвращает размер входного разделителя
-inline size_t util_get_sep_size( const wchar_t &sep )      { return 1; }
+inline size_t util_get_sep_size( const wchar_t &sep )      { UMBA_USED(sep); return 1; }
 //! Возвращает размер входного разделителя
 inline size_t util_get_sep_size( const char *sep )         { return std::strlen(sep); }
 //! Возвращает размер входного разделителя
@@ -2198,6 +2245,21 @@ StringType quote( const StringType &str
 
 
 //-----------------------------------------------------------------------------
+//! Хелпер для вычисления размера буфера для функции format_print
+inline std::size_t calc_buf_char_size_for_format_print( std::size_t fmtStringSize )
+{
+    UMBA_ASSERT(fmtStringSize<256);
+
+    std::size_t bufSize = fmtStringSize*16;
+    if (bufSize<128)
+        bufSize = 128;
+    if (bufSize>4096)
+        bufSize = 4096;
+
+    return bufSize;
+
+}
+//-----------------------------------------------------------------------------
 //! Хелпер-обертка для sprintf и аналогичных платформо-зависимых аналогов.
 /*! 
     Используется vsnprintf.
@@ -2219,25 +2281,15 @@ StringType format_print( const StringType fmt, ... )
 }
 
 //-----------------------------------------------------------------------------
-//! Хелпер для вычисления размера буфера для функции format_print
-inline std::size_t calc_buf_char_size_for_format_print( std::size_t fmtStringSize )
-{
-    UMBA_ASSERT(fmtStringSize<256);
-
-    std::size_t bufSize = fmtStringSize*16;
-    if (bufSize<128)
-        bufSize = 128;
-    if (bufSize>4096)
-        bufSize = 4096;
-
-    return bufSize;
-
-}
-//-----------------------------------------------------------------------------
 //! \copydoc format_print
 template <> inline
 std::string format_print<std::string>( const std::string fmt, ... )
 {
+    if (fmt.empty())
+    {
+        return fmt;
+    }
+
     std::size_t bufSize = calc_buf_char_size_for_format_print (fmt.size());
 
     char *pBuf = 0;
@@ -2251,12 +2303,14 @@ std::string format_print<std::string>( const std::string fmt, ... )
         return fmt;
     }
 
+    #include "warnings/push_disable_non_portable_variadic.h"
     va_list args;
     va_start (args, fmt);
-    int numCharsPrinted = vsnprintf(pBuf,bufSize-1, fmt.c_str(), args );
+    auto numCharsPrinted = (std::size_t)vsnprintf(pBuf,bufSize-1, fmt.c_str(), args );
     va_end (args);
+    #include "warnings/pop.h"
 
-    return std::string(pBuf);
+    return std::string(pBuf, numCharsPrinted);
 }
 
 //-----------------------------------------------------------------------------
@@ -2266,6 +2320,11 @@ std::string format_print<std::string>( const std::string fmt, ... )
 template <> inline
 std::wstring format_print<std::wstring>( const std::wstring fmt, ... )
 {
+    if (fmt.empty())
+    {
+        return fmt;
+    }
+
     std::size_t bufSize = calc_buf_char_size_for_format_print (fmt.size());
 
     wchar_t *pBuf = 0;
@@ -2279,12 +2338,15 @@ std::wstring format_print<std::wstring>( const std::wstring fmt, ... )
         return fmt;
     }
 
+    #include "warnings/push_disable_non_portable_variadic.h"
+    #include "warnings/disable_fn_or_var_unsafe.h"
     va_list args;
     va_start (args, fmt);
-    int numCharsPrinted = _vsnwprintf(pBuf, bufSize-1, fmt.c_str(), args );
+    auto numCharsPrinted = (std::size_t)_vsnwprintf(pBuf, bufSize-1, fmt.c_str(), args );
     va_end (args);
+    #include "warnings/pop.h"
 
-    return std::wstring(pBuf);
+    return std::wstring(pBuf, numCharsPrinted);
 }
 #endif // UMBA_MSVC_COMPILER_USED
 
