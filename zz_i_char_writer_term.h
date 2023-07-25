@@ -175,8 +175,8 @@ namespace win32
    inline
    colors::SgrColor convertColorFromConsole( WORD conColor )
    {
-       return convertColorFromConsoleHelper( conColor&0x0F )
-            | convertColorFromConsoleHelper( (conColor>>4)&0x0F );
+       return convertColorFromConsoleHelper( conColor&0x0Fu )
+            | convertColorFromConsoleHelper( (conColor>>4)&0x0Fu );
    }
 
    //! Хелпер преобразования цвета colors::SgrColor в Win32-атрибут текста консоли
@@ -193,7 +193,7 @@ namespace win32
            case colors::magenta: return FOREGROUND_RED|FOREGROUND_BLUE;
            case colors::cyan   : return FOREGROUND_GREEN|FOREGROUND_BLUE;
            case colors::white  : return FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE;
-           case colors::color_default: return defAttr & 0x0F;
+           case colors::color_default: return defAttr & 0x0Fu;
            default: return 0;
           }
    }
@@ -212,7 +212,7 @@ namespace win32
                fg |= FOREGROUND_INTENSITY;
        }
 
-       WORD bg = convertColorToConsoleHelper(bgClr, defAttr>>4);
+       WORD bg = convertColorToConsoleHelper(bgClr, (WORD)(defAttr>>4));
        if (bgClr!=colors::color_default)
        {
            if (clr&colors::bright)
@@ -222,7 +222,7 @@ namespace win32
        if (clr&colors::invert)
            std::swap(fg,bg);
 
-       return fg | (bg<<4); //  | bright;
+       return (WORD)(fg | (WORD)(bg<<4)); //  | bright;
    }
 
 

@@ -29,6 +29,7 @@ struct NulCharWriter : UMBA_IMPLEMENTS ICharWriter
     virtual
     void writeChar( char ch ) override
     {
+        UMBA_USED(ch);
     }
 
     //! Сброс всех выходных буферов
@@ -550,7 +551,7 @@ public:
 
         //if (isAttachedToConsole())
         //    return true;
-        return false;
+        //return false;
     }
 
     //! Возвращает true, если консоль является ANSI-терминалом с поддержкой Escape-последовательностей
@@ -687,6 +688,8 @@ protected:
 
     void beforeWriteChar( char ch )
     {
+        UMBA_USED(ch);
+
         #if defined(WIN32) || defined(_WIN32)
 
             /*
@@ -710,6 +713,7 @@ protected:
 
     void afterWriteChar( char ch )
     {
+        UMBA_USED(ch);
     }
 
 public:
@@ -865,12 +869,14 @@ public:
                     numPositionsToClear = maxPosToClear;
                 }
 
+                #include "umba/warnings/push_disable_spectre_mitigation.h"
                 if (numPositionsToClear>0)
                 {
                     term::win32::setConsoleTextAttribute( m_hCon, FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE );
                     DWORD charsWritten = 0;
-                    FillConsoleOutputCharacter( m_hCon, (TCHAR)' ', numPositionsToClear, curCoords, &charsWritten);
+                    FillConsoleOutputCharacter( m_hCon, (TCHAR)' ', (DWORD)numPositionsToClear, curCoords, &charsWritten);
                 }
+                #include "umba/warnings/pop.h"
             }
         }
         #endif
@@ -909,7 +915,7 @@ public:
                     remainingLines = maxLines;
 
                 term::win32::setConsoleTextAttribute( m_hCon, FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE );
-                FillConsoleOutputCharacter( m_hCon, (TCHAR)' ', (conSize.X - curCoords.X) + (remainingLines)*conSize.X , curCoords, &charsWritten);
+                FillConsoleOutputCharacter( m_hCon, (TCHAR)' ', (DWORD)(conSize.X - curCoords.X) + (remainingLines)*conSize.X , curCoords, &charsWritten);
             }
         }
         #endif

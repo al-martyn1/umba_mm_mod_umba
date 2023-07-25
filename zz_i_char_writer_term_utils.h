@@ -22,7 +22,7 @@ char* formatUnsignedDec( char *pBuf, unsigned u)
     while(u)
     {
         unsigned d = u % 10;
-        *pBuf++ = '0' + d;
+        *pBuf++ = (char)('0' + (char)d);
         u /= 10;
     }
 

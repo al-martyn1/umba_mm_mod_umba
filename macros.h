@@ -111,7 +111,7 @@ const int keepUnknownVars                     = smf_KeepUnknownVars             
 template<typename StringType>
 struct IMacroTextGetter
 {
-
+    virtual ~IMacroTextGetter() {}
     virtual bool operator()(const StringType &name, StringType &text) const = 0;
 };
 
@@ -217,6 +217,10 @@ struct MacroTextGetterProxy : public IMacroTextGetter<StringType>
 
         return orgGetter(name, text);
     }
+
+    MacroTextGetterProxy(const MacroTextGetterProxy&) = delete;
+    MacroTextGetterProxy& operator=(const MacroTextGetterProxy&) = delete;
+    MacroTextGetterProxy& operator=(MacroTextGetterProxy&&) = delete;
 
 }; // struct MacroTextGetterProxy
 
@@ -477,8 +481,8 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
 
             macroText = cond ? truthPart : falsePart;
             StringType 
-                str = (flags&smf_DisableRecursion) ? macroText : substMacros(macroText, getMacroText, flags, usedMacros);
-            res.append(str);
+                strToAppend = (flags&smf_DisableRecursion) ? macroText : substMacros(macroText, getMacroText, flags, usedMacros);
+            res.append(strToAppend);
            }
        }
 

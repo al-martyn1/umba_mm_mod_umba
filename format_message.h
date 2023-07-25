@@ -205,11 +205,14 @@ public:
     static inline EFormatAlign  alignCenter = EFormatAlign::center;
     static inline EFormatAlign  alignRight  = EFormatAlign::right ;
 
+    virtual ~FormatMessage() {}
 
     FormatMessage( const StringType &msg, const std::string &ltag=std::string() )
     : formattedMacros()
     , messageText(msg)
-    {}
+    {
+        UMBA_USED(ltag);
+    }
 
 
     StringType toString() const
@@ -270,7 +273,7 @@ public:
 
     //TODO: !!! Не реализовано
     //! Установка нац особенностей форматирования десятичных чисел, делает decSep и decGroup
-    virtual FormatMessage& locale(const std::string &ltag) { return *this; }
+    virtual FormatMessage& locale(const std::string& ltag) { UMBA_USED(ltag); return *this; }
 
     FormatMessage& values(const macros_map_type &predefMacros)
     {
@@ -302,7 +305,7 @@ public:
         else // center
         {
             std::size_t lenLeft  = completemntString.size()/2;
-            std::size_t lenRight = completemntString.size()-lenLeft;
+            // std::size_t lenRight = completemntString.size()-lenLeft; // not used
             formattedMacros[argName] = StringType(completemntString, 0, lenLeft)
                                      + val
                                      + StringType(completemntString, lenLeft)

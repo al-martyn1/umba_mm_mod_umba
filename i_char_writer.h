@@ -52,6 +52,8 @@ namespace umba
 struct ICharWriter
 {
 
+    virtual ~ICharWriter() {}
+
     //! Запись символа
     virtual
     void writeChar( char ch ) = 0;
@@ -61,7 +63,7 @@ struct ICharWriter
     void writeBuf( const uint8_t* pBuf, size_t len )
     {
         for(size_t i = 0; i!=len; ++i, ++pBuf)
-           writeChar(*pBuf);
+           writeChar((char)*pBuf);
     }
 
     //! Запись ASCII-Z строки
@@ -147,7 +149,7 @@ struct ICharWriter
     }
 
     //! Производит установку цвета выводимого текста (текст и фон)
-    virtual void setTermColors(term::colors::SgrColor clr) {}
+    virtual void setTermColors(term::colors::SgrColor clr) { UMBA_USED(clr);  }
 
     //! Производит установку значений цвета текста и фона по умолчанию 
     virtual void setDefaultTermColors() {}
@@ -244,10 +246,10 @@ struct ICharWriter
 
 
     //! Установка каретки (курсора) консоли. 0 - выключена, 1 - полоска внизу, 2 - половина, 3 - во всю высоту
-    virtual void terminalSetCaret( int csz ) {}
+    virtual void terminalSetCaret( int csz ) { UMBA_USED(csz); }
 
     //! Helper для спиннера
-    virtual void terminalSetSpinnerMode( bool m ) {}
+    virtual void terminalSetSpinnerMode( bool m ) { UMBA_USED(m); }
 
     //! Перейти в абсолютный 0.
     virtual void terminalMove2Abs0()    {}
@@ -259,20 +261,20 @@ struct ICharWriter
     virtual void terminalMove2Line0()   {}
 
     //! Перейти на заданную позицию в текущей строке
-    virtual void terminalMove2LinePos( int pos ) {}
+    virtual void terminalMove2LinePos( int pos ) { UMBA_USED(pos); }
 
     //! Очистить в текущей строке N позиции от текущего положения
-    virtual void terminalClearLine( int n=-1 ) {}
+    virtual void terminalClearLine( int n=-1 ) { UMBA_USED(n); }
 
     //! Очистить текущую строку до конца, и очистить всё, что ниже, но не больше, чем maxLines - для ускорения
-    virtual void terminalClearRemaining( int maxLines = -1 ) {}
+    virtual void terminalClearRemaining( int maxLines = -1 ) { UMBA_USED(maxLines); }
 
     //! Переход в абсолютную позицию
     virtual void terminalMove2Pos( int x, int y )
     {
         // Реализация по умолчанию использует огранниченные методы, перечисленные выше, если терминал не поддерживает такое позиционирование напрямую
         terminalMove2Abs0();
-        int i = 0;
+        // int i = 0;
         for( auto j = 0; j<y; ++j)
             terminalMove2Down();
 

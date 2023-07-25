@@ -81,7 +81,7 @@
 #else
 
     //! Макрос записи в stdout - какой-то хелпер - XZ - затычка
-    #define  DEBUG_WINCONHELPERS_WRITE_STR(str) str
+    #define  DEBUG_WINCONHELPERS_WRITE_STR(str) do{} while(0)
     //! Макрос printf'а в stdout - какой-то хелпер - XZ - затычка
     #define  DEBUG_WINCONHELPERS_PRINTF( ... )
 
@@ -109,8 +109,10 @@ char toUpper( char ch )
 inline
 char toLower( char ch )
 {
+    #include "umba/warnings/push_disable_spectre_mitigation.h"
     if (ch>='A' && ch<='Z')
         return ch - 'A' + 'a';
+    #include "umba/warnings/pop.h"
     return ch;
 }
 
@@ -333,7 +335,9 @@ LONG /* NTSTATUS */  NtQueryInformationProcessImpl(
     #else
 
         // Для нормальных компиляторов оставлю как было
+        #include "warnings/push_disable_C4191.h"
         NtQueryInformationProcessFnPtrT NtQueryInformationProcessFnPtr = (NtQueryInformationProcessFnPtrT)GetProcAddress(LoadLibraryA("NTDLL.DLL"), "NtQueryInformationProcess");
+        #include "warnings/pop.h"
        
         // NtQueryInformationProcessFnPtrT NtQueryInformationProcessFnPtr = reinterpret_cast<NtQueryInformationProcessFnPtrT>(GetProcAddress(LoadLibraryA("NTDLL.DLL"), "NtQueryInformationProcess"));
 
@@ -375,7 +379,7 @@ ULONG_PTR GetParentProcessIdByPid( ULONG_PTR /* DWORD */  pid = GetCurrentProces
     #if defined(_MSC_VER) && _MSC_VER<=1400
     HANDLE h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, (DWORD)pid );
     #else
-    HANDLE h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    HANDLE h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, (DWORD)pid );
     #endif
     //HANDLE h = OpenProcess( SYNCHRONIZE, FALSE, pid );
     //HANDLE h = OpenProcess(SYNCHRONIZE, TRUE, pid);
