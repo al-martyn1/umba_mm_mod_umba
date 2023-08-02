@@ -78,7 +78,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
     Определяется, если задан один из макросов DEBUG или _DEBUG, или еще что-то (в зависимости от системы сборки)
  */
-#if defined(DEBUG) || (_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG)
     #if !defined(UMBA_DEBUG)
         #define UMBA_DEBUG
     #endif
