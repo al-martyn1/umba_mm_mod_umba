@@ -1100,7 +1100,7 @@ StringType getCurrentDrive()
     StringType getUserFolderPathFromWinApi(); // { return throw std::runtime_error("getUserFolderPathFromWinApi: not specified"); StringType(); }
 
     //! Получение домашнего каталога текущего пользователя в винде. Специализация
-    template<>
+    template<> inline
     std::string getUserFolderPathFromWinApi<std::string>()
     {
         char buf[4096];
@@ -1113,7 +1113,7 @@ StringType getCurrentDrive()
     }
     
     //! Получение домашнего каталога текущего пользователя в винде. Специализация
-    template<>
+    template<> inline
     std::wstring getUserFolderPathFromWinApi<std::wstring>()
     {
         wchar_t buf[4096];
@@ -1133,7 +1133,7 @@ StringType getCurrentDrive()
     StringType getTempFolderPathFromWinApi(); // { return throw std::runtime_error("getUserFolderPathFromWinApi: not specified"); StringType(); }
 
     //! Получение временного каталога (текущего пользователя или как придётся) в винде. Специализация
-    template<>
+    template<> inline
     std::string getTempFolderPathFromWinApi<std::string>()
     {
         char buf[4096];
@@ -1149,7 +1149,7 @@ StringType getCurrentDrive()
     }
 
     //! Получение временного каталога (текущего пользователя или как придётся) в винде. Специализация
-    template<>
+    template<> inline
     std::wstring getTempFolderPathFromWinApi<std::wstring>()
     {
         wchar_t buf[4096];
@@ -1218,6 +1218,10 @@ StringType getTempFolderPath()
         // Пытаемся найти юзерский TEMP
         StringType res;
         if (umba::env::getVar(make_string<StringType>("TMPDIR"), res))
+        {
+            return res;
+        }
+        if (umba::env::getVar(make_string<StringType>("TMP"), res))
         {
             return res;
         }
