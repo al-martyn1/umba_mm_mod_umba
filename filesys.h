@@ -27,12 +27,17 @@
 
 
 #if defined(WIN32) || defined(_WIN32)
+
     #include <Shlobj.h>
+
 #else
+
     #include <pwd.h>
+    #include <stdio.h>
     #include <unistd.h>
 
     #include <sys/types.h>
+
 #endif
 
 
@@ -623,7 +628,56 @@ StringType getCurrentDirectory()
 }
 
 //----------------------------------------------------------------------------
+//! Удаление файла
+template<typename StringType> inline
+bool deleteFile( const StringType &filename )
+{
+    throw std::runtime_error("Not implemented: deleteFile not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
+//! Удаление каталога
+template<typename StringType> inline
+bool deleteDirectory( const StringType &filename )
+{
+    throw std::runtime_error("Not implemented: deleteDirectory not specialized for this StringType");
+}
+
+
+//----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::string
+template<> inline
+bool deleteFile<std::string>( const std::string &filename )
+{
+    return DeleteFileA(filename.c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::wstring
+template<> inline
+bool deleteFile<std::wstring>( const std::wstring &filename )
+{
+    return DeleteFileW(filename.c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::string
+template<> inline
+bool deleteDirectory<std::string>( const std::string &filename )
+{
+    return RemoveDirectoryA(filename.c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::wstring
+template<> inline
+bool deleteDirectory<std::wstring>( const std::wstring &filename )
+{
+    return RemoveDirectoryW(filename.c_str()) ? true : false;
+}
 
 //----------------------------------------------------------------------------
 //! Проверка доступности файла на чтение
@@ -854,11 +908,11 @@ bool writeFile( const StringType            &filename    //!< Имя файла
     if (filedata.empty())
     {
         DataType d;
-        return writeFile(filename, &d, 0);
+        return writeFile(filename, &d, 0, bOverwrite);
     }
     else
     {
-        return writeFile(filename, &filedata[0], filedata.size());
+        return writeFile(filename, &filedata[0], filedata.size(), bOverwrite);
     }
 }
 
@@ -869,7 +923,7 @@ bool writeFile( const StringType            &filename    //!< Имя файла
               , bool                        bOverwrite
               )
 {
-    return writeFile(filename, filedata.data(), filedata.size());
+    return writeFile(filename, filedata.data(), filedata.size(), bOverwrite);
 }
 
 //------------------------------
@@ -904,8 +958,26 @@ std::wstring getCurrentDirectory<std::wstring>()
 
 #else // !WIN32
 
-//----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::string
+template<> inline
+bool deleteFile<std::string>( const std::string &filename )
+{
+    // same as remove for files
+    return unlink(filename.c_str()) == 0 ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление каталога, специализация для std::string
+template<> inline
+bool deleteDirectory<std::string>( const std::string &filename )
+{
+    // same as remove for folders
+    return rmdir(filename.c_str()) == 0 ? true : false;
+}
+
+//----------------------------------------------------------------------------
 //! Проверка доступности файла на чтение
 template<typename StringType> inline
 bool isFileReadable( const StringType &filename )
