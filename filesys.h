@@ -802,7 +802,7 @@ bool readFile( const StringType &filename       //!< Имя файла
             // filedata.resize( numItems ); // We can read files which are always can fit to memory
         }
         
-        const size_t numRawBytesToRead = filedata.size()*itemSize;
+        // const size_t numRawBytesToRead = filedata.size()*itemSize;
     
         // Here starts "no exceptions" (exception safe) zone
     
