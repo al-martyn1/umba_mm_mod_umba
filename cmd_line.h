@@ -703,6 +703,7 @@ struct CommandLineOptionInfo
 
     std::string formatNumberHelper( int i ) const
     {
+        UMBA_USED(i); //!!!
         char buf[128];
         size_t numCharsOut = umba::format_utils::formatNumber( &buf[0], 128, (int64_t)intDefVal, 10 );
         buf[numCharsOut] = 0;
@@ -711,6 +712,7 @@ struct CommandLineOptionInfo
 
     std::string formatNumberHelper( unsigned u ) const
     {
+        UMBA_USED(u); //!!!
         char buf[128];
         size_t numCharsOut = umba::format_utils::formatNumber( &buf[0], 128, (uint64_t)intDefVal, 10 );
         buf[numCharsOut] = 0;
@@ -719,6 +721,7 @@ struct CommandLineOptionInfo
 
     std::string formatNumberHelper( int64_t i ) const
     {
+        UMBA_USED(i); //!!!
         char buf[128];
         size_t numCharsOut = umba::format_utils::formatNumber( &buf[0], 128, (int64_t)intDefVal, 10 );
         buf[numCharsOut] = 0;
@@ -727,6 +730,7 @@ struct CommandLineOptionInfo
 
     std::string formatNumberHelper( uint64_t u ) const
     {
+        UMBA_USED(u); //!!!
         char buf[128];
         size_t numCharsOut = umba::format_utils::formatNumber( &buf[0], 128, (uint64_t)intDefVal, 10 );
         buf[numCharsOut] = 0;
@@ -777,6 +781,14 @@ struct CommandLineOptionInfo
                     return "<AUTO>";
                 return std::string("'") + res + std::string("'");
             }
+
+            case OptionType::optUnknown:
+            case OptionType::optIntList:
+            case OptionType::optStringList:
+            case OptionType::optEnumList:
+                [[fallthrough]];
+            //case OptionType::optUnknown:
+            default: {}
         }
 
         return std::string();
@@ -811,6 +823,14 @@ struct CommandLineOptionInfo
                     return "<AUTO>";
                 return std::string("'") + res + std::string("'");
             }
+
+            case OptionType::optUnknown:
+            case OptionType::optIntList:
+            case OptionType::optStringList:
+            case OptionType::optEnumList:
+                [[fallthrough]];
+                //case OptionType::optUnknown:
+            default: {}
         }
 
         return std::string();
@@ -843,6 +863,8 @@ struct CommandLineOptionInfo
 
 struct ICommandLineOptionCollector
 {
+    virtual ~ICommandLineOptionCollector() {}
+
     virtual void ignoreOptInfo( ) = 0;
     virtual void setCollectMode( bool bCollect ) = 0;
 
@@ -904,7 +926,15 @@ struct CommandLineOption
     bool          valueOptional;
     ICommandLineOptionCollector *pCollector;
 
-    CommandLineOption( std::string a, ICommandLineOptionCollector *pCol = 0) : fOption(false), fResponseFile(false), fShort(false), argOrg(a), pCollector(pCol), valueOptional(false)
+    CommandLineOption( std::string a, ICommandLineOptionCollector *pCol = 0)
+    : fOption(false)
+    , fResponseFile(false)
+    , fShort(false)
+    , argOrg(a)
+    , name()
+    , optArg()
+    , valueOptional(false)
+    , pCollector(pCol)
     {
         fOption = isCommandLineOption( argOrg, name, optArg, fShort );
         if (!fOption)
@@ -2313,6 +2343,7 @@ bool updateAutocompletionBashRc( ICommandLineOptionCollector *pCol, bool simpleR
 inline
 bool updateAutocompletionBashProfile( ICommandLineOptionCollector *pCol, bool simpleRemoveLine )
 {
+    UMBA_USED(pCol);
     //std::string pref, suf, text = pCol->makeText( 0, PrintHelpStyle::bash_complete, &pref, &suf );
     return updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory<std::string>(), umba::string_plus::make_string<std::string>(".bash_profile") ), "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi", std::string(), std::string(), simpleRemoveLine );
 }

@@ -481,7 +481,7 @@ bool removeNumberUnits( char* numStr, char* pUnitsBuf, std::size_t unitsBufSize,
         #if defined(UMBA_MSVC_COMPILER_USED)
 
             strncpy_s( pUnitsBuf, unitsBufSize, &numStr[unitsStartPos], _TRUNCATE );
-            https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/strncpy-s-strncpy-s-l-wcsncpy-s-wcsncpy-s-l-mbsncpy-s-mbsncpy-s-l?view=msvc-160
+            // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/strncpy-s-strncpy-s-l-wcsncpy-s-wcsncpy-s-l-mbsncpy-s-mbsncpy-s-l?view=msvc-160
 
         #else
 
