@@ -2313,7 +2313,7 @@ bool updateRcScriptFile( const std::string &fileName, const std::string & update
         return false;
     }
 
-    output.write( fileText.data(), fileText.size() );
+    output.write( fileText.data(), (std::streamsize)fileText.size() );
 
     return true;
 }
