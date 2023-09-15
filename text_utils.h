@@ -191,7 +191,7 @@ std::string alignStringWithWidth( std::string str, std::string::size_type width,
 
     switch(textAlignment)
     {
-        //case TextAlignment::left   : return str;
+        case TextAlignment::left   : return str;
 
         case TextAlignment::center :
                                      {
@@ -248,7 +248,7 @@ std::vector<std::string> prepareTextParaMakeLines( const std::string &para, std:
 
     std::vector<std::string> res;
 
-    std::vector< std::vector<std::string> >::size_type lineIdx = 0;
+    //std::vector< std::vector<std::string> >::size_type lineIdx = 0;
 
     std::vector< std::vector<std::string> >::const_iterator lineWordsIt = paraLinesWords.begin();
     std::vector< std::vector<std::string> >::const_iterator lastLineIt  = paraLinesWords.end();
