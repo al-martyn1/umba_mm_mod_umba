@@ -109,7 +109,7 @@ namespace time_service{
 
             double microsecondsPerCount = 1.0e9 / static_cast<double>(freq.QuadPart);
             
-            return (HiresTimeTick)(curTime.QuadPart*microsecondsPerCount);
+            return (HiresTimeTick)((double)curTime.QuadPart*microsecondsPerCount);
         }
 
         void   delayMs(TimeTick deltaMs)
