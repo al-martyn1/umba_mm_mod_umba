@@ -734,6 +734,7 @@ bool readFile( const StringType &filename       //!< Имя файла
     if (hFile==INVALID_HANDLE_VALUE)
     {
         DWORD err = GetLastError();
+        UMBA_USED(err);
         return false;
     }
 
