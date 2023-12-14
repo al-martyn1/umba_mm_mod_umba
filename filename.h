@@ -865,8 +865,8 @@ StringType getName( const StringType &path )
     return stripLastExtSepCopy(StringType( lastPathSepIt, lastExtSepIt ));
 }
 
-inline std::string  getName( const char    *p ) { return getName<std::string> ( p ); } //!< Извлекает из имени расширение
-inline std::wstring getName( const wchar_t *p ) { return getName<std::wstring>( p ); } //!< Извлекает из имени расширение
+inline std::string  getName( const char    *p ) { return getName<std::string> ( p ); } //!< Извлекает из имени имя файла без пути и расширения
+inline std::wstring getName( const wchar_t *p ) { return getName<std::wstring>( p ); } //!< Извлекает из имени имя файла без пути и расширения
 
 
 //-----------------------------------------------------------------------------
