@@ -237,6 +237,31 @@ StringType formatFiletime( filetime_t t, const StringType &fmt );
 #if defined(WIN32) || defined(_WIN32)
 
 //------------------------------
+//! Хелпер конвертации юниксового filetime_t в виндовый
+inline FILETIME convertUnixTimeT( filetime_t t )
+{
+    filetime_t t1 = t, t2 = 10000000ull, t3 = 116444736000000000ull;
+    LONGLONG ll = t1*t2 + t3;
+    FILETIME ft;
+    ft.dwLowDateTime = (DWORD) ll;
+    ft.dwHighDateTime = (DWORD)(ll >>32);
+    return ft;
+}
+
+//------------------------------
+//! Хелпер конвертации виндового FILETIME в юниксовый
+inline filetime_t convertWindowsFiletime( FILETIME ft )
+{
+    filetime_t ftH = ft.dwHighDateTime;
+    filetime_t ftL = ft.dwLowDateTime;
+    //filetime_t ft
+
+    filetime_t wndFt = (ftH<<32)+ftL;
+
+    return (filetime_t)((wndFt - 116444736000000000ull) / 10000000ull);
+}
+
+//------------------------------
 //! Версия std::string strftime для C++. Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
 template<> inline
 std::string formatFiletime<std::string>( filetime_t t, const std::string &fmt )
@@ -374,6 +399,38 @@ struct FileStat
         return _wstat64( fileName.c_str(), statBuf );
     }
 
+
+    inline
+    FileStat fileStatFromFindData(const WIN32_FIND_DATAW &findData)
+    {
+        FileStat fileStat;
+    
+        fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
+        fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
+    
+        fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
+        fileStat.timeLastModified = convertWindowsFiletime(findData.ftLastWriteTime);
+        fileStat.timeLastAccess   = convertWindowsFiletime(findData.ftLastAccessTime);
+    
+        return fileStat;
+    }
+    
+    inline
+    FileStat fileStatFromFindData(const WIN32_FIND_DATAA &findData)
+    {
+        FileStat fileStat;
+    
+        fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
+        fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
+    
+        fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
+        fileStat.timeLastModified = convertWindowsFiletime(findData.ftLastWriteTime);
+        fileStat.timeLastAccess   = convertWindowsFiletime(findData.ftLastAccessTime);
+    
+        return fileStat;
+    }
+
+
 #else
 
     //! Одно универсальное имя для struct stat
@@ -499,29 +556,6 @@ HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
 }
 
 // https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time
-
-//! Хелпер конвертации юниксового filetime_t в виндовый
-inline FILETIME convertUnixTimeT( filetime_t t )
-{
-    filetime_t t1 = t, t2 = 10000000ull, t3 = 116444736000000000ull;
-    LONGLONG ll = t1*t2 + t3;
-    FILETIME ft;
-    ft.dwLowDateTime = (DWORD) ll;
-    ft.dwHighDateTime = (DWORD)(ll >>32);
-    return ft;
-}
-
-//! Хелпер конвертации виндового FILETIME в юниксовый
-inline filetime_t convertWindowsFiletime( FILETIME ft )
-{
-    filetime_t ftH = ft.dwHighDateTime;
-    filetime_t ftL = ft.dwLowDateTime;
-    //filetime_t ft
-
-    filetime_t wndFt = (ftH<<32)+ftL;
-
-    return (filetime_t)((wndFt - 116444736000000000ull) / 10000000ull);
-}
 
 //! Хелпер получения статистики файла
 template<typename StringType> inline
@@ -1231,7 +1265,7 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
     // https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-win32_find_dataa
     WIN32_FIND_DATAW fndData;
 
-    //TODO: !!! При возникновении исключения hFind утекает. Надо бы везде это проверить
+    //TODO: !!! При возникновении исключения hFind утекает. Надо бы переделать, и такие моменты надо бы везде это проверить
     HANDLE hFind = ::FindFirstFileW( umba::filename::prepareForNativeUsage(path).c_str(), &fndData );
 
     if (hFind==INVALID_HANDLE_VALUE)
@@ -1246,9 +1280,12 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
         return (name==curDirAlias || name==parentDirAlias);
     };
 
+    FileStat fileStat;
+
     if (!isSpecialAlias(fndData.cFileName))
     {
-        if (!handler(fndData.cFileName, (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false))
+        fileStat = fileStatFromFindData(fndData);
+        if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
         {
             return true;
         }
@@ -1259,7 +1296,8 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
     {
         if (!isSpecialAlias(fndData.cFileName))
         {
-            if (!handler(fndData.cFileName, (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false))
+            fileStat = fileStatFromFindData(fndData);
+            if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
             {
                 return true;
             }
@@ -1302,9 +1340,12 @@ bool enumerateDirectoryImpl(std::string path, EnumDirectoryHandler handler)
         return (name==curDirAlias || name==parentDirAlias);
     };
 
+    FileStat fileStat;
+
     if (!isSpecialAlias(fndData.cFileName))
     {
-        if (!handler(fndData.cFileName, (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false))
+        fileStat = fileStatFromFindData(fndData);
+        if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
         {
             return true;
         }
@@ -1315,7 +1356,8 @@ bool enumerateDirectoryImpl(std::string path, EnumDirectoryHandler handler)
     {
         if (!isSpecialAlias(fndData.cFileName))
         {
-            if (!handler(fndData.cFileName, (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false))
+            fileStat = fileStatFromFindData(fndData);
+            if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
             {
                 return true;
             }
