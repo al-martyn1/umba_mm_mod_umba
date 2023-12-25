@@ -70,9 +70,7 @@ void gmesg(const StringType &msg)
 template<typename StringTypeA, typename StringTypeB> inline
 void gmesg(const StringTypeA &file, const StringTypeB &msg)
 {
-    setGlobalMessage<StringType>(msg);
-
-    setGlobalMessage(fromUtf8(file) + L": " + fromUtf8(msg));
+    setGlobalMessage<std::wstring>(fromUtf8(file) + L": " + fromUtf8(msg));
 }
 
 void gmesgClr()
