@@ -1,5 +1,10 @@
 #pragma once
 
+#include "umba.h"
+//
+#include "preprocessor.h"
+
+//
 #include "utf.h"
 #include <exception>
 #include <stdexcept>
@@ -37,7 +42,7 @@ std::wstring getGlobalMessage<std::wstring>()
 }
 
 template<typename StringType> inline
-void setGlobalMessage(const StringType &msg)
+void setGlobalMessage(const StringType &)
 {
     throw std::runtime_error("umba::setGlobalMessage not implemented for this string type");
 }
@@ -54,6 +59,24 @@ void setGlobalMessage<std::wstring>(const std::wstring &msg)
     getGlobalMessageStringImpl() = msg;
 }
 
+inline
+void setGlobalMessage(const char* pMsg)
+{
+    if (pMsg)
+    {
+        getGlobalMessageStringImpl() = fromUtf8(pMsg);
+    }
+}
+
+inline
+void setGlobalMessage(const wchar_t* pMsg)
+{
+    if (pMsg)
+    {
+        getGlobalMessageStringImpl() = pMsg;
+    }
+}
+
 
 template<typename StringType> inline
 StringType gmesg()
@@ -64,8 +87,21 @@ StringType gmesg()
 template<typename StringType> inline
 void gmesg(const StringType &msg)
 {
-    setGlobalMessage<StringType>(msg);
+    setGlobalMessage(msg);
 }
+
+inline
+void gmesg(const char* pMsg)
+{
+    setGlobalMessage(pMsg);
+}
+
+inline
+void gmesg(const wchar_t* pMsg)
+{
+    setGlobalMessage(pMsg);
+}
+
 
 template<typename StringTypeA, typename StringTypeB> inline
 void gmesg(const StringTypeA &file, const StringTypeB &msg)
