@@ -109,6 +109,24 @@ void gmesg(const StringTypeA &file, const StringTypeB &msg)
     setGlobalMessage<std::wstring>(fromUtf8(file) + L": " + fromUtf8(msg));
 }
 
+template<typename StringType>
+void gmesg(const StringType &file, const char *pMsg)
+{
+    if (pMsg)
+    {
+        setGlobalMessage<std::wstring>(fromUtf8(file) + L": " + fromUtf8(pMsg));
+    }
+}
+
+template<typename StringType>
+void gmesg(const StringType &file, const wchar_t *pMsg)
+{
+    if (pMsg)
+    {
+        setGlobalMessage<std::wstring>(fromUtf8(file) + L": " + fromUtf8(pMsg));
+    }
+}
+
 void gmesgClr()
 {
     getGlobalMessageStringImpl().clear();
