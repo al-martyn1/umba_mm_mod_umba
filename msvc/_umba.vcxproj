@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C78648A3-E5D3-4907-901E-312613819F88}</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VisualStudioVersion)'=='16.0'" Label="UmbaProps">
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(UMBA_INC_DIRS)</IncludePath>
+  </PropertyGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ItemGroup>
+    <ClInclude Include="..\algoritms.h" />
+    <ClInclude Include="..\alloca.h" />
+    <ClInclude Include="..\arithmetic_strong_typedef.h" />
+    <ClInclude Include="..\assert.h" />
+    <ClInclude Include="..\autolock.h" />
+    <ClInclude Include="..\basic_interfaces.h" />
+    <ClInclude Include="..\basic_interfaces_impl.h" />
+    <ClInclude Include="..\bits.h" />
+    <ClInclude Include="..\bits_fmt.h" />
+    <ClInclude Include="..\char_writers.h" />
+    <ClInclude Include="..\cli_tool_helpers.h" />
+    <ClInclude Include="..\clipboard_win32.h" />
+    <ClInclude Include="..\cmd_line.h" />
+    <ClInclude Include="..\const_string.h" />
+    <ClInclude Include="..\critical_section.h" />
+    <ClInclude Include="..\debug_helpers.h" />
+    <ClInclude Include="..\dump.h" />
+    <ClInclude Include="..\enum_helpers.h" />
+    <ClInclude Include="..\env.h" />
+    <ClInclude Include="..\errors.h" />
+    <ClInclude Include="..\exception.h" />
+    <ClInclude Include="..\file_helpers.h" />
+    <ClInclude Include="..\filecache.h" />
+    <ClInclude Include="..\filename.h" />
+    <ClInclude Include="..\filesys.h" />
+    <ClInclude Include="..\flag_helpers.h" />
+    <ClInclude Include="..\format_message.h" />
+    <ClInclude Include="..\format_utils.h" />
+    <ClInclude Include="..\gmesg.h" />
+    <ClInclude Include="..\hr_counter.h" />
+    <ClInclude Include="..\i_char_writer.h" />
+    <ClInclude Include="..\include_finder.h" />
+    <ClInclude Include="..\info_log.h" />
+    <ClInclude Include="..\ini.h" />
+    <ClInclude Include="..\interface.h" />
+    <ClInclude Include="..\legacy.h" />
+    <ClInclude Include="..\linefeedtype.h" />
+    <ClInclude Include="..\lineinfo.h" />
+    <ClInclude Include="..\lineposinfo.h" />
+    <ClInclude Include="..\lineview.h" />
+    <ClInclude Include="..\log.h" />
+    <ClInclude Include="..\macro_helpers.h" />
+    <ClInclude Include="..\macros.h" />
+    <ClInclude Include="..\name_version.h" />
+    <ClInclude Include="..\nul_ostream.h" />
+    <ClInclude Include="..\numeric_version.h" />
+    <ClInclude Include="..\optimize_pop.h" />
+    <ClInclude Include="..\optimize_speed.h" />
+    <ClInclude Include="..\packpop.h" />
+    <ClInclude Include="..\parse_utils.h" />
+    <ClInclude Include="..\perf_counters.h" />
+    <ClInclude Include="..\preprocessor.h" />
+    <ClInclude Include="..\program_location.h" />
+    <ClInclude Include="..\properties.h" />
+    <ClInclude Include="..\pushpack1.h" />
+    <ClInclude Include="..\pushpack2.h" />
+    <ClInclude Include="..\pushpack4.h" />
+    <ClInclude Include="..\pushpack8.h" />
+    <ClInclude Include="..\qtui-show-simple-message.h" />
+    <ClInclude Include="..\regex_helpers.h" />
+    <ClInclude Include="..\rgbquad.h" />
+    <ClInclude Include="..\scanners.h" />
+    <ClInclude Include="..\scope_exec.h" />
+    <ClInclude Include="..\stl.h" />
+    <ClInclude Include="..\stl_keil.h" />
+    <ClInclude Include="..\stl_keil_initializer_list.h" />
+    <ClInclude Include="..\stl_keil_type_traits.h" />
+    <ClInclude Include="..\string_plus.h" />
+    <ClInclude Include="..\text_utils.h" />
+    <ClInclude Include="..\time_service.h" />
+    <ClInclude Include="..\timestamp.h" />
+    <ClInclude Include="..\umba.h" />
+    <ClInclude Include="..\umba_cpp.h" />
+    <ClInclude Include="..\undef_FormatMessage.h" />
+    <ClInclude Include="..\undef_min_max.h" />
+    <ClInclude Include="..\user_literals.h" />
+    <ClInclude Include="..\utf.h" />
+    <ClInclude Include="..\utf_impl.h" />
+    <ClInclude Include="..\utf8.h" />
+    <ClInclude Include="..\utility.h" />
+    <ClInclude Include="..\variadic_helpers.h" />
+    <ClInclude Include="..\winconhelpers.h" />
+    <ClInclude Include="..\zz_detect_environment.h" />
+    <ClInclude Include="..\zz_error_codes.h" />
+    <ClInclude Include="..\zz_i_char_writer_term.h" />
+    <ClInclude Include="..\zz_i_char_writer_term_colors.h" />
+    <ClInclude Include="..\zz_i_char_writer_term_console_type.h" />
+    <ClInclude Include="..\zz_i_char_writer_term_utils.h" />
+    <ClInclude Include="..\zz_mcu_low_level.h" />
+  </ItemGroup>
+</Project>
