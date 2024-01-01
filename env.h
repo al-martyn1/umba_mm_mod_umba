@@ -118,6 +118,12 @@ inline
 bool getEnvVarsList( std::vector<std::pair<std::wstring,std::wstring> > &lst)
 {
     auto env = GetEnvironmentStringsW();
+    if (!env)
+    {
+        return false;
+    }
+
+    auto envOrg = env;
 
     while(*env)
     {
@@ -143,6 +149,8 @@ bool getEnvVarsList( std::vector<std::pair<std::wstring,std::wstring> > &lst)
         env += fullStr.size()+1;
     }
 
+    FreeEnvironmentStringsW(envOrg);
+
     return true;
 }
 
@@ -150,12 +158,16 @@ inline
 bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
 {
 #if defined(GetEnvironmentStrings)
-    
     #undef GetEnvironmentStrings
-
 #endif
 
     auto env = GetEnvironmentStrings();
+    if (!env)
+    {
+        return false;
+    }
+
+    auto envOrg = env;
 
     while(*env)
     {
@@ -180,6 +192,8 @@ bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
 
         env += fullStr.size()+1;
     }
+
+    FreeEnvironmentStringsA(envOrg);
 
     return true;
 }
