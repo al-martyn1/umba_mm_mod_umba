@@ -39,7 +39,7 @@ namespace units {
 
 
 //----------------------------------------------------------------------------
-template<typename StringType>
+template<typename StringType> inline
 void splitValueAndUnits( const StringType     &valWithUnits
                        , StringType           &valStr 
                        , StringType           &unitsStr
