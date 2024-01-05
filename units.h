@@ -434,7 +434,7 @@ protected:
     // std::bad_alloc           - ErrorCode::noMemory
     //                            ErrorCode::genericError
 
-    template<StringType>
+    template<typename StringType>
     static
     ValWithUnits fromStringImpl( const StringType &str
                            , std::unordered_map<StringType, UnitsType> unitsMap
