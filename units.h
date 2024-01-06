@@ -515,7 +515,7 @@ public:
                            , const std::string &dotAliasChars  = ","
                            )
     {
-        return fromStringImpl(str, unitsMap, defaultUnits, iCase, ignoreValChars, dotAliasChars)
+        return fromStringImpl(str, unitsMap, defaultUnits, iCase, ignoreValChars, dotAliasChars);
     }
 
     static
@@ -527,11 +527,11 @@ public:
                            , const std::wstring &dotAliasChars  = L","
                            )
     {
-        return fromStringImpl(str, unitsMap, defaultUnits, iCase, ignoreValChars, dotAliasChars)
+        return fromStringImpl(str, unitsMap, defaultUnits, iCase, ignoreValChars, dotAliasChars);
     }
 
 
-};
+}; // struct ValWithUnits
 
 //----------------------------------------------------------------------------
 
