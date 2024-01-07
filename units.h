@@ -115,6 +115,7 @@ void splitValueAndUnits( const StringType     &valWithUnits
 
             ++dotCount;
             valStr.append(1,(CharType)'.');
+            continue;
         }
 
 
@@ -130,6 +131,7 @@ void splitValueAndUnits( const StringType     &valWithUnits
 
             ++dotCount;
             valStr.append(1,(CharType)'.');
+            continue;
         }
 
         // Символы, которые просто игнорируем в строке значения
