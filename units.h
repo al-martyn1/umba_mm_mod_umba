@@ -425,8 +425,14 @@ struct ValWithUnits
     ValueType  value;
     UnitsType  units;
 
+    ValWithUnits() = default;
+    ValWithUnits(const ValWithUnits &) = default;
+    ValWithUnits& operator=(const ValWithUnits &) = default;
+    ValWithUnits(ValWithUnits &&) = default;
+    ValWithUnits& operator=(ValWithUnits &&) = default;
 
 protected:
+
 
     // ErrorCode::ok
 
