@@ -2703,6 +2703,7 @@ struct ArgsParser
     {
         // if (disableBuiltins)
         //     return true;
+        UMBA_USED(userConfFileOnly);
 
         auto filenames = programLocationInfo.getBuiltinOptionsFilenames(builtinsOptions);
 
