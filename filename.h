@@ -605,10 +605,10 @@ StringType makeAbsPath( const StringType &path
                       , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
                       )
 {
-    if (isAbsPath(path))
+    if (isAbsPath(path, pathSep))
         return path;
 
-    return appendPath(cwd, path);
+    return appendPath(cwd, path, pathSep);
 }
 
 //-----------------------------------------------------------------------------
