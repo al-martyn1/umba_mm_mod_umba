@@ -180,20 +180,30 @@ std::string adjustInputFilename(const std::string &inputFilename)
         return "STDIN";
     }
 
-    return inputFilename;
+    //return inputFilename;
+    return umba::filename::makeCanonical(umba::filename::makeAbsPath(inputFilename));
 }
 
 //----------------------------------------------------------------------------
 inline
 std::string adjustOutputFilename(const std::string &outputFilename, const std::string &inputFilename, IoFileType inputFileType)
 {
-    if (!outputFilename.empty())
+    if (outputFilename=="STDOUT")
+    {
         return outputFilename;
+    }
+
+    if (!outputFilename.empty())
+    {
+        //return outputFilename;
+        return umba::filename::makeCanonical(umba::filename::makeAbsPath(outputFilename));
+    }
 
     if (inputFileType==IoFileType::stdinFile)
         return "STDOUT";
 
-    return inputFilename;
+    //return inputFilename;
+    return umba::filename::makeCanonical(umba::filename::makeAbsPath(inputFilename));
 }
 
 //----------------------------------------------------------------------------
