@@ -528,19 +528,22 @@ StringType makeCanonicalForCompare( StringType fileName, typename StringType::va
 template<typename StringType> inline
 StringType prepareForNativeUsage( const StringType &fileName )
 {
+
     #if defined(WIN32) || defined(_WIN32)
-        StringType canoname = makeCanonical(fileName);
 
         if constexpr (sizeof(typename StringType::value_type)==sizeof(char))
         {
-            return canoname;
+            return fileName;
         }
         else
         {
-            if (!isAbsPath(canoname))
+            if (!isAbsPath(fileName))
             {
-                return canoname;
+                return fileName;
             }
+
+            // А надо ли вообще тут делать makeCanonical?
+            StringType canoname = fileName; //makeCanonical(fileName);
 
             namespace ustrp = umba::string_plus;
     
