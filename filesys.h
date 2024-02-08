@@ -27,13 +27,34 @@
 
 
 #if defined(WIN32) || defined(_WIN32)
+
     #include <Shlobj.h>
+
 #else
+
     #include <pwd.h>
+    #include <stdio.h>
     #include <unistd.h>
 
     #include <sys/types.h>
+
 #endif
+
+
+// umba::filename::
+namespace umba{
+namespace filename{
+
+template<typename StringType> StringType getPath( const StringType &s );
+std::string  getPath( const char    *p );
+std::wstring getPath( const wchar_t *p );
+
+template<typename StringType> StringType prepareForNativeUsage( const StringType &fileName );
+
+
+} // namespace filename
+} // namespace umba
+
 
 
 
@@ -61,6 +82,13 @@ namespace filename{
     template<typename StringType>
     StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
 #endif
+
+template<typename StringType> StringType appendPath( const StringType &p, const StringType &f, typename StringType::value_type pathSep );
+template<typename StringType> StringType appendPath( const StringType &p, const StringType &f );
+
+template<typename StringType> inline  StringType getNativeCurrentDirAlias( );
+template<typename StringType> inline  StringType getNativeParentDirAlias( );
+
 
 } // namespace umba
 } // namespace filename
@@ -209,6 +237,31 @@ StringType formatFiletime( filetime_t t, const StringType &fmt );
 #if defined(WIN32) || defined(_WIN32)
 
 //------------------------------
+//! Хелпер конвертации юниксового filetime_t в виндовый
+inline FILETIME convertUnixTimeT( filetime_t t )
+{
+    filetime_t t1 = t, t2 = 10000000ull, t3 = 116444736000000000ull;
+    LONGLONG ll = t1*t2 + t3;
+    FILETIME ft;
+    ft.dwLowDateTime = (DWORD) ll;
+    ft.dwHighDateTime = (DWORD)(ll >>32);
+    return ft;
+}
+
+//------------------------------
+//! Хелпер конвертации виндового FILETIME в юниксовый
+inline filetime_t convertWindowsFiletime( FILETIME ft )
+{
+    filetime_t ftH = ft.dwHighDateTime;
+    filetime_t ftL = ft.dwLowDateTime;
+    //filetime_t ft
+
+    filetime_t wndFt = (ftH<<32)+ftL;
+
+    return (filetime_t)((wndFt - 116444736000000000ull) / 10000000ull);
+}
+
+//------------------------------
 //! Версия std::string strftime для C++. Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
 template<> inline
 std::string formatFiletime<std::string>( filetime_t t, const std::string &fmt )
@@ -346,6 +399,38 @@ struct FileStat
         return _wstat64( fileName.c_str(), statBuf );
     }
 
+
+    inline
+    FileStat fileStatFromFindData(const WIN32_FIND_DATAW &findData)
+    {
+        FileStat fileStat;
+    
+        fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
+        fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
+    
+        fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
+        fileStat.timeLastModified = convertWindowsFiletime(findData.ftLastWriteTime);
+        fileStat.timeLastAccess   = convertWindowsFiletime(findData.ftLastAccessTime);
+    
+        return fileStat;
+    }
+    
+    inline
+    FileStat fileStatFromFindData(const WIN32_FIND_DATAA &findData)
+    {
+        FileStat fileStat;
+    
+        fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
+        fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
+    
+        fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
+        fileStat.timeLastModified = convertWindowsFiletime(findData.ftLastWriteTime);
+        fileStat.timeLastAccess   = convertWindowsFiletime(findData.ftLastAccessTime);
+    
+        return fileStat;
+    }
+
+
 #else
 
     //! Одно универсальное имя для struct stat
@@ -424,7 +509,7 @@ HANDLE openFileForReadingWin32(const std::wstring &filename)
 {
     if (filename.empty()) return INVALID_HANDLE_VALUE;
 
-    return CreateFileW( filename.c_str(), GENERIC_READ
+    return CreateFileW( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_READ
                       , FILE_SHARE_READ | FILE_SHARE_WRITE
                       , 0 // lpSecurityAttributes
                       , OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL
@@ -443,7 +528,7 @@ HANDLE openFileForWrittingWin32(const std::string &filename, bool bOverwrite)
                                 : (DWORD)CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
                                 ;
 
-    return CreateFileA( filename.c_str(), GENERIC_WRITE
+    return CreateFileA( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_WRITE
                       , FILE_SHARE_READ
                       , 0 // lpSecurityAttributes
                       , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
@@ -462,7 +547,7 @@ HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
                                 : (DWORD)CREATE_NEW    // Creates a new file, only if it does not already exist. If the specified file exists, the function fails
                                 ;
 
-    return CreateFileW( filename.c_str(), GENERIC_WRITE
+    return CreateFileW( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_WRITE
                       , FILE_SHARE_READ
                       , 0 // lpSecurityAttributes
                       , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
@@ -471,29 +556,6 @@ HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
 }
 
 // https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time
-
-//! Хелпер конвертации юниксового filetime_t в виндовый
-inline FILETIME convertUnixTimeT( filetime_t t )
-{
-    filetime_t t1 = t, t2 = 10000000ull, t3 = 116444736000000000ull;
-    LONGLONG ll = t1*t2 + t3;
-    FILETIME ft;
-    ft.dwLowDateTime = (DWORD) ll;
-    ft.dwHighDateTime = (DWORD)(ll >>32);
-    return ft;
-}
-
-//! Хелпер конвертации виндового FILETIME в юниксовый
-inline filetime_t convertWindowsFiletime( FILETIME ft )
-{
-    filetime_t ftH = ft.dwHighDateTime;
-    filetime_t ftL = ft.dwLowDateTime;
-    //filetime_t ft
-
-    filetime_t wndFt = (ftH<<32)+ftL;
-
-    return (filetime_t)((wndFt - 116444736000000000ull) / 10000000ull);
-}
 
 //! Хелпер получения статистики файла
 template<typename StringType> inline
@@ -623,7 +685,295 @@ StringType getCurrentDirectory()
 }
 
 //----------------------------------------------------------------------------
+//! Удаление файла
+template<typename StringType> inline
+bool deleteFile( const StringType &filename )
+{
+    UMBA_USED(filename);
+    throw std::runtime_error("Not implemented: deleteFile not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
+//! Удаление каталога
+template<typename StringType> inline
+bool deleteDirectory( const StringType &dirname )
+{
+    UMBA_USED(dirname);
+    throw std::runtime_error("Not implemented: deleteDirectory not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
+//! Создание каталога
+template<typename StringType> inline bool createDirectory( const StringType &dirname )
+{
+    UMBA_USED(dirname);
+    throw std::runtime_error("Not implemented: createDirectory not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
+//! Создание каталога
+template<typename StringType> inline bool createDirectoryEx( const StringType &dirname, bool forceCreatePath )
+{
+    UMBA_USED(dirname);
+    UMBA_USED(forceCreatePath);
+    throw std::runtime_error("Not implemented: createDirectory not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
+//! Проверка, является ли путь каталогом
+template<typename StringType> inline bool isPathDirectory( const StringType &path )
+{
+    UMBA_USED(path);
+    throw std::runtime_error("Not implemented: isPathDirectory not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
+//! Проверка, является ли файл файлом только для чтения
+template<typename StringType> inline bool isFileReadonly( const StringType &fname )
+{
+    UMBA_USED(path);
+    throw std::runtime_error("Not implemented: isFileReadonly not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::string
+template<> inline
+bool deleteFile<std::string>( const std::string &filename )
+{
+    return ::DeleteFileA(umba::filename::prepareForNativeUsage(filename).c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::wstring
+template<> inline
+bool deleteFile<std::wstring>( const std::wstring &filename )
+{
+    return ::DeleteFileW(umba::filename::prepareForNativeUsage(filename).c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление каталога, специализация для std::string
+template<> inline
+bool deleteDirectory<std::string>( const std::string &filename )
+{
+    return ::RemoveDirectoryA(umba::filename::prepareForNativeUsage(filename).c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление каталога, специализация для std::wstring
+template<> inline
+bool deleteDirectory<std::wstring>( const std::wstring &filename )
+{
+    return ::RemoveDirectoryW(umba::filename::prepareForNativeUsage(filename).c_str()) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+/*
+template<typename StringType> inline bool createDirectory( const StringType &dirname )
+*/
+//! Создание каталога, специализация для std::string
+template<> inline bool createDirectory<std::string>( const std::string &dirname )
+{
+    return ::CreateDirectoryA(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
+}
+
+//----------------------------------------------------------------------------
+//! Создание каталога, специализация для std::wstring
+template<> inline bool createDirectory<std::wstring>( const std::wstring &dirname )
+{
+    return ::CreateDirectoryW(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
+}
+
+//----------------------------------------------------------------------------
+//! Создание каталога, специализация для std::string
+template<> inline bool createDirectoryEx<std::string>( const std::string &dirname, bool forceCreatePath )
+{
+    if (!forceCreatePath)
+    {
+        return createDirectory(dirname);
+    }
+
+    std::vector<std::string> pathList;
+
+    std::string path = dirname;
+
+    while(!path.empty() && !createDirectory(path) && GetLastError()!=ERROR_ALREADY_EXISTS)
+    {
+        pathList.emplace_back(path);
+        auto newPath = umba::filename::getPath(path);
+        if (newPath==path)
+        {
+            break;
+        }
+
+        path = newPath;
+    }
+
+    std::vector<std::string>::const_reverse_iterator it = pathList.rbegin();
+    for(; it!=pathList.rend(); ++it)
+    {
+        // if (it==pathList.rbegin() && !it->empty() && it->back()==':')
+        // {
+        //     continue;
+        // }
+
+        if (!createDirectory(*it))
+        {
+            auto err = GetLastError();
+            if (err==ERROR_ALREADY_EXISTS) // 183L
+            {
+                continue;
+            }
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+//! Создание каталога, специализация для std::wstring
+template<> inline bool createDirectoryEx<std::wstring>( const std::wstring &dirname, bool forceCreatePath )
+{
+    if (!forceCreatePath)
+    {
+        return createDirectory(dirname);
+    }
+
+    std::vector<std::wstring> pathList;
+
+    std::wstring path = dirname;
+
+    while(!path.empty() && !createDirectory(path) && GetLastError()!=ERROR_ALREADY_EXISTS)
+    {
+        pathList.emplace_back(path);
+        auto newPath = umba::filename::getPath(path);
+        if (newPath==path)
+        {
+            break;
+        }
+
+        path = newPath;
+    }
+
+    std::vector<std::wstring>::const_reverse_iterator it = pathList.rbegin();
+    for(; it!=pathList.rend(); ++it)
+    {
+        // if (it==pathList.rbegin() && !it->empty() && it->back()==L':')
+        // {
+        //     continue;
+        // }
+
+        if (!createDirectory(*it))
+        {
+            auto err = GetLastError();
+            // #define ERROR_INVALID_NAME               123L    // dderror
+            if (err==ERROR_ALREADY_EXISTS) // 183L
+            {
+                continue;
+            }
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+//! Проверка, является ли путь каталогом, специализация для std::string
+template<> inline bool isPathDirectory<std::string>( const std::string &path )
+{
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfileattributesa?redirectedfrom=MSDN
+    DWORD attrs = ::GetFileAttributesA(umba::filename::prepareForNativeUsage(path).c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+    if (attrs & FILE_ATTRIBUTE_DIRECTORY)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+//! Проверка, является ли путь каталогом, специализация для std::wstring
+template<> inline bool isPathDirectory<std::wstring>( const std::wstring &path )
+{
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfileattributesa?redirectedfrom=MSDN
+    DWORD attrs = ::GetFileAttributesW(umba::filename::prepareForNativeUsage(path).c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+    if (attrs & FILE_ATTRIBUTE_DIRECTORY)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+//! Проверка, является ли файл файлом только для чтения, специализация для std::string
+template<> inline bool isFileReadonly<std::string>( const std::string &fname )
+{
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfileattributesa?redirectedfrom=MSDN
+    DWORD attrs = ::GetFileAttributesA(umba::filename::prepareForNativeUsage(fname).c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+    if (attrs & FILE_ATTRIBUTE_DIRECTORY)
+    {
+        return false;
+    }
+
+    if (attrs & FILE_ATTRIBUTE_READONLY)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+//! Проверка, является ли файл файлом только для чтения, специализация для std::wstring
+template<> inline bool isFileReadonly<std::wstring>( const std::wstring &fname )
+{
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfileattributesa?redirectedfrom=MSDN
+    DWORD attrs = ::GetFileAttributesW(umba::filename::prepareForNativeUsage(fname).c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+    {
+        return false;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+    if (attrs & FILE_ATTRIBUTE_DIRECTORY)
+    {
+        return false;
+    }
+
+    if (attrs & FILE_ATTRIBUTE_READONLY)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 
 //----------------------------------------------------------------------------
 //! Проверка доступности файла на чтение
@@ -680,6 +1030,7 @@ bool readFile( const StringType &filename       //!< Имя файла
     if (hFile==INVALID_HANDLE_VALUE)
     {
         DWORD err = GetLastError();
+        UMBA_USED(err);
         return false;
     }
 
@@ -748,7 +1099,7 @@ bool readFile( const StringType &filename       //!< Имя файла
             // filedata.resize( numItems ); // We can read files which are always can fit to memory
         }
         
-        const size_t numRawBytesToRead = filedata.size()*itemSize;
+        // const size_t numRawBytesToRead = filedata.size()*itemSize;
     
         // Here starts "no exceptions" (exception safe) zone
     
@@ -854,11 +1205,11 @@ bool writeFile( const StringType            &filename    //!< Имя файла
     if (filedata.empty())
     {
         DataType d;
-        return writeFile(filename, &d, 0);
+        return writeFile(filename, &d, 0, bOverwrite);
     }
     else
     {
-        return writeFile(filename, &filedata[0], filedata.size());
+        return writeFile(filename, &filedata[0], filedata.size(), bOverwrite);
     }
 }
 
@@ -869,7 +1220,7 @@ bool writeFile( const StringType            &filename    //!< Имя файла
               , bool                        bOverwrite
               )
 {
-    return writeFile(filename, filedata.data(), filedata.size());
+    return writeFile(filename, filedata.data(), filedata.size(), bOverwrite);
 }
 
 //------------------------------
@@ -901,11 +1252,149 @@ std::wstring getCurrentDirectory<std::wstring>()
 }
 
 //----------------------------------------------------------------------------
+template<typename EnumDirectoryHandler> inline
+bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
+{
+    path = umba::filename::appendPath(path, std::wstring(L"*.*"));
 
-#else // !WIN32
+    // stripLastPathSep(path);
+
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfilea
+    // https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-win32_find_dataa
+    WIN32_FIND_DATAW fndData;
+
+    //TODO: !!! При возникновении исключения hFind утекает. Надо бы переделать, и такие моменты надо бы везде это проверить
+    HANDLE hFind = ::FindFirstFileW( umba::filename::prepareForNativeUsage(path).c_str(), &fndData );
+
+    if (hFind==INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    std::wstring curDirAlias    = umba::filename::getNativeCurrentDirAlias<std::wstring>();
+    std::wstring parentDirAlias = umba::filename::getNativeParentDirAlias <std::wstring>();
+    auto isSpecialAlias = [&](const std::wstring &name) -> bool
+    {
+        return (name==curDirAlias || name==parentDirAlias);
+    };
+
+    FileStat fileStat;
+
+    if (!isSpecialAlias(fndData.cFileName))
+    {
+        fileStat = fileStatFromFindData(fndData);
+        if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+        {
+            return true;
+        }
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findnextfilea
+    while(::FindNextFileW(hFind, &fndData))
+    {
+        if (!isSpecialAlias(fndData.cFileName))
+        {
+            fileStat = fileStatFromFindData(fndData);
+            if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+            {
+                return true;
+            }
+        }
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findclose
+    ::FindClose(hFind);
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<typename EnumDirectoryHandler> inline
+bool enumerateDirectoryImpl(std::string path, EnumDirectoryHandler handler)
+{
+    path = umba::filename::appendPath(path, std::string("*.*"));
+
+    // stripLastPathSep(path);
+
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfilea
+    // https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-win32_find_dataa
+    WIN32_FIND_DATAA fndData;
+
+    //TODO: !!! При возникновении исключения hFind утекает. Надо бы везде это проверить
+    //HANDLE hFind = ::FindFirstFileA( umba::filename::prepareForNativeUsage(path).c_str(), &fndData );
+    HANDLE hFind = ::FindFirstFileA( path.c_str(), &fndData );
+
+    if (hFind==INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    std::string curDirAlias    = umba::filename::getNativeCurrentDirAlias<std::string>();
+    std::string parentDirAlias = umba::filename::getNativeParentDirAlias <std::string>();
+    auto isSpecialAlias = [&](const std::string &name) -> bool
+    {
+        return (name==curDirAlias || name==parentDirAlias);
+    };
+
+    FileStat fileStat;
+
+    if (!isSpecialAlias(fndData.cFileName))
+    {
+        fileStat = fileStatFromFindData(fndData);
+        if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+        {
+            return true;
+        }
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findnextfilea
+    while(::FindNextFileA(hFind, &fndData))
+    {
+        if (!isSpecialAlias(fndData.cFileName))
+        {
+            fileStat = fileStatFromFindData(fndData);
+            if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+            {
+                return true;
+            }
+        }
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findclose
+    ::FindClose(hFind);
+
+    return true;
+}
 
 //----------------------------------------------------------------------------
 
+
+#else // !WIN32
+
+
+//----------------------------------------------------------------------------
+//! Удаление файла, специализация для std::string
+template<> inline
+bool deleteFile<std::string>( const std::string &filename )
+{
+    // same as remove for files
+    return unlink(filename.c_str()) == 0 ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Удаление каталога, специализация для std::string
+template<> inline
+bool deleteDirectory<std::string>( const std::string &filename )
+{
+    // same as remove for folders
+    return rmdir(filename.c_str()) == 0 ? true : false;
+}
+
+//----------------------------------------------------------------------------
 //! Проверка доступности файла на чтение
 template<typename StringType> inline
 bool isFileReadable( const StringType &filename )
@@ -1061,7 +1550,19 @@ std::string getCurrentDirectory<std::string>()
 
 //----------------------------------------------------------------------------
 
-#endif
+#endif // WIN32
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+template<typename StringType, typename EnumDirectoryHandler> inline
+bool enumerateDirectory(const StringType &path, EnumDirectoryHandler handler)
+{
+    return enumerateDirectoryImpl(path, handler);
+}
 
 //----------------------------------------------------------------------------
 
@@ -1201,7 +1702,6 @@ StringType getCurrentUserHomeDirectory()
 
     #endif
 
-    return StringType();
 }
 
 //----------------------------------------------------------------------------
@@ -1253,6 +1753,10 @@ StringType getTempFolderPath()
 } // namespace umba
 
 // umba::filesys::
+
+
+#include "filename.h"
+
 
 
 

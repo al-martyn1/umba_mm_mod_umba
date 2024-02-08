@@ -15,6 +15,11 @@
     #include <stdlib.h>
 #endif
 
+#include <utility>
+
+#if defined(WIN32) || defined(_WIN32)
+    #include <processenv.h>
+#endif
 
 #include "warnings/push_disable_fn_or_var_unsafe.h"
 
@@ -108,6 +113,129 @@ bool putVar(const ::std::wstring &varName, const ::std::wstring &val)
     if (::_wputenv(ptmp)<0) return false;
     return true;
    }
+
+inline
+bool getEnvVarsList( std::vector<std::pair<std::wstring,std::wstring> > &lst)
+{
+    auto env = GetEnvironmentStringsW();
+    if (!env)
+    {
+        return false;
+    }
+
+    auto envOrg = env;
+
+    while(*env)
+    {
+        std::wstring fullStr = env;
+        std::wstring name, val;
+
+        std::wstring::size_type eqPos = fullStr.find(L'=');
+        if (eqPos==fullStr.npos)
+        {
+            name = fullStr;
+        }
+        else
+        {
+            name.assign(fullStr, 0, eqPos);
+            val .assign(fullStr, eqPos+1);
+        }
+
+        if (!name.empty())
+        {
+            lst.emplace_back(std::make_pair(name, val));
+        }
+
+        env += fullStr.size()+1;
+    }
+
+    FreeEnvironmentStringsW(envOrg);
+
+    return true;
+}
+
+inline
+bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
+{
+#if defined(GetEnvironmentStrings)
+    #undef GetEnvironmentStrings
+#endif
+
+    auto env = GetEnvironmentStrings();
+    if (!env)
+    {
+        return false;
+    }
+
+    auto envOrg = env;
+
+    while(*env)
+    {
+        std::string fullStr = env;
+        std::string name, val;
+
+        std::string::size_type eqPos = fullStr.find('=');
+        if (eqPos==fullStr.npos)
+        {
+            name = fullStr;
+        }
+        else
+        {
+            name.assign(fullStr, 0, eqPos);
+            val .assign(fullStr, eqPos+1);
+        }
+
+        if (!name.empty())
+        {
+            lst.emplace_back(std::make_pair(name, val));
+        }
+
+        env += fullStr.size()+1;
+    }
+
+    FreeEnvironmentStringsA(envOrg);
+
+    return true;
+}
+
+
+#else
+
+inline
+bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
+{
+    extern char ** environ;
+    char ** env = environ;
+    for (; *env; ++env)
+    {
+        std::string fullStr = *env;
+        std::string name, val;
+
+        std::string::size_type eqPos = fullStr.find('=');
+        if (eqPos==fullStr.npos)
+        {
+            name = fullStr;
+        }
+        else
+        {
+            name = std::string(fullStr, 0, eqPos);
+            val  = std::string(fullStr, eqPos+1);
+        }
+
+        if (!name.empty())
+        {
+            lst.emplace_back(std::make_pair(name, val));
+        }
+    }
+
+    return true;
+}
+//LPTCH WINAPI GetEnvironmentStrings(void);
+// for (char **env = envp; *env != 0; env++)
+//   {
+//     char *thisEnv = *env;
+//     printf("%s\n", thisEnv);    
+//   }
 
 
 #endif

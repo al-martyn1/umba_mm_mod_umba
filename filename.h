@@ -42,8 +42,8 @@ namespace filename
 
 
 //-----------------------------------------------------------------------------
-template<typename StringType> inline  StringType getNativeParentDirAlias( )  { return umba::string_plus::make_string<StringType>(".."); } //!< Возвращает строку с алиасом родительского каталога, как это принято в целевой системе. Обычно это ".."
 template<typename StringType> inline  StringType getNativeCurrentDirAlias( ) { return umba::string_plus::make_string<StringType>(".") ; } //!< Возвращает строку с алиасом текущего каталога, как это принято в целевой системе. Обычно это "."
+template<typename StringType> inline  StringType getNativeParentDirAlias( )  { return umba::string_plus::make_string<StringType>(".."); } //!< Возвращает строку с алиасом родительского каталога, как это принято в целевой системе. Обычно это ".."
 template<typename StringType> inline  StringType getNativeHomeDirAlias( )    { return umba::string_plus::make_string<StringType>("~") ; } //!< Возвращает строку с алиасом домашнего каталога текущего пользователя
 
 template<typename CharType>   inline CharType getNativeExtSep( )    { return (CharType)'.'; } //!< Возвращает символ - разделитель расширения файла
@@ -135,7 +135,7 @@ template<typename StringType> inline bool hasLastPathSep( StringType &p )   { re
 template<typename StringType> inline bool stripLastPathSep( StringType &p ) { if (hasLastPathSep(p)) { p.erase( p.size()-1, 1 ); return true; } return false; }                              //!< Возвращает true, если последний символ - разделитель пути, обрезая его
 template<typename StringType> inline StringType stripLastPathSepCopy( const StringType &p ) { if (!hasLastPathSep(p)) return p; StringType res = p; stripLastPathSep(res); return res; }     //!< Возвращает копию аргумента, обрезая разделитель пути в конце, если он есть
 template<typename StringType> inline bool hasFirstPathSep( StringType &p )  { return (p.empty() || !isPathSep(p[0])) ? false : true; }                                                       //!< Возвращает true, если первый символ - разделитель пути
-template<typename StringType> inline bool stripFirstPathSep(StringType &p)  { if (hasFirstPathSep(p)) p.erase( 0, 1 ); return true; }                                                        //!< Возвращает true, если первый символ - разделитель пути, обрезая его
+template<typename StringType> inline bool stripFirstPathSep(StringType &p)  { if (hasFirstPathSep(p)) { p.erase( 0, 1 ); return true; } return false; }                                                        //!< Возвращает true, если первый символ - разделитель пути, обрезая его
 template<typename StringType> inline StringType stripFirstPathSepCopy( const StringType &p ) { if (!hasFirstPathSep(p)) return p; StringType res = p; stripFirstPathSep(res); return res; }  //!< Возвращает копию аргумента, обрезая разделитель пути в начале, если он есть
 
 template<typename StringType> inline bool hasLastExtSep( StringType &p )    { return (p.empty() || !isExtSep(p[p.size()-1])) ? false : true; }                                               //!< Возвращает true, если последний символ - разделитель расширения                  
@@ -193,11 +193,14 @@ StringType appendPathSepCopy( const StringType &p, typename StringType::value_ty
 template<typename StringType> inline
 StringType normalizePathSeparators( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
 {
-    for(auto &ch : fileName)
-    {
-        if (isPathSep(ch))
-            ch = pathSep;
-    }
+
+    std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
+
+    // for(auto &ch : fileName)
+    // {
+    //     if (isPathSep(ch))
+    //         ch = pathSep;
+    // }
 
     return fileName;
 }
@@ -217,14 +220,179 @@ StringType hasPathSeparators( const StringType &fileName )
 }
 
 //-----------------------------------------------------------------------------
-//! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и ".")
-template<typename StringType> inline
-StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep  /* = getNativePathSep<typename StringType::value_type>() */  )
+// Выделяем код обрезания различных спец префиксов в отдельные функции
+struct NativePrefixFlagsInfo
 {
-    std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
+    bool networkUncPrefix = false;
+    bool uncPrefix        = false;
+    bool netPrefix        = false;
+
+    bool hasAnyPrefix() const
+    {
+        return networkUncPrefix || uncPrefix || netPrefix;
+    }
+
+}; // struct NativePrefixFlagsInfo
+
+//! Отрезаем спец префиксы, нничего не трогая в имени, даже разделители путей
+template<typename StringType> inline
+NativePrefixFlagsInfo stripNativePrefixes(StringType &fileName, typename StringType::value_type pathSep)
+{
+    NativePrefixFlagsInfo npfi;
+
+    // Почему-то ранее спец префиксы не переводились к текущему платформенному разделителю путей
+
+    StringType nativeNetworkUncPrefix   = normalizePathSeparators(getNativeNetworkUncPrefix<StringType>()  , pathSep); // "\\?\UNC\"
+    StringType nativeUncPrefix          = normalizePathSeparators(getNativeUncPrefix<StringType>()         , pathSep); // "\\?\"
+    StringType nativeNetworkPathPrefix  = normalizePathSeparators(getNativeNetworkPathPrefix<StringType>() , pathSep); // "\\"
+
+    //std::size_t numCharsStripped = 0;
+
+    StringType fileNameTmp = normalizePathSeparators(fileName, pathSep);
 
     namespace ustrp = umba::string_plus;
 
+    #if defined(WIN32) || defined(_WIN32)
+    if (ustrp::starts_with_and_strip(fileNameTmp, nativeNetworkUncPrefix))
+    {
+        npfi.networkUncPrefix = true;
+    }
+    else if (ustrp::starts_with_and_strip(fileNameTmp, nativeUncPrefix))
+    {
+        npfi.uncPrefix = true;
+    }
+    #endif
+
+    //bool hasNetPrefix = false;
+    if (ustrp::starts_with_and_strip(fileNameTmp, nativeNetworkPathPrefix))
+    {
+        npfi.netPrefix = true;
+    }
+
+    if (fileNameTmp.size()<fileName.size())
+    {
+        std::size_t numCharsToStrip = fileName.size() - fileNameTmp.size();
+        fileName.erase(0, numCharsToStrip);
+    }
+
+    return npfi;
+}
+
+// Добавляет нативные префиксы
+template<typename StringType> inline
+StringType addNativePrefixes(const StringType &fileName, const NativePrefixFlagsInfo &npfi)
+{
+    if (npfi.netPrefix)
+    {
+        return getNativeNetworkPathPrefix<StringType>() + fileName;
+    }
+
+    if (npfi.networkUncPrefix)
+    {
+        return getNativeNetworkUncPrefix<StringType>() + fileName;
+    }
+
+    if (npfi.uncPrefix)
+    {
+        return getNativeUncPrefix<StringType>() + fileName;
+    }
+
+    return fileName;
+}
+
+// Добавляет нативные префиксы
+template<typename StringType> inline
+StringType addNativePrefixes(const StringType &fileName, const NativePrefixFlagsInfo &npfi, typename StringType::value_type pathSep)
+{
+    if (npfi.netPrefix)
+    {
+        return normalizePathSeparators(getNativeNetworkPathPrefix<StringType>(), pathSep) + fileName;
+    }
+
+    if (npfi.networkUncPrefix)
+    {
+        return normalizePathSeparators(getNativeNetworkUncPrefix<StringType>(), pathSep) + fileName;
+    }
+
+    if (npfi.uncPrefix)
+    {
+        return normalizePathSeparators(getNativeUncPrefix<StringType>(), pathSep) + fileName;
+    }
+
+    return fileName;
+}
+
+//----------------------------------------------------------------------------
+//! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути, не учитывая возможные спец префиксы
+template<typename StringType> inline
+std::vector< StringType > makeCanonicalSimpleParts( StringType fileName, const StringType &curDirAlias, const StringType &parentDirAlias, typename StringType::value_type pathSep)
+{
+    namespace ustrp = umba::string_plus;
+
+    std::vector< StringType > parts = ustrp::split(fileName, pathSep, true /* skipEmpty */ );
+    std::vector< StringType > resParts; resParts.reserve(parts.size());
+
+    typename std::vector< StringType >::iterator pit = parts.begin();
+    for(; pit != parts.end(); ++pit)
+    {
+        if (*pit==curDirAlias)
+            continue;
+
+        if (*pit==parentDirAlias)
+        {
+            if (!resParts.empty())
+                resParts.erase( --resParts.end() );
+            continue;
+        }
+
+        resParts.push_back(*pit);
+    }
+
+    return resParts;
+}
+
+//----------------------------------------------------------------------------
+//! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути, не учитывая возможные спец префиксы
+template<typename StringType> inline
+StringType makeCanonicalSimple( StringType fileName, const StringType &curDirAlias, const StringType &parentDirAlias, typename StringType::value_type pathSep)
+{
+    namespace ustrp = umba::string_plus;
+
+    fileName = normalizePathSeparators(fileName, pathSep);
+
+    bool lastPathSep  = stripLastPathSep(fileName);
+    bool firstPathSep = stripFirstPathSep(fileName);
+
+    std::vector< StringType > parts = makeCanonicalSimpleParts( fileName, curDirAlias, parentDirAlias, pathSep);
+
+    fileName = ustrp::merge(parts,pathSep);
+
+    if (firstPathSep)
+    {
+        fileName = StringType(1, pathSep) + fileName;
+    }
+
+    if (lastPathSep)
+    {
+        fileName.append(1, pathSep);
+    }
+        
+    return fileName;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути
+template<typename StringType> inline
+StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep  /* = getNativePathSep<typename StringType::value_type>() */  )
+{
+    // std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
+
+    namespace ustrp = umba::string_plus;
+
+    #if 0
     bool hasNetworkUncPrefix = false;
     bool hasUncPrefix = false;
 
@@ -238,7 +406,19 @@ StringType makeCanonical( StringType fileName, typename StringType::value_type p
     bool hasNetPrefix = false;
     if (ustrp::starts_with_and_strip(fileName, getNativeNetworkPathPrefix<StringType>()))
         hasNetPrefix = true;
+    #endif
 
+    // Сначала обрезаем нативные префиксы, если есть
+    //std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
+
+    NativePrefixFlagsInfo npfi = stripNativePrefixes(fileName, pathSep);
+
+    fileName = normalizePathSeparators(fileName, pathSep);
+
+    bool lastPathSep  = stripLastPathSep(fileName);
+    bool firstPathSep = stripFirstPathSep(fileName);
+
+    #if 0
     bool lastPathSep = stripLastPathSep(fileName);
 
     std::vector< StringType > parts = ustrp::split(fileName, pathSep, true /* skipEmpty */ );
@@ -263,10 +443,13 @@ StringType makeCanonical( StringType fileName, typename StringType::value_type p
 
         resParts.push_back(*pit);
     }
+    #endif
 
-    pit = resParts.begin();
+    std::vector< StringType > parts = makeCanonicalSimpleParts( fileName, getNativeCurrentDirAlias<StringType>(), getNativeParentDirAlias<StringType>(), pathSep);
+
+    typename std::vector< StringType >::iterator pit = parts.begin();
     StringType nativeHomeDirAlias = getNativeHomeDirAlias<StringType>();
-    if (!hasNetPrefix && !hasNetworkUncPrefix && !hasUncPrefix && pit!=resParts.end() && !nativeHomeDirAlias.empty() && *pit==nativeHomeDirAlias)
+    if (!npfi.hasAnyPrefix() /* !hasNetPrefix && !hasNetworkUncPrefix && !hasUncPrefix */ && pit!=parts.end() && !nativeHomeDirAlias.empty() && *pit==nativeHomeDirAlias)
     {
         StringType homePath = filesys::getCurrentUserHomeDirectory<StringType>();
         if (!homePath.empty())
@@ -274,14 +457,25 @@ StringType makeCanonical( StringType fileName, typename StringType::value_type p
             std::replace_if( homePath.begin(), homePath.end(), isPathSep<typename StringType::value_type>, pathSep );
             std::vector< StringType > homeParts = ustrp::split(homePath, pathSep, true /* skipEmpty */ );
 
-            resParts.erase(pit);
-            resParts.insert( resParts.begin(), homeParts.begin(), homeParts.end() );
+            parts.erase(pit);
+            parts.insert( parts.begin(), homeParts.begin(), homeParts.end() );
         }
     }
 
+    fileName = ustrp::merge(parts,pathSep);
 
-    StringType res = ustrp::merge(resParts,pathSep);
+    if (firstPathSep)
+    {
+        fileName = StringType(1, pathSep) + fileName;
+    }
 
+    if (lastPathSep)
+    {
+        fileName.append(1, pathSep);
+    }
+        
+
+    #if 0
     if (lastPathSep)
         appendPathSepInline(res,pathSep);
 
@@ -294,6 +488,9 @@ StringType makeCanonical( StringType fileName, typename StringType::value_type p
         res = getNativeUncPrefix<StringType>() + res;
 
     return res;
+    #endif
+
+    return addNativePrefixes(fileName, npfi, pathSep);
 }
 
 //-----------------------------------------------------------------------------
@@ -303,16 +500,24 @@ StringType makeCanonicalForCompare( StringType fileName, typename StringType::va
 {
     #if defined(WIN32) || defined(_WIN32)
     namespace ustrp = umba::string_plus;
+
+    NativePrefixFlagsInfo npfi = stripNativePrefixes(fileName, pathSep);
+    npfi.networkUncPrefix = false;
+    npfi.uncPrefix        = false;
+    fileName = addNativePrefixes(fileName, npfi, pathSep);
+
     StringType canoname = makeCanonical(fileName, pathSep);
 
+    #if 0
     if (ustrp::starts_with_and_strip(canoname, getNativeNetworkUncPrefix<StringType>()))
         canoname = getNativeNetworkPathPrefix<StringType>() + canoname;
     else
         ustrp::starts_with_and_strip(canoname, getNativeUncPrefix<StringType>());
+    #endif
 
     //return ustrp::toupper_copy(canoname);
     //return ustrp::tolower_copy(canoname);
-    return canoname;
+    return canoname; // Почему регистр не меняем, я хз, и почему раньше меняли, а сейчас - нет - хз
     #else
     return makeCanonical(fileName);
     #endif
@@ -323,31 +528,43 @@ StringType makeCanonicalForCompare( StringType fileName, typename StringType::va
 template<typename StringType> inline
 StringType prepareForNativeUsage( const StringType &fileName )
 {
+
     #if defined(WIN32) || defined(_WIN32)
-        StringType canoname = makeCanonical(fileName);
 
-        if (sizeof(typename StringType::value_type)==sizeof(char))
-            return canoname;
-
-        namespace ustrp = umba::string_plus;
-
-        //if (hasNativeNetworkPathPrefix(canoname))
-        //{
-        //    return canoname;
-        //}
-        if (ustrp::starts_with(canoname, getNativeNetworkUncPrefix<StringType>()))
-            return canoname; // already UNC name
-
-        StringType nativeUncPrefix = getNativeUncPrefix<StringType>();
-        if (ustrp::starts_with(canoname, nativeUncPrefix))
-            return canoname; // already UNC name
-
-        if (ustrp::starts_with_and_strip(canoname, getNativeNetworkPathPrefix<StringType>()))
+        if constexpr (sizeof(typename StringType::value_type)==sizeof(char))
         {
-            return getNativeNetworkUncPrefix<StringType>() + canoname;
+            return fileName;
         }
+        else
+        {
+            if (!isAbsPath(fileName))
+            {
+                return fileName;
+            }
 
-        return getNativeUncPrefix<StringType>() + canoname;
+            // А надо ли вообще тут делать makeCanonical?
+            StringType canoname = fileName; //makeCanonical(fileName);
+
+            namespace ustrp = umba::string_plus;
+    
+            //if (hasNativeNetworkPathPrefix(canoname))
+            //{
+            //    return canoname;
+            //}
+            if (ustrp::starts_with(canoname, getNativeNetworkUncPrefix<StringType>()))
+                return canoname; // already UNC name
+    
+            StringType nativeUncPrefix = getNativeUncPrefix<StringType>();
+            if (ustrp::starts_with(canoname, nativeUncPrefix))
+                return canoname; // already UNC name
+    
+            if (ustrp::starts_with_and_strip(canoname, getNativeNetworkPathPrefix<StringType>()))
+            {
+                return getNativeNetworkUncPrefix<StringType>() + canoname;
+            }
+    
+            return getNativeUncPrefix<StringType>() + canoname;
+        }
 
     #else
 
@@ -391,10 +608,10 @@ StringType makeAbsPath( const StringType &path
                       , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
                       )
 {
-    if (isAbsPath(path))
+    if (isAbsPath(path, pathSep))
         return path;
 
-    return appendPath(cwd, path);
+    return appendPath(cwd, path, pathSep);
 }
 
 //-----------------------------------------------------------------------------
@@ -456,8 +673,7 @@ StringType makeRelPath( const std::vector<StringType> &commonPaths
 
 //-----------------------------------------------------------------------------
 //! Добавляет путь (или имя файла) к другому пути
-template<typename StringType> inline
-StringType appendPath( const StringType &p, const StringType &f, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+template<typename StringType> inline StringType appendPath( const StringType &p, const StringType &f, typename StringType::value_type pathSep )
 {
     if (p.empty())
         return f;
@@ -472,6 +688,12 @@ StringType appendPath( const StringType &p, const StringType &f, typename String
         return p + f;
 
     return p + StringType(1, pathSep) + f;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline StringType appendPath( const StringType &p, const StringType &f )
+{
+    return appendPath(p,f,getNativePathSep<typename StringType::value_type>());
 }
 
 //-----------------------------------------------------------------------------
@@ -646,8 +868,8 @@ StringType getName( const StringType &path )
     return stripLastExtSepCopy(StringType( lastPathSepIt, lastExtSepIt ));
 }
 
-inline std::string  getName( const char    *p ) { return getName<std::string> ( p ); } //!< Извлекает из имени расширение
-inline std::wstring getName( const wchar_t *p ) { return getName<std::wstring>( p ); } //!< Извлекает из имени расширение
+inline std::string  getName( const char    *p ) { return getName<std::string> ( p ); } //!< Извлекает из имени имя файла без пути и расширения
+inline std::wstring getName( const wchar_t *p ) { return getName<std::wstring>( p ); } //!< Извлекает из имени имя файла без пути и расширения
 
 
 //-----------------------------------------------------------------------------

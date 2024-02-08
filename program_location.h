@@ -532,6 +532,7 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
                                                   , const StringType &confFolderName  = umba::string_plus::make_string<StringType>(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME)
                                                   )
 {
+    UMBA_USED(argv0);
     UMBA_PROGRAM_LOCATION_INIT_IMPL( argv0 );
 
     ProgramLocation<StringType> loc;
@@ -569,6 +570,8 @@ ProgramLocation<std::string> getProgramLocation( int argc, char    **argv
                                                , const std::string &confFolderName = umba::string_plus::make_string<std::string>(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME)
                                                )
 {
+    UMBA_USED(argv);
+
     if (argc>0)
     {
         UMBA_PROGRAM_LOCATION_INIT_IMPL(std::string(argv[0]));
@@ -586,6 +589,8 @@ ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
                                                 , const std::wstring &confFolderName = umba::string_plus::make_string<std::wstring>(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME)
                                                 )
 {
+    UMBA_USED(argv);
+
     if (argc>0)
     {
         UMBA_PROGRAM_LOCATION_INIT_IMPL(std::wstring(argv[0]));
