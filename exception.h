@@ -90,7 +90,7 @@ public:
     }
 
     //! Деструктор
-    virtual ~FileException() throw () {}
+    //virtual ~FileException() throw () {}
 
     //! Возврат указателя на текст ошибки
     virtual 
@@ -134,7 +134,7 @@ public:
     {}
 
     //! Деструктор
-    virtual ~FileParsingException() throw () {}
+    //virtual ~FileParsingException() throw () {}
 
     //! Возвращает номер строки
     virtual
@@ -187,7 +187,7 @@ public:
     {}
 
     //! Деструктор
-    virtual ~FileBinaryParsingException() throw () {}
+    //virtual ~FileBinaryParsingException() throw () {}
 
     //! Возвращает смещение в файле
     virtual

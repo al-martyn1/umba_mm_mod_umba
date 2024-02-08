@@ -813,8 +813,7 @@ StringType textCompress( const StringType &text, const StringType &compressChars
 
     \return Результат слияния строковых представлений объектов
  */
-template<typename StringType, typename Iter, typename ToStringObj>
-inline
+template<typename StringType, typename Iter, typename ToStringObj> inline
 StringType merge( Iter b, Iter e, const std::string &delim, const ToStringObj &stringifier )
 {
     StringType _delim = make_string<StringType>(delim);
@@ -841,9 +840,8 @@ StringType merge( Iter b, Iter e, const std::string &delim, const ToStringObj &s
 
     \return Результат слияния строковых представлений объектов
  */
-template<typename StringType, typename Iter, typename ToStringObj>
-inline
-StringType merge( Iter b , Iter e, const std::wstring &delim, const ToStringObj &stringifier )
+template<typename StringType, typename Iter, typename ToStringObj> inline
+StringType merge( Iter b, Iter e, const std::wstring &delim, const ToStringObj &stringifier )
 {
     StringType _delim = make_string<StringType>(delim);
     StringType res;
