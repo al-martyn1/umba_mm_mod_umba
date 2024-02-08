@@ -10,6 +10,7 @@
 // #include "case.h"
 
 #include "string_plus.h"
+#include "utf.h"
 
 #include <string>
 
@@ -229,7 +230,7 @@ struct SymbolLenCalculatorEncodingSingleByte
 template<typename SymbolLenCalculator> inline
 std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symbolLenCalculator)
 {
-    using marty_utf::utf8_char_t;
+    //using marty_utf::utf8_char_t;
 
     std::size_t numSymbols = 0;
 
