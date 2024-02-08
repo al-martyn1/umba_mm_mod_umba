@@ -215,10 +215,53 @@ std::string alignStringWithWidth( std::string str, std::string::size_type width,
 }
 
 //-----------------------------------------------------------------------------
+//! Вычисляет длину символа в char'ах для однобайтных кодировок
+struct SymbolLenCalculatorEncodingSingleByte
+{
+    std::size_t operator()(const char *pCh) const
+    {
+        return 1;
+    }
+};
 
+//-----------------------------------------------------------------------------
+//! Вычисляет длину строки в символах
+template<typename SymbolLenCalculator> inline
+std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symbolLenCalculator)
+{
+    using marty_utf::utf8_char_t;
+
+    std::size_t numSymbols = 0;
+
+    std::size_t curPos = 0;
+
+    while(curPos<str.size())
+    {
+        //auto uch = (utf8_char_t)str[curPos];
+        //auto symbolNumBytes = getNumberOfBytesUtf8(uch);
+        auto symbolNumBytes = symbolLenCalculator(&str[curPos]);
+
+        std::size_t nextPos = curPos + symbolNumBytes;
+
+        if (nextPos<=str.size())
+        {
+            ++numSymbols;
+        }
+
+        curPos = nextPos;
+    }
+
+    return numSymbols;
+
+}
+
+//-----------------------------------------------------------------------------
 //! Форматирует абзац (параграф). На входе - строка текста абзаца, на выходе - разбито на строки, и строки выровнены с учетом textAlignment
-inline
-std::vector<std::string> prepareTextParaMakeLines( const std::string &para, std::string::size_type paraWidth, TextAlignment textAlignment = TextAlignment::width )
+template<typename SymbolLenCalculator> inline
+std::vector<std::string> prepareTextParaMakeLines( const std::string &para, std::string::size_type paraWidth
+                                                 , TextAlignment textAlignment // = TextAlignment::width
+                                                 , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                                                 )
 {
     std::vector<std::string> words = umba::string_plus::split(para, ' ', false);
     //splitToVector( para, words, ' ' );
@@ -230,14 +273,15 @@ std::vector<std::string> prepareTextParaMakeLines( const std::string &para, std:
 
     for( const auto &w : words )
     {
-        if ( (curLineLen+1+w.size()) > paraWidth)
+        std::size_t wordLenInSymbols = getStringLen(w, symbolLenCalculator);
+        if ( (curLineLen+1+wordLenInSymbols) > paraWidth)
         {
             paraLinesWords.push_back(curLineWords);
             curLineLen = 0;
             curLineWords.clear();
         }
 
-        curLineLen += 1 + w.size();
+        curLineLen += 1 + wordLenInSymbols; // w.size(); // 1 - space len
         curLineWords.push_back( w );
     }
 
@@ -280,10 +324,14 @@ std::vector<std::string> prepareTextParaMakeLines( const std::string &para, std:
 }
 
 //-----------------------------------------------------------------------------
-inline
-std::string prepareTextParaMakeString( const std::string &para, std::string::size_type paraWidth, TextAlignment textAlignment = TextAlignment::width )
+//! Форматирует абзац (параграф). Разбивает входную строку на строки по длине, форматирует их по alignment, и затем склеивает с переводом строки
+template<typename SymbolLenCalculator> inline
+std::string prepareTextParaMakeString( const std::string &para, std::string::size_type paraWidth
+                                     , TextAlignment textAlignment // = TextAlignment::width
+                                     , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                                     )
 {
-    std::vector<std::string> v = prepareTextParaMakeLines( para, paraWidth, textAlignment );
+    std::vector<std::string> v = prepareTextParaMakeLines( para, paraWidth, textAlignment, symbolLenCalculator );
     auto res = umba::string_plus::merge( v, '\n'); // umba::string_plus::merge
     if (!res.empty() && res.back()!='.' && res.back()!='!' && res.back()!='?' && res.back()!=':' && res.back()!=';')
         res.push_back('.');
@@ -300,8 +348,12 @@ std::string prepareTextParaMakeString( const std::string &para, std::string::siz
 //  
 // };
 
-inline
-std::string formatTextParas( std::string text, std::string::size_type paraWidth, TextAlignment textAlignment = TextAlignment::width )
+//! Форматирует параграфы. Разбивает текст по символу LF, форматирует, склеивает обратно
+template<typename SymbolLenCalculator> inline
+std::string formatTextParas( std::string text, std::string::size_type paraWidth
+                           , TextAlignment textAlignment // = TextAlignment::width
+                           , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                           )
 {
     std::vector<std::string> paras = umba::string_plus::split(text, '\n', true /* skipEmpty */);
     //splitToVector( text, paras, '\n' );
@@ -322,7 +374,7 @@ std::string formatTextParas( std::string text, std::string::size_type paraWidth,
         {
             if (!text.empty())
                 text.append("\n\n");
-            text.append(prepareTextParaMakeString(p, paraWidth, textAlignment));
+            text.append(prepareTextParaMakeString(p, paraWidth, textAlignment, symbolLenCalculator));
         }
     }
 
@@ -331,6 +383,17 @@ std::string formatTextParas( std::string text, std::string::size_type paraWidth,
 }
 
 //-----------------------------------------------------------------------------
+//! Форматирует параграфы. Разбивает текст по символу LF, форматирует, склеивает обратно. Дефолтная реализация для однобайтной кодировки.
+inline
+std::string formatTextParas( std::string text, std::string::size_type paraWidth
+                           , TextAlignment textAlignment // = TextAlignment::width
+                           )
+{
+    return formatTextParas<SymbolLenCalculatorEncodingSingleByte>(text, paraWidth, textAlignment, SymbolLenCalculatorEncodingSingleByte());
+}
+
+//-----------------------------------------------------------------------------
+//! Разбор строки с базовыми C-escape последовательностями - \\, \r, \n, \t, \', \"
 inline
 std::string parseEscapes( const std::string &text )
 {
@@ -356,11 +419,14 @@ std::string parseEscapes( const std::string &text )
         {
             switch(ch)
             {
-                case 'n':
-                     res.append(1,'\n');
+                case '\\':
+                     res.append(1,'\\');
                      break;
                 case 'r':
                      res.append(1,'\r');
+                     break;
+                case 'n':
+                     res.append(1,'\n');
                      break;
                 case 't':
                      res.append(1,'\t');
@@ -370,9 +436,6 @@ std::string parseEscapes( const std::string &text )
                      break;
                 case '\"':
                      res.append(1,'\"');
-                     break;
-                case '\\':
-                     res.append(1,'\\');
                      break;
                 default:
                      res.append(1,ch);
@@ -385,8 +448,8 @@ std::string parseEscapes( const std::string &text )
     return res;
 }
 
-//void splitToVector( std::string str, std::vector<std::string> &vec, char ch )
-
+//-----------------------------------------------------------------------------
+//! Просто добавляет точку в конце текста, если её там нет
 inline
 std::string textAppendDot( std::string text )
 {
@@ -396,6 +459,8 @@ std::string textAppendDot( std::string text )
     return text;
 }
 
+//-----------------------------------------------------------------------------
+//! Производит "сжатие" последовательностей из повторяющихся символов в один. Символы для "сжатия" задаются параметром compressChars
 inline
 std::string textCompress( const std::string &text, const std::string &compressChars )
 {
