@@ -221,6 +221,7 @@ struct SymbolLenCalculatorEncodingSingleByte
 {
     std::size_t operator()(const char *pCh) const
     {
+        UMBA_USED(pCh);
         return 1;
     }
 };
