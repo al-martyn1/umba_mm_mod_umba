@@ -6,8 +6,8 @@
 
 #if defined(_WIN32) || defined(WIN32)
 
-    #include <windows.h>
     #include <winsock2.h>
+    #include <windows.h>
 
 #endif
 
