@@ -18,9 +18,9 @@
     // Делаем вид, что WinSock.h уже подключен, иначе, если потом подключается 
     // WinSock2.h, то будет конфликт
 
-    #ifndef _WINSOCKAPI_
-        #define _WINSOCKAPI_
-    #endif
+    // #ifndef _WINSOCKAPI_
+    //     #define _WINSOCKAPI_
+    // #endif
 
     //
     #include <winsock2.h>
