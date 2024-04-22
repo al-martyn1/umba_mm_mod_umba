@@ -208,7 +208,7 @@ struct MacroTextGetterProxy : public IMacroTextGetter<StringType>
         // if (getMacroTextFromMap(m, name, text))
         //     return true;
 
-        StringStringMap<StringType>::const_iterator it = m.find(name);
+        typename StringStringMap<StringType>::const_iterator it = m.find(name);
         if (it!=m.end())
         {
             text = it->second;

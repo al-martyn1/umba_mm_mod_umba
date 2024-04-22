@@ -2098,11 +2098,14 @@ struct CommandLineOptionInfo
             if (!initVal.empty())
             {
                 if (descExtraOss.str().empty())
+                {
                     descExtraOss<<"Initial value: ";
+                }    
                 else
+                {
                     descExtraOss<<", initial value: ";
-
-                    descExtraOss<<initVal;
+                }
+                descExtraOss<<initVal;
             }
 
             if (optInfo.hasDefVal && optInfo.paramOptional)

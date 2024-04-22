@@ -69,7 +69,7 @@ StringType toStringImpl2( const std::map<FlagType,StringType> &flagsMap, FlagTyp
     // Or - if ORing all flags result is zero
     if (intFlagsVal==0 || intAllFlags==0)
     {
-        std::map<FlagType,StringType>::const_iterator it = flagsMap.find(flagsVal);
+        typename std::map<FlagType,StringType>::const_iterator it = flagsMap.find(flagsVal);
         if (it==flagsMap.end())
             return umba::string_plus::make_string<StringType>("0");
         else

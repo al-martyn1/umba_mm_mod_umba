@@ -85,7 +85,7 @@ protected: // utils
 
     template< typename UnsignedType >
     static 
-    typename std::enable_if<std::is_unsigned<UnsignedType>::value, typename StringType >::type
+    typename std::enable_if<std::is_unsigned<UnsignedType>::value,  /* typename  */ StringType >::type
     formatIntDecimal(UnsignedType u, bool showSign = false)
     {
         StringType resStr;
@@ -111,10 +111,10 @@ protected: // utils
 
     template< typename IntType >
     static
-    typename std::enable_if<std::is_signed<IntType>::value, typename StringType>::type
+    typename std::enable_if<std::is_signed<IntType>::value,  /* typename */  StringType>::type
     formatIntDecimal(IntType intVal, bool showSign = false)
     {
-        typedef std::make_unsigned<IntType>::type UnsignedType;
+        typedef typename std::make_unsigned<IntType>::type UnsignedType;
 
         StringType resStr;
 
@@ -320,8 +320,8 @@ public:
             , typename = std::enable_if_t<std::is_integral<T>::value> >
     FormatMessage& arg(const StringType &argName, T val, std::size_t fieldWidth=0, EFormatAlign align=EFormatAlign::left)
     {
-        typedef std::make_signed<T>::type   IntType;
-        typedef std::make_unsigned<T>::type UnsignedType;
+        //typedef typename std::make_signed<T>::type   IntType;
+        typedef typename std::make_unsigned<T>::type UnsignedType;
 
         StringType  valFormatted;
 
@@ -368,21 +368,21 @@ public:
 
         StringType str = oss.str();
 
-        StringType::size_type numAddZeros = 0;
+        typename StringType::size_type numAddZeros = 0;
         if (precision>=0)
         {
-            StringType::size_type dotPos = str.rfind((CharType)'.');
+            typename StringType::size_type dotPos = str.rfind((CharType)'.');
             if (dotPos==str.npos)
             {
                 str.append(1,(CharType)'.');
-                numAddZeros = (StringType::size_type)precision;
+                numAddZeros = (typename StringType::size_type)precision;
             }
             else
             {
-                StringType::size_type curNumDigits = str.size()-(dotPos+1);
-                if (curNumDigits<(StringType::size_type)precision)
+                typename StringType::size_type curNumDigits = str.size()-(dotPos+1);
+                if (curNumDigits<(typename StringType::size_type)precision)
                 {
-                    numAddZeros = (StringType::size_type)precision - curNumDigits;
+                    numAddZeros = (typename StringType::size_type)precision - curNumDigits;
                 }
             }
         }
