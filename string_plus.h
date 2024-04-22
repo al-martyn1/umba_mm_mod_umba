@@ -2091,7 +2091,7 @@ bool is_quoted( const StringType &s                        //!< Строка д�
     Используется в bat-файлах, и тп
  */
 template<typename StringType> inline
-bool unquoteSimpleQuoted( StringType &str //!< Строка для раскавычивания
+StringType unquoteSimpleQuoted( StringType &str //!< Строка для раскавычивания
                         )
 {
     if (str.size()<2)
@@ -2102,9 +2102,9 @@ bool unquoteSimpleQuoted( StringType &str //!< Строка для раскав�
     if (str.front()!=quotChar || str.back()!=quotChar)
         return str;
 
-    std::string::size_type pos = 1, endPos = str.size()-1;
+    typename StringType::size_type pos = 1, endPos = str.size()-1;
 
-    std::string res; res.reserve(endPos-pos);
+    StringType res; res.reserve(endPos-pos);
 
     bool prevQuot = false;
 

@@ -15,6 +15,7 @@
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <list>
 #include <map>
 #include <regex>
 #include <set>
@@ -109,7 +110,7 @@ fromSimpleMaskToRegexVector(const std::vector<StringType> &regexStrings, bool us
 
     for(const auto &s : regexStrings)
     {
-        resVec.emplace_back(std::basic_regex<StringType::value_type>(umba::regex_helpers::expandSimpleMaskToEcmaRegex(s, useAnchoring, allowRawRegexes)));
+        resVec.emplace_back(std::basic_regex<typename StringType::value_type>(umba::regex_helpers::expandSimpleMaskToEcmaRegex(s, useAnchoring, allowRawRegexes)));
     }
 
     return resVec;
@@ -124,7 +125,7 @@ fromSimpleMaskToRegexMap(const std::vector<StringType> &regexStrings, bool useAn
 
     for(const auto &s : regexStrings)
     {
-        resMap[s] = std::basic_regex<StringType::value_type>(umba::regex_helpers::expandSimpleMaskToEcmaRegex(s, useAnchoring, allowRawRegexes));
+        resMap[s] = std::basic_regex<typename StringType::value_type>(umba::regex_helpers::expandSimpleMaskToEcmaRegex(s, useAnchoring, allowRawRegexes));
     }
 
     return resMap;

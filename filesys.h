@@ -731,7 +731,7 @@ template<typename StringType> inline bool isPathDirectory( const StringType &pat
 //! Проверка, является ли файл файлом только для чтения
 template<typename StringType> inline bool isFileReadonly( const StringType &fname )
 {
-    UMBA_USED(path);
+    UMBA_USED(fname);
     throw std::runtime_error("Not implemented: isFileReadonly not specialized for this StringType");
 }
 

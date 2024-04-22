@@ -24,7 +24,7 @@ namespace macros{
 template<typename StringType>
 bool getMacroTextFromMap(const StringStringMap<StringType> &m, const StringType &name, StringType &text)
 {
-    StringStringMap<StringType>::const_iterator it = m.find(name);
+    typename StringStringMap<StringType>::const_iterator it = m.find(name);
     if (it==m.end())
         return false;
 
@@ -144,7 +144,7 @@ struct MacroTextFromMapOrEnvRef : public IMacroTextGetter<StringType>
 template<typename StreamType, typename StringType>
 StreamType& printMacros( StreamType &oss, const StringType &prefix, const StringStringMap<StringType> &macros )
 {
-    StringStringMap<StringType>::const_iterator it = macros.begin();
+    typename StringStringMap<StringType>::const_iterator it = macros.begin();
 
     std::size_t maxName = 0;
 

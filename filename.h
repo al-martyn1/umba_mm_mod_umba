@@ -524,6 +524,34 @@ StringType makeCanonicalForCompare( StringType fileName, typename StringType::va
 }
 
 //-----------------------------------------------------------------------------
+//! Возвращает true,  если путь абсолютный
+template<typename StringType> inline 
+bool isAbsPath( StringType p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+{
+    namespace ustrp = umba::string_plus;
+
+    p = makeCanonical(p);
+
+    #if defined(WIN32) || defined(_WIN32)
+    if (ustrp::starts_with(p, getNativeUncPrefix<StringType>()))
+        return true;
+    #endif
+
+    if (ustrp::starts_with(p, ustrp::make_string<StringType>(pathSep)))
+        return true;
+
+    #if defined(WIN32) || defined(_WIN32)
+    if (p.size()<2)
+        return false;
+    if ( (ustrp::is_alpha(p[0]) && (p[1]==(typename StringType::value_type)':')) || ((p.size()>2 && ustrp::is_alpha(p[1]) && p[2]==(typename StringType::value_type)':')) )
+        return true;
+    #endif
+
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------
 //! Подготавливает имя для "нативного" использования - для передачи имени в системные API
 template<typename StringType> inline
 StringType prepareForNativeUsage( const StringType &fileName )
@@ -571,33 +599,6 @@ StringType prepareForNativeUsage( const StringType &fileName )
         return makeCanonical(fileName);
 
     #endif
-}
-
-//-----------------------------------------------------------------------------
-//! Возвращает true,  если путь абсолютный
-template<typename StringType> inline 
-bool isAbsPath( StringType p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
-{
-    namespace ustrp = umba::string_plus;
-
-    p = makeCanonical(p);
-
-    #if defined(WIN32) || defined(_WIN32)
-    if (ustrp::starts_with(p, getNativeUncPrefix<StringType>()))
-        return true;
-    #endif
-
-    if (ustrp::starts_with(p, ustrp::make_string<StringType>(pathSep)))
-        return true;
-
-    #if defined(WIN32) || defined(_WIN32)
-    if (p.size()<2)
-        return false;
-    if ( ustrp::is_alpha(p[0]) && (p[1]==(typename StringType::value_type)':') || (p.size()>2 && ustrp::is_alpha(p[1]) && p[2]==(typename StringType::value_type)':'))
-        return true;
-    #endif
-
-    return false;
 }
 
 //-----------------------------------------------------------------------------
