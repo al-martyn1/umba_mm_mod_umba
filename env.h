@@ -138,7 +138,7 @@ bool getEnvVarsList( std::vector<std::pair<std::wstring,std::wstring> > &lst)
         else
         {
             name.assign(fullStr, 0, eqPos);
-            val .assign(fullStr, eqPos+1);
+            val .assign(fullStr, eqPos+1, fullStr.npos);
         }
 
         if (!name.empty())
@@ -182,7 +182,7 @@ bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
         else
         {
             name.assign(fullStr, 0, eqPos);
-            val .assign(fullStr, eqPos+1);
+            val .assign(fullStr, eqPos+1, fullStr.npos);
         }
 
         if (!name.empty())
