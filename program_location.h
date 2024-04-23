@@ -10,7 +10,7 @@
 #include "string_plus.h"
 #include "zz_inc_windows.h"
 
-#include <filesystem>
+//#include <filesystem>
 #include <map>
 
 
@@ -513,7 +513,8 @@ StringType findAppConfPath( const StringType &appRoot, const StringType &confFol
         {
             auto candisDatton = umba::filename::appendPath( confRootCandy, confName );
             candisDatton      = umba::filename::makeCanonical(candisDatton);
-            if (std::filesystem::exists(candisDatton))
+            //if (std::filesystem::exists(candisDatton))
+            if (umba::filesys::isPathDirectory(candisDatton))
                 return candisDatton;
         }
     }

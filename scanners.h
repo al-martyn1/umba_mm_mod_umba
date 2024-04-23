@@ -178,7 +178,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 
     bool bFound = false;
 
-    namespace fs = std::filesystem;
+    //namespace fs = std::filesystem;
 
 
     // std::smatch m;
@@ -196,10 +196,10 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 
     for( std::list<std::string>::const_iterator it=scanPaths.begin(); it!=scanPaths.end(); ++it )
     {
-        fs::directory_iterator scanPathDirectoryIterator;
+        std::filesystem::directory_iterator scanPathDirectoryIterator;
         try
         {
-            scanPathDirectoryIterator = fs::directory_iterator(*it);
+            scanPathDirectoryIterator = std::filesystem::directory_iterator(*it);
         }
         catch(...)
         {
