@@ -1041,7 +1041,7 @@ struct CommandLineOption
 
         PrintHelpStyle phs = PrintHelpStyle::normal;
 
-        if (name=="wiki")
+        if (name=="wiki" || name=="md")
             phs = PrintHelpStyle::wiki;
         else if (name=="bash")
             phs = PrintHelpStyle::bash_complete;
@@ -1061,7 +1061,7 @@ struct CommandLineOption
     static
     std::set<std::string> getHelpStyleOptions()
     {
-        static std::set<std::string> _ = { "wiki", "bash", "clink" };
+        static std::set<std::string> _ = { "wiki", "md", "bash", "clink" };
         return _;
     }
 
