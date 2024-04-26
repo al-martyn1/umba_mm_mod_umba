@@ -105,7 +105,7 @@ UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(GitHubIdTranslationMapUtf8_ascii)
 
 //----------------------------------------------------------------------------
 inline
-std::string generateIdFromText_forGitHub(const std::string &t)
+std::string generateIdFromText_forGitHub(const std::string &t, const std::string &prefix="user-content-")
 {
     //return generateIdFromText_generic(t, '-');
 
@@ -120,7 +120,7 @@ std::string generateIdFromText_forGitHub(const std::string &t)
                                                                                                              }
                                                 , 0 // replaceChar - игнорим
                                                 );
-    return transliterated;
+    return prefix+transliterated;
 }
 
 
