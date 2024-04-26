@@ -87,21 +87,41 @@ std::string generateIdFromText_forDoxygen(const std::string &t, char replaceChar
 
 //----------------------------------------------------------------------------
 inline
-std::unordered_map<std::string, std::string> makeGitHubIdTranslation()
+std::unordered_map<std::string, std::string> makeGitHubIdTranslationMapUtf8_ascii()
 {
     std::unordered_map<std::string, std::string> m;
 
     m["-"] = "-";
     m[" "] = "-";
     m["_"] = "_";
+    m["`"] = "-";
 
     return m;
 }
 
-UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(GitHubIdTranslation)
+UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(GitHubIdTranslationMapUtf8_ascii)
 //----------------------------------------------------------------------------
 
 
+//----------------------------------------------------------------------------
+inline
+std::string generateIdFromText_forGitHub(const std::string &t)
+{
+    //return generateIdFromText_generic(t, '-');
+
+    // Никакого алгоритма не используем, тупо заменяем, что знаем, остальное - просто игнорим
+
+    std::string transliterated = transliterateEx( t
+                                                , std::vector< std::unordered_map<std::string, std::string> >{ getGitHubIdTranslationMapUtf8_ascii()
+                                                                                                             , getLowercaseMapUtf8_ru()
+                                                                                                             , getLowercaseMapUtf8_en()
+                                                                                                             , getDigitsTranslationMapUtf8()
+                                                                                                             //, get
+                                                                                                             }
+                                                , 0 // replaceChar - игнорим
+                                                );
+    return transliterated;
+}
 
 
 
