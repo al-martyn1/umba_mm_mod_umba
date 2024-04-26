@@ -103,12 +103,63 @@ std::unordered_map<std::string, std::string> makeLowercaseMapUtf8_ru()
     m["Ё"] = "ё";    m["Н"] = "н";    m["Х"] = "х";    m["Э"] = "э";
     m["Ж"] = "ж";    m["О"] = "о";    m["Ц"] = "ц";    m["Ю"] = "ю";    m["Я"] = "я";
 
+    m["а"] = "а";    m["з"] = "з";    m["п"] = "п";    m["ч"] = "ч";
+    m["б"] = "б";    m["и"] = "и";    m["р"] = "р";    m["ш"] = "ш";
+    m["в"] = "в";    m["й"] = "й";    m["с"] = "с";    m["щ"] = "щ";
+    m["г"] = "г";    m["к"] = "к";    m["т"] = "т";    m["ъ"] = "ъ";
+    m["д"] = "д";    m["л"] = "л";    m["у"] = "у";    m["ы"] = "ы";
+    m["е"] = "е";    m["м"] = "м";    m["ф"] = "ф";    m["ь"] = "ь";
+    m["ё"] = "ё";    m["н"] = "н";    m["х"] = "х";    m["э"] = "э";
+    m["ж"] = "ж";    m["о"] = "о";    m["ц"] = "ц";    m["ю"] = "ю";    m["я"] = "я";
+
+    return m;
+}
+
+//----------------------------------------------------------------------------
+//! Для генерации ID для гитхаба
+inline
+std::unordered_map<std::string, std::string> makeLowercaseMapUtf8_en()
+{
+    std::unordered_map<std::string, std::string> m;
+
+    m["A"] = "a";    m["G"] = "g";    m["M"] = "m";    m["S"] = "s";
+    m["B"] = "b";    m["H"] = "h";    m["N"] = "n";    m["T"] = "t";
+    m["C"] = "c";    m["I"] = "i";    m["O"] = "o";    m["U"] = "u";
+    m["D"] = "d";    m["J"] = "j";    m["P"] = "p";    m["V"] = "v";
+    m["E"] = "e";    m["K"] = "k";    m["Q"] = "q";    m["W"] = "w";    m["Y"] = "y";
+    m["F"] = "f";    m["L"] = "l";    m["R"] = "r";    m["X"] = "x";    m["Z"] = "z";
+
+    m["a"] = "a";    m["g"] = "g";    m["m"] = "m";    m["s"] = "s";
+    m["b"] = "b";    m["h"] = "h";    m["n"] = "n";    m["t"] = "t";
+    m["c"] = "c";    m["i"] = "i";    m["o"] = "o";    m["u"] = "u";
+    m["d"] = "d";    m["j"] = "j";    m["p"] = "p";    m["v"] = "v";
+    m["e"] = "e";    m["k"] = "k";    m["q"] = "q";    m["w"] = "w";    m["y"] = "y";
+    m["f"] = "f";    m["l"] = "l";    m["r"] = "r";    m["x"] = "x";    m["z"] = "z";
+
+    return m;
+}
+
+//----------------------------------------------------------------------------
+//! Для генерации ID для гитхаба
+inline
+std::unordered_map<std::string, std::string> makeDigitsTranslationMapUtf8()
+{
+    std::unordered_map<std::string, std::string> m;
+
+    m["0"] = "0";    m["5"] = "5";
+    m["1"] = "1";    m["6"] = "6";
+    m["2"] = "2";    m["7"] = "7";
+    m["3"] = "3";    m["8"] = "8";
+    m["4"] = "4";    m["9"] = "9";
+
     return m;
 }
 
 //----------------------------------------------------------------------------
 UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(TransliterationMapUtf8_ru)
 UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(LowercaseMapUtf8_ru)
+UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(LowercaseMapUtf8_en)
+UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(DigitsTranslationMapUtf8)
 
 //----------------------------------------------------------------------------
 inline
