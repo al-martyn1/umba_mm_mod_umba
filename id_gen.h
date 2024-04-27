@@ -32,7 +32,7 @@ std::string generateIdFromText_generic(const std::string &t, char replaceChar)
         {
             resText.append(1u, ch);
         }
-        else if (ch==' ')
+        else if (ch==' ' || ch=='-')
         {
             resText.append(1u, '-');
         }
