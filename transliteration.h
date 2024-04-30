@@ -54,6 +54,20 @@ std::unordered_map<std::string, std::string> mergeTransliterationMaps(const std:
 }
 
 //----------------------------------------------------------------------------
+inline
+std::unordered_map<std::string, std::string> makeTransliterationMapUtf8_ascii()
+{
+    std::unordered_map<std::string, std::string> m;
+    for(char ch=' '; ch!=127; ++ch)
+    {
+        auto str = std::string(1, ch);
+        m[str] = str;
+    }
+
+    return m;
+}
+
+//----------------------------------------------------------------------------
 //! Транслитерация руссского абы как, из вики, что показалось более привычным, не по каким-то стандартам
 inline
 std::unordered_map<std::string, std::string> makeTransliterationMapUtf8_ru()
@@ -156,6 +170,8 @@ std::unordered_map<std::string, std::string> makeDigitsTranslationMapUtf8()
 }
 
 //----------------------------------------------------------------------------
+
+UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(TransliterationMapUtf8_ascii)
 UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(TransliterationMapUtf8_ru)
 UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(LowercaseMapUtf8_ru)
 UMBA_TRANSLITERTION_IMPLEMENT_GET_TRANSLIT_MAP(LowercaseMapUtf8_en)
@@ -219,6 +235,7 @@ std::string transliterate( const std::string &str )
 {
     return transliterateEx( str
                           , std::vector< std::unordered_map<std::string, std::string> >{ getTransliterationMapUtf8_ru()
+                                                                                       , getTransliterationMapUtf8_ascii()
                                                                                        }
                           );
 }
