@@ -51,6 +51,43 @@ namespace cli_tool_helpers {
 
 
 
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+bool findProjectOptionsFile(const StringType &prjFile, StringType &foundOptionsFile, const std::vector<StringType> &names)
+{
+    StringType optPath = umba::filename::getPath(prjFile);
+
+    while(true)
+    {
+        for(const auto &name : names)
+        {
+            StringType optFile = umba::filename::appendPath(optPath, name);
+            if (umba::filesys::isFileReadable(optFile))
+            {
+                foundOptionsFile = optFile;
+                return true;
+            }
+        }
+
+        umba::filename::stripLastPathSep(optPath);
+        StringType optPathNext = umba::filename::getPath(optPath);
+        if (optPathNext.empty() || optPathNext==optPath)
+        {
+            return false;
+        }
+
+        optPath = optPathNext;
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
 //----------------------------------------------------------------------------
 // https://stackoverflow.com/questions/11697820/how-to-use-date-and-time-predefined-macros-in-as-two-integers-then-stri
 
