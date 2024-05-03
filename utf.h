@@ -106,6 +106,62 @@ std::wstring fromUtf8(const wchar_t *pStr)
 }
 
 
+//template<typename StringType> inline
+//void utfToStringType(StringType &to, )
+
+inline
+void utfToStringTypeHelper(std::string &to, const char *pStr)
+{
+    to = pStr;
+}
+
+inline
+void utfToStringTypeHelper(std::string &to, const std::string &str)
+{
+    to = str;
+}
+
+inline
+void utfToStringTypeHelper(std::wstring &to, const char *pStr)
+{
+    to = fromUtf8(pStr);
+}
+
+inline
+void utfToStringTypeHelper(std::wstring &to, const std::string &str)
+{
+    to = fromUtf8(str);
+}
+
+
+
+inline
+void utfToStringTypeHelper(std::wstring &to, const wchar_t *pStr)
+{
+    to = pStr;
+}
+
+inline
+void utfToStringTypeHelper(std::wstring &to, const std::wstring &str)
+{
+    to = str;
+}
+
+inline
+void utfToStringTypeHelper(std::string &to, const wchar_t *pStr)
+{
+    to = toUtf8(pStr);
+}
+
+inline
+void utfToStringTypeHelper(std::string &to, const std::wstring &str)
+{
+    to = toUtf8(str);
+}
+
+
+
+
 
 } // namespace umba {
 

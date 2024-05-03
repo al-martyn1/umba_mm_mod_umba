@@ -10,7 +10,8 @@
 #include "program_location.h"
 #include "string_plus.h"
 #include "text_utils.h"
-
+#include "utf8.h"
+//
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -284,6 +285,14 @@ bool isComment( std::string line )
     return umba::string_plus::starts_with( line, ";" ) || umba::string_plus::starts_with( line, "#" ) || umba::string_plus::starts_with( line, "//" );
 }
 
+inline
+bool isComment( std::wstring line )
+{
+    umba::string_plus::trim(line);
+
+    return umba::string_plus::starts_with( line, L";" ) || umba::string_plus::starts_with( line, L"#" ) || umba::string_plus::starts_with( line, L"//" );
+}
+
 
 //bool startsWithAndStrip( std::string &str, const std::string &prefix );
 
@@ -323,9 +332,40 @@ bool readOptionsFile( std::ifstream &optFile, std::vector<std::string> &resVec )
 }
 
 inline
+bool readOptionsFile( std::ifstream &optFile, std::vector<std::wstring> &resVec )
+{
+    std::string optLine;
+    while( std::getline( optFile, optLine) )
+    {
+        umba::string_plus::trim(optLine);
+
+        if (optLine.empty())
+            continue;
+
+        if (isComment( optLine ))
+            continue;
+
+        resVec.push_back(fromUtf8(optLine));
+
+    }
+    
+    return true;
+}
+
+inline
 bool readOptionsFile( const std::string &fileName, std::vector<std::string> &resVec )
 {
     std::ifstream optFile(fileName.c_str());
+    if (!optFile)
+        return false; // resVec;
+
+    return readOptionsFile( optFile, resVec );
+}
+
+inline
+bool readOptionsFile( const std::wstring &fileName, std::vector<std::wstring> &resVec )
+{
+    std::ifstream optFile(toUtf8(fileName).c_str());
     if (!optFile)
         return false; // resVec;
 
@@ -2643,7 +2683,8 @@ struct ArgsParser
     }
 
 
-    int callArgParser( std::string a, bool fBuiltin, bool ignoreInfos )
+    //int callArgParser( std::string a, bool fBuiltin, bool ignoreInfos )
+    int callArgParser( StringType a, bool fBuiltin, bool ignoreInfos )
     {
         umba::string_plus::trim(a);
 
@@ -2657,7 +2698,7 @@ struct ArgsParser
 
         ICommandLineOptionCollector *pCol = &optionsCollector;
 
-        umba::command_line::CommandLineOption opt(a, pCol);
+        umba::command_line::CommandLineOption opt(toUtf8(a), pCol);
 
         pCol->setCollectMode( opt.isHelpOption() );
 
@@ -2675,7 +2716,7 @@ struct ArgsParser
         //     return true;
 
         // std::string optionsFileName = umba::filename::appendPath<std::string>(programLocationInfo.confPath, optFilename );
-        std::vector<std::string> opts;
+        std::vector<StringType> opts;
         umba::command_line::readOptionsFile(optionsFileName, opts );
         for( auto optLine : opts)
         {
@@ -2831,7 +2872,7 @@ makeArgsParser( const ArgParser        &argParser
                             //&programLocationInfo = umba::program_location::getProgramLocation(argc, argv)
               )
 {
-    return makeArgsParserImpl<std::string, ArgParser, OptionsCollector>( argParser, optionsCollector, argc, argv, programLocationInfo );
+    return makeArgsParserImpl<std::wstring, ArgParser, OptionsCollector>( argParser, optionsCollector, argc, argv, programLocationInfo );
 }
 
 /*
