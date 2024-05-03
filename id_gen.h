@@ -24,7 +24,7 @@ std::string generateIdFromText_generic(const std::string &t, char replaceChar)
         {
             resText.append(1u, ch);
         }
-        else if (ch>='A' && ch<='z')
+        else if (ch>='A' && ch<='Z')
         {
             resText.append(1u, ch-'A'+'a');
         }
