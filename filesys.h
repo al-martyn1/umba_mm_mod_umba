@@ -684,6 +684,13 @@ StringType getCurrentDirectory()
     throw std::runtime_error("Not implemented: getCurrentDirectory not specialized for this StringType");
 }
 
+//! Получение текущего рабочего каталога - генерик версия
+template<typename StringType> inline
+bool setCurrentDirectory(const StringType &newCurDir)
+{
+    throw std::runtime_error("Not implemented: setCurrentDirectory not specialized for this StringType");
+}
+
 //----------------------------------------------------------------------------
 //! Удаление файла
 template<typename StringType> inline
@@ -1249,6 +1256,22 @@ std::wstring getCurrentDirectory<std::wstring>()
     buf = (wchar_t*)_alloca(size*sizeof(wchar_t)+1);
     ::GetCurrentDirectoryW(size, buf);
     return std::wstring(buf);
+}
+
+//----------------------------------------------------------------------------
+//! Установка текущего рабочего каталога - специализация для std::string
+template<> inline
+bool setCurrentDirectory<std::string>(const std::string &newCurDir)
+{
+    return SetCurrentDirectoryA(newCurDir.c_str()) ? true : false;
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога - специализация для std::wstring
+template<> inline
+bool setCurrentDirectory<std::wstring>(const std::wstring &newCurDir)
+{
+    return SetCurrentDirectoryW(newCurDir.c_str()) ? true : false;
 }
 
 //----------------------------------------------------------------------------
