@@ -684,6 +684,7 @@ StringType getCurrentDirectory()
     throw std::runtime_error("Not implemented: getCurrentDirectory not specialized for this StringType");
 }
 
+//----------------------------------------------------------------------------
 //! Получение текущего рабочего каталога - генерик версия
 template<typename StringType> inline
 bool setCurrentDirectory(const StringType &newCurDir)
