@@ -36,7 +36,7 @@
 #endif
 
 
-// umba::timeservice::
+// umba::time_service::
 namespace umba{
 namespace time_service{
 
@@ -104,5 +104,5 @@ namespace time_service{
 
 } // namespace time_service
 } // namespace umba
-// umba::timeservice::
+// umba::time_service::
 
