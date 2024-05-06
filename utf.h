@@ -160,6 +160,23 @@ void utfToStringTypeHelper(std::string &to, const std::wstring &str)
 }
 
 
+template<typename StringTypeFrom, typename StringTypeTo>
+void utfFromTo(const StringTypeFrom &from, StringTypeTo &to)
+{
+    std::wstring wideStr = fromUtf8(from);
+    to = toUtf8(wideStr);
+}
+
+template<typename StringTypeFrom, typename StringTypeTo>
+StringTypeTo utfFromToReturn(const StringTypeFrom &from)
+{
+    std::wstring wideStr = fromUtf8(from);
+    return toUtf8(wideStr);
+}
+
+
+//template<typename StringType> inline
+//void utfToStringType(StringType &to, )
 
 
 
