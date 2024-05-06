@@ -2755,6 +2755,7 @@ struct ArgsParser
 
         for(; it!=filenames.end(); ++it)
         {
+            //std::cout << "Parse std builtin file: " << *it << "\n";
             if (!parseOptionsFile( *it ) )
                 return false;
         }
