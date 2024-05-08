@@ -13,7 +13,7 @@
 #include "umba.h"
 
 #include <exception>
-#include <filesystem>
+//#include <filesystem>
 #include <iostream>
 #include <list>
 #include <map>
@@ -144,6 +144,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
                 , std::vector<std::string> &foundFiles
                 , std::vector<std::string> &excludedFiles
                 , std::set<std::string>    &foundExtentions
+                , std::vector<std::string> *pFoundFilesRootFolders = 0
                 )
 {
     using namespace umba::omanip;
@@ -194,9 +195,172 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
     //  
     // std::regex("meow", std::regex::ECMAScript|std::regex::icase).
 
+
+
     for( std::list<std::string>::const_iterator it=scanPaths.begin(); it!=scanPaths.end(); ++it )
     {
+        const auto &scanPath = *it; // path
+
+	    if (!umba::filesys::enumerateDirectory( scanPath
+	                                          , [&](std::string entryName, const umba::filesys::FileStat &fileStat)
+	                                            {
+												    if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileTypeDir)
+												    {
+												        scanPaths.push_back(entryName);
+												        // std::cout << entry.path() << "\n";
+												        return true; // continue
+												    }
+
+                                                    if (fileStat.fileType!=umba::filesys:: /* FileType:: */ FileTypeFile)
+                                                    {
+                                                        return true; // continue
+                                                    }
+
+										            entryName = umba::filename::makeCanonical(entryName);
+										
+										            if (!bFound)
+										            {
+										                bFound = true;
+										
+										                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
+										                {
+										                    umba::info_log::printSectionHeader(logMsg, "Found Files");
+										                    // logMsg << "---------------------\nFound Files:" << endl << "------------" << endl;
+										                }
+										            }
+										
+										
+										            // if (appConfig.testVerbosity(VerbosityLevel::detailed))
+										            {
+										                logMsg << entryName << " - ";
+										            }
+										
+										            auto normalizedEntryName = umba::filename::normalizePathSeparators(entryName,'/');
+										
+										            //TODO: !!! Нужно что-то решать с отсутствующим расширением
+
+										            bool addThisFile = false;
+										            bool excludedByIncludeMask = false;
+										
+										            std::string includeRegexStr;
+										            std::string excludeRegexStr;
+										
+										            bool matchInclude = true;
+										            if (!includeRegexes.empty()) // матчим только если не пусто
+										            {
+										                matchInclude = umba::regex_helpers::regexMatch(normalizedEntryName,includeRegexes,&includeRegexStr);
+										            }
+										
+										            if (!matchInclude)
+										            {
+										                // Не подходит под инклюзивную маску
+										                addThisFile = false;
+										                excludedByIncludeMask = true;
+										            }
+										            else
+										            {
+										                addThisFile = true; // Вроде подошло, надо проверить исключения
+										
+										                if (umba::regex_helpers::regexMatch(normalizedEntryName,excludeRegexes,&excludeRegexStr))
+										                {
+										                    addThisFile = false;
+										                    excludedByIncludeMask = false;
+										                }
+										            }
+										
+										            if (addThisFile)
+										            {
+										                foundFiles.emplace_back(entryName);
+                                                        if (pFoundFilesRootFolders)
+                                                        {
+                                                            pFoundFilesRootFolders->emplace_back(scanPath);
+                                                        }
+										
+										                auto ext = umba::filename::getExt(entryName);
+										
+										                foundExtentions.insert(ext);
+										
+										                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
+										                {
+										                    if (ext.empty())
+										                        ext = "<EMPTY>";
+										                    else
+										                        ext = std::string(".") + ext;
+										
+										                    logMsg << good << "added" << normal;
+										                    logMsg << " (" << notice << ext << normal << ")";
+										                    if (!includeRegexStr.empty())
+										                    {
+										                        // orgMask = includeOriginalMasks[includeRegexStr]
+										                        logMsg << " due include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
+										                    }
+										
+										                    if (ext.empty())
+										                    {
+										                        logMsg << " - !note: empty extention: " << notice << entryName << normal << "";
+										                        //logMsg << "\n";
+										                    }
+										
+										                    logMsg << "\n";
+										
+										                }
+										            }
+										            else
+										            {
+										                excludedFiles.push_back(entryName);
+										
+										                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
+										                {
+										                    if (excludedByIncludeMask)
+										                    {
+										                        logMsg << notice << "skipped" <<  /* normal << */  " due include masks" << normal << "\n";
+										                    }
+										                    else
+										                    {
+										                        logMsg << notice << "skipped" <<  /* normal << */  " due exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
+										                    }
+										                    // std::string regexStr = excludedByIncludeMask ? includeRegexStr : excludeRegexStr;
+										                    // std::string orgMask  = excludedByIncludeMask ? includeOriginalMasks[includeRegexStr] : excludeOriginalMasks[excludeRegexStr];
+										                    // std::string wichMask = excludedByIncludeMask ? "include" : "exclude";
+										                    // logMsg << notice << "skipped" <<  /* normal << */  " due " << wichMask << " mask '" << orgMask << "' (" << regexStr << ")" << normal << endl;
+										                }
+										            }
+
+
+	                                                // DirectoryEntryInfoW e;
+	                                                // e.entryName     = name;
+	                                                // e.entryExt      = getExt(name);
+	                                                // e.path          = vPath;
+	                                                // fillDirectoryEntryInfoFromUmbaFilesysFileStat(fileStat, e);
+	                                                // entries.emplace_back(e);
+
+                                                    // fileStat.fileType
+
+// enum FileType
+// {
+//     FileTypeInvalid, //!< Файл не найден, или ещё какая-то проблема
+//     FileTypeUnknown, //!< Тип файла не известен
+//     FileTypeDir    , //!< Каталог, не файл
+//     FileTypeFile   , //!< Файл
+//     FileTypeRam      //!< Что-то просто лежит в памяти
+// };
+
+	                                                return true;
+	                                            }
+	                                          )
+	       )
+	    {
+	        //return ErrorCode::genericError;
+            
+	    }
+
+
+#if 0
         std::filesystem::directory_iterator scanPathDirectoryIterator;
+
+
+
+
         try
         {
             scanPathDirectoryIterator = std::filesystem::directory_iterator(*it);
@@ -383,6 +547,8 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 // good
 
         }
+
+#endif
 
     }
 }
