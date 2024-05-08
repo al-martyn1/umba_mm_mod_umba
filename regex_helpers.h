@@ -179,12 +179,29 @@ bool regexMatch(const StringType &text, const std::basic_regex<typename StringTy
 
 //! Просто завернули std::regex_match в try/catch, версия для строки
 template< typename CharType > inline
+#if defined(__GNUC__)
+bool regexMatch( std::basic_string<CharType> text, const std::basic_regex<CharType> &r
+               , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
+               )
+#else
 bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
+#endif
 {
     try
     {
+        #if defined(__GNUC__)
+    
+            //TODO: !!! Если не обрезать, то регулярки в GCC 7.3 падают
+            // Чет не работает, а обрезать в прикладухе - работает
+            // if (text.size()>7000u)
+            // {
+            //     text.erase(7000u, text.npos);
+            // }
+    
+        #endif
+
         return std::regex_match( text, r, flags );
     }
     catch(...)
@@ -196,12 +213,29 @@ bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex
 //----------------------------------------------------------------------------
 //! Просто завернули std::regex_match в try/catch, версия для вектора CharType'ов
 template< typename CharType > inline
+#if defined(__GNUC__)
+bool regexMatch( std::vector<CharType> text, const std::basic_regex<CharType> &r
+               , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
+               )
+#else
 bool regexMatch( const std::vector<CharType> &text, const std::basic_regex<CharType> &r
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
+#endif
 {
     try
     {
+        #if defined(__GNUC__)
+    
+            //TODO: !!! Если не обрезать, то регулярки в GCC 7.3 падают
+            // Чет не работает, а обрезать в прикладухе - работает
+            // if (text.size()>7000u)
+            // {
+            //     text.erase(text.begin()+7000u, text.end());
+            // }
+    
+        #endif
+
         return std::regex_match( text.begin(), text.end(), r, flags );
     }
     catch(...)
