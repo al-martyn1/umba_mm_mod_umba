@@ -204,6 +204,8 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 	    if (!umba::filesys::enumerateDirectory( scanPath
 	                                          , [&](std::string entryName, const umba::filesys::FileStat &fileStat)
 	                                            {
+                                                    entryName = umba::filename::appendPath(scanPath, entryName);
+
 												    if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileTypeDir)
 												    {
 												        scanPaths.push_back(entryName);

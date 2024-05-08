@@ -219,7 +219,16 @@ bool regexMatch( const std::basic_string<CharType>     &text
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
-    return regexMatch(text, std::basic_regex<CharType>(r));
+    // Чота если задать флаги в GCC не компилится, не стал пока разбираться
+    #if defined(__GNUC__)
+
+        return regexMatch(text, std::basic_regex<CharType>(r /* , (std::regex_constants::match_flag_type)(flags | std::regex_constants::optimize) */ ));
+
+    #else
+
+        return regexMatch(text, std::basic_regex<CharType>(r /* , flags */ ));
+
+    #endif
 }
 
 //----------------------------------------------------------------------------
@@ -230,7 +239,15 @@ bool regexMatch( const std::vector<CharType>           &text
                , std::regex_constants::match_flag_type flags = std::regex_constants::match_default
                )
 {
-    return regexMatch(text, std::basic_regex<CharType>(r));
+    #if defined(__GNUC__)
+
+        return regexMatch(text, std::basic_regex<CharType>(r /* , (std::regex_constants::match_flag_type)(flags | std::regex_constants::optimize) */ ));
+
+    #else
+
+        return regexMatch(text, std::basic_regex<CharType>(r /* , flags */ ));
+
+    #endif
 }
 
 //----------------------------------------------------------------------------
