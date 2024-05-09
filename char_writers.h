@@ -564,7 +564,7 @@ public:
 
     //! Помещает EOL в поток вывода консоли
     virtual
-    void putEndl() // end line - LF or CR LF
+    void putEndl() override // end line - LF or CR LF
     {
         /*
         if (isTextMode())

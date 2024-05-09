@@ -25,6 +25,7 @@
 #include <vector>
 
 
+//TODO: !!! Надо бы переименовать в umba::filesys::scanners
 
 // umba::scanners::
 namespace umba {
