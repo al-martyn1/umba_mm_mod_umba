@@ -500,15 +500,15 @@ bool isPathExist(const StringType &path)
 }
 
 //----------------------------------------------------------------------------
-// template<typename StringType>
-// bool isPathDirectory(const StringType &path)
-// {
-//     FileStat fileStat;
-//     if (!getPathStat(path, fileStat))
-//         return false;
-//  
-//     return fileStat.isDir();
-// }
+template<typename StringType>
+bool isPathDirectory(const StringType &path)
+{
+    FileStat fileStat;
+    if (!getPathStat(path, fileStat))
+        return false;
+ 
+    return fileStat.isDir();
+}
 
 //----------------------------------------------------------------------------
 
@@ -792,13 +792,13 @@ template<typename StringType> inline bool createDirectoryEx( const StringType &d
     throw std::runtime_error("Not implemented: createDirectory not specialized for this StringType");
 }
 
-//----------------------------------------------------------------------------
-//! Проверка, является ли путь каталогом
-template<typename StringType> inline bool isPathDirectory( const StringType &path )
-{
-    UMBA_USED(path);
-    throw std::runtime_error("Not implemented: isPathDirectory not specialized for this StringType");
-}
+// //----------------------------------------------------------------------------
+// //! Проверка, является ли путь каталогом
+// template<typename StringType> inline bool isPathDirectory( const StringType &path )
+// {
+//     UMBA_USED(path);
+//     throw std::runtime_error("Not implemented: isPathDirectory not specialized for this StringType");
+// }
 
 //----------------------------------------------------------------------------
 //! Проверка, является ли файл файлом только для чтения
@@ -957,6 +957,9 @@ template<> inline bool createDirectoryEx<std::wstring>( const std::wstring &dirn
     return true;
 }
 
+#if 0
+// Почему-то это не работает
+
 //----------------------------------------------------------------------------
 //! Проверка, является ли путь каталогом, специализация для std::string
 template<> inline bool isPathDirectory<std::string>( const std::string &path )
@@ -996,6 +999,7 @@ template<> inline bool isPathDirectory<std::wstring>( const std::wstring &path )
 
     return false;
 }
+#endif
 
 //----------------------------------------------------------------------------
 //! Проверка, является ли файл файлом только для чтения, специализация для std::string
