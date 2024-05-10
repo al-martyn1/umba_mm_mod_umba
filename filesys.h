@@ -482,6 +482,36 @@ void parseStatToFileStat( const struct_file_stat &statBuf, FileStat &fileStat )
 }
 
 //----------------------------------------------------------------------------
+//! Возвращает FileStat по пути (файл или каталог, не важно)
+template<typename StringType>
+bool getPathStat(const StringType &path, FileStat &fileStat)
+{
+    UMBA_USED(path);
+    UMBA_USED(fileStat);
+    throw std::runtime_error("Not implemented: getPathStat");
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+bool isPathExist(const StringType &path)
+{
+    FileStat fileStat;
+    return getPathStat(path, fileStat);
+}
+
+//----------------------------------------------------------------------------
+// template<typename StringType>
+// bool isPathDirectory(const StringType &path)
+// {
+//     FileStat fileStat;
+//     if (!getPathStat(path, fileStat))
+//         return false;
+//  
+//     return fileStat.isDir();
+// }
+
+//----------------------------------------------------------------------------
+
 
 
 
@@ -489,6 +519,41 @@ void parseStatToFileStat( const struct_file_stat &statBuf, FileStat &fileStat )
 //----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
 
+//TODO: !!! Посмотреть "Именование файлов, путей и пространств имен" - https://learn.microsoft.com/ru-ru/windows/win32/fileio/naming-a-file
+
+//----------------------------------------------------------------------------
+template<>
+bool getPathStat<std::string>(const std::string &path, FileStat &fileStat)
+{
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind = FindFirstFileA(path.c_str(), &findData);
+    if (hFind==INVALID_HANDLE_VALUE)
+        return false;
+
+    fileStat = fileStatFromFindData(findData);
+
+    FindClose(hFind);
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<>
+bool getPathStat<std::wstring>(const std::wstring &path, FileStat &fileStat)
+{
+    WIN32_FIND_DATAW findData;
+    HANDLE hFind = FindFirstFileW(path.c_str(), &findData);
+    if (hFind==INVALID_HANDLE_VALUE)
+        return false;
+
+    fileStat = fileStatFromFindData(findData);
+
+    FindClose(hFind);
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
 //! Хелпер (std::string) для генерик открытия файла для чтения
 inline
 HANDLE openFileForReadingWin32(const std::string &filename)
