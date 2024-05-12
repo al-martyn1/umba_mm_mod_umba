@@ -405,7 +405,20 @@ struct FileStat
     {
         FileStat fileStat;
     
-        fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
+        if (findData.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT))
+            fileStat.fileType = FileType::FileTypeDir;
+        else
+            fileStat.fileType = FileType::FileTypeFile;
+
+// if(result->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+// {
+//     if(result->dwReserved0 == IO_REPARSE_TAG_MOUNT_POINT)
+//     {
+//         //path is a volume; try using GetVolumeNameForVolumeMountPoint for info
+//     }
+// }
+
+        //fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
         fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
     
         fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
@@ -420,7 +433,11 @@ struct FileStat
     {
         FileStat fileStat;
     
-        fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
+        if (findData.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT))
+            fileStat.fileType = FileType::FileTypeDir;
+        else
+            fileStat.fileType = FileType::FileTypeFile;
+        //fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
         fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
     
         fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
@@ -861,14 +878,36 @@ template<typename StringType> inline bool createDirectory( const StringType &dir
 //! Создание каталога, специализация для std::string
 template<> inline bool createDirectory<std::string>( const std::string &dirname )
 {
-    return ::CreateDirectoryA(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
+    bool bRes = ::CreateDirectoryA(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
+    if (bRes)
+    {
+        DWORD dwAttrs = GetFileAttributesA(umba::filename::prepareForNativeUsage(dirname).c_str()); 
+        if (dwAttrs!=INVALID_FILE_ATTRIBUTES)
+        {
+            SetFileAttributesA(umba::filename::prepareForNativeUsage(dirname).c_str(), dwAttrs|FILE_ATTRIBUTE_DIRECTORY);
+        }
+        return true;
+    }
+
+    return false;
 }
 
 //----------------------------------------------------------------------------
 //! Создание каталога, специализация для std::wstring
 template<> inline bool createDirectory<std::wstring>( const std::wstring &dirname )
 {
-    return ::CreateDirectoryW(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
+    bool bRes = ::CreateDirectoryW(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
+    if (bRes)
+    {
+        DWORD dwAttrs = GetFileAttributesW(umba::filename::prepareForNativeUsage(dirname).c_str()); 
+        if (dwAttrs!=INVALID_FILE_ATTRIBUTES)
+        {
+            SetFileAttributesW(umba::filename::prepareForNativeUsage(dirname).c_str(), dwAttrs|FILE_ATTRIBUTE_DIRECTORY);
+        }
+        return true;
+    }
+
+    return false;
 }
 
 //----------------------------------------------------------------------------
