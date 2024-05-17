@@ -1359,9 +1359,10 @@ std::string getCurrentDirectory<std::string>()
     char *buf = &ch;
     DWORD size = ::GetCurrentDirectoryA(1, buf);
     if (!size) return std::string();
-    buf = (char*)_alloca(size*sizeof(char)+1);
-    ::GetCurrentDirectoryA(size, buf);
-    return std::string(buf);
+    std::size_t allocSize = (size+1)*sizeof(char);
+    buf = (char*)_alloca(allocSize);
+    DWORD numCharsCopied = ::GetCurrentDirectoryA(size+1, buf);
+    return std::string(buf, (std::size_t)numCharsCopied );
 }
 
 //------------------------------
@@ -1373,9 +1374,10 @@ std::wstring getCurrentDirectory<std::wstring>()
     wchar_t *buf = &ch;
     DWORD size = ::GetCurrentDirectoryW(1, buf);
     if (!size) return std::wstring();
-    buf = (wchar_t*)_alloca(size*sizeof(wchar_t)+1);
-    ::GetCurrentDirectoryW(size, buf);
-    return std::wstring(buf);
+    std::size_t allocSize = (size+1)*sizeof(wchar_t);
+    buf = (wchar_t*)_alloca(allocSize);
+    DWORD numCharsCopied = ::GetCurrentDirectoryW(size+1, buf);
+    return std::wstring(buf, (std::size_t)numCharsCopied);
 }
 
 //----------------------------------------------------------------------------
