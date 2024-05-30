@@ -32,6 +32,7 @@
 
 #else
 
+    #include <errno.h>
     #include <pwd.h>
     #include <stdio.h>
     #include <unistd.h>
@@ -835,6 +836,22 @@ template<typename StringType> inline bool isFileReadonly( const StringType &fnam
     UMBA_USED(fname);
     throw std::runtime_error("Not implemented: isFileReadonly not specialized for this StringType");
 }
+
+
+#if defined(WIN32) || defined(_WIN32)
+inline
+bool isLastErrorAlreadyExists()
+{
+    return ::GetLastError()==ERROR_ALREADY_EXISTS;
+}
+#else
+inline
+bool isLastErrorAlreadyExists()
+{
+    return errno==EEXIST;
+}
+#endif
+
 
 //----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
