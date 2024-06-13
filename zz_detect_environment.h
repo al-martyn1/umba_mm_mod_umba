@@ -677,6 +677,11 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
         #define UMBA_ARCH_ARM
         #define UMBA_ARCH_LITTLE_ENDIAN
 
+    #elif defined(_M_IA64)
+
+        #define UMBA_ARCH_IA64
+        #define UMBA_ARCH_LITTLE_ENDIAN /* !!! ??? */
+
     #else
 
         #error "Windows Arch is unknown"
