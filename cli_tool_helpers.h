@@ -25,6 +25,11 @@
 #endif
 
 
+#if defined(UMBA_PRINT_NAME_VERSION_NO_PLATFORM_ARCHITECTURE) || defined(UMBA_PRINT_NAME_VERSION_NO_COMPILER_INFO) || defined(UMBA_PRINT_NAME_VERSION_NO_BUILD_DATE_TIME)
+#else
+    #include "compiler_info.h"
+#endif
+
 
 
 //----------------------------------------------------------------------------
@@ -103,6 +108,30 @@ StreamType& printNameVersion( StreamType &os, const std::string &indent = "" )
 {
     os << indent << appFullName << " version ";
     printOnlyVersion(os);
+
+    #if !defined(UMBA_PRINT_NAME_VERSION_NO_PLATFORM_ARCHITECTURE)
+    os << umba::getAppPlatformArchitecture() <<"\n";
+    #endif
+
+    #if !defined(UMBA_PRINT_NAME_VERSION_NO_COMPILER_INFO)
+    std::string compilerFullInfoString = umba::getCompilerNameVersionString();
+    {
+        std::string compilerSimulateFullInfoString = umba::getCompilerSimulateNameVersionString();
+        if (!compilerSimulateFullInfoString.empty())
+        {
+            compilerFullInfoString += " (as ";
+            compilerFullInfoString += compilerSimulateFullInfoString;
+            compilerFullInfoString += ")";
+        }
+    }
+     
+    os << "Built with " << compilerFullInfoString <<" compiler\n";
+    #endif
+
+    #if !defined(UMBA_PRINT_NAME_VERSION_NO_BUILD_DATE_TIME)
+    os << "Built at "<< appBuildDate <<" "<< appBuildTime <<"\n";
+    #endif
+
     return os;
 }
 
