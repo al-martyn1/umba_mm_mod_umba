@@ -1,0 +1,3 @@
+visual studio macro with the path of a props file - https://stackoverflow.com/questions/10400222/visual-studio-macro-with-the-path-of-a-props-file
+MSBuild Reserved and Well-Known Properties - https://learn.microsoft.com/ru-ru/previous-versions/visualstudio/visual-studio-2015/msbuild/msbuild-reserved-and-well-known-properties?view=vs-2015&redirectedfrom=MSDN
+The solution is $(MSBuildThisFileDirectory)
