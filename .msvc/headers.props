@@ -1,0 +1,6 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)\..\algoritms.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)\..\alloca.h" />
+  </ItemGroup>
+</Project>
