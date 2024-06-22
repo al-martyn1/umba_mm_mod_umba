@@ -1,6 +1,14 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)\..\time_service.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)\..\compiler_info.cpp" />
+    <Filter Include="Source Files\umba">
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\..\time_service.cpp">
+      <Filter>Source Files\umba</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\..\compiler_info.cpp">
+      <Filter>Source Files\umba</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
