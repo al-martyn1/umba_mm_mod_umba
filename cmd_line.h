@@ -2831,7 +2831,9 @@ makeArgsParserImpl( const ArgParser                                            &
         // else if (opt.isOption("no-builtin-includes"))
         //     disableBuiltinIncludes = true;
         else if (opt.isSomeKindOfQuet() && !argsParser.hasHelpOption)
+        {
             argsParser.quet = true;
+        }
         else if (opt.isWhereOption())
         {
             if constexpr (sizeof(typename StringType::value_type)>sizeof(char))
