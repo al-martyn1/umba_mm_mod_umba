@@ -285,7 +285,7 @@ bool regexMatch( const std::vector<CharType>           &text
 }
 
 //----------------------------------------------------------------------------
-//! На входе - map, ключ - трока с выражением, значение - regex, чтобы прогонять regex'ы пачками и уметь получать исходную строку regex-выражения
+//! На входе - map, ключ - строка с выражением, значение - regex, чтобы прогонять regex'ы пачками и уметь получать исходную строку regex-выражения
 template< typename StringType > inline
 bool regexMatch( const StringType                                                                &text
                , const std::map< StringType, std::basic_regex<typename StringType::value_type> > &regexes
