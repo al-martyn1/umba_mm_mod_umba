@@ -27,14 +27,12 @@ list(FILTER sources EXCLUDE REGEX ".*CMakeCXXCompilerId\\.cpp$")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "${PROJECT_NAME}/Sources" FILES ${sources})
 
 file(GLOB headers "${MODULE_ROOT}/*.h")
-list(FILTER headers EXCLUDE REGEX ".*zz_.*\\.cpp$")
+list(FILTER headers EXCLUDE REGEX ".*zz_.*\\.h$")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "${PROJECT_NAME}/Headers" FILES ${headers})
 
 
-add_library(${PROJECT_NAME} ${sources})
+add_library(${PROJECT_NAME} ${sources} ${headers})
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-#target_sources(${PROJECT_NAME} PRIVATE ${sources})
-#target_include_directories(${PROJECT_NAME} PUBLIC ${MODULE_ROOT}/..)
 target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_ROOT}/..)
 
