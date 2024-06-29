@@ -149,6 +149,8 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                 , std::vector<StringType>  &excludedFiles
                 , std::set<StringType>     &foundExtentions
                 , std::vector<StringType>  *pFoundFilesRootFolders = 0
+                , bool                     scanRecurse    = true
+                , bool                     logFoundHeader = true
                 )
 {
     using namespace umba::omanip;
@@ -205,7 +207,10 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 	
 													    if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileTypeDir)
 													    {
-													        scanPaths.push_back(entryName);
+                                                            if (scanRecurse)
+                                                            {
+    												            scanPaths.push_back(entryName);
+                                                            }
 													        // std::cout << entry.path() << "\n";
 													        return true; // continue
 													    }
@@ -223,8 +228,11 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 											
 											                //if (appConfig.testVerbosity(VerbosityLevel::detailed))
 											                {
-											                    umba::info_log::printSectionHeader(logMsg, "Found Files");
-											                    // logMsg << "---------------------\nFound Files:" << endl << "------------" << endl;
+                                                                if (logFoundHeader)
+                                                                {
+    										                        umba::info_log::printSectionHeader(logMsg, "Found Files");
+                                                                    // logMsg << "---------------------\nFound Files:" << endl << "------------" << endl;
+                                                                }
 											                }
 											            }
 											
@@ -291,7 +299,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 											                    if (!includeRegexStr.empty())
 											                    {
 											                        // orgMask = includeOriginalMasks[includeRegexStr]
-											                        logMsg << " due include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
+											                        logMsg << notice << " due include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
 											                    }
 											
 											                    if (ext.empty())
@@ -312,11 +320,11 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 											                {
 											                    if (excludedByIncludeMask)
 											                    {
-											                        logMsg << notice << "skipped" <<  /* normal << */  " due include masks" << normal << "\n";
+											                        logMsg << good_but_notice /* warning */  << "skipped" << notice << /* normal << */  " due include masks" << normal << "\n";
 											                    }
 											                    else
 											                    {
-											                        logMsg << notice << "skipped" <<  /* normal << */  " due exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
+											                        logMsg << good_but_warning /* warning */  << "skipped" << notice << /* normal << */  " due exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
 											                    }
 											                }
 											            }
@@ -346,6 +354,8 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
                 , std::vector<std::string> &excludedFiles
                 , std::set<std::string>    &foundExtentions
                 , std::vector<std::string> *pFoundFilesRootFolders = 0
+                , bool                     scanRecurse = true
+                , bool                     logFoundHeader = true
                 )
 {
     scanFolders( appConfig.scanPaths
@@ -356,6 +366,8 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
                , excludedFiles
                , foundExtentions
                , pFoundFilesRootFolders
+               , scanRecurse
+               , logFoundHeader
                );
 
     #if 0
