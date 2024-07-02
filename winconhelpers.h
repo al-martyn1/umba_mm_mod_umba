@@ -58,8 +58,12 @@
 
 
 #include <set>
+#include <unordered_set>
 #include <string>
 #include <vector>
+#include <iterator>
+#include <algorithm>
+
 
 #ifdef DEBUG_WINCONHELPERS
     
@@ -172,6 +176,15 @@ std::vector<std::string> toLower( std::vector<std::string> v )
     }
 
     return v;
+}
+
+inline
+std::string getNameWithoutExt(const std::string &name)
+{
+    std::string::size_type dotPos = name.find('.', 0);
+    if (dotPos==name.npos)
+        return name;
+    return std::string(name, 0, dotPos);
 }
 
 
@@ -401,6 +414,7 @@ std::vector<std::string> getProcessParentNames( ULONG_PTR pid = GetCurrentProces
     DEBUG_WINCONHELPERS_WRITE_STR("getProcessParentNames enter\n");
 
     std::set<ULONG_PTR> pidSet; // strange bug - sometimes we got next:
+
 /*
     getProcessParentNames, pid: 5336
     getProcessParentNames, parent name: explorer.exe
@@ -460,6 +474,28 @@ std::vector<std::string> getProcessParentNames( ULONG_PTR pid = GetCurrentProces
 
     return res;
 }
+
+//-----------------------------------------------------------------------------
+bool isProcessHasParentOneOf(const std::vector<std::string> names, ULONG_PTR pid = GetCurrentProcessId())
+{
+    std::unordered_set<std::string> namesSet;
+    std::transform(names.begin(), names.end(), std::inserter(namesSet, namesSet.end()), [](const std::string &str) { return utils::toLower(str); });
+
+    std::vector<std::string> processParents = getProcessParentNames(pid);
+    for(const auto &p: processParents)
+    {
+        auto pWithoutExt = utils::getNameWithoutExt(p);
+        if (namesSet.find(utils::toLower(pWithoutExt))!=namesSet.end())
+            return true;
+    }
+
+    //std::string toLower( std::string s )
+
+    return false;
+}
+
+
+
 
 #ifdef UMBA_CXX_HAS_STD11
 
