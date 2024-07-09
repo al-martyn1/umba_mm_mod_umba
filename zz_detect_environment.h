@@ -76,9 +76,9 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 /*! 
     \brief Определяет тип сборки - отладочная
 
-    Определяется, если задан один из макросов DEBUG или _DEBUG, или еще что-то (в зависимости от системы сборки)
+    Определяется, если задан макрос NDEBUG, или еще что-то (в зависимости от системы сборки)
  */
-#if defined(DEBUG) || defined(_DEBUG)
+#if !defined(NDEBUG)
     #if !defined(UMBA_DEBUG)
         #define UMBA_DEBUG
     #endif
