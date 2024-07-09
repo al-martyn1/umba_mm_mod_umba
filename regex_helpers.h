@@ -9,6 +9,7 @@
 
 #include <exception>
 #include <map>
+#include <unordered_map>
 #include <regex>
 #include <set>
 #include <stdexcept>
@@ -291,6 +292,28 @@ bool regexMatch( const StringType                                               
                , const std::map< StringType, std::basic_regex<typename StringType::value_type> > &regexes
                , StringType                                                                      *pMatchedRegexText = 0
                , std::regex_constants::match_flag_type                                           flags = std::regex_constants::match_default
+               )
+{
+    for( const auto& [key,val] : regexes)
+    {
+        if (regexMatch(text, val, flags))
+        {
+            if (pMatchedRegexText)
+               *pMatchedRegexText = key;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+//! На входе - map, ключ - строка с выражением, значение - regex, чтобы прогонять regex'ы пачками и уметь получать исходную строку regex-выражения
+template< typename StringType > inline
+bool regexMatch( const StringType                                                                          &text
+               , const std::unordered_map< StringType, std::basic_regex<typename StringType::value_type> > &regexes
+               , StringType                                                                                *pMatchedRegexText = 0
+               , std::regex_constants::match_flag_type                                                     flags = std::regex_constants::match_default
                )
 {
     for( const auto& [key,val] : regexes)
