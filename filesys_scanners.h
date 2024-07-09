@@ -18,6 +18,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <regex>
 #include <set>
 #include <sstream>
@@ -144,13 +145,14 @@ template<typename StringType, typename LogMsgType> inline
 void scanFolders( const std::vector<StringType> &rootScanPaths
                 , const std::vector<StringType> &includeFilesMaskList
                 , const std::vector<StringType> &excludeFilesMaskList
-                , LogMsgType               &logMsg           // logMsg or logNul
-                , std::vector<StringType>  &foundFiles
-                , std::vector<StringType>  &excludedFiles
-                , std::set<StringType>     &foundExtentions
-                , std::vector<StringType>  *pFoundFilesRootFolders = 0
-                , bool                     scanRecurse    = true
-                , bool                     logFoundHeader = true
+                , LogMsgType                    &logMsg           // logMsg or logNul
+                , std::vector<StringType>       &foundFiles
+                , std::vector<StringType>       &excludedFiles
+                , std::set<StringType>          &foundExtentions
+                , std::vector<StringType>       *pFoundFilesRootFolders = 0
+                , const std::vector<StringType> &excludeFoldersExact = std::vector<StringType>()
+                , bool                          scanRecurse    = true
+                , bool                          logFoundHeader = true
                 )
 {
     using namespace umba::omanip;
@@ -160,8 +162,15 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 
     //std::list<StringType> rootScanPaths( scanPaths.begin(), scanPaths.end() );
 
-    std::map<StringType,std::regex>  excludeRegexes;
-    std::map<StringType,StringType> excludeOriginalMasks;
+    std::unordered_set<StringType>  excludeFoldersExactSet;
+    if (scanRecurse)
+    {
+        std::transform(excludeFoldersExact.begin(), excludeFoldersExact.end(), std::inserter(excludeFoldersExactSet, excludeFoldersExactSet.end()), [](const StringType &str) { return umba::string_plus::tolower_copy(str); });
+    }
+
+
+    std::unordered_map<StringType,std::regex>  excludeRegexes;
+    std::unordered_map<StringType,StringType> excludeOriginalMasks;
 
     for(auto excludeFileMask : excludeFilesMaskList)
     {
@@ -172,8 +181,8 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
         excludeOriginalMasks[regexStr] = excludeFileMask;
     }
 
-    std::map<StringType,std::regex>  includeRegexes;
-    std::map<StringType,StringType> includeOriginalMasks;
+    std::unordered_map<StringType,std::regex>  includeRegexes;
+    std::unordered_map<StringType,StringType> includeOriginalMasks;
 
     for(auto includeFileMask : includeFilesMaskList)
     {
@@ -203,13 +212,22 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 		    if (!umba::filesys::enumerateDirectory( scanPath
 		                                          , [&](StringType entryName, const umba::filesys::FileStat &fileStat)
 		                                            {
+                                                        auto entryNameOnly = entryName;
 	                                                    entryName = umba::filename::appendPath(scanPath, entryName);
 	
 													    if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileTypeDir)
 													    {
                                                             if (scanRecurse)
                                                             {
-    												            scanPaths.push_back(entryName);
+                                                                if (excludeFoldersExactSet.find(umba::string_plus::tolower_copy(entryNameOnly))==excludeFoldersExactSet.end())
+                                                                {
+    												                scanPaths.push_back(entryName);
+                                                                }
+                                                                else
+                                                                {
+                                                                    logMsg << entryName << " - ";
+                                                                    logMsg << good_but_warning /* warning */  << "skipped" << notice << /* normal << */  " due to exclude exact folder rule" << normal << "\n";
+                                                                }
                                                             }
 													        // std::cout << entry.path() << "\n";
 													        return true; // continue
@@ -299,7 +317,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 											                    if (!includeRegexStr.empty())
 											                    {
 											                        // orgMask = includeOriginalMasks[includeRegexStr]
-											                        logMsg << notice << " due include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
+											                        logMsg << notice << " due to include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
 											                    }
 											
 											                    if (ext.empty())
@@ -320,11 +338,11 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 											                {
 											                    if (excludedByIncludeMask)
 											                    {
-											                        logMsg << good_but_notice /* warning */  << "skipped" << notice << /* normal << */  " due include masks" << normal << "\n";
+											                        logMsg << good_but_notice /* warning */  << "skipped" << notice << /* normal << */  " due to include masks" << normal << "\n";
 											                    }
 											                    else
 											                    {
-											                        logMsg << good_but_warning /* warning */  << "skipped" << notice << /* normal << */  " due exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
+											                        logMsg << good_but_warning /* warning */  << "skipped" << notice << /* normal << */  " due to exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
 											                    }
 											                }
 											            }
@@ -347,15 +365,16 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 //! Сканирует каталоги в поисках файлов, заданных масками инклюд и эксклюд - appConfig.includeFilesMaskList и appConfig.excludeFilesMaskList
 /*! Если инклюд маски пусты, этап пропускается. Эксклюд маски обрабатываются в любом случае
 */
-template<typename AppConfigType, typename LogMsgType> inline
-void scanFolders( const AppConfigType      &appConfig        // with includeFilesMaskList and excludeFilesMaskList 
-                , LogMsgType               &logMsg           // logMsg or logNul
-                , std::vector<std::string> &foundFiles
-                , std::vector<std::string> &excludedFiles
-                , std::set<std::string>    &foundExtentions
-                , std::vector<std::string> *pFoundFilesRootFolders = 0
-                , bool                     scanRecurse = true
-                , bool                     logFoundHeader = true
+template<typename StringType, typename AppConfigType, typename LogMsgType> inline
+void scanFolders( const AppConfigType            &appConfig        // with includeFilesMaskList and excludeFilesMaskList 
+                , LogMsgType                     &logMsg           // logMsg or logNul
+                , std::vector<StringType>        &foundFiles
+                , std::vector<StringType>        &excludedFiles
+                , std::set<StringType>           &foundExtentions
+                , std::vector<StringType>        *pFoundFilesRootFolders = 0
+                , const std::vector<StringType>  &excludeFoldersExact = std::vector<StringType>()
+                , bool                           scanRecurse = true
+                , bool                           logFoundHeader = true
                 )
 {
     scanFolders( appConfig.scanPaths
@@ -366,6 +385,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
                , excludedFiles
                , foundExtentions
                , pFoundFilesRootFolders
+               , excludeFoldersExact
                , scanRecurse
                , logFoundHeader
                );
@@ -512,7 +532,7 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 											                    if (!includeRegexStr.empty())
 											                    {
 											                        // orgMask = includeOriginalMasks[includeRegexStr]
-											                        logMsg << " due include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
+											                        logMsg << " due to include mask '" << includeOriginalMasks[includeRegexStr] << "' (" << includeRegexStr << ")" << normal;
 											                    }
 											
 											                    if (ext.empty())
@@ -533,11 +553,11 @@ void scanFolders( const AppConfigType      &appConfig        // with includeFile
 											                {
 											                    if (excludedByIncludeMask)
 											                    {
-											                        logMsg << notice << "skipped" <<  /* normal << */  " due include masks" << normal << "\n";
+											                        logMsg << notice << "skipped" <<  /* normal << */  " due to include masks" << normal << "\n";
 											                    }
 											                    else
 											                    {
-											                        logMsg << notice << "skipped" <<  /* normal << */  " due exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
+											                        logMsg << notice << "skipped" <<  /* normal << */  " due to exclude mask '" << excludeOriginalMasks[excludeRegexStr] << "' (" << excludeRegexStr << ")" << normal << "\n";
 											                    }
 											                }
 											            }
