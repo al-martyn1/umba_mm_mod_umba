@@ -74,14 +74,21 @@ namespace filename{
 
 #if !defined(UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED)
 #define UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED
-    template<typename CharType>
-    CharType getNativePathSep( );
+    template<typename CharType> CharType getNativePathSep( );
+    template<typename StringType> StringType getNativeCurrentDirAlias( );
+    template<typename StringType> StringType getNativeParentDirAlias( ) ;
+    template<typename StringType> StringType getNativeHomeDirAlias( )   ;
 #endif
 
 #if !defined(UMBA_FILENAME_MAKE_CANONICAL_DECLARED)
 #define UMBA_FILENAME_MAKE_CANONICAL_DECLARED
     template<typename StringType>
-    StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
+    StringType makeCanonical( StringType fileName
+                            , typename StringType::value_type pathSep  = umba::filename::getNativePathSep<typename StringType::value_type>()
+                            , const StringType &currentDirAlias        = umba::filename::getNativeCurrentDirAlias<StringType>()
+                            , const StringType &parentDirAlias         = umba::filename::getNativeParentDirAlias<StringType>()
+                            , bool keepLeadingParents                  = false
+                            );
 #endif
 
 template<typename StringType> StringType appendPath( const StringType &p, const StringType &f, typename StringType::value_type pathSep );

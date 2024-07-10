@@ -30,14 +30,22 @@ namespace filename
 
 #if !defined(UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED)
 #define UMBA_FILENAME_GET_NATIVE_PATH_SEP_DECLARED
-    template<typename CharType>
-    CharType getNativePathSep( );
+    template<typename CharType> CharType getNativePathSep( );
+    template<typename StringType> StringType getNativeCurrentDirAlias( );
+    template<typename StringType> StringType getNativeParentDirAlias( ) ;
+    template<typename StringType> StringType getNativeHomeDirAlias( )   ;
+
 #endif
 
 #if !defined(UMBA_FILENAME_MAKE_CANONICAL_DECLARED)
 #define UMBA_FILENAME_MAKE_CANONICAL_DECLARED
     template<typename StringType>
-    StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() );
+    StringType makeCanonical( StringType fileName
+                            , typename StringType::value_type pathSep  = umba::filename::getNativePathSep<typename StringType::value_type>()
+                            , const StringType &currentDirAlias        = umba::filename::getNativeCurrentDirAlias<StringType>()
+                            , const StringType &parentDirAlias         = umba::filename::getNativeParentDirAlias<StringType>()
+                            , bool keepLeadingParents                  = false
+                            );
 #endif
 
 
@@ -325,12 +333,14 @@ StringType addNativePrefixes(const StringType &fileName, const NativePrefixFlags
 //----------------------------------------------------------------------------
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути, не учитывая возможные спец префиксы
 template<typename StringType> inline
-std::vector< StringType > makeCanonicalSimpleParts( StringType fileName, const StringType &curDirAlias, const StringType &parentDirAlias, typename StringType::value_type pathSep)
+std::vector< StringType > makeCanonicalSimpleParts( StringType fileName, typename StringType::value_type pathSep, const StringType &curDirAlias, const StringType &parentDirAlias, bool keepLeadingParents = false)
 {
     namespace ustrp = umba::string_plus;
 
     std::vector< StringType > parts = ustrp::split(fileName, pathSep, true /* skipEmpty */ );
     std::vector< StringType > resParts; resParts.reserve(parts.size());
+
+    std::size_t parentDirPrefixCounter = 0;
 
     typename std::vector< StringType >::iterator pit = parts.begin();
     for(; pit != parts.end(); ++pit)
@@ -341,11 +351,25 @@ std::vector< StringType > makeCanonicalSimpleParts( StringType fileName, const S
         if (*pit==parentDirAlias)
         {
             if (!resParts.empty())
+            {
                 resParts.erase( --resParts.end() );
+            }
+            else
+            {
+                ++parentDirPrefixCounter;
+            }
             continue;
         }
 
         resParts.push_back(*pit);
+    }
+
+    if (parentDirPrefixCounter!=0 && keepLeadingParents)
+    {
+        std::vector< StringType > tmp = std::vector< StringType >(parentDirPrefixCounter, parentDirAlias);
+        tmp.reserve(tmp.size()+resParts.size());
+        tmp.insert(tmp.end(), resParts.begin(), resParts.end());
+        resParts.swap(tmp);
     }
 
     return resParts;
@@ -354,7 +378,7 @@ std::vector< StringType > makeCanonicalSimpleParts( StringType fileName, const S
 //----------------------------------------------------------------------------
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути, не учитывая возможные спец префиксы
 template<typename StringType> inline
-StringType makeCanonicalSimple( StringType fileName, const StringType &curDirAlias, const StringType &parentDirAlias, typename StringType::value_type pathSep)
+StringType makeCanonicalSimple( StringType fileName, typename StringType::value_type pathSep, const StringType &curDirAlias, const StringType &parentDirAlias, bool keepLeadingParents = false)
 {
     namespace ustrp = umba::string_plus;
 
@@ -363,7 +387,7 @@ StringType makeCanonicalSimple( StringType fileName, const StringType &curDirAli
     bool lastPathSep  = stripLastPathSep(fileName);
     bool firstPathSep = stripFirstPathSep(fileName);
 
-    std::vector< StringType > parts = makeCanonicalSimpleParts( fileName, curDirAlias, parentDirAlias, pathSep);
+    std::vector< StringType > parts = makeCanonicalSimpleParts( fileName, pathSep, curDirAlias, parentDirAlias, keepLeadingParents);
 
     fileName = ustrp::merge(parts,pathSep);
 
@@ -386,7 +410,14 @@ StringType makeCanonicalSimple( StringType fileName, const StringType &curDirAli
 
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути
 template<typename StringType> inline
-StringType makeCanonical( StringType fileName, typename StringType::value_type pathSep  /* = getNativePathSep<typename StringType::value_type>() */  )
+StringType makeCanonical( StringType fileName
+                        , typename StringType::value_type pathSep 
+                        , const StringType &currentDirAlias
+                        , const StringType &parentDirAlias
+                        , bool keepLeadingParents
+                        )
+
+
 {
     // std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
 
@@ -445,7 +476,7 @@ StringType makeCanonical( StringType fileName, typename StringType::value_type p
     }
     #endif
 
-    std::vector< StringType > parts = makeCanonicalSimpleParts( fileName, getNativeCurrentDirAlias<StringType>(), getNativeParentDirAlias<StringType>(), pathSep);
+    std::vector< StringType > parts = makeCanonicalSimpleParts( fileName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
 
     typename std::vector< StringType >::iterator pit = parts.begin();
     StringType nativeHomeDirAlias = getNativeHomeDirAlias<StringType>();
