@@ -527,17 +527,27 @@ StringType makeCanonical( StringType fileName
 //-----------------------------------------------------------------------------
 //! Делает "каноническое" имя для сравнения
 template<typename StringType> inline
-StringType makeCanonicalForCompare( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+StringType makeCanonicalForCompare( StringType                      fileName
+                                  , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
+                                  , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
+                                  , const StringType                &parentDirAlias    = umba::filename::getNativeParentDirAlias<StringType>()
+                                  , bool                            keepLeadingParents = false
+                                  )
 {
     #if defined(WIN32) || defined(_WIN32)
-    namespace ustrp = umba::string_plus;
+    // namespace ustrp = umba::string_plus;
+    //  
+    // NativePrefixFlagsInfo npfi = stripNativePrefixes(fileName, pathSep);
+    // // npfi.networkUncPrefix      = false;
+    // // npfi.uncPrefix             = false;
+    // // fileName                   = addNativePrefixes(fileName, npfi, pathSep);
 
-    NativePrefixFlagsInfo npfi = stripNativePrefixes(fileName, pathSep);
-    npfi.networkUncPrefix = false;
-    npfi.uncPrefix        = false;
-    fileName = addNativePrefixes(fileName, npfi, pathSep);
+    // StringType canoname        = makeCanonical(fileName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
+    // canoname = ustrp::tolower_copy(canoname);
+    //  
+    // return addNativePrefixes(canoname, npfi, pathSep);
 
-    StringType canoname = makeCanonical(fileName, pathSep);
+    return umba::string_plus::tolower_copy(makeCanonical(fileName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents));
 
     #if 0
     if (ustrp::starts_with_and_strip(canoname, getNativeNetworkUncPrefix<StringType>()))
@@ -548,9 +558,9 @@ StringType makeCanonicalForCompare( StringType fileName, typename StringType::va
 
     //return ustrp::toupper_copy(canoname);
     //return ustrp::tolower_copy(canoname);
-    return canoname; // Почему регистр не меняем, я хз, и почему раньше меняли, а сейчас - нет - хз
+    //return canoname; // Почему регистр не меняем, я хз, и почему раньше меняли, а сейчас - нет - хз
     #else
-    return makeCanonical(fileName);
+    return makeCanonical(fileName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
     #endif
 }
 
@@ -649,14 +659,17 @@ StringType makeAbsPath( const StringType &path
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
 template<typename StringType> inline 
-bool isSubPathName( StringType commonPath
-                  , StringType fullName
-                  , StringType *pResName = 0
-                  , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
+bool isSubPathName( StringType                      commonPath
+                  , StringType                      fullName
+                  , StringType                      *pResName          = 0
+                  , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
+                  , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
+                  , const StringType                &parentDirAlias    = umba::filename::getNativeParentDirAlias<StringType>()
+                  , bool                            keepLeadingParents = false
                   )
 {
-    commonPath = makeCanonical(commonPath, pathSep);
-    fullName   = makeCanonical(fullName  , pathSep);
+    commonPath = makeCanonicalForCompare(commonPath, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
+    fullName   = makeCanonicalForCompare(fullName  , pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
 
     appendPathSepInline(commonPath, pathSep);
     if (umba::string_plus::starts_with_and_strip(fullName, commonPath))
@@ -670,35 +683,119 @@ bool isSubPathName( StringType commonPath
     return false;
 }
 
+    // StringType makeCanonical( StringType fileName
+    //                         , typename StringType::value_type pathSep  = umba::filename::getNativePathSep<typename StringType::value_type>()
+    //                         , const StringType &currentDirAlias        = umba::filename::getNativeCurrentDirAlias<StringType>()
+    //                         , const StringType &parentDirAlias         = umba::filename::getNativeParentDirAlias<StringType>()
+    //                         , bool keepLeadingParents                  = false
+    //                         );
+
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
 template<typename StringType> inline 
-StringType makeRelPath( const StringType &commonPath
-                      , const StringType &fullName
-                      , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
+bool makeRelPath( StringType                      &foundRelName
+                , const StringType                &commonPath
+                , const StringType                &fullName
+                , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
+                , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
+                , const StringType                &parentDirAlias    = umba::filename::getNativeParentDirAlias<StringType>()
+                , bool                            keepLeadingParents = false
+                , bool                            tryReverseRelPath   = false
+                )
+{
+    StringType res;
+    if (isSubPathName(commonPath, fullName, &res, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents))
+    {
+        foundRelName = res;
+        return true;
+    }
+
+    if (!tryReverseRelPath)
+        return false;
+
+    StringType fullNamePath = getPath(fullName); // относительное имя ищем для последнего компонента пути, "отрезаем" его тут
+
+    if (umba::filename::isSubPathName(fullNamePath, commonPath, &res))
+    {
+        res = umba::filename::normalizePathSeparators(res, pathSep);
+        std::vector<std::string> parts = umba::string_plus::split(res, pathSep, true /* skipEmpty */ );
+        //res = umba::filename::appendPath(umba::string_plus::merge(std::vector<std::string>(parts.size(), ".."), '/'), umba::filename::getFileName(url));
+        res = appendPath( umba::string_plus::merge(std::vector<std::string>(parts.size(), parentDirAlias), pathSep)
+                        , getFileName(fullName)
+                        , pathSep
+                        );
+        foundRelName = res;
+        return true;
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+//! Удаляет префикс пути - делает имя относительным
+template<typename StringType> inline 
+StringType makeRelPath( const StringType                &fullName
+                      , const StringType                &commonPath
+                      , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
+                      , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
+                      , const StringType                &parentDirAlias    = umba::filename::getNativeParentDirAlias<StringType>()
+                      , bool                            keepLeadingParents = false
+                      , bool                            tryReverseRelPath  = false
                       )
 {
     StringType res;
-    if (isSubPathName(commonPath, fullName, &res, pathSep))
+    if (makeRelPath(res, commonPath, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, tryReverseRelPath))
         return res;
-
+    
     return fullName;
 }
 
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
 template<typename StringType> inline 
-StringType makeRelPath( const std::vector<StringType> &commonPaths
-                      , const StringType &fullName
-                      , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
+bool makeRelPath( StringType                      &foundRelName
+                , const std::vector<StringType>   &commonPaths
+                , const StringType                &fullName
+                , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
+                , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
+                , const StringType                &parentDirAlias    = umba::filename::getNativeParentDirAlias<StringType>()
+                , bool                            keepLeadingParents = false
+                , bool                            tryReverseRelPath  = false
+                )
+{
+    for(const StringType &commonPath : commonPaths)
+    {
+        if (makeRelPath(foundRelName, commonPath, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, false))
+            return true;
+    }
+
+    if (!tryReverseRelPath)
+        return false;
+
+    for(const StringType &commonPath : commonPaths)
+    {
+        if (makeRelPath(foundRelName, commonPath, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, true))
+            return true;
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+//! Удаляет префикс пути - делает имя относительным
+template<typename StringType> inline 
+StringType makeRelPath( const std::vector<StringType>   &commonPaths
+                      , const StringType                &fullName
+                      , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
+                      , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
+                      , const StringType                &parentDirAlias    = umba::filename::getNativeParentDirAlias<StringType>()
+                      , bool                            keepLeadingParents = false
+                      , bool                            tryReverseRelPath  = false
                       )
 {
     StringType res;
-    for(const StringType &commonPath : commonPaths)
-    {
-        if (isSubPathName(commonPath, fullName, &res, pathSep))
-            return res;
-    }
+    if (makeRelPath(res, commonPath, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, tryReverseRelPath))
+        return res;
 
     return fullName;
 }
