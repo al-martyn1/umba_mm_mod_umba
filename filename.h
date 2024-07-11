@@ -49,6 +49,13 @@ namespace filename
 #endif
 
 
+template<typename StringType> inline
+StringType getFileName( const StringType &path );
+std::string  getFileName( const char    *p );
+std::wstring getFileName( const wchar_t *p );
+
+
+
 //-----------------------------------------------------------------------------
 template<typename StringType> inline  StringType getNativeCurrentDirAlias( ) { return umba::string_plus::make_string<StringType>(".") ; } //!< Возвращает строку с алиасом текущего каталога, как это принято в целевой системе. Обычно это "."
 template<typename StringType> inline  StringType getNativeParentDirAlias( )  { return umba::string_plus::make_string<StringType>(".."); } //!< Возвращает строку с алиасом родительского каталога, как это принято в целевой системе. Обычно это ".."
@@ -794,7 +801,7 @@ StringType makeRelPath( const std::vector<StringType>   &commonPaths
                       )
 {
     StringType res;
-    if (makeRelPath(res, commonPath, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, tryReverseRelPath))
+    if (makeRelPath(res, commonPaths, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, tryReverseRelPath))
         return res;
 
     return fullName;
