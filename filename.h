@@ -338,6 +338,29 @@ StringType addNativePrefixes(const StringType &fileName, const NativePrefixFlags
 }
 
 //----------------------------------------------------------------------------
+//! Делает путь плоским - заменяет разделители пути и спец-имена каталогов на подчеркивания
+template<typename StringType> inline
+StringType flattenPath( StringType fileName
+                      , const StringType &currentDirAlias       = umba::filename::getNativeCurrentDirAlias<StringType>()
+                      , const StringType &parentDirAlias        = umba::filename::getNativeParentDirAlias<StringType>()
+                      )
+{
+    constexpr const auto flattenChar = (typename StringType::value_type)'_';
+    fileName = normalizePathSeparators(fileName, (typename StringType::value_type)'/');
+    std::vector< StringType > parts = umba::string_plus::split(fileName, (typename StringType::value_type)'/', true /* skipEmpty */ );
+
+    for(auto &p : parts)
+    {
+        if (p==currentDirAlias || p==parentDirAlias)
+        {
+            p = StringType(p.size(), flattenChar);
+        }
+    }
+
+    return umba::string_plus::merge(parts,flattenChar);
+}
+
+//----------------------------------------------------------------------------
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути, не учитывая возможные спец префиксы
 template<typename StringType> inline
 std::vector< StringType > makeCanonicalSimpleParts( StringType fileName, typename StringType::value_type pathSep, const StringType &curDirAlias, const StringType &parentDirAlias, bool keepLeadingParents = false)
@@ -412,9 +435,6 @@ StringType makeCanonicalSimple( StringType fileName, typename StringType::value_
 }
 
 //----------------------------------------------------------------------------
-
-
-
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути
 template<typename StringType> inline
 StringType makeCanonical( StringType fileName
@@ -423,8 +443,6 @@ StringType makeCanonical( StringType fileName
                         , const StringType &parentDirAlias
                         , bool keepLeadingParents
                         )
-
-
 {
     // std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
 
