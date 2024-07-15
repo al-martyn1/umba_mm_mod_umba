@@ -476,6 +476,7 @@ std::vector<std::string> getProcessParentNames( ULONG_PTR pid = GetCurrentProces
 }
 
 //-----------------------------------------------------------------------------
+inline
 bool isProcessHasParentOneOf(const std::vector<std::string> names, ULONG_PTR pid = GetCurrentProcessId())
 {
     std::unordered_set<std::string> namesSet;
