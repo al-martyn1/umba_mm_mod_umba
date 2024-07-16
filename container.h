@@ -50,9 +50,19 @@ using growth_factor_50  = boost::container::growth_factor_50;
 using growth_factor_60  = boost::container::growth_factor_60;
 using growth_factor_100 = boost::container::growth_factor_100;
 
-
 template<typename OptVal>
 using growth_factor = boost::container::growth_factor<OptVal>;
+
+using small_vector_option_growth_50_t  = small_vector_options< growth_factor<growth_factor_50> >::type;
+using small_vector_option_growth_60_t  = small_vector_options< growth_factor<growth_factor_60> >::type;
+using small_vector_option_growth_100_t = small_vector_options< growth_factor<growth_factor_100> >::type;
+
+
+template<std::size_t Alignment> 
+using inplace_alignment = boost::container::inplace_alignment<Alignment>;
+
+using small_vector_option_inplace_alignment_16_t = small_vector_options< inplace_alignment<16u> >::type;
+
 
 template <class T, std::size_t N, class Allocator BOOST_CONTAINER_DOCONLY(= void), class Options BOOST_CONTAINER_DOCONLY(= void) >
 using small_vector = boost::container::small_vector<T, N, Allocator, Options>;
