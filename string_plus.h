@@ -2052,6 +2052,110 @@ bool split_to_pair( const StringType str, StringType &first, StringType &second,
 
 }
 
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const StringType &delim, typename StringType::size_type nSplits = -1)
+{
+    // std::string s = "scott>=tiger>=mushroom";
+    // std::string delimiter = ">=";
+
+    // txt = "apple#banana#cherry#orange"
+    // # setting the maxsplit parameter to 1, will return a list with 2 elements!
+    // x = txt.split("#", 1)
+
+    std::vector<StringType> res;
+
+    typename StringType::size_type curPos  = 0;
+    typename StringType::size_type prevPos = 0;
+    //StringType token;
+    while (res.size()!=nSplits && (curPos = str.find(delim, prevPos)) != StringType::npos)
+    {
+        res.emplace_back(str, prevPos, curPos-prevPos);
+        prevPos = curPos+delim.size();
+    }
+
+    // Ранее остаток закидывали безусловно
+    // Пока так и оставим
+    res.emplace_back(str, prevPos, StringType::npos);
+
+    //TODO: !!! Надо подумать, править баг и как его править
+    #if 0
+    if (res.size()==nSplits)
+    {
+        // Набрали нужное количество частей, надо закинуть последнюю без всяких условий
+        res.emplace_back(str, prevPos);
+    }
+    else
+    {
+        // У нас сплит до упора, и мы просто не нашли следующий разделитель после последнего его вхождения
+        // Или мы вообще его не нашли
+        // Или мы его вообще не нашли
+        // Что и где может поломаться, если мы что-то тут подправим?
+
+        if ()
+    }
+    #endif
+
+    return res;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const typename StringType::value_type *delim, typename StringType::size_type nSplits = -1)
+{
+    return simple_string_split( str, StringType(delim), nSplits);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const typename StringType::value_type delim, typename StringType::size_type nSplits = -1)
+{
+    typename StringType::value_type tmpDelimStr[2] = { delim, 0 };
+    return simple_string_split( str, tmpDelimStr, nSplits);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType, typename OutputIterator> inline
+void simple_string_split(OutputIterator inserterIt, const StringType &str, const StringType &delim, typename StringType::size_type nSplits = -1)
+{
+    typename StringType::size_type curPos  = 0;
+    typename StringType::size_type prevPos = 0;
+
+    typename StringType::size_type numPartsAdded = 0;
+
+    //StringType token;
+    while (numPartsAdded!=nSplits && (curPos = str.find(delim, prevPos)) != StringType::npos)
+    {
+        *inserterIt++ = StringType(str, prevPos, curPos-prevPos);
+        prevPos = curPos+delim.size();
+        ++numPartsAdded;
+    }
+
+    // Ранее остаток закидывали безусловно
+    // Пока так и оставим
+    *inserterIt++ = StringType(str, prevPos, StringType::npos);
+
+    //TODO: !!! Надо подумать, править баг и как его править
+    #if 0
+    if (res.size()==nSplits)
+    {
+        // Набрали нужное количество частей, надо закинуть последнюю без всяких условий
+        res.emplace_back(str, prevPos);
+    }
+    else
+    {
+        // У нас сплит до упора, и мы просто не нашли следующий разделитель после последнего его вхождения
+        // Или мы вообще его не нашли
+        // Или мы его вообще не нашли
+        // Что и где может поломаться, если мы что-то тут подправим?
+
+        if ()
+    }
+    #endif
+
+    //return res;
+}
+
 
 // bool splitToPair( std::string str, std::string &first, std::string &second, char ch, std::string::size_type pos = 0 )
 
