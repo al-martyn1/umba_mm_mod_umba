@@ -44,14 +44,29 @@ enum class TagType
 
 
 //----------------------------------------------------------------------------
-struct HtmlTag
+template<bool UseCaseIndependentNames = true>
+struct HtmlTagT
 {
-    TagType                                       tagType   ;
+    TagType                                       tagType   = TagType::invalid;
     std::string                                   name      ;
     std::string                                   text      ;
     std::unordered_map<std::string, std::string>  attributes;
-    std::vector<HtmlTag>                          childs    ;  // Content 
+    std::vector<HtmlTagT>                         childs    ;  // Content 
 
+    constexpr
+    static bool isCaseIndependent()
+    {
+        return UseCaseIndependentNames;
+    }
+
+    constexpr // Пусть будет, ведь tolower_copy не всегда вызывается
+    static
+    std::string prepareName(const std::string &n)
+    {
+        return isCaseIndependent() ? umba::string_plus::tolower_copy(n) : n;
+    }
+
+    constexpr
     static char isNameChar(char ch)
     {
         return (ch>='a' && ch<='z')
@@ -61,6 +76,7 @@ struct HtmlTag
                ;
     }
 
+    constexpr
     static char isNameFirstChar(char ch)
     {
         return (ch>='a' && ch<='z')
@@ -84,12 +100,12 @@ struct HtmlTag
         return tagType!=TagType::invalid && tagType!=TagType::text && !name.empty();
     }
 
-    bool isTag(const std::string &nameToCompare, bool caseIndependent = true) const
+    bool isTag(const std::string &nameToCompare) const
     {
         if (!isTag())
             return false;
 
-        return name == (caseIndependent ? umba::string_plus::tolower_copy(nameToCompare) : nameToCompare);
+        return name == prepareName(nameToCompare);
     }
 
     bool isCloseTag() const
@@ -108,24 +124,25 @@ struct HtmlTag
         return tagType==TagType::empty;
     }
 
-    bool hasAttr(const std::string &attrName, bool caseIndependent = true) const
+    bool hasAttr(const std::string &attrName) const
     {
-        return attributes.find(caseIndependent ? umba::string_plus::tolower_copy(attrName) : attrName)!=attributes.end();
+        return attributes.find(prepareName(attrName))!=attributes.end();
     }
 
-    std::string getAttrValue(const std::string &attrName, const std::string &defVal, bool caseIndependent = true) const
+    std::string getAttrValue(const std::string &attrName, const std::string &defVal=std::string()) const
     {
-        auto it = attributes.find(caseIndependent ? umba::string_plus::tolower_copy(attrName) : attrName);
+        auto it = attributes.find(prepareName(attrName));
         return it==attributes.end() ? defVal : it->second;
-    }
-
-    std::string getAttrValue(const std::string &attrName, bool caseIndependent = true) const
-    {
-        return getAttrValue(attrName, std::string(), caseIndependent);
     }
     
 
 }; // struct HtmlTag
+
+
+using HtmlTag              = HtmlTagT<true>;
+using HtmlTagCaseSensitive = HtmlTagT<false>;
+using HtmlTagCaseSens      = HtmlTagCaseSensitive;
+
 
 //----------------------------------------------------------------------------
 
@@ -149,7 +166,7 @@ struct HtmlTag
 
 */
 template<char TagOpenChar='<', char TagCloseChar='>', typename IteratorType, typename HtmlTagType>
-IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e, bool caseIndependent = true)
+IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e)
 {
     parseTo.clear();
 
@@ -169,7 +186,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
     auto addAttribute = [&]()
     {
         if (!attrName.empty())
-        parseTo.attributes[caseIndependent ? umba::string_plus::tolower_copy(attrName) : attrName] = attrVal;
+            parseTo.attributes[parseTo.prepareName(attrName)] = attrVal;
         attrName.clear();
         attrVal .clear();
     };
@@ -184,8 +201,8 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
 
         addAttribute();
 
-        if (caseIndependent)
-            parseTo.name = umba::string_plus::tolower_copy(parseTo.name);
+        //if (caseIndependent)
+        parseTo.name = parseTo.prepareName(parseTo.name);
 
         return b;
     };
@@ -200,8 +217,8 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
 
         addAttribute();
 
-        if (caseIndependent)
-            parseTo.name = umba::string_plus::tolower_copy(parseTo.name);
+        //if (caseIndependent)
+        parseTo.name = parseTo.prepareName(parseTo.name);
 
         if (parseTo.tagType==TagType::close)
             return b; // Обнаружен символ '/', как в empty тэге - но у нас закрывающий тэг, такой символ был перед именем тэга (</tag/>) - это ошибка
