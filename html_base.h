@@ -28,26 +28,47 @@ namespace html {
 
 //----------------------------------------------------------------------------
 
+
+
+//----------------------------------------------------------------------------
+enum class TagType
+{
+    invalid = -1,
+    text    =  0,
+    tag         ,  // <tag> open tag
+    close       ,  // </tag> close tag
+    empty          // <empty-tag/> - не содержит в себе вложенные тэги
+
+};
+
+
+
 //----------------------------------------------------------------------------
 struct HtmlTag
 {
-
-    enum class TagType
-    {
-        invalid = -1,
-        text    =  0,
-        tag         ,  // <tag> open tag
-        close       ,  // </tag> close tag
-        empty          // <empty-tag/> - не содержит в себе вложенные тэги
-    
-    };
-
-
     TagType                                       tagType   ;
     std::string                                   name      ;
     std::string                                   text      ;
     std::unordered_map<std::string, std::string>  attributes;
     std::vector<HtmlTag>                          childs    ;  // Content 
+
+    static char isNameChar(char ch)
+    {
+        return (ch>='a' && ch<='z')
+            || (ch>='A' && ch<='Z')
+            || (ch>='0' && ch<='9')
+            || (ch>='_' || ch=='-' || ch=='.' || ch==':')
+               ;
+    }
+
+    static char isNameFirstChar(char ch)
+    {
+        return (ch>='a' && ch<='z')
+            || (ch>='A' && ch<='Z')
+            || (ch>='_' || ch=='-' || ch=='.' || ch==':')
+               ;
+    }
+
 
     void clear()
     {
@@ -127,8 +148,8 @@ struct HtmlTag
    На этой базе можно строить какой-то более высокоуровневый разбор.
 
 */
-template<typename IteratorType>
-IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bool caseIndependent = true)
+template<char TagOpenChar='<', char TagCloseChar='>', typename IteratorType, typename HtmlTagType>
+IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e, bool caseIndependent = true)
 {
     parseTo.clear();
 
@@ -137,23 +158,9 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
         return ch==' ' || ch=='\r' || ch=='\n' || ch=='\t';
     };
 
-    // Точка вроде как допустима в имени, а ':' - namespace разделитель
-    auto isNameChar = [](char ch)
-    {
-        return (ch>='a' && ch<='z')
-            || (ch>='A' && ch<='Z')
-            || (ch>='0' && ch<='9')
-            || (ch>='_' || ch=='-' || ch=='.' || ch==':')
-               ;
-    };
-
-    auto isNameFirstChar = [](char ch)
-    {
-        return (ch>='a' && ch<='z')
-            || (ch>='A' && ch<='Z')
-            || (ch>='_' || ch=='-' || ch=='.' || ch==':')
-               ;
-    };
+    // Переехали в HtmlTag
+    auto isNameChar      = [&](char ch) { return parseTo.isNameChar(ch);      };
+    auto isNameFirstChar = [&](char ch) { return parseTo.isNameFirstChar(ch); };
 
     std::string attrName;
     std::string attrVal ;
@@ -196,15 +203,15 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
         if (caseIndependent)
             parseTo.name = umba::string_plus::tolower_copy(parseTo.name);
 
-        if (parseTo.tagType==HtmlTag::TagType::close)
+        if (parseTo.tagType==TagType::close)
             return b; // Обнаружен символ '/', как в empty тэге - но у нас закрывающий тэг, такой символ был перед именем тэга (</tag/>) - это ошибка
 
         ++b;
         if (b==e)
             return b;
 
-        if (*b=='>') // Последовательность "/>" должна идти без пробела - надоело пробелы пропускать
-            parseTo.tagType = HtmlTag::TagType::empty; // нормальное закрытие empty тэга
+        if (*b==TagCloseChar) // Последовательность "/>" должна идти без пробела - надоело пробелы пропускать
+            parseTo.tagType = TagType::empty; // нормальное закрытие empty тэга
 
         return b; // в любом случае - завершаемся, ошибка или нет, если норм, то тип тэга установлен на empty
     };
@@ -214,7 +221,7 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
     if (b==e)
         return b;
 
-    if (*b!='<')
+    if (*b!=TagOpenChar)
         return b;
 
     ++b;
@@ -224,7 +231,7 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
     if (b==e)
         return b;
 
-    if (*b=='<') // Неожиданое открытие другого тэга
+    if (*b==TagOpenChar) // Неожиданое открытие другого тэга
         return b;
 
     if (*b=='/') // Закрывающий тэг
@@ -234,11 +241,11 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
         if (b==e)
             return b;
 
-        parseTo.tagType = HtmlTag::TagType::close;
+        parseTo.tagType = TagType::close;
     }
     else
     {
-        parseTo.tagType = HtmlTag::TagType::tag;
+        parseTo.tagType = TagType::tag;
     }
 
     // Читаем имя тэга
@@ -268,10 +275,10 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
         if (b==e)
             return finalizeTag();
 
-        if (*b=='>')
-            return finalizeTag(); // нормальное закрытие - либо открывающего, либо закрывающего тэга. На вызывающей стороне проверят *b=='>' и убедятся, что всё хорошо
+        if (*b==TagCloseChar)
+            return finalizeTag(); // нормальное закрытие - либо открывающего, либо закрывающего тэга. На вызывающей стороне проверят *b==TagCloseChar и убедятся, что всё хорошо
 
-        if (*b=='<')
+        if (*b==TagOpenChar)
             return finalizeTag(); // Неожиданое открытие другого тэга
 
         if (*b=='/') // возможно, это empty тэг - <tag/>
@@ -280,7 +287,7 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
         if (!isNameFirstChar(*b))
             return finalizeTag(); // Ожидаем первый символ имени атрибута, но получили какую-то фигню
 
-        if (parseTo.tagType==HtmlTag::TagType::close) // закрывающий тэг
+        if (parseTo.tagType==TagType::close) // закрывающий тэг
             return finalizeTag(); //  В закрывающем тэге не должно быть никаких атрибутов
 
         // Таки атрибут
@@ -314,7 +321,7 @@ IteratorType parseSingleTag(HtmlTag &parseTo, IteratorType b, IteratorType e, bo
         while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
 
         // Значения у нас пока без кавычек, ибо лень. Надо будет - прикрутим
-        for(; b!=e && !isWhiteSpace(*b) && *b!='>' && *b!='<'; ++b)
+        for(; b!=e && !isWhiteSpace(*b) && *b!=TagCloseChar && *b!=TagOpenChar; ++b)
         {
             attrVal.append(1, *b);
         }
@@ -332,7 +339,7 @@ bool testParseSingleTag(StreamType &s, const std::string &str, char expectedEndC
 {
     HtmlTag parsedTag;
 
-    auto resIt = parseSingleTag(parsedTag, str.begin(), str.end());
+    auto resIt = parseSingleTag<'<', '>'>(parsedTag, str.begin(), str.end());
 
     char resChar = 'E';
     if (resIt!=str.end())
@@ -351,23 +358,23 @@ bool testParseSingleTag(StreamType &s, const std::string &str, char expectedEndC
     s << "Tag type: ";
     switch(parsedTag.tagType)
     {
-        case HtmlTag::TagType::invalid:
+        case TagType::invalid:
             s << "<INVALID>";
             break;
 
-        case HtmlTag::TagType::text:
+        case TagType::text:
             s << "Text";
             break;
 
-        case HtmlTag::TagType::tag:
+        case TagType::tag:
             s << "Tag (open tag)";
             break;
 
-        case HtmlTag::TagType::close:
+        case TagType::close:
             s << "End tag (close tag)";
             break;
 
-        case HtmlTag::TagType::empty:
+        case TagType::empty:
             s << "Empty tag (<tag/>)";
             break;
     }
