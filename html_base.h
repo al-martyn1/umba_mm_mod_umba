@@ -85,7 +85,6 @@ struct HtmlTagT
                ;
     }
 
-
     void clear()
     {
         tagType = TagType::invalid;
@@ -93,6 +92,14 @@ struct HtmlTagT
         text      .clear();
         attributes.clear();
         childs    .clear();
+    }
+
+    void addAttr(const std::string &attrName, const std::string &attrVal)
+    {
+        if (attrName.empty())
+            return;
+
+        attributes[prepareName(attrName)] = attrVal;
     }
 
     bool isTag() const
@@ -185,8 +192,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
 
     auto addAttribute = [&]()
     {
-        if (!attrName.empty())
-            parseTo.attributes[parseTo.prepareName(attrName)] = attrVal;
+        parseTo.addAttr(attrName, attrVal);
         attrName.clear();
         attrVal .clear();
     };
