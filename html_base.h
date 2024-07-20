@@ -44,7 +44,7 @@ enum class TagType
 
 
 //----------------------------------------------------------------------------
-template<bool UseCaseIndependentNames = true>
+template<bool UseCaseIndependentNames = true, char AttrAppendSeparatorChar = 0>
 struct HtmlTagT
 {
     TagType                                       tagType   = TagType::invalid;
@@ -53,11 +53,25 @@ struct HtmlTagT
     std::unordered_map<std::string, std::string>  attributes;
     std::vector<HtmlTagT>                         childs    ;  // Content 
 
+
     constexpr
     static bool isCaseIndependent()
     {
         return UseCaseIndependentNames;
     }
+
+    constexpr
+    static char getAttrAppendChar()
+    {
+        return AttrAppendSeparatorChar;
+    }
+    
+    constexpr
+    static bool getAttrAppendMode()
+    {
+        return AttrAppendSeparatorChar!=0;
+    }
+    
 
     constexpr // Пусть будет, ведь tolower_copy не всегда вызывается
     static
@@ -99,7 +113,25 @@ struct HtmlTagT
         if (attrName.empty())
             return;
 
-        attributes[prepareName(attrName)] = attrVal;
+        auto preparedName = prepareName(attrName);
+
+        if (getAttrAppendMode())
+        {
+            attributes[preparedName] = attrVal;
+        }
+        else
+        {
+            auto it = attributes.find(preparedName);
+            if (it==attributes.end())
+            {
+                attributes[preparedName] = attrVal;
+            }
+            else
+            {
+                it->second.append(1, getAttrAppendChar());
+                it->second.append(attrVal);
+            }
+        }
     }
 
     bool isTag() const
@@ -146,8 +178,8 @@ struct HtmlTagT
 }; // struct HtmlTag
 
 
-using HtmlTag              = HtmlTagT<true>;
-using HtmlTagCaseSensitive = HtmlTagT<false>;
+using HtmlTag              = HtmlTagT<true, 0>;
+using HtmlTagCaseSensitive = HtmlTagT<false, 0>;
 using HtmlTagCaseSens      = HtmlTagCaseSensitive;
 
 
