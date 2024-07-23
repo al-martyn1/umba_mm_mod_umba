@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Хелперы для вариадик-шаблонов
  */
@@ -116,7 +116,7 @@ AdcInjected adcInitInject( ADC_TypeDef* ADCx, AdcSamplingSpeed samplingSpeed
 //...
 
 // Calling that function
-auto 
+auto
      adc1 = umba::periph::adcInitInject( ADC1, umba::periph::AdcSamplingSpeed::high
                                        , umba::periph::AdcInitHwOption::init
                                        , PA1, PA2, PA3 // here is the list
@@ -137,7 +137,7 @@ size_t buildSomeTypeArray( ArrayItemType *pArrayBuf
 
 /*
 
-!!! Usage    
+!!! Usage
 
 template< typename... SomeTypeListItems >
 inline
@@ -153,7 +153,7 @@ AdcInjected adcInitInject( ADC_TypeDef* ADCx, AdcSamplingSpeed samplingSpeed
 }
 
 
-    auto 
+    auto
          adc1 = umba::periph::adcInitInject( ADC1, umba::periph::AdcSamplingSpeed::high
                                            , umba::periph::AdcInitHwOption::init
                                            , PA1, PA2, PA3 // here is the list

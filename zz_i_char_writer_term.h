@@ -18,7 +18,7 @@
 //! Определения, относящиеся к терминалам
 /*!
  */
-namespace term 
+namespace term
 {
 
 
@@ -171,7 +171,7 @@ namespace win32
 
    }
 
-   //! Преобразование Win32-атрибута текста консоли в colors::SgrColor 
+   //! Преобразование Win32-атрибута текста консоли в colors::SgrColor
    inline
    colors::SgrColor convertColorFromConsole( WORD conColor )
    {
@@ -227,7 +227,7 @@ namespace win32
 
 
 
-} // namespace win32    
+} // namespace win32
 
 #endif
 

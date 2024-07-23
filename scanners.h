@@ -35,7 +35,7 @@ StringType scanForOptionsFile( const StringType &flagsFileName, StringType baseP
 template<typename StringType> inline
 StringType scanForOptionsFile( const std::vector<StringType> &flagsFileNames, StringType basePath)
 {
-    return 
+    return
 }
 
 
@@ -80,7 +80,7 @@ fromSimpleMaskToRegexMap(const std::vector<StringType> &regexStrings, bool useAn
 
 
 template<typename AppConfigType, typename LogMsgType> inline
-void scanFolders( const AppConfigType      &appConfig        // with includeFilesMaskList and excludeFilesMaskList 
+void scanFolders( const AppConfigType      &appConfig        // with includeFilesMaskList and excludeFilesMaskList
                 , LogMsgType               &logMsg           // logMsg or logNul
                 , std::vector<std::string> &foundFiles
                 , std::vector<std::string> &excludedFiles

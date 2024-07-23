@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief На базе кода под STM32, адаптация для кроссплатформы
 
@@ -64,7 +64,7 @@ namespace time_service{
 
 
 
-    //! Инициализация сервиса времени (и его запуск). 
+    //! Инициализация сервиса времени (и его запуск).
     /*! Требуется только на голой системе. Для FreeRTOS инициализация происходит при старте шедулера */
     void init();
 
@@ -73,7 +73,7 @@ namespace time_service{
 
     //! Остановка сервиса времени. Реализовано только на голом железе
     void stop();
-    
+
     //! Перевод системных тиков в милисекунды
     TimeTick ticksToMs(TimeTick ticks);
     //! Перевод милисекунд в системных тики
@@ -85,7 +85,7 @@ namespace time_service{
     //! Текущее время (тик) в микросекундах
     HiresTimeTick getCurTimeHires();
 
-    //! Возвращает сырые Hi-Res тики 
+    //! Возвращает сырые Hi-Res тики
     void getCurTimeHiresRaw( TimeTick* pHigh, TimeTick *pLow, TimeTick *pModule);
 
     //! Что-то считает

@@ -10,7 +10,7 @@
 
 #include "stl.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <cctype>
 #include <iterator>
 #include <string>
@@ -56,7 +56,7 @@ struct has_reserve< C, std::enable_if_t<
 
 //------------------------------
 //! Функция резервирует дополнительное (по отношению к текущему занимаемому объему) место, если у объекта есть метод reserve
-/*! 
+/*!
      \tparam C Тип контейнера
  */
 template< typename C >
@@ -68,7 +68,7 @@ optional_reserve( C& c, std::size_t n )
 
 //------------------------------
 //! Версия функции резервирования места optional_reserve для контейнеров, не имеющих метода reserve. Не делает ничего.
-/*! 
+/*!
      \tparam C Тип контейнера
  */
 template< typename C >
@@ -103,7 +103,7 @@ struct has_shrink_to_fit< C, std::enable_if_t<
 
 //------------------------------
 //! Функция пытается освободить лишнюю занятую, но не используемую контейнером (объектом) память, если у объекта есть метод shrink_to_fit
-/*! 
+/*!
      \tparam C Тип контейнера
  */
 template< typename C >
@@ -115,7 +115,7 @@ optional_shrink_to_fit( C& c )
 
 //------------------------------
 //! Версия функции резервирования места optional_shrink_to_fit для контейнеров, не имеющих метода shrink_to_fit. Не делает ничего.
-/*! 
+/*!
      \tparam C Тип контейнера
  */
 template< typename C >
@@ -132,7 +132,7 @@ optional_shrink_to_fit( C&, std::size_t ) {}
 #ifndef UMBA_MCU_USED
 
 //! Вычисляет дистанцию между индексами, по аналогии с итераторами
-/*! 
+/*!
      \return Возвращает вычисленную дистанцию
  */
 template< typename IterType >
@@ -144,7 +144,7 @@ distance(IterType b, IterType e)
 
 
 //! Вычисляет дистанцию между чем-то, что видимо является итераторами
-/*! 
+/*!
      \return Возвращает вычисленную дистанцию
  */
 template< typename IterType >

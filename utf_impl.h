@@ -10,7 +10,7 @@
 #include <cwchar>
 
 
-// BOM: 
+// BOM:
 // 0xFFFE    - UTF-18 little endian
 // 0xFEFF    - UTF-18 big endian
 // EF BB BF  - UTF-8
@@ -39,7 +39,7 @@ typedef std::uint8_t     utf8_char_t   ;
 //! Тип BOM - Byte Order Mark
 enum class EBom
 {
-    noBom    = 0,   // 
+    noBom    = 0,   //
     utf16le  = 1,   // 0xFF 0xFE
     utf16be  = 2,   // 0xFE 0xFF
     utf8     = 3    // 0xEF 0xBB 0xBF
@@ -98,7 +98,7 @@ EBom detectBom(const utf8_char_t *pBegin, const utf8_char_t *pEnd)
         ++pBegin;
         if (pBegin==pEnd || *pBegin!=0xBF)
             return EBom::noBom;
-    
+
         return EBom::utf8;
     }
 
@@ -228,7 +228,7 @@ std::basic_string<utf32_char_t> utf32_from_utf16( const utf16_char_t *pBegin, co
     while(pChar!=pEnd)
     {
         utf16_char_t ch = byteSwapEx(*pChar++, swapBytes);
-    
+
         if (ch<0xD800u || ch>0xDFFFu)
         {
             strRes.append(1, (utf32_char_t)ch);
@@ -246,7 +246,7 @@ std::basic_string<utf32_char_t> utf32_from_utf16( const utf16_char_t *pBegin, co
             }
 
             utf16_char_t ch2 = byteSwapEx(*pChar++, swapBytes);
-           
+
             if (ch2<0xDC00u || ch2>0xDFFFu)
             {
                 throw unicode_convert_error((std::size_t)(pChar-pBegin), swapBytes ? "Invalid code sequence in UTF-16 with byte swap (pair second)" : "Invalid code sequence in UTF-16 (pair second)");
@@ -406,7 +406,7 @@ void utf32_from_utf8_impl( const utf8_char_t *pBegin, const utf8_char_t *pEnd, O
         }
 
         // https://datatracker.ietf.org/doc/html/rfc2279
-       
+
         // UCS-4 range (hex.)    UTF-8 octet sequence (binary)
         // 1 - 0000 0000-0000 007F   0xxxxxxx
         // 2 - 0000 0080-0000 07FF   110xxxxx 10xxxxxx
@@ -574,7 +574,7 @@ void utf8_from_utf32_impl(const utf32_char_t *pBegin, const utf32_char_t *pEnd, 
             *pOutputIter++ = (value_type)(utf8_char_t)(((ch>> 6)&0x3F) | 0x80);
             *pOutputIter++ = (value_type)(utf8_char_t)(((ch>> 0)&0x3F) | 0x80);
         }
-        else if (ch<=0x1FFFFFu) // 4 
+        else if (ch<=0x1FFFFFu) // 4
         {
             *pOutputIter++ = (value_type)(utf8_char_t)(((ch>>18)&0x07) | 0xF0);
             *pOutputIter++ = (value_type)(utf8_char_t)(((ch>>12)&0x3F) | 0x80);

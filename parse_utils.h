@@ -393,7 +393,7 @@ bool toDecimalFixedPoint( const char* pBuf, size_t bufSize, size_t prec, int64_t
         if (pReadedCount)
            *pReadedCount += orgBufSize - bufSize;
         return true;
-    }    
+    }
 
     ++pBuf;
     --bufSize;
@@ -423,7 +423,7 @@ bool toDecimalFixedPoint( const char* pBuf, size_t bufSize, size_t prec, int64_t
     return true;
 }
 
-//! \copydoc toDecimalFixedPoint 
+//! \copydoc toDecimalFixedPoint
 inline
 bool toDecimalFixedPoint( const uint8_t* pBuf, size_t bufSize, size_t prec, int64_t *pRes, size_t *pReadedCount = 0 )
 {
@@ -521,7 +521,7 @@ bool removeNumberUnits( QString &numStr, QString &unitsStr, bool allowAposAsSepa
 
     unitsStr = numStr;
 
-    unitsStr.remove( 0, unitsStartPos ); // remove number from units 
+    unitsStr.remove( 0, unitsStartPos ); // remove number from units
     numStr.remove( unitsStartPos, numStr.size()-unitsStartPos );
 
     return true;

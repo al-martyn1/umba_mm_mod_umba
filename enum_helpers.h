@@ -54,7 +54,7 @@ typename std::underlying_type< EnumType >::type toUnderlyingType( EnumType flags
 //! Конвертирует enum в подлежащий тип. Версия для интегральных типов.
 /*! Часто неохота разбираться, является ли значение int'ом, unsigned'ом, или другим интегральным типом,
     или же является enum'ом.
- */ 
+ */
 template< typename EnumType, typename std::enable_if<!std::is_enum<EnumType>{} && std::is_integral< EnumType >{} /* ::value */ , bool>::type = true > inline
 EnumType toUnderlyingType( EnumType flagsVal )
 {
@@ -73,7 +73,7 @@ EnumType fromUnderlyingType( typename std::underlying_type< EnumType >::type fla
 //! Конвертирует в enum из подлежащего типа. Версия для интегральных типов.
 /*! Часто неохота разбираться, является ли значение int'ом, unsigned'ом, или другим интегральным типом,
     или же является enum'ом.
- */ 
+ */
 template< typename EnumType, typename std::enable_if<!std::is_enum<EnumType>{} && std::is_integral< EnumType >{} /* ::value */ , bool>::type = true > inline
 EnumType fromUnderlyingType( EnumType flagsVal )
 {
@@ -252,7 +252,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
              inline bool operator> (EnumType e1, EnumType e2) { return umba::enum_helpers::enumGreaterImpl     (e1, e2); }  \
              inline bool operator>=(EnumType e1, EnumType e2) { return umba::enum_helpers::enumGreaterEqualImpl(e1, e2); }
 
-                                                                                                                
+
 //----------------------------------------------------------------------------
 //! Реализует операции сравнения больше/меньше для enum-типа и подлежащего типа
 #define UMBA_ENUM_CLASS_IMPLEMENT_UNDERLYING_TYPE_RELATION_OPERATORS( EnumType )                                             \
@@ -267,7 +267,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
              inline bool operator> (typename std::underlying_type< EnumType >::type e1, EnumType e2) { return umba::enum_helpers::enumGreaterImpl     ((EnumType)e1, e2); } \
              inline bool operator>=(typename std::underlying_type< EnumType >::type e1, EnumType e2) { return umba::enum_helpers::enumGreaterEqualImpl((EnumType)e1, e2); }
 
-                                                                                                                
+
 //----------------------------------------------------------------------------
 #define UMBA_ENUM_CLASS_IMPLEMENT_UNDERLYING_TYPE_EQUAL_OPERATORS( EnumType )                                   \
                                                                                                                 \
@@ -420,9 +420,9 @@ namespace enum_helpers {
     std::string toNormalEnumNameCase( const std::string &s )
     {
         std::string res; res.reserve(s.size());
-    
+
         std::string::size_type i = 0, sz = s.size();
-    
+
         for(; i!=sz; ++i )
         {
             char ch = s[i];
@@ -430,7 +430,7 @@ namespace enum_helpers {
                ch = ch - 'a' + 'A';
             res.append(1,ch);
         }
-    
+
         return res;
     }
 
@@ -449,7 +449,7 @@ namespace enum_helpers {
         return s;
     }
 
-    //! Создаёт std::map с ключами - именами enum'а 
+    //! Создаёт std::map с ключами - именами enum'а
     template< typename EnumType > inline
     void fillMapForEnumEntry( std::map< std::string, EnumType> &m, EnumType v, const std::string &strName )
     {
@@ -491,7 +491,7 @@ namespace enum_helpers {
         return names[0];
     }
 
-    //! Создаёт std::map с ключами - именами enum'а 
+    //! Создаёт std::map с ключами - именами enum'а
     template< typename EnumType > inline
     void fillMapForEnumEntry( std::map< QString, EnumType> &m, EnumType v, const QString &strName )
     {
@@ -579,7 +579,7 @@ const char* toEnumName( const char *s )
 
 //----------------------------------------------------------------------------
 //! Генерирует функцию-хелпер для преобразования значения enum'а в строку. Реализация.
-/*! 
+/*!
     storageDuration - static / inline
     stringType      - тип строки - std::string, QString, const char*, ...
     enumType        - тип enum'а
@@ -723,7 +723,7 @@ const std::map<stringType,enumType>& fnNamePrefix##To##stringTypeName##GetMap() 
 }
 
 //----------------------------------------------------------------------------
-//! Генерирует функцию, возвращающую std::map, где ключи - строковые представления enum'а. Версия для свободных enum'ов. 
+//! Генерирует функцию, возвращающую std::map, где ключи - строковые представления enum'а. Версия для свободных enum'ов.
 /*! stringType      - тип строки - std::string, QString, const char*, ...
     enumType        - тип enum'а
     fnNamePrefix    - префикс имени функции, обычно задаётся равным имени enum'а, но для каких-то кривых случаев или во избежание коллизий можно задать что-то иное
@@ -775,7 +775,7 @@ enumType fnNamePrefix##_##from##stringTypeName( stringType t )                  
 
 //----------------------------------------------------------------------------
 
-//! Конвертация из строки в enum с использованием std::map. Версия для свободных enum'ов. 
+//! Конвертация из строки в enum с использованием std::map. Версия для свободных enum'ов.
 /*! stringType      - тип строки - std::string, QString, const char*, ...
     enumType        - тип enum'а
     fnNamePrefix    - префикс имени функции, обычно задаётся равным имени enum'а, но для каких-то кривых случаев или во избежание коллизий можно задать что-то иное
@@ -833,7 +833,7 @@ enumType fnNamePrefix##_##From##stringTypeName( stringType t )                  
 }
 
 //----------------------------------------------------------------------------
-//! Конвертация из строки в enum с использованием перебора. Реализация для MCU. Версия для свободных enum'ов. 
+//! Конвертация из строки в enum с использованием перебора. Реализация для MCU. Версия для свободных enum'ов.
 /*! stringType      - тип строки - const char*, ...
     enumType        - тип enum'а
     fnNamePrefix    - префикс имени функции, обычно задаётся равным имени enum'а, но для каких-то кривых случаев или во избежание коллизий можно задать что-то иное

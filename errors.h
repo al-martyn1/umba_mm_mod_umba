@@ -73,9 +73,9 @@ namespace errors
 
     /* info */
     #define UMBA_DECLARE_ERROR_CODE(name, code, info) \
-                 const ErrorCode name = code; 
+                 const ErrorCode name = code;
     #define UMBA_DECLARE_ERROR_CODE_ALIAS(name, code, info) \
-                 const ErrorCode name = code; 
+                 const ErrorCode name = code;
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -180,7 +180,7 @@ public:
 
       #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-        // errors:: 
+        // errors::
         #define UMBA_DECLARE_ERROR_CODE(name, code, info) \
                      case name : return UMBA_STRINGIFY(name);
         #define UMBA_DECLARE_ERROR_CODE_ALIAS(name, code, info)
@@ -214,7 +214,7 @@ public:
 
       #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-        // errors:: 
+        // errors::
         #define UMBA_DECLARE_ERROR_CODE(name, code, info) \
                      case name : return info;
         #define UMBA_DECLARE_ERROR_CODE_ALIAS(name, code, info)
@@ -245,7 +245,7 @@ public:
                         };
 
                         #if defined(UMBA_CXX_HAS_STD11)
-                            thread_local 
+                            thread_local
                         #else
                             #if defined(_MSC_VER)
                                 __declspec( thread )
@@ -310,7 +310,7 @@ public:
                             //default:                     return "Unknown error";
                         };
                         #if defined(UMBA_CXX_HAS_STD11)
-                            thread_local 
+                            thread_local
                         #else
                             #if defined(_MSC_VER)
                                 __declspec( thread )

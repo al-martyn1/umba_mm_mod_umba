@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Прослойка абстракций для работы с файловой системой
  */
@@ -150,7 +150,7 @@ bool readFile(std::istream &fileIn, std::vector<DataType> &filedata)
     std::size_t readedBytes = (size_t)fileIn.gcount();
     std::size_t readedItems = readedBytes/sizeof(DataType);
     filedata.insert(filedata.end(), &buf[0], &buf[readedItems]);
-    
+
     return true;
 }
 
@@ -171,7 +171,7 @@ bool readFile(std::istream &fileIn, std::string &filedata)
     std::size_t readedBytes = (std::size_t)fileIn.gcount();
     std::size_t readedItems = readedBytes/sizeof(char);
     filedata.append(&buf[0], readedItems);
-    
+
     return true;
 }
 
@@ -210,7 +210,7 @@ bool writeFile(std::ostream &fileOut, const std::vector<DataType> &data)
     {
         return writeFile(fileOut, &data[0], data.size());
     }
-    
+
 }
 
 //----------------------------------------------------------------------------
@@ -391,7 +391,7 @@ struct FileStat
 
 //----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
-    
+
     //! Одно универсальное имя для struct stat
     #define struct_file_stat               struct __stat64
 
@@ -412,7 +412,7 @@ struct FileStat
     FileStat fileStatFromFindData(const WIN32_FIND_DATAW &findData)
     {
         FileStat fileStat;
-    
+
         if (findData.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT))
             fileStat.fileType = FileType::FileTypeDir;
         else
@@ -428,30 +428,30 @@ struct FileStat
 
         //fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
         fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
-    
+
         fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
         fileStat.timeLastModified = convertWindowsFiletime(findData.ftLastWriteTime);
         fileStat.timeLastAccess   = convertWindowsFiletime(findData.ftLastAccessTime);
-    
+
         return fileStat;
     }
-    
+
     inline
     FileStat fileStatFromFindData(const WIN32_FIND_DATAA &findData)
     {
         FileStat fileStat;
-    
+
         if (findData.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT))
             fileStat.fileType = FileType::FileTypeDir;
         else
             fileStat.fileType = FileType::FileTypeFile;
         //fileStat.fileType         = (findData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? FileType::FileTypeDir : FileType::FileTypeFile;
         fileStat.fileSize         = (((filesize_t)findData.nFileSizeHigh) << 32) | ((filesize_t)findData.nFileSizeLow);
-    
+
         fileStat.timeCreation     = convertWindowsFiletime(findData.ftCreationTime);
         fileStat.timeLastModified = convertWindowsFiletime(findData.ftLastWriteTime);
         fileStat.timeLastAccess   = convertWindowsFiletime(findData.ftLastAccessTime);
-    
+
         return fileStat;
     }
 
@@ -483,7 +483,7 @@ struct FileStat
 
 //----------------------------------------------------------------------------
 //! Хелпер конвертации системной статистики в нашу
-inline 
+inline
 void parseStatToFileStat( const struct_file_stat &statBuf, FileStat &fileStat )
 {
     fileStat.fileSize         = (filesize_t)statBuf.st_size;
@@ -531,7 +531,7 @@ bool isPathDirectory(const StringType &path)
     FileStat fileStat;
     if (!getPathStat(path, fileStat))
         return false;
- 
+
     return fileStat.isDir();
 }
 
@@ -542,7 +542,7 @@ bool isPathFile(const StringType &path)
     FileStat fileStat;
     if (!getPathStat(path, fileStat))
         return false;
- 
+
     return fileStat.isFile();
 }
 
@@ -672,7 +672,7 @@ FileStat getFileStat( const StringType &fileName )
 
 
     HANDLE hFile = openFileForReadingWin32( fileName.c_str() );
-    if (hFile==INVALID_HANDLE_VALUE) 
+    if (hFile==INVALID_HANDLE_VALUE)
     {
         // DWORD err = GetLastError();
         return fileStat;
@@ -905,7 +905,7 @@ template<> inline bool createDirectory<std::string>( const std::string &dirname 
     bool bRes = ::CreateDirectoryA(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
     if (bRes)
     {
-        DWORD dwAttrs = GetFileAttributesA(umba::filename::prepareForNativeUsage(dirname).c_str()); 
+        DWORD dwAttrs = GetFileAttributesA(umba::filename::prepareForNativeUsage(dirname).c_str());
         if (dwAttrs!=INVALID_FILE_ATTRIBUTES)
         {
             SetFileAttributesA(umba::filename::prepareForNativeUsage(dirname).c_str(), dwAttrs|FILE_ATTRIBUTE_DIRECTORY);
@@ -923,7 +923,7 @@ template<> inline bool createDirectory<std::wstring>( const std::wstring &dirnam
     bool bRes = ::CreateDirectoryW(umba::filename::prepareForNativeUsage(dirname).c_str(), 0)==0 ? false : true;
     if (bRes)
     {
-        DWORD dwAttrs = GetFileAttributesW(umba::filename::prepareForNativeUsage(dirname).c_str()); 
+        DWORD dwAttrs = GetFileAttributesW(umba::filename::prepareForNativeUsage(dirname).c_str());
         if (dwAttrs!=INVALID_FILE_ATTRIBUTES)
         {
             SetFileAttributesW(umba::filename::prepareForNativeUsage(dirname).c_str(), dwAttrs|FILE_ATTRIBUTE_DIRECTORY);
@@ -1142,7 +1142,7 @@ bool isFileReadable( const StringType &filename )
 // In C++ 0x11 string class also has the same functionality
 //----------------------------------------------------------------------------
 //! Чтение файла в вектор
-/*! 
+/*!
     \tparam StringType Тип имени файла - std::string/std::wstring
     \tparam DataType   Тип читаемых данных
 
@@ -1228,20 +1228,20 @@ bool readFile( const StringType &filename       //!< Имя файла
     #ifdef UMBA_CXX_HAS_STD17
 
         filedata.clear();
-    
+
         FileStat fileStat = getFileStat( filename );
         if (fileStat.fileType!=FileTypeFile)
             return false;
-    
+
         if (pFileStat)
             *pFileStat = fileStat;
-    
+
         if (fileStat.fileSize==0)
             return true; // no data for reading at all
-    
+
         if (!isFileReadable( filename ))
             return false;
-    
+
         const size_t itemSize = sizeof(char);
         const size_t numItems = (size_t)(fileStat.fileSize / itemSize);
         {
@@ -1249,30 +1249,30 @@ bool readFile( const StringType &filename       //!< Имя файла
             std::swap(strTmp, filedata);
             // filedata.resize( numItems ); // We can read files which are always can fit to memory
         }
-        
+
         // const size_t numRawBytesToRead = filedata.size()*itemSize;
-    
+
         // Here starts "no exceptions" (exception safe) zone
-    
+
         HANDLE hFile = openFileForReadingWin32( filename.c_str() );
         if (hFile==INVALID_HANDLE_VALUE)
         {
             // DWORD err = GetLastError();
             return false;
         }
-    
+
         DWORD readedBytes = 0;
-    
+
         BOOL bReadRes = ReadFile( hFile, filedata.data(), (DWORD)filedata.size(), &readedBytes, 0 );
-    
+
         CloseHandle(hFile);
-    
+
         if (!bReadRes)
         {
             filedata.clear(); // Ошибка. Если вектор не временный, то неплохо бы его обнулить, чтобы место в памяти не хавал.
             return false;
         }
-    
+
         if (readedBytes!=(DWORD)fileStat.fileSize)
         {
             if (ignoreSizeErrors)
@@ -1283,12 +1283,12 @@ bool readFile( const StringType &filename       //!< Имя файла
                     *pFileStat = fileStat;
                 return true;
             }
-    
+
             // Чистим вектор, и возвращаем ошибку
             filedata.clear();
             return false;
         }
-    
+
         // Вроде всё хорошоу
         return true;
 
@@ -1573,7 +1573,7 @@ bool isFileReadable( const StringType &filename )
 
 //----------------------------------------------------------------------------
 //! Чтение файла в вектор
-/*! 
+/*!
     \tparam StringType Тип имени файла - std::string / std::wstring
     \tparam DataType   Тип читаемых данных
 
@@ -1774,24 +1774,24 @@ StringType getCurrentDrive()
     std::string getUserFolderPathFromWinApi<std::string>()
     {
         char buf[4096];
-    
+
         if (SHGetSpecialFolderPathA( 0, buf, CSIDL_PROFILE, false))
         //if (SHGetFolderPathA( 0, buf, CSIDL_PROFILE, false))
            return buf;
-    
+
         return std::string();
     }
-    
+
     //! Получение домашнего каталога текущего пользователя в винде. Специализация
     template<> inline
     std::wstring getUserFolderPathFromWinApi<std::wstring>()
     {
         wchar_t buf[4096];
-    
+
         if (SHGetSpecialFolderPathW( 0, buf, CSIDL_PROFILE, false))
         //if (SHGetFolderPathA( 0, buf, CSIDL_PROFILE, false))
            return buf;
-    
+
         return std::wstring();
     }
 
@@ -1807,7 +1807,7 @@ StringType getCurrentDrive()
     std::string getTempFolderPathFromWinApi<std::string>()
     {
         char buf[4096];
-    
+
         const std::size_t bufSize = sizeof(buf) / sizeof(buf[0]);
 
         DWORD res = GetTempPathA( bufSize, &buf[0]);
@@ -1823,7 +1823,7 @@ StringType getCurrentDrive()
     std::wstring getTempFolderPathFromWinApi<std::wstring>()
     {
         wchar_t buf[4096];
-    
+
         const std::size_t bufSize = sizeof(buf) / sizeof(buf[0]);
 
         DWORD res = GetTempPathW( bufSize, &buf[0]);
@@ -1853,14 +1853,14 @@ StringType getCurrentUserHomeDirectory()
         {
             return res;
         }
-       
+
         return getUserFolderPathFromWinApi<StringType>();
 
     #else
 
         //TODO: Переделать !!!
         // https://stackoverflow.com/questions/2910377/get-home-directory-in-linux
-       
+
         StringType res;
         if (umba::env::getVar(make_string<StringType>("HOME"), res))
         {

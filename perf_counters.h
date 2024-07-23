@@ -22,7 +22,7 @@
 
     PerfTick queryCounter()  - значение счетчика
 
-    Для подсчета 
+    Для подсчета
 
 
     https://www.compel.ru/lib/ne/2018/1/3-stm32-semeystva-h7-s-novyimi-vozmozhnostyami-k-novyim-vershinam
@@ -46,32 +46,32 @@
 
     Критическая секция - это также объект синхронизации, позволяющий предотвратить одновременное выполнение.
 
-    Защита критической секции кода в МК с использованием механизма запрета прерываний не позволяет сделать 
+    Защита критической секции кода в МК с использованием механизма запрета прерываний не позволяет сделать
     отдельный объект синхронизации, но для совместимости с Windows без него не обойтись.
 
     Обычно захват объекта критической секции называется Enter, освобождение - Leave, но
     для совместимости с классом AutoLock используются имена lock и unlock.
 
-    \warning Использование методов lock и unlock напрямую запрещено, следует использовать 
+    \warning Использование методов lock и unlock напрямую запрещено, следует использовать
     класс \ref umba::AutoLock или макрос #UMBA_CRITICAL_SECTION / #UMBA_CRITICAL_SECTION_EX.
 
     \section perf_counters_conf Настройка
     В любой системе класс критической секции называется CriticalSection, и используется соответствующая версия.
     Это справедливо и для случая использования FreeRTOS, за исключением того, что класс InterruptCriticalSection
-    также доступен. Для выбора класса InterruptCriticalSection для использования по умолчанию требуется задать 
+    также доступен. Для выбора класса InterruptCriticalSection для использования по умолчанию требуется задать
     макрос #UMBA_FORCE_USE_INTERRUPT_CS
 
     \note
-    Реализация критической секции для FreeRTOS использует syscall'ы 
+    Реализация критической секции для FreeRTOS использует syscall'ы
     \b taskENTER_CRITICAL_FROM_ISR, \b taskENTER_CRITICAL, \b taskEXIT_CRITICAL_FROM_ISR и \b taskEXIT_CRITICAL
-    и предоставляет гарантии этой ОС. Если ваши прерывания настроены на высокий приоритет, то 
+    и предоставляет гарантии этой ОС. Если ваши прерывания настроены на высокий приоритет, то
     следует использовать InterruptCriticalSection, но следует учитывать, что в таких прерываниях запрещено
     использование syscall'ов.
 
     По умолчанию предоставляется для использования готовый объект критической секции
     \b umba::globalCriticalSection, если не определен макрос \b UMBA_NO_GLOBAL_CS.
 
-    Некоторые библиотеки расчитывают на существование глобальной критической секции. В этом случае, 
+    Некоторые библиотеки расчитывают на существование глобальной критической секции. В этом случае,
     если определен макрос \b UMBA_NO_GLOBAL_CS, следует определить такой объект самостоятельно.
 
 
@@ -113,18 +113,18 @@ if(QueryPerformanceFrequency(&liFrequency))
 
     // Start Timing
     LARGE_INTEGER liStart = {0};
-    if(QueryPerformanceCounter(&liStart))           
+    if(QueryPerformanceCounter(&liStart))
     {
         // Do Stuff
 
         // Get Time spent...
         LARGE_INTEGER liStop = {0};
-        if(QueryPerformanceCounter(&liStop))    
-        {               
+        if(QueryPerformanceCounter(&liStop))
+        {
             LONGLONG llMilliseconds = (LONGLONG)((liStop.QuadPart - liStart.QuadPart) * 1000.0 / liFrequency.QuadPart);
             printf("time ellapsed ms:%lld\n", llMilliseconds);
         }
-    }       
+    }
 }
 */
 

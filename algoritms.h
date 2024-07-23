@@ -11,7 +11,7 @@
 #include "string_plus.h"
 #include "utility.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <cctype>
 #include <iterator>
 #include <string>
@@ -78,11 +78,11 @@ ContainerType generate_strings( const StringType &fmt, InputIteratorType b, Inpu
         ResultContainerType generate_strings( const FormatContainerType &fmtContainer, InputIteratorType b, InputIteratorType e)
         {
             // https://www.fluentcpp.com/2017/03/28/inserting-several-elements-into-an-stl-container/
-        
+
             ResultContainerType res;
-        
+
             auto distance = umba::utility::distance(b,e);
-        
+
           #ifdef UMBA_CXX_HAS_STD17
             if constexpr( std::is_integral_v< typename FormatContainerType::value_type > )
           #else
@@ -95,13 +95,13 @@ ContainerType generate_strings( const StringType &fmt, InputIteratorType b, Inpu
             else
             {
                 umba::utility::optional_reserve(res, fmtContainer.size()*distance);
-        
+
                 for( const auto &fmt: fmtContainer)
                 {
                     generate_strings_helper( fmt, b, e, std::back_inserter(res) );
                 }
             }
-        
+
             return res;
         }
 

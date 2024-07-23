@@ -31,13 +31,13 @@
 #define _INITIALIZER_LIST
 
 // #pragma GCC system_header
-//  
+//
 // #ifndef __GXX_EXPERIMENTAL_CXX0X__
 // # include <bits/c++0x_warning.h>
 // #else // C++0x
-//  
+//
 // #pragma GCC visibility push(default)
-//  
+//
 // #include <bits/c++config.h>
 
 namespace std
@@ -47,16 +47,16 @@ namespace std
     class initializer_list
     {
     public:
-      typedef _E 		value_type;
-      typedef const _E& 	reference;
-      typedef const _E& 	const_reference;
-      typedef size_t 		size_type;
-      typedef const _E* 	iterator;
-      typedef const _E* 	const_iterator;
+      typedef _E         value_type;
+      typedef const _E&     reference;
+      typedef const _E&     const_reference;
+      typedef size_t         size_type;
+      typedef const _E*     iterator;
+      typedef const _E*     const_iterator;
 
     private:
-      iterator			_M_array;
-      size_type			_M_len;
+      iterator            _M_array;
+      size_type            _M_len;
 
       // The compiler can call a private constructor.
       constexpr initializer_list(const_iterator __a, size_type __l)

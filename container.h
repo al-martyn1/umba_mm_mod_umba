@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief ������������� ����������. ����� �� boost (�� ��������� � �������), ��������, ����� ������ �� ���-�� �����������, �� ������, ��������, �� STD, ���� ��������
  */
@@ -58,7 +58,7 @@ using small_vector_option_growth_60_t  = small_vector_options< growth_factor<gro
 using small_vector_option_growth_100_t = small_vector_options< growth_factor<growth_factor_100> >::type;
 
 
-template<std::size_t Alignment> 
+template<std::size_t Alignment>
 using inplace_alignment = boost::container::inplace_alignment<Alignment>;
 
 using small_vector_option_inplace_alignment_16_t = small_vector_options< inplace_alignment<16u> >::type;
@@ -85,11 +85,11 @@ using small_vector = boost::container::small_vector<T, N, Allocator, Options>;
 //
 //    typedef static_vector_opt< packed_options::throw_on_overflow
 //                             , packed_options::inplace_alignment> implementation_defined;
-//  
+//
 // BOOST_INTRUSIVE_OPTION_CONSTANT(throw_on_overflow, bool, ThrowOnOverflow, throw_on_overflow)
 // BOOST_INTRUSIVE_OPTION_CONSTANT(inplace_alignment, std::size_t, Alignment, inplace_alignment)
-//  
-//  
+//
+//
 // #define BOOST_INTRUSIVE_OPTION_CONSTANT(OPTION_NAME, TYPE, VALUE, CONSTANT_NAME) \
 // template< TYPE VALUE> \
 // struct OPTION_NAME \

@@ -15,7 +15,7 @@
 Препроцессор:
 - #UMBA_PP_HAS_COUNTER / #UMBA_PP_NO_COUNTER - есть или нет макрос \b `__COUNTER__`.
 
-В зависимости от версии языка C++ определяются макросы: 
+В зависимости от версии языка C++ определяются макросы:
 - #UMBA_CXX_HAS_STD03,
 - #UMBA_CXX_HAS_STD11,
 - #UMBA_CXX_HAS_STD14,
@@ -24,7 +24,7 @@
 \section UMBA_X_DETECT_ENVIRONMENT_USAGE Настройка проекта на целевую платформу
 
 Существует два способа использования: 1) для проекта задаются predefined макросы,
-которые настраивают библиотеку - #UMBA_USE_MCU, #UMBA_USE_QT ..., и тогда библиотека 
+которые настраивают библиотеку - #UMBA_USE_MCU, #UMBA_USE_QT ..., и тогда библиотека
 сама подключает необходимые хидеры, и 2) когда перед подключением заголовков библиотеки
 подключаются сначала системные хидеры
 
@@ -45,7 +45,7 @@
 #UMBA_WIN32_USED и подключаются необходимые заголовочные файлы.
 
 В зависимости от системы автоматически определяются макросы:
-- #UMBA_WIN32_USED, 
+- #UMBA_WIN32_USED,
 - #UMBA_FREERTOS_USED,
 - #UMBA_QT_USED.
 - #UMBA_MCU_USED.
@@ -73,7 +73,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \brief Определяет тип сборки - отладочная
 
     Определяется, если задан макрос NDEBUG, или еще что-то (в зависимости от системы сборки)
@@ -85,7 +85,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \brief Определяет тип сборки - релизная (но отладочная информация может быть включена)
 
     Определяется, если задан макрос NDEBUG, или еще что-то (в зависимости от системы сборки)
@@ -102,7 +102,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \brief Алиас для UMBA_NDEBUG, соответствующий соглашениям электронщиков об именовании цепей
 
     См. описание UMBA_NDEBUG
@@ -112,7 +112,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \brief Verbose режим компиляции - выводятся все диагностические сообщения
 
  */
@@ -144,7 +144,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief Служит для отключения всех устаревших возможностей
 
@@ -155,7 +155,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief Служит для отключения всех отладочных проверок.
 
@@ -166,9 +166,9 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
-    \brief Служит для отключения виртуального деструктора у интерфейсов. Сэкономит 4 байта в каждой VTBL. 
+    \brief Служит для отключения виртуального деструктора у интерфейсов. Сэкономит 4 байта в каждой VTBL.
     По умолчанию виртуальный деструктор объявлен у базового интерфейса IUnknown, чтобы разные дотошные компиляторы не генерировали варнинги.
 
     Никак не определяется в исходниках, при необходимости должен быть задан средствами среды разработки/сборочного инструмента.
@@ -178,7 +178,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief По умолчанию странные виндовые макросы min и max андефайнятся, ибо они адское зло. Но если по странной прихоти их хочется оставить, то используйте данный макрос.
 
@@ -197,7 +197,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief Указывает использовать версию кода для MCU
 
@@ -208,7 +208,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief Указывает использовать версию кода для Qt и подключает некоторые основные заголовочные файлы Qt
 
@@ -219,7 +219,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief Указывает использовать версию кода для Win32/Win64. Обычно не требует явного указания.
 
@@ -230,7 +230,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_TUNING_MACROS
     \brief Указывает использовать версию кода для FreeRTOS
 
@@ -246,7 +246,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая платформа - Win32/Win64
  */
@@ -255,7 +255,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая платформа - Win64
  */
@@ -264,7 +264,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая платформа - Qt.
 
@@ -277,19 +277,19 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 //------------------------------
 /*! \def UMBA_FREERTOS_USED
     \ingroup UMBA_LIBS_STATE_MACROS
-    \brief Определён, если целевая платформа - FreeRTOS. 
-    
-    Обычно определён при использовании FreeRTOS на MCU совместно #UMBA_MCU_USED. 
+    \brief Определён, если целевая платформа - FreeRTOS.
+
+    Обычно определён при использовании FreeRTOS на MCU совместно #UMBA_MCU_USED.
     Теоретически, FreeRTOS вроде может быть запущена и под Window. В этом случае будут определены макросы
     #UMBA_WIN32_USED/#UMBA_WIN64_USED.
-    
+
  */
 #ifdef DOXYGEN_ONLY
     #define UMBA_FREERTOS_USED
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая платформа - MCU
  */
@@ -302,7 +302,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор Microsoft Visual C++
  */
@@ -311,7 +311,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор ARMCC (Keil)
  */
@@ -320,7 +320,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор ARMCC
  */
@@ -329,7 +329,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор CLang (Keil/ARMCC v6)
  */
@@ -338,7 +338,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор ARMCC/CLang (Keil/ARMCC v6). Аналогично #UMBA_KEIL_CLANG_COMPILER_USED
  */
@@ -347,7 +347,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор CLang
  */
@@ -356,7 +356,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор IAR.
 
@@ -369,7 +369,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор GCC (GNU C/C++ Compiler from GNU Compiler Collection)
  */
@@ -378,11 +378,11 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор Borland или производный.
-    
-    Он также определён, если используется компилятор Inprise/CodeGear, 
+
+    Он также определён, если используется компилятор Inprise/CodeGear,
     исходя из той логики, что тама люди соблюдали какую-то преемственность, а не переписывали всё заново при переименованиях конторы.
 
     Можно рассматривать абревиатуру BCC как Borland Compiler Collection, и если нет уточнений, то это есть изначальный Борман.
@@ -393,7 +393,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор CodeGear (ранее бывшый Borland'ом).
     См. #UMBA_BCC_COMPILER_USED, #UMBA_BCC_CGC_COMPILER_USED
@@ -403,7 +403,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если используется компилятор CodeGear. CGC легко перепутать с GCC, поэтому был добавлен макрос, означающий
     Borland Compiler Collection - CodeGear Compiler.
@@ -417,7 +417,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если на целевой архитектуре используется порядок хранения данных в памяти Little Endian - сначала младшие (младшие части по младшим адресам)
  */
@@ -426,7 +426,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если на целевой архитектуре используется порядок хранения данных в памяти Big Endian - сначала старшие (старшие части по младшим адресам)
  */
@@ -440,7 +440,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая архитектура - Intel x86 совместимый процессор (32ух или более разрядный, само собой)
  */
@@ -449,7 +449,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая архитектура - проц, совместимый с расширениями x86 от AMD до 64ти-четырёх разрядов
  */
@@ -458,7 +458,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Устоявшийся алиас для #UMBA_ARCH_AMD64
  */
@@ -467,7 +467,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая архитектура - ARM (32/64 разряда)
  */
@@ -476,7 +476,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 //------------------------------
-/*! 
+/*!
     \ingroup UMBA_LIBS_STATE_MACROS
     \brief Определён, если целевая архитектура - ARM64. При этом определяется и макрос #UMBA_ARCH_ARM
  */
@@ -492,7 +492,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 //----------------------------------------------------------------------------
 /*! \def UMBA_CXX_HAS_STD03
     \ingroup UMBA_LIBS_STATE_MACROS
-    \brief Определён, если компилятор поддерживает стандарт C++03 на уровне конструкций языка. 
+    \brief Определён, если компилятор поддерживает стандарт C++03 на уровне конструкций языка.
     В основном все компиляторы поддерживают и стандартные библиотеки на уровне C++03.
  */
 #ifdef DOXYGEN_ONLY
@@ -503,7 +503,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 /*! \def UMBA_CXX_HAS_STD11
     \ingroup UMBA_LIBS_STATE_MACROS
-    \brief Определён, если компилятор поддерживает стандарт C++11 на уровне конструкций языка. 
+    \brief Определён, если компилятор поддерживает стандарт C++11 на уровне конструкций языка.
  */
 #ifdef DOXYGEN_ONLY
     #define UMBA_CXX_HAS_STD11
@@ -513,7 +513,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 /*! \def UMBA_CXX_HAS_STD14
     \ingroup UMBA_LIBS_STATE_MACROS
-    \brief Определён, если компилятор поддерживает стандарт C++14 на уровне конструкций языка. 
+    \brief Определён, если компилятор поддерживает стандарт C++14 на уровне конструкций языка.
  */
 #ifdef DOXYGEN_ONLY
     #define UMBA_CXX_HAS_STD14
@@ -523,7 +523,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 /*! \def UMBA_CXX_HAS_STD17
     \ingroup UMBA_LIBS_STATE_MACROS
-    \brief Определён, если компилятор поддерживает стандарт C++17 на уровне конструкций языка. 
+    \brief Определён, если компилятор поддерживает стандарт C++17 на уровне конструкций языка.
  */
 #ifdef DOXYGEN_ONLY
     #define UMBA_CXX_HAS_STD17
@@ -559,9 +559,9 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 
 #if 0
 //----------------------------------------------------------------------------
-/*! \def 
+/*! \def
     \ingroup UMBA_LIBS_STATE_MACROS
-    \brief Определён, если 
+    \brief Определён, если
  */
 #endif
 
@@ -1044,11 +1044,11 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
     #if _MSVC_LANG >= 201103L
         #define UMBA_CXX_HAS_STD11
     #endif
-    
+
     #if _MSVC_LANG >= 201402L
         #define UMBA_CXX_HAS_STD14
     #endif
-    
+
     #if _MSVC_LANG >= 201703L
         #define UMBA_CXX_HAS_STD17
     #endif
@@ -1059,7 +1059,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
     #if __cplusplus >= 201703L
         #define UMBA_CXX_HAS_STD17
     #endif
-   
+
     #if __cplusplus >= 201402L
         #define UMBA_CXX_HAS_STD14
     #endif
@@ -1104,7 +1104,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
     #include "mcu.h"
     #include "stm32_drivers.h"
 
-    
+
 #endif
 
 

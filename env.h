@@ -48,7 +48,7 @@ bool putVar(const ::std::string &varName, const ::std::string &val)
    {
     ::std::string tmp = varName + ::std::string("=") + val;
     // Могут быть утечки памяти, но зато везде безопасно.
-    // Некоторые системы не делают копию передаваемого значения, 
+    // Некоторые системы не делают копию передаваемого значения,
     // а запоминают непосредственно переданное значение, поэтому передача
     // автоматических переменных вызовет крах.
     char *ptmp = (char*)malloc(tmp.size()+1);
@@ -76,7 +76,7 @@ bool getVar(const ::std::wstring &varName, ::std::wstring &val)
     if (!pval) return false;
     val = pval;
     return true;
-   }    
+   }
 
 //! Получение переменной окружения, возвращает true, если значение получено
 inline
@@ -87,7 +87,7 @@ bool getVar(const ::std::wstring &varName, ::std::string &val)
     if (!pval) return false;
     val = string_plus::make_string<std::string>(pval);
     return true;
-   }    
+   }
 
 //! Получение переменной окружения, возвращает true, если значение получено
 inline
@@ -234,7 +234,7 @@ bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
 // for (char **env = envp; *env != 0; env++)
 //   {
 //     char *thisEnv = *env;
-//     printf("%s\n", thisEnv);    
+//     printf("%s\n", thisEnv);
 //   }
 
 

@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Qt-хелпер для отображения MessageBox
  */
@@ -79,7 +79,7 @@ void showSimpleMessage( MessageType messageType
         case MessageType::err:
              msgBox.setIcon(QMessageBox::Critical);
              break;
-             
+
     }
 
     msgBox.exec();

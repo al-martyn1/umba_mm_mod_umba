@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Umba-исключения
  */
@@ -93,11 +93,11 @@ public:
     //virtual ~FileException() throw () {}
 
     //! Возврат указателя на текст ошибки
-    virtual 
+    virtual
     const char* what() const throw ()
     {
        return m_message.c_str();
-    }           
+    }
 
     //! Возвращает имя файла
     virtual
@@ -105,7 +105,7 @@ public:
     {
         return m_fileName.c_str();
     }
-    
+
 protected:
 
     std::string      m_message   ; //!< Текст сообщения
@@ -373,7 +373,7 @@ void printException(Stream &stream, const ::umba::FileBinaryParsingException &e)
     stream<<e.getOffset();
     exceptionHandlingConfigureStreamHex( stream, false );
     stream<<")"<<": ";
-    
+
     exceptionHandlingConfigureStreamColoringErrorMessage(stream);
     stream<<e.what();
     if (e.hasDump())

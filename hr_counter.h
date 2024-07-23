@@ -119,9 +119,9 @@ namespace hr_counter{
         HiResTick tickStart = getTick();
         if (!isCounterAvailable())
             return;
-    
+
         HiResTick deltaTick = convertNanosecToTick( deltaNanosec );
-    
+
         while( (getTick() - tickStart) <= deltaTick) {}
     }
 
@@ -132,7 +132,7 @@ namespace hr_counter{
         delayNanosec( deltaNanosec );
     }
 
-    
+
 
 #elif defined(UMBA_MCU_USED)
 
@@ -272,7 +272,7 @@ namespace hr_counter{
                 deltaNanosec = 0;
 
         #else
-            
+
         #endif
 
         HiResTick deltaTick = convertNanosecToTick( deltaNanosec );
@@ -288,7 +288,7 @@ namespace hr_counter{
     inline
     void delayNanosecHard( NanosecInterval deltaNanosec )
     {
-        uint32_t isMasked = UMBA_INTERRUPTS_DISABLED(); 
+        uint32_t isMasked = UMBA_INTERRUPTS_DISABLED();
         UMBA_DISABLE_IRQ();
         delayNanosec(deltaNanosec);
         if (!isMasked)

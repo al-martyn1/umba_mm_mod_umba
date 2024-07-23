@@ -47,7 +47,7 @@ struct PingRequestGeneratorImplBase : UMBA_IMPLEMENTS IPingRequestGenerator
 
 protected:
 
-    umba::time_service::TimeTick  m_pingPeriod = 0;   //!< Период пинга 
+    umba::time_service::TimeTick  m_pingPeriod = 0;   //!< Период пинга
 
 }; // struct PingRequestGeneratorImplBase
 

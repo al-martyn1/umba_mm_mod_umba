@@ -1,7 +1,7 @@
 #pragma once
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \file
     \brief Работа с именоваными номерами версий
  */
@@ -25,7 +25,7 @@ struct NameVersion
     NumericVersion     version; //!< Версия
 
     //! Создаёт версию "любая версия"
-    static 
+    static
     NameVersion any()
     {
         return NameVersion{ std::string(), NumericVersion::any() };
@@ -77,11 +77,11 @@ struct NameVersion
 //! Версия чего либо вида Major.Minor.BuildNumber
 struct NameVersionEx
 {
-    std::string        name;    //!< Имя   
+    std::string        name;    //!< Имя
     NumericVersionEx   version; //!< Версия
 
     //! Создаёт версию "любая версия"
-    static 
+    static
     NameVersionEx any()
     {
         return NameVersionEx{ std::string(), NumericVersionEx::any() };

@@ -81,7 +81,7 @@ size_t calcEscapedStringDumpSize( const char *pData, size_t dataSize )
         {
             case '\'': // \'
             case '\"': // \"
-            case '\\': // 
+            case '\\': //
             case '\0': // \0
             case '\a': // \a, bell, 0x07
             case '\b': // 0x08
@@ -90,18 +90,18 @@ size_t calcEscapedStringDumpSize( const char *pData, size_t dataSize )
             case '\r': // CR, 0x0D
             case '\t': // tab, 0x09
             case '\v': // vertical tab, 0x0b
-                       requiredSize += 2; 
+                       requiredSize += 2;
                        break;
-        
+
             default:
-        
+
                        if (uch<(uint8_t)' ' || uch>=0x7F)
                            requiredSize += 4; // \xXX
                        else
                            requiredSize += 1;
         }
     }
-    
+
     return requiredSize+1;
 }
 
@@ -137,7 +137,7 @@ const char* dumpStripSpaces( char *pBuf, bool bStrip = true )
             continue;
         pBuf[--chPos] = ch;
     }
-    
+
     return &pBuf[chPos];
 }
 
@@ -295,7 +295,7 @@ const char* escapedStringDump( char *pBuf, const char *pData, size_t dataSize )
                        if (uch<(uint8_t)' ' || uch>=0x7F)
                        {
                            // \xXX
-                           pBuf[pos++] = '\\'; 
+                           pBuf[pos++] = '\\';
                            pBuf[pos++] = 'x' ;
                            utils::dumpSingleByte( &pBuf[pos], uch );
                            pos+=2;
@@ -308,7 +308,7 @@ const char* escapedStringDump( char *pBuf, const char *pData, size_t dataSize )
     }
 
     pBuf[pos] = 0;
-    
+
     return pBuf;
 }
 

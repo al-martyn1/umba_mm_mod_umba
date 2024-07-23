@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief Помощяки для плюсовых регулярок. В тч (простая_маска_*_?) -> ECMA Regex
  */
@@ -61,22 +61,22 @@ StringType expandSimpleMaskToEcmaRegex( StringType s, bool useAnchoring = false,
     // https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide/Regular_Expressions
 
     // The assertion ^ (beginning of line) matches
-    //  
-    // 1) The position that immediately follows a LineTerminator character (this may not be supported) 
+    //
+    // 1) The position that immediately follows a LineTerminator character (this may not be supported)
     //    (until C++17) (this is only guaranteed if std::regex_constants::multiline(C++ only) is enabled) (since C++17)
     // 2) The beginning of the input (unless std::regex_constants::match_not_bol(C++ only) is enabled)
 
 
     // The assertion $ (end of line) matches
-    //  
-    // 1) The position of a LineTerminator character (this may not be supported) (until C++17)(this is only guaranteed 
+    //
+    // 1) The position of a LineTerminator character (this may not be supported) (until C++17)(this is only guaranteed
     //    if std::regex_constants::multiline(C++ only) is enabled) (since C++17)
     // 2) The end of the input (unless std::regex_constants::match_not_eol(C++ only) is enabled)
 
 
     // characters ^ $ \ . * + ? ( ) [ ] { } |
 
-    // Single character matches The Atom '.' matches and consumes any one character 
+    // Single character matches The Atom '.' matches and consumes any one character
     // from the input string except for LineTerminator (U+000D, U+000A, U+2029, or U+2028)
     // Quantifiers
     // { DecimalDigits } exact DecimalDigits
@@ -167,7 +167,7 @@ template< typename StringType > inline
 bool regexMatch(const StringType &text, const std::basic_regex<typename StringType::value_type> &r)
 {
     // https://en.cppreference.com/w/cpp/regex/match_results
-    
+
     // std::smatch m;
     std::match_results< typename StringType::const_iterator > m;
 
@@ -193,14 +193,14 @@ bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex
     try
     {
         #if defined(__GNUC__)
-    
+
             //TODO: !!! Если не обрезать, то регулярки в GCC 7.3 падают
             // Чет не работает, а обрезать в прикладухе - работает
             // if (text.size()>7000u)
             // {
             //     text.erase(7000u, text.npos);
             // }
-    
+
         #endif
 
         return std::regex_match( text, r, flags );
@@ -227,14 +227,14 @@ bool regexMatch( const std::vector<CharType> &text, const std::basic_regex<CharT
     try
     {
         #if defined(__GNUC__)
-    
+
             //TODO: !!! Если не обрезать, то регулярки в GCC 7.3 падают
             // Чет не работает, а обрезать в прикладухе - работает
             // if (text.size()>7000u)
             // {
             //     text.erase(text.begin()+7000u, text.end());
             // }
-    
+
         #endif
 
         return std::regex_match( text.begin(), text.end(), r, flags );

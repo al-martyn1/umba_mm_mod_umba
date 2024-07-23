@@ -85,7 +85,7 @@ bool clipboardClear(HWND hWndNewOwner=0)
     {
         return false;
     }
-    
+
     ClipboardAutoCloser autoCloser;
 
     return ::EmptyClipboard() ? true : false;
@@ -120,13 +120,13 @@ bool clipboardTextGet(StringType &text, HWND hWndNewOwner=0)
     // https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats
 
     HGLOBAL hglb = (HGLOBAL)::GetClipboardData(cfText);
-    if (!hglb) 
+    if (!hglb)
     {
          return false;
     }
 
     std::size_t dataLen  = (std::size_t)GlobalSize( hglb );
-    char_type* lpClpText = (char_type*)GlobalLock(hglb); 
+    char_type* lpClpText = (char_type*)GlobalLock(hglb);
     if (!lpClpText)
     {
          return false;
@@ -185,12 +185,12 @@ bool clipboardTextSet(const StringType &text, HWND hWndNewOwner=0)
         return false;
     }
 
-    char_type* lpGlobalData = (char_type*)::GlobalLock(hglb); 
+    char_type* lpGlobalData = (char_type*)::GlobalLock(hglb);
 
     text.copy(lpGlobalData, text.size());
     lpGlobalData[text.size()] = 0;
 
-    ::GlobalUnlock(hglb); 
+    ::GlobalUnlock(hglb);
 
     ::EmptyClipboard();
 

@@ -10,38 +10,38 @@
 #else
 
     #include <limits.h>
-    
+
     namespace std{
 
         template<class _Ty,
         _Ty _Val>
         struct integral_constant
-        {	// convenient template for integral constant types
-            static 
-            //constexpr 
+        {    // convenient template for integral constant types
+            static
+            //constexpr
             _Ty value = _Val;
-            
+
             typedef _Ty value_type;
             typedef integral_constant<_Ty, _Val> type;
-            
-            //constexpr 
-            operator value_type() const //_NOEXCEPT 
+
+            //constexpr
+            operator value_type() const //_NOEXCEPT
             {    // return stored value
                 return (value);
             }
-            
-            //constexpr 
+
+            //constexpr
             value_type operator()() const //_NOEXCEPT
-            {	// return stored value
+            {    // return stored value
                 return (value);
             }
         };
-        
+
         typedef integral_constant<bool, true> true_type;
         typedef integral_constant<bool, false> false_type;
-           
-   
-        typedef unsigned __int8     uint8_t ; 
+
+
+        typedef unsigned __int8     uint8_t ;
         typedef signed   __int8     int8_t  ;
 
         typedef unsigned __int16    uint16_t;
@@ -55,18 +55,18 @@
 
         typedef unsigned __int64    uintmax_t;
         typedef signed   __int64    intmax_t ;
-        
+
     } // namespace std
 
     typedef std::uint8_t      uint8_t ;
     typedef std::int8_t       int8_t  ;
-                                      
+
     typedef std::uint16_t     uint16_t;
     typedef std::int16_t      int16_t ;
-                                      
+
     typedef std::uint32_t     uint32_t;
     typedef std::int3_t       int3_t  ;
-                                      
+
     typedef std::uint64_t     uint64_t;
     typedef std::int64_t      int64_t ;
 

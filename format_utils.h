@@ -51,8 +51,8 @@ inline
 char digitToChar( unsigned d, CaseParam caseParam = CaseParam::upper )
 {
     return (char)( d<10
-                 ? '0' + d 
-                 : (caseParam==CaseParam::lower ? 'a' : 'A') - 10 + d 
+                 ? '0' + d
+                 : (caseParam==CaseParam::lower ? 'a' : 'A') - 10 + d
                  );
 }
 
@@ -157,7 +157,7 @@ size_t formatNumber( char* pBuf, size_t bufSize, int64_t val, int ss, size_t fmt
 
 //----------------------------------------------------------------------------
 //! Форматирует число. Знаковая версия
-/*! 
+/*!
     \note Версия для uint_t буфера
  */
 inline
@@ -195,7 +195,7 @@ size_t formatDecimalFixedPoint( char * pBuf, size_t bufSize, int64_t val, size_t
 
 //----------------------------------------------------------------------------
 //! Форматирует число с фиксированной точкой
-/*! 
+/*!
     \note Версия для uint_t буфера
  */
 inline
