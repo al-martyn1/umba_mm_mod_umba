@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief На базе кода под STM32, адаптация для кроссплатформы, реализация
 
@@ -38,7 +38,7 @@ namespace time_service{
         {
             return ticks * portTICK_PERIOD_MS;
         }
-        
+
         TimeTick msToTicks(TimeTick ms)
         {
             return ms / portTICK_PERIOD_MS;
@@ -48,7 +48,7 @@ namespace time_service{
         {
             return ticksToMs(xTaskGetTickCount());
         }
-        
+
         TimeTick getCurTimeMs()
         {
             if (IS_IN_ISR())
@@ -61,13 +61,13 @@ namespace time_service{
         {
             return (HiresTimeTick)1000*(HiresTimeTick)getCurTimeMs();
         }
-        
+
         void   delayMs(TimeTick deltaMs)
         {
             UMBA_ASSERT( ! IS_IN_ISR() );
             osTaskDelay(msToTicks(deltaMs));
         }
-        
+
         void   delay_ms(TimeTick deltaMs)
         {
             UMBA_ASSERT( ! IS_IN_ISR() );
@@ -84,7 +84,7 @@ namespace time_service{
         {
             return ticks;
         }
-        
+
         TimeTick msToTicks(TimeTick ms)
         {
             return ms;
@@ -108,7 +108,7 @@ namespace time_service{
                 return (HiresTimeTick)getCurTimeMs() * 1000ull;
 
             double microsecondsPerCount = 1.0e9 / static_cast<double>(freq.QuadPart);
-            
+
             return (HiresTimeTick)((double)curTime.QuadPart*microsecondsPerCount);
         }
 
@@ -128,7 +128,7 @@ namespace time_service{
         {
             return ticks;
         }
-        
+
         TimeTick msToTicks(TimeTick ms)
         {
             return ms;
@@ -170,7 +170,7 @@ namespace time_service{
         {
             delayMs(delta);
         }
-        
+
 
     #else
 
@@ -187,7 +187,7 @@ namespace time_service{
         }
 
         void   delayMs(TimeTick deltaMs);
-    
+
         void start(void)
         {
             SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
@@ -195,7 +195,7 @@ namespace time_service{
             delayMs( 250 );
             #endif
         }
-    
+
         void stop(void)
         {
             SysTick->CTRL &= ~(SysTick_CTRL_ENABLE_Msk);
@@ -205,7 +205,7 @@ namespace time_service{
         {
             return ticks;
         }
-        
+
         TimeTick msToTicks(TimeTick ms)
         {
             return ms;
@@ -224,7 +224,7 @@ namespace time_service{
 
             {
                 UMBA_CRITICAL_SECTION_EX(umba::CriticalSection, umba::globalCriticalSection);
-                tickVal = SysTick->VAL;          
+                tickVal = SysTick->VAL;
                 hrMsecModule = SysTick->LOAD + 1;
                 msTick = systemTime;
             }
@@ -244,7 +244,7 @@ namespace time_service{
         {
             return 1000ull*(HiresTimeTick)hPart + 1000ull * (HiresTimeTick)lPart / (HiresTimeTick)module;
         }
-   
+
         HiresTimeTick getCurTimeHires()
         {
             TimeTick tickHi, tickLo, tickMod;
@@ -295,7 +295,7 @@ namespace time_service{
 
     #endif
     // #ifdef UMBA_FREERTOS_USED
-        
+
 } // namespace time_service
 } // namespace umba
 

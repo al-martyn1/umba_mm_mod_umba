@@ -36,28 +36,28 @@ namespace platform_support{
     {
         return std::strcmp( s1, s2 );
     }
-    
+
     //! Сравнение первых cnt символов строк. \returns -1, 0, 1
     inline
     int strn_compare( const char *s1, const char *s2, size_t cnt )
     {
         return std::strncmp( s1, s2, cnt );
     }
-    
+
     //! Сравнение первых cnt символов строк без учёта регистра символов. \returns -1, 0, 1
     inline
     int str_icase_compare( const char *s1, const char *s2 )
     {
         return std::strcasecmp( s1, s2 );
     }
-    
+
     //! Сравнение первых cnt символов строк без учёта регистра символов. \returns -1, 0, 1
     inline
     int strn_icase_compare( const char *s1, const char *s2, size_t cnt )
     {
         return std::strncasecmp( s1, s2, cnt );
     }
-    
+
 #elif defined(UMBA_MSVC_COMPILER_USED)
 
     //! Сравнение строк. \returns -1, 0, 1
@@ -66,21 +66,21 @@ namespace platform_support{
     {
         return strcmp( s1, s2 );
     }
-    
+
     //! Сравнение первых cnt символов строк. \returns -1, 0, 1
     inline
     int strn_compare( const char *s1, const char *s2, size_t cnt )
     {
         return strncmp( s1, s2, cnt );
     }
-    
+
     //! Сравнение первых cnt символов строк без учёта регистра символов. \returns -1, 0, 1
     inline
     int str_icase_compare( const char *s1, const char *s2 )
     {
         return _stricmp( s1, s2 );
     }
-    
+
     //! Сравнение первых cnt символов строк без учёта регистра символов. \returns -1, 0, 1
     inline
     int strn_icase_compare( const char *s1, const char *s2, size_t cnt )
@@ -96,28 +96,28 @@ namespace platform_support{
     {
         UMBA_ASSERT(0 && "Not implemented for this compiler"); return 0;
     }
-    
+
     //! Сравнение первых cnt символов строк. \returns -1, 0, 1
     inline
     int strn_compare( const char *s1, const char *s2, size_t cnt )
     {
         UMBA_ASSERT(0 && "Not implemented for this compiler"); return 0;
     }
-    
+
     //! Сравнение первых cnt символов строк без учёта регистра символов. \returns -1, 0, 1
     inline
     int str_icase_compare( const char *s1, const char *s2 )
     {
         UMBA_ASSERT(0 && "Not implemented for this compiler"); return 0;
     }
-    
+
     //! Сравнение первых cnt символов строк без учёта регистра символов. \returns -1, 0, 1
     inline
     int strn_icase_compare( const char *s1, const char *s2, size_t cnt )
     {
         UMBA_ASSERT(0 && "Not implemented for this compiler"); return 0;
     }
-    
+
 #endif
 
 } //namespace platform_support
@@ -242,7 +242,7 @@ typedef ConstString<case_sensitive>   ConstStringCaseSensitive; //!< Регис�
 //! Сравнение строк
 template< bool CaseIgnore >
 inline
-int 
+int
 stringsCompare( const ConstString<CaseIgnore> &s1, const char *s2 )
 {
     return s1.compare( s2 );
@@ -251,7 +251,7 @@ stringsCompare( const ConstString<CaseIgnore> &s1, const char *s2 )
 //! Сравнение строк
 template< bool CaseIgnore >
 inline
-int 
+int
 stringsCompare( const char *s1, const ConstString<CaseIgnore> &s2 )
 {
     return - s2.compare( s1 );
@@ -260,7 +260,7 @@ stringsCompare( const char *s1, const ConstString<CaseIgnore> &s2 )
 //! Сравнение строк
 template< bool CaseIgnore >
 inline
-int 
+int
 stringsCompare( const ConstString<CaseIgnore> &s1, const ConstString<CaseIgnore> &s2 )
 {
     return s1.compare( s2 );
@@ -270,7 +270,7 @@ stringsCompare( const ConstString<CaseIgnore> &s1, const ConstString<CaseIgnore>
 //! Сравнение строк
 template< bool CaseIgnore >
 inline
-int 
+int
 stringsCompare( const ConstString<CaseIgnore> &s1, const char *s2, size_t n )
 {
     return s1.compare( s2, n );
@@ -279,7 +279,7 @@ stringsCompare( const ConstString<CaseIgnore> &s1, const char *s2, size_t n )
 //! Сравнение строк
 template< bool CaseIgnore >
 inline
-int 
+int
 stringsCompare( const char *s1, const ConstString<CaseIgnore> &s2, size_t n )
 {
     return - s2.compare( s1, n );
@@ -288,7 +288,7 @@ stringsCompare( const char *s1, const ConstString<CaseIgnore> &s2, size_t n )
 //! Сравнение строк
 template< bool CaseIgnore >
 inline
-int 
+int
 stringsCompare( const ConstString<CaseIgnore> &s1, const ConstString<CaseIgnore> &s2, size_t n )
 {
     return s1.compare( s2, n );

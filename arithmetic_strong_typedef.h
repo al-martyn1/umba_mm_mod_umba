@@ -30,7 +30,7 @@
                  os << umba::enum_helpers::toUnderlyingType(val);                              \
                  return os;                                                                    \
              }
-             
+
 
 // Also to read:
 //   https://www.foonathan.net/2016/10/strong-typedefs/

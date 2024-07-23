@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief Разная шляпа по разбору командной строки для консольных утилит
  */
@@ -63,12 +63,12 @@
         std::string makeAbsPath( std::string p )
         {
             std::string basePath;
-        
+
             if (optFiles.empty())
                 basePath = umba::filesys::getCurrentDirectory<std::string>();
             else
                 basePath = umba::filename::getPath(optFiles.top());
-        
+
             return umba::filename::makeAbsPath( p, basePath );
         }
 
@@ -111,9 +111,9 @@
 
         if (argsParser.mustExit)
             return 1;
-    
+
         return 0;
-    
+
     }
 
     // А тут просто собираем всё, что не опция или респонз файл - простые аргументы
@@ -173,14 +173,14 @@
         // Создается опция --color=CLR, где CLR - одно из значений перечисления.
         // Перечисления задаются строкой, в которой '|' - задаёт альтернативы, а
         //                                          '/' - позволяет задавать алиасы
-        // Для обработки таких enum-значений 
-        else if (opt.setParam("CLR", 0, "no/none/file|" 
-                                        "ansi/term|" 
+        // Для обработки таких enum-значений
+        else if (opt.setParam("CLR", 0, "no/none/file|"
+                                        "ansi/term|"
                                         #if defined(WIN32) || defined(_WIN32)
                                         "win32/win/windows/cmd/console"
                                         #endif
                              )
-              || opt.setInitial(-1) || opt.isOption("color") 
+              || opt.setInitial(-1) || opt.isOption("color")
               || opt.setDescription("Force set console output coloring")
               // ", can be:\nno, none, file - disable coloring\nansi, term - set ansi terminal coloring\nwin32, win, windows, cmd, console - windows console specific coloring method"
               )
@@ -210,13 +210,13 @@
 
 
     Длинная опция
-    Если первый символ '!' - internal option - недокументированная опция, обрабатывается, 
+    Если первый символ '!' - internal option - недокументированная опция, обрабатывается,
     но не выводится в генерируемой справке
 
     Имя параметра
     Если имя параметра начинается с символа '?' - это опциональный параметр, может быть опущен.
 
-    umba::command_line::CommandLineOption также следующие методы для задания имени, 
+    umba::command_line::CommandLineOption также следующие методы для задания имени,
     типа, деф значения и диапазона значений:
 
 
@@ -327,7 +327,7 @@ bool readOptionsFile( std::ifstream &optFile, std::vector<std::string> &resVec )
         resVec.push_back(optLine);
 
     }
-    
+
     return true;
 }
 
@@ -348,7 +348,7 @@ bool readOptionsFile( std::ifstream &optFile, std::vector<std::wstring> &resVec 
         resVec.push_back(fromUtf8(optLine));
 
     }
-    
+
     return true;
 }
 
@@ -376,13 +376,13 @@ inline
 bool readBinaryFile( std::ifstream &input, std::string &data )
 {
     char buf[4096];
-    
+
     while( input.read( buf, sizeof(buf)) )
     {
         size_t rdSz = (size_t)input.gcount();
         data.append(buf, (size_t)rdSz);
     }
-    
+
     size_t rdSz = (size_t)input.gcount();
     if (rdSz!=0  /* && rdSz!=(size_t)-1 */ )
     {
@@ -657,7 +657,7 @@ struct CommandLineOptionInfo
 
         if ( eit->second >= enums.size() )
             return -1;
-        
+
         return enums[eit->second].value;
     }
 
@@ -944,7 +944,7 @@ struct ICommandLineOptionCollector
     virtual std::string makeText( std::string::size_type width, const std::set<std::string> *pHelpOnlyThats ) = 0;
     virtual std::string makeText( std::string::size_type width, std::string *pPrefix, std::string *pSuffix, bool useExt ) = 0;
     virtual std::string makeText( std::string::size_type width, std::string *pPrefix, std::string *pSuffix, bool useExt, const std::set<std::string> *pHelpOnlyThats ) = 0;
-    
+
 
     //const std::set<std::string>
 
@@ -1056,7 +1056,7 @@ struct CommandLineOption
             default : return "";
         }
     }
-    
+
     static std::string getBuiltinsDisableOptionMainName  () { return getBuiltinsDisableOptionName(umba::program_location::BuiltinOptionsLocationFlag::appGlobal   ); }
     static std::string getBuiltinsDisableOptionCustomName() { return getBuiltinsDisableOptionName(umba::program_location::BuiltinOptionsLocationFlag::customGlobal); }
     static std::string getBuiltinsDisableOptionUserName  () { return getBuiltinsDisableOptionName(umba::program_location::BuiltinOptionsLocationFlag::userLocal   ); }
@@ -1107,7 +1107,7 @@ struct CommandLineOption
 
 
 /*
-        
+
 
         else if (opt.isOption("!wiki") || opt.setDescription("Help output in Wiki format"))
         {
@@ -1274,7 +1274,7 @@ struct CommandLineOption
         }
         return false;
     }
-    
+
 
     // Опциональный параметр задается символом '?' перед именем параметра
     // Для обязательного параметра defVal не используется, но он используется для задания типа опции
@@ -1413,7 +1413,7 @@ struct CommandLineOption
         }
 
         return false;
-    
+
     }
 
     bool getParamValue( bool &val, std::string &errMsg )
@@ -1448,7 +1448,7 @@ struct CommandLineOption
 
         errMsg = std::string("Invalid option value taken (") + optInfo.getAllOptionNames("/") + std::string(")");
         return false;
-        
+
     }
 
     bool getParamValue( int &val, std::string &errMsg )
@@ -1967,7 +1967,7 @@ struct CommandLineOptionInfo
            exeFullName = umba::filename::getFileName(exeFullName);
         }
 
-        exeVarName = //std::string("_") + 
+        exeVarName = //std::string("_") +
                      //makeCppName( exeFullName );
             exeFullName; // !!!
 
@@ -2140,7 +2140,7 @@ struct CommandLineOptionInfo
                 if (descExtraOss.str().empty())
                 {
                     descExtraOss<<"Initial value: ";
-                }    
+                }
                 else
                 {
                     descExtraOss<<", initial value: ";
@@ -2376,7 +2376,7 @@ bool updateAutocompletionBashRc( ICommandLineOptionCollector *pCol, bool simpleR
         text = pCol->makeText( 0, PrintHelpStyle::bash_complete, &pref, &suf, true );
         //if (!updateRcScriptFile( appendPath( getUserFolderPath(), ".bashrc" ), text, pref, suf, simpleRemoveLine ))
         if (!updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory<std::string>(), umba::string_plus::make_string<std::string>(".bashrc") ), text, pref, suf, simpleRemoveLine))
-                
+
             return false;
     #endif
 
@@ -2428,7 +2428,7 @@ bool updateAutocompletionCLinkScripts( ICommandLineOptionCollector *pCol, bool s
     umba::filename::stripLastPathSep(pathName);
 
     // https://docs.microsoft.com/ru-ru/cpp/c-runtime-library/reference/stat-functions?view=vs-2019
-    
+
     bool isFile = true;
 
     #if defined(WIN32) || defined(_WIN32)
@@ -2511,7 +2511,7 @@ int autocompletionInstaller ( ICommandLineOptionCollector *pCol, CommandLineOpti
 
     // #if defined(WIN32) || defined(_WIN32)
     // #else
-    //     useCLink = false; // --clink simple ignored 
+    //     useCLink = false; // --clink simple ignored
     // #endif
 
     if (useBash)
@@ -2548,7 +2548,7 @@ bool argsHasHelpOption( const std::vector<std::string> &args )
     for( const auto &a : args)
     {
         CommandLineOption opt(a);
-     
+
         if (opt.isPureHelpOption())
             return true;
     }
@@ -2573,7 +2573,7 @@ bool argsFilterForHelpOption( std::vector<std::string> &args, std::set<std::stri
         umba::string_plus::ltrim(b, [](char ch) {return ch == '-'; } );
 
         bool allowedForHelp = argsAllowedForHelp.find(b)!=argsAllowedForHelp.end();
-     
+
         //if (!allowedForHelp) // allowed to use with --help in special way
             argsTmp.push_back(a);
 
@@ -2611,7 +2611,7 @@ struct ArgParsingContext
     bool                      hasHelpOption   = false;
     bool                      disableBuiltins = false; // prevent to parse conf/$(AppExeName).options
     bool                      quet            = false;
-    bool                      mustExit        = false; // prevent to parse 
+    bool                      mustExit        = false; // prevent to parse
     std::set<StringType>      argsNeedHelp    ;
 
 };
@@ -2666,7 +2666,7 @@ struct ArgsParser
             s << "\nBuiltin option files:\n";
 
         using namespace umba::program_location;
-        
+
         if (builtinsOptions&BuiltinOptionsLocationFlag::appGlobal   )
             s << "  AppGlobal  : " << programLocationInfo.getBuiltinOptionsFilename( BuiltinOptionsLocationFlag::appGlobal ) << "\n";
 
@@ -2740,7 +2740,7 @@ struct ArgsParser
 
     //! Parses predefined files
     /*!
-        $(AppRoot)/conf/$(AppExeName).options     - file from distribution, can be skipped 
+        $(AppRoot)/conf/$(AppExeName).options     - file from distribution, can be skipped
      */
     //! If userConfFileOnly==true, used $(Home)\.$(AppExeName).options, else used $(Home)\.$(AppExeName)\builtin.options
     bool parseStdBuiltins( bool userConfFileOnly = true )
@@ -2788,7 +2788,7 @@ struct ArgsParser
 
 
 template<typename StringType, typename ArgParser, typename OptionsCollector> inline
-ArgsParser<StringType,ArgParser,OptionsCollector> 
+ArgsParser<StringType,ArgParser,OptionsCollector>
 makeArgsParserImpl( const ArgParser                                            &argParser
                   , const OptionsCollector                                     &optionsCollector
                   , int                                                        argc
@@ -2814,7 +2814,7 @@ makeArgsParserImpl( const ArgParser                                            &
     for( const auto & a : argsParser.args)
     {
         CommandLineOption opt(a);
-     
+
         if (!opt.isOption())
             continue;
 
@@ -2853,12 +2853,12 @@ makeArgsParserImpl( const ArgParser                                            &
 
 
 template<typename ArgParser, typename OptionsCollector> inline
-ArgsParser<std::string,ArgParser,OptionsCollector> 
+ArgsParser<std::string,ArgParser,OptionsCollector>
 makeArgsParser( const ArgParser         &argParser
               , const OptionsCollector  &optionsCollector
               , int                     argc
               , char                    **argv
-              , const umba::program_location::ProgramLocation<std::string> &programLocationInfo = umba::program_location::ProgramLocation<std::string>() 
+              , const umba::program_location::ProgramLocation<std::string> &programLocationInfo = umba::program_location::ProgramLocation<std::string>()
                             //&programLocationInfo = umba::program_location::getProgramLocation(argc, argv)
               )
 {
@@ -2886,13 +2886,13 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
                                                   )
 
 
-inline 
+inline
 ProgramLocation<std::string> getProgramLocation( int argc, char **argv
                                                , std::string overrideExeName       = std::string()
                                                , const std::string &confFolderName = umba::string_plus::make_string<std::string>(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME)
                                                )
 
-inline 
+inline
 ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
                                                 , std::wstring overrideExeName       = std::wstring()
                                                 , const std::wstring &confFolderName = umba::string_plus::make_string<std::wstring>(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME)

@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Разбор INI-файла
  */
@@ -15,7 +15,7 @@
 #include "rgbquad.h"
 #include "string_plus.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <exception>
@@ -103,11 +103,11 @@ static const char* filterIdentifierFirst     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 /*! Был сделан на скорую руку как абстракция для доступа к файловой системе.
     На тот момент ещё не имелось абстракции FileCache.
 
-    \todo 
-    //TODO: Нужно весь INI-reader переделать через LineView, а конкретно 
+    \todo
+    //TODO: Нужно весь INI-reader переделать через LineView, а конкретно
     IniFileReaderInterface упразднить и работать через FileCache.
 
-    \todo 
+    \todo
     //TODO: Замечание по FileCache: нужно научить его не кешировать (вернее, разучить кешировать)
     содержимое файлов. Это нужно, чтобы можно было на MCU обрабатывать INI-файлы, которые великоваты для
     помещения в оперативную память. По крайней мере, после того, как файл обработан, хорошо бы вымарать его из кеша -
@@ -120,7 +120,7 @@ public:
 
     //------------------------------
     //! Чтение файла в вектор строк. Какой используется перевод строки - зависит от реализации
-    virtual 
+    virtual
     std::vector<std::string> readLines( std::string fileName ) = 0;
 
 
@@ -131,8 +131,8 @@ public:
     /*! Было сделано на скорую руку.
         На тот момент ещё не имелось абстракции IncludeFinder.
 
-        \todo 
-        //TODO: Нужно весь INI-reader переделать через LineView, а конкретно 
+        \todo
+        //TODO: Нужно весь INI-reader переделать через LineView, а конкретно
         данный метод упразднить/переделать через IncludeFinder.
      */
     virtual
@@ -161,9 +161,9 @@ public:
             return fileName;
 
         std::string basePath;
-        
+
         size_t slashPos = baseName.find_last_of("/\\");
-        
+
         if (slashPos!=std::string::npos)
         {
             basePath.assign( baseName, 0, slashPos);
@@ -174,7 +174,7 @@ public:
 
         if (fileName[0]=='/' || fileName[0]=='\\')
             fileName.erase(0,1);
-        
+
         #if defined(WIN32) || defined(_WIN32)
         return basePath + std::string("\\") + fileName;
         #else
@@ -187,8 +187,8 @@ public:
     /*! Было сделано на скорую руку.
         На тот момент ещё не имелось абстракции IncludeFinder.
 
-        \todo 
-        //TODO: Нужно весь INI-reader переделать через LineView, а конкретно 
+        \todo
+        //TODO: Нужно весь INI-reader переделать через LineView, а конкретно
         данный метод упразднить/переделать через IncludeFinder.
      */
     virtual
@@ -219,8 +219,8 @@ public:
     /*! Было сделано на скорую руку.
         На тот момент ещё не имелось абстракций IncludeFinder / FileCache.
 
-        \todo 
-        //TODO: Нужно весь INI-reader переделать через LineView, а конкретно 
+        \todo
+        //TODO: Нужно весь INI-reader переделать через LineView, а конкретно
         данный метод упразднить/переделать через IncludeFinder / FileCache.
      */
     virtual
@@ -242,7 +242,7 @@ public:
 class SimpleStdIfstreamIniFileReader : public IniFileReaderInterface
 {
     //! Чтение файла в вектор строк. Какой используется перевод строки - зависит от реализации
-    virtual 
+    virtual
     std::vector<std::string> readLines( std::string fileName ) override
     {
                                                // makeLookupKeyFromFileName
@@ -253,9 +253,9 @@ class SimpleStdIfstreamIniFileReader : public IniFileReaderInterface
             throw umba::FileException( "Failed to open file", filenameToOpen );
 
         std::vector<std::string> lines;
-       
+
         std::string s;
-       
+
         while( std::getline( in, s ) )
         {
             lines.push_back(s);
@@ -274,10 +274,10 @@ class SimpleStdIfstreamIniFileReader : public IniFileReaderInterface
 
 //----------------------------------------------------------------------------
 //! Класс разбора INI-файлов
-/*! 
+/*!
     Данный класс читает INI-файл, и дополнительно:
     - парсит include'ы, позволяя раскидать конфиг по разным файлам (опционально)
-    - умеет в изначально предопределенные условия - ifdef/ifndef (опционально) - чтобы одни и те же конфиги можно было бы использовать 
+    - умеет в изначально предопределенные условия - ifdef/ifndef (опционально) - чтобы одни и те же конфиги можно было бы использовать
       в разных сходных прогах на одну тему
     - умеет в define для задания условий на лету (опционально)
 
@@ -292,7 +292,7 @@ class SimpleStdIfstreamIniFileReader : public IniFileReaderInterface
     INI-файлов с отступами (которые на самом деле не мобязательны). Все любители иерархических древесных INI были удовлетворены,
     и никто не заметил найопки.
 
-    \todo 
+    \todo
     //TODO: Нужно хорошечно его переделать, слишком многое втащено прямо сюда за неимением над тот момент
     адекватных изолированных абстракций
 
@@ -309,7 +309,7 @@ public:
         empty,
         comment,
         section
-    
+
     };
 
     //! Настроечный конструктор
@@ -383,9 +383,9 @@ public:
     bool readFrom( std::istream &in, const std::string &fileName = "-" )
     {
         std::vector<std::string> lines;
-       
+
         std::string s;
-       
+
         while( std::getline( in, s ) )
         {
             lines.push_back(s);
@@ -414,7 +414,7 @@ protected:
     void readFrom( const std::string &fileName, const std::string &baseName, bool lookupSystemFirst )
     {
         auto lines = m_pFileReader->readLines( fileName /* , baseName, lookupSystemFirst */ );
-        //return 
+        //return
         readFrom(lines, fileName);
     }
     #endif
@@ -524,8 +524,8 @@ protected:
     }
 
     //! Возвращает имя файла по его ID
-    /*! 
-        \todo 
+    /*!
+        \todo
         //TODO: Втащено сюда, потому что не было IncludeFinder / FileCache. А вообще оно тут ненужное.
      */
     std::string getFileName( size_t idx ) const
@@ -543,7 +543,7 @@ protected:
         #ifdef !SOME_TAG -- сработает, если SOME_TAG не определен
         \endcode
 
-        Хз, нужно ли, но, имхо, если конструкция без \b else ветки, 
+        Хз, нужно ли, но, имхо, если конструкция без \b else ветки,
         то
         \code
         #ifdef !SOME_TAG
@@ -596,9 +596,9 @@ protected:
             if (m_conditionalTags.find(str)!=m_conditionalTags.end())
                 throw umba::FileParsingException( "Value already defined", getFileName(fileId), lineNumber );
         }
-        
+
         m_conditionalTags.insert(str);
-    
+
     }
 
     //! Парсит инклюжу
@@ -654,7 +654,7 @@ protected:
         //m_lines.insert( m_lines.end(), ini.m_lines.begin(), ini.m_lines.end() );
 
         return ini.m_lines;
-            
+
     }
 
     //! Подсчитывает трушность текущего состояния, получая на входе стек условий
@@ -759,7 +759,7 @@ public:
                 {
                     testStr.erase(0, directives[lineCond].size());
                     umba::string_plus::trim( testStr );
-                    
+
                     if (testStr.empty())
                         throw umba::FileParsingException( "Invalid (empty) condition", getFileName(it->fileId), it->lineNumber );
 
@@ -895,7 +895,7 @@ public:
         namespace strplus = umba::string_plus;
 
         std::vector< LineInfo > res;
-    
+
         for( auto line : iniLines )
         {
             if (res.empty() || res.back().type != LineType::normal )
@@ -903,14 +903,14 @@ public:
                 res.push_back(line);
                 continue;
             }
-    
+
             auto prevText = strplus::trim_copy(res.back().text);
             if (prevText.empty())
             {
                 res.push_back(line);
                 continue;
             }
-    
+
             if (prevText.back()=='\\')
             {
                 prevText.erase( prevText.end()-1 );
@@ -918,11 +918,11 @@ public:
                 res.back().text = prevText;
                 continue;
             }
-    
+
             res.push_back(line);
-            
+
         }
-    
+
         return res;
     }
 
@@ -1033,11 +1033,11 @@ public:
             //! Строка с допками
             struct LineInfo
             {
-        
+
                 friend class Ini;
-        
+
             public:
-        
+
                 bool isEmpty()         const { return type==LineType::empty; }     //!< Пустая строка?
                 bool isValueLine()     const { return type==LineType::normal; }    //!< Строка со значением?
                 bool isValue()         const { return type==LineType::normal; }    //!< Строка со значением?
@@ -1046,44 +1046,44 @@ public:
                 bool isNameEqual( const std::string &n ) const { return nameCompare(n)==0; }              //!< Сравнение имени секции/параметра
                 bool isSection( const std::string &n )   const { return isSection() && isNameEqual(n); }  //!< Секция с указанным именем?
                 bool isValue  ( const std::string &n )   const { return isValue() && isNameEqual(n); }    //!< Параметр с указанным именем?
-        
+
                 std::string getFileName() const { return fileName; }    //!< Возвращает имя файла, изолированныхкоторого строка
                 size_t getLineNumber()    const { return lineNumber; }  //!< Возвращает номер строки
                 size_t getLevel()         const { return startPos; }    //!< Возвращает уровень вложенности
                 std::string getText()     const { return text; }        //!< Возвращает текст строки
-        
+
                 int nameCompare( std::string compareWith ) const        //!< Сравнение имени
                 {
                     return umba::string_plus::toupper_copy(name).compare( umba::string_plus::toupper_copy(compareWith) );
                 }
-        
+
                 int nameStartsWith( std::string startsWith ) const      //!< Сравнение начала имени
                 {
                     return umba::string_plus::starts_with( umba::string_plus::toupper_copy(name), umba::string_plus::toupper_copy(startsWith) );
                 }
-        
+
                 int nameEndsWith( std::string endsWith ) const          //!< Сравнение конца имени
                 {
                     return umba::string_plus::ends_with( umba::string_plus::toupper_copy(name), umba::string_plus::toupper_copy(endsWith) );
                 }
-        
+
                 std::string getName() const                             //!< Возвращает имя раздела или параметра
                 {
                     return name;
                 }
-        
+
                 template<typename T>
                 T getValue() const                                      //!< Шаблон получения значения
                 {
                     static_assert ( false , "getValue<T> requres specialization" );
                 }
-        
+
                 template<typename T>
-                T getValue( int base ) const                            //!< Специализация шаблона получения значения для целого 
+                T getValue( int base ) const                            //!< Специализация шаблона получения значения для целого
                 {
                     static_assert ( false , "getValue<T>(base) requres specialization" );
                 }
-        
+
                 //---
                 template<> int getValue<int>( int base ) const          //!< Специализация шаблона получения значения для целого знакого
                 {
@@ -1091,7 +1091,7 @@ public:
                     int res = stoi( getValueNumericSeparatorStripped(), 0, base );
                     return res;
                 }
-        
+
                 template<> int getValue<int>( ) const { return getValue<int>( 0 ); } //!< Специализация шаблона получения значения для целого знакого
 
                 //---
@@ -1101,7 +1101,7 @@ public:
                     unsigned res = (unsigned)stoul( getValueNumericSeparatorStripped(), 0, base );
                     return res;
                 }
-        
+
                 template<> unsigned getValue<unsigned>( ) const { return getValue<int>( 0 );  } //!< Специализация шаблона получения значения для целого беззнакого
 
                 //---
@@ -1111,7 +1111,7 @@ public:
                     long long int res = stoll( getValueNumericSeparatorStripped(), 0, base );
                     return res;
                 }
-        
+
                 template<> long long int getValue<long long int>( ) const { return getValue<long long int>( 0 ); } //!< Специализация шаблона получения значения для целого очень длинного
 
                 //---
@@ -1121,37 +1121,37 @@ public:
                     unsigned long long res = stoull( getValueNumericSeparatorStripped(), 0, base );
                     return res;
                 }
-        
+
                 template<> unsigned long long getValue<unsigned long long>( ) const { return getValue<unsigned long long>( 0 );  } //!< Специализация шаблона получения значения для целого очень длинного беззнакого
 
                 //---
-        
+
                 template<typename Validator>
                 int getValue( int base, const Validator &validator ) const            //!< Геттер-конвертер
                 {
                     return validator( *this, getValue<int>( base ) );
                 }
-        
+
                 template<typename Validator>
                 unsigned getValue( unsigned base, const Validator &validator ) const  //!< Геттер-конвертер
                 {
                     return validator( *this, getValue<unsigned>( (int)base ) );
                 }
-        
+
                 template<>
                 std::string getValue<std::string>( ) const                            //!< Геттер-конвертер
                 {
                     checkCanGetValue();
                     return getValueUnquoted();
                 }
-        
+
                 template<typename Validator>
                 std::string getValue( const Validator &validator ) const              //!< Геттер-конвертер
                 {
                     checkCanGetValue();
                     return validator( *this, getValueUnquoted());
                 }
-        
+
                 template<>
                 bool getValue<bool>( ) const                                          //!< Геттер-конвертер
                 {
@@ -1163,7 +1163,7 @@ public:
                         return true;
                     throw std::invalid_argument("Value can't be converted to bool");
                 }
-        
+
                 bool isVersionStringAnyVersion( std::string strVer ) const            //!< Геттер-конвертер
                 {
                     std::string strUpper = umba::string_plus::toupper_copy(strVer);
@@ -1171,29 +1171,29 @@ public:
                         return true;
                     return false;
                 }
-        
+
                 NumericVersion parseNumericVersion( std::string strVer ) const        //!< Геттер-конвертер
                 {
                     if (isVersionStringAnyVersion(strVer))
                         return NumericVersion::any();
-        
+
                     size_t pos = 0;
                     uint32_t verMajor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                     if (pos==0)
                         throw std::invalid_argument("Value can't be converted to NumericVersion");
-        
+
                     strVer.erase( 0, pos ); pos = 0;
-        
+
                     uint32_t verMinor = 0;
-        
+
                     if (!strVer.empty())
                     {
                         if (strVer[0]!='.')
                             throw std::invalid_argument("Value can't be converted to NumericVersion");
-        
+
                         strVer.erase(0, 1);
                         umba::string_plus::trim(strVer);
-        
+
                         if (!strVer.empty())
                         {
                             verMinor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
@@ -1201,50 +1201,50 @@ public:
                                 throw std::invalid_argument("Value can't be converted to NumericVersion");
                         }
                     }
-        
+
                     if (verMajor>65535 || verMinor>65535)
                         throw std::invalid_argument("Value can't be converted to NumericVersion - too big version number part");
                     return NumericVersion{ (uint16_t)verMajor, (uint16_t)verMinor };
                 }
-        
-        
+
+
                 NumericVersionEx parseNumericVersionEx( std::string strVer ) const    //!< Геттер-конвертер
                 {
                     if (isVersionStringAnyVersion(strVer))
                         return NumericVersionEx::any();
-        
+
                     size_t pos = 0;
                     uint32_t verMajor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                     if (pos==0)
                         throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-        
+
                     strVer.erase( 0, pos ); pos = 0;
-        
+
                     uint32_t verMinor = 0;
                     uint32_t verBuild = 0;
-        
+
                     if (!strVer.empty())
                     {
                         if (strVer[0]!='.')
                             throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-        
+
                         strVer.erase(0, 1);
                         umba::string_plus::trim(strVer);
-        
+
                         verMinor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                         if (pos==0)
                             throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-        
+
                         strVer.erase( 0, pos ); pos = 0;
-        
+
                         if (!strVer.empty())
                         {
                             if (strVer[0]!='.')
                                 throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-                       
+
                             strVer.erase(0, 1);
                             umba::string_plus::trim(strVer);
-        
+
                             if (!strVer.empty())
                             {
                                 verBuild = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
@@ -1253,12 +1253,12 @@ public:
                             }
                         }
                     }
-        
+
                     if (verMajor>65535 || verMinor>65535)
                         throw std::invalid_argument("Value can't be converted to NumericVersionEx - too big version number part");
                     return NumericVersionEx{ (uint16_t)verMajor, (uint16_t)verMinor, (uint32_t)verBuild };
                 }
-        
+
                 template<>
                 NumericVersion getValue<NumericVersion>( ) const                      //!< Геттер-конвертер
                 {
@@ -1266,66 +1266,66 @@ public:
                     //std::string strVer = getValueNumericSeparatorStripped();
                     return parseNumericVersion( getValueUnquoted() );
                 }
-        
+
                 template<>
                 NumericVersionEx getValue<NumericVersionEx>( ) const                  //!< Геттер-конвертер
                 {
                     checkCanGetValue();
                     return parseNumericVersionEx( getValueUnquoted() );
                 }
-        
+
                 template<>
                 NameVersion getValue<NameVersion>( ) const                            //!< Геттер-конвертер
                 {
                     checkCanGetValue();
                     std::string strVer = getValueUnquoted();
                     std::string::size_type sepPos = strVer.find_first_of( " /" );
-        
+
                     if (sepPos==std::string::npos)
                         throw std::invalid_argument("Value can't be converted to NameVersion - missing version number");
-        
+
                     std::string name = std::string( strVer, 0, sepPos );
                     umba::string_plus::trim( name );
-                    
+
                     strVer.erase( 0, sepPos+1 );
                     umba::string_plus::trim( strVer );
-        
+
                     if (strVer.empty())
                         throw std::invalid_argument("Value can't be converted to NameVersion - missing version number");
-        
+
                     return NameVersion{ name, parseNumericVersion( strVer ) };
                 }
-        
+
                 template<>
                 NameVersionEx getValue<NameVersionEx>( ) const                        //!< Геттер-конвертер
                 {
                     checkCanGetValue();
                     std::string strVer = getValueUnquoted();
                     std::string::size_type sepPos = strVer.find_first_of( " /" );
-        
+
                     if (sepPos==std::string::npos)
                         throw std::invalid_argument("Value can't be converted to NameVersionEx - missing version number");
-        
+
                     std::string name = std::string( strVer, 0, sepPos );
                     umba::string_plus::trim( name );
-                    
+
                     strVer.erase( 0, sepPos+1 );
                     umba::string_plus::trim( strVer );
-        
+
                     if (strVer.empty())
                         throw std::invalid_argument("Value can't be converted to NameVersionEx - missing version number");
-        
+
                     return NameVersionEx{ name, parseNumericVersionEx( strVer ) };
                 }
-        
-        
+
+
                 size_t findEnumValue( const std::vector<std::string> &nameList
-                                    , std::string name 
+                                    , std::string name
                                     ) const                                           //!< Геттер-конвертер
                 {
                     umba::string_plus::trim( name );
                     name = umba::string_plus::toupper_copy(name);
-        
+
                     size_t idx = 0, size = nameList.size();
                     for(; idx!=size; ++idx)
                     {
@@ -1333,10 +1333,10 @@ public:
                         if (nameFromList==name)
                             return idx;
                     }
-        
+
                     return (size_t)-1;
                 }
-        
+
                 template< typename EnumType >
                 EnumType getValue( const std::vector< EnumType > &valList
                                  , const std::vector<std::string> &nameList
@@ -1345,66 +1345,66 @@ public:
                 {
                     if (valList.size()!=nameList.size())
                         throw std::invalid_argument("Name list not match values list");
-        
+
                     std::string upperValue = umba::string_plus::toupper_copy(value);
                     umba::string_plus::trim( upperValue );
-        
+
                     if (!asFlags)
                     {
                         size_t foundAt = findEnumValue( nameList, upperValue );
                         if (foundAt==(size_t)-1)
                             throw std::invalid_argument( std::string("Unknown enumeration value - '") + upperValue + std::string("'"));
-        
+
                         return valList[foundAt];
                     }
-        
+
                     typedef typename std::underlying_type< EnumType >::type    EnumUnderlyingType;
-        
+
                     EnumUnderlyingType res = 0;
-        
+
                     std::vector< std::string> flagsStrings = umba::string_plus::split( upperValue, '|',  /* skipEmpty */  true );
-        
+
                     for( const auto &flagStr : flagsStrings)
                     {
                         size_t foundAt = findEnumValue( nameList, flagStr );
                         if (foundAt==(size_t)-1)
                             throw std::invalid_argument( std::string("Unknown enumeration value - '") + flagStr + std::string("'"));
-        
+
                         res |= (EnumUnderlyingType)valList[foundAt];
                     }
-        
+
                     return (EnumType)res;
-                    
+
                 }
                 //enumValuesToVector( EnumType eb, EnumType ee, bool inclusiveEnd = false )
-                
+
                 template<>
                 RgbQuad getValue<RgbQuad>( ) const                                    //!< Геттер-конвертер
                 {
                     RgbQuad rgbq;
                     if (!rgbq.fromString(value))
                         throw std::invalid_argument( std::string("Value can't be converted to color"));
-        
+
                     return rgbq;
                 }
-        
+
                 std::string getCommentText() const                                    //!< Геттер-конвертер
                 {
                     size_t eraseCharsN = isIniCommentLine( text );
                     if (!eraseCharsN)
                         throw std::invalid_argument("Comment text can't be retrieved on non-comment lines");
-        
+
                     std::string str = std::string(text, eraseCharsN );
-        
+
                     return umba::string_plus::trim_copy(str);
                 }
-        
+
                 std::string getValueStringAsIs() const                                //!< Геттер-конвертер
                 {
                     return value;
                 }
-        
-        
+
+
                 std::vector< LineInfo > splitMultiParam( std::map<std::string, size_t> *pNameMap = 0
                                                        , char paramsSeparator = ','
                                                        , const std::string &nameValSeparators = ":="
@@ -1423,7 +1423,7 @@ public:
                         std::string buf;
 
                         char quot = 0;
-                       
+
                         for ( auto ch : text )
                         {
                             if (quot==0 && ch==paramsSeparator)
@@ -1451,7 +1451,7 @@ public:
                             buf.append(1,ch);
 
                         } // for
-                    
+
                         umba::string_plus::trim(buf);
                         if (!buf.empty())
                         {
@@ -1459,27 +1459,27 @@ public:
                         }
                     }
 
-        
+
                     for( const auto &pvPair : paramPairs )
                     {
                         LineInfo li;
-        
+
                         li.text        = pvPair;
                         li.lineNumber  = lineNumber;
                         li.type        = type;
                         li.fileId      = fileId  ;
                         li.fileName    = fileName;
-        
+
                         li.split(nameValSeparators);
 
                         if (pNameMap)
                         {
                             (*pNameMap)[li.getName()] = resLines.size();
                         }
-        
+
                         resLines.push_back(li);
                     }
-        
+
                     return resLines;
                 }
 
@@ -1507,97 +1507,97 @@ public:
 
                     return res;
                 }
-        
-        
+
+
             protected:
-        
+
                 std::string    text;                          //!< Текст строки
                 size_t         lineNumber;                    //!< Номер строки
                 LineType       type;                          //!< Тип строки
-        
+
                 size_t              fileId = (size_t)-1;      //!< ID файла
                 mutable std::string fileName;                 //!< Имя файла
-        
+
                 std::string    name;                          //!< Имя параметра/секции
                 std::string    value;                         //!< Строковое значение парамета
                 std::string    sep;                           //!< Найденный разделитель
                 size_t         startPos = 0;                  //!< Стартовая позиция имени
                 size_t         sepPos   = std::string::npos;  //!< Позиция разделителя
                 size_t         valPos   = 0;                  //!< Позиция значения
-        
+
                 //! Проверка, можно ли взять значение
                 void checkCanGetValue() const
                 {
                     if (type!=LineType::normal)
                         throw std::runtime_error("Can't get value on this type of INI line");
                 }
-        
+
                 //! Возвращает true, если value'шка заквотена
                 bool isValueQuoted() const
                 {
                     if (value.size()<2)
                         return false;
-        
+
                     if ( (value.front()=='\"' && value.back()=='\"')
                       || (value.front()=='\'' && value.back()=='\'')
                        )
                        return true;
                     return false;
                 }
-        
-                std::string getValueUnquoted() const //!< Возвращает расковыченное строковое значение 
+
+                std::string getValueUnquoted() const //!< Возвращает расковыченное строковое значение
                 {
                     if (!isValueQuoted())
                         return value;
-        
+
                     std::string res = value;
                     res.erase(res.size()-1, 1);
                     res.erase(0, 1);
                     return res;
                 }
-        
+
                 std::string getValueNumericSeparatorStripped() const //!< Возвращает строку с целочисленным значением, убирая разделители разрядов
                 {
                     // Числа не должны быть закавычены, получим исключение
                     if (isValueQuoted())
                         return value;
-        
+
                     std::string res;
-        
+
                     for( auto ch : value )
                     {
                         if (ch=='\'' || ch==' ')
                             continue;
                         res.append(1, ch);
                     }
-        
+
                     return res;
                 }
-        
+
                 //! Производит разделение имени и значения параметра
                 void split( std::string seps = ":=")
                 {
                     namespace strplus = umba::string_plus;
-        
+
                     if (seps.empty())
                         seps = ":=";
-        
+
                     startPos = 0;
                     sepPos   = std::string::npos;
                     valPos   = 0;
-        
+
                     if (type!=LineType::normal)
                         return;
-        
+
                     std::string tmp = strplus::trim_copy(text);
                     if (tmp.empty())
                     {
                         type = LineType::empty;
                         return;
                     }
-        
+
                     startPos = text.find_first_not_of( ' ' );
-        
+
                     if (tmp.front()=='[' && tmp.back()==']')
                     {
                         type = LineType::section;
@@ -1620,10 +1620,10 @@ public:
                             }
                             //sp = std::min( sp, text.find(sepCh) );
                         }
-        
+
                         if (sepPos == std::string::npos)
                         {
-                            name = strplus::trim_copy(text); 
+                            name = strplus::trim_copy(text);
                             value.clear();
                         }
                         else
@@ -1631,16 +1631,16 @@ public:
                             name  = strplus::trim_copy( std::string( text, 0, sepPos) );
                             value = strplus::trim_copy( std::string( text, sepPos+1 ) );
                         }
-        
+
                     }
-                         
+
                 } // split
-        
+
                 //! Чота мержит
                 void merge()
                 {
                     namespace strplus = umba::string_plus;
-        
+
                     switch(type)
                        {
                         case LineType::normal:
@@ -1654,7 +1654,7 @@ public:
                                  text.append(value);
                              }
                              break;
-        
+
                         case LineType::section:
                              text.clear();
                              strplus::expand(text, startPos, ' ');
@@ -1665,12 +1665,12 @@ public:
                         //case LineType::empty:
                         //case LineType::comment:
                         //default:
-        
+
                        }
                 } // merge
-        
-        
-        
+
+
+
             }; // struct LineInfo
 
     //--------------------------------------
@@ -1692,9 +1692,9 @@ public:
         //! Тровер
         void doThrow( const LineInfo &lineInfo, std::string value, const std::string &validatorName ) const
         {
-            throw umba::FileParsingException( std::string("Invalid value '") 
-                                            + value + std::string("' in parameter '") 
-                                            + lineInfo.getName() + std::string("' - ") 
+            throw umba::FileParsingException( std::string("Invalid value '")
+                                            + value + std::string("' in parameter '")
+                                            + lineInfo.getName() + std::string("' - ")
                                             + validatorName + std::string(" required")
                                             , lineInfo.getFileName()
                                             , lineInfo.getLineNumber()

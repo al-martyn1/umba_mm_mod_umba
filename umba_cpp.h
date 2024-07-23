@@ -1,6 +1,6 @@
 #pragma once
 
-/*! 
+/*!
     \file
     \brief Разная всячина в C++ стиле
  */
@@ -29,7 +29,7 @@ namespace cpp
 
 //----------------------------------------------------------------------------
 //! back_insert_iterator итератор для сырого массива
-/*! 
+/*!
     \tparam ItemType Тип итерируемых элементов
  */
 
@@ -41,7 +41,7 @@ struct array_back_insert_iterator
     typedef std::size_t     size_type;   //!< Тип размера
 
     //! Конструктор из сырого указателя и количества элементов
-    array_back_insert_iterator( ItemType *pArray   //!< Указатель на массив/буфер для заполнения 
+    array_back_insert_iterator( ItemType *pArray   //!< Указатель на массив/буфер для заполнения
                               , size_type numItems //!< Количество доступных для заполнения элементов
                               )
     : m_pArray(pArray)
@@ -134,7 +134,7 @@ protected:
 
 //! Хелпер для создания array_back_insert_iterator
 template< typename T, std::size_t N > inline
-array_back_insert_iterator<T> array_back_inserter( T (&arr)[N] )  
+array_back_insert_iterator<T> array_back_inserter( T (&arr)[N] )
    { return array_back_insert_iterator< T >( &arr[0], (std::size_t)N ); }
 
 
@@ -143,12 +143,12 @@ array_back_insert_iterator<T> array_back_inserter( T (&arr)[N] )
 
 //! Хелпер для создания array_back_insert_iterator
 template< typename T, std::size_t N > inline
-array_back_insert_iterator<T> array_back_inserter( T (&arr)[N], std::size_t M )  
+array_back_insert_iterator<T> array_back_inserter( T (&arr)[N], std::size_t M )
    { return array_back_insert_iterator< T >( &arr[0], std::min((std::size_t)N, (std::size_t)M) ); }
 
 //! Хелпер для создания array_back_insert_iterator
 template< typename T > inline
-array_back_insert_iterator<T> array_back_inserter( const T *pT, std::size_t N )  
+array_back_insert_iterator<T> array_back_inserter( const T *pT, std::size_t N )
    { return array_back_insert_iterator< T >( pT, N ); }
 
 // End of UMBA_CPP

@@ -27,7 +27,7 @@ namespace umba
 
 //-----------------------------------------------------------------------------
 //! Интерфейс полируемого
-// UMBA_INTERFACE 
+// UMBA_INTERFACE
 struct IPollCapable : UMBA_INHERITS umba::IUnknown
 {
 
@@ -50,7 +50,7 @@ struct IPollCapable : UMBA_INHERITS umba::IUnknown
 
 //-----------------------------------------------------------------------------
 //! Интерфейс ждуна
-//UMBA_INTERFACE 
+//UMBA_INTERFACE
 struct IIdleCapable : UMBA_INHERITS umba::IUnknown
 {
 
@@ -69,7 +69,7 @@ struct IIdleCapable : UMBA_INHERITS umba::IUnknown
 
 //-----------------------------------------------------------------------------
 //! "Something is complete" event handler UMBA_INTERFACE
-//UMBA_INTERFACE 
+//UMBA_INTERFACE
 struct ICompletionHandler : UMBA_INHERITS umba::IUnknown
 {
 
@@ -93,7 +93,7 @@ struct ICompletionHandler : UMBA_INHERITS umba::IUnknown
    различними ID.
    ID задается при создании таймера.
  */
-//UMBA_INTERFACE 
+//UMBA_INTERFACE
 struct ITimerHandler : UMBA_INHERITS umba::IUnknown
 {
 
@@ -114,7 +114,7 @@ struct ITimerHandler : UMBA_INHERITS umba::IUnknown
 
 //-----------------------------------------------------------------------------
 //! Обработчик запросов пинга
-//UMBA_INTERFACE 
+//UMBA_INTERFACE
 struct IPingRequestHandler : UMBA_INHERITS umba::IUnknown
 {
 
@@ -137,13 +137,13 @@ struct IPingRequestHandler : UMBA_INHERITS umba::IUnknown
 
 //-----------------------------------------------------------------------------
 //! Интерфейс генератора запросов пинга
-/*! Сам по себе интерфейс ничего не говорит о том, 
+/*! Сам по себе интерфейс ничего не говорит о том,
     как он генерирует события - по аппаратному таймеру,
     например, или это объект, который надо полировать.
     Также этот интерфейс ничего не говорит о том, кто и как обрабатывает
     запросы пингов
  */
-//UMBA_INTERFACE 
+//UMBA_INTERFACE
 struct IPingRequestGenerator : UMBA_INHERITS umba::IUnknown
 {
 

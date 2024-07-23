@@ -153,11 +153,11 @@ template<typename StringType> inline bool hasFirstPathSep( StringType &p )  { re
 template<typename StringType> inline bool stripFirstPathSep(StringType &p)  { if (hasFirstPathSep(p)) { p.erase( 0, 1 ); return true; } return false; }                                                        //!< Возвращает true, если первый символ - разделитель пути, обрезая его
 template<typename StringType> inline StringType stripFirstPathSepCopy( const StringType &p ) { if (!hasFirstPathSep(p)) return p; StringType res = p; stripFirstPathSep(res); return res; }  //!< Возвращает копию аргумента, обрезая разделитель пути в начале, если он есть
 
-template<typename StringType> inline bool hasLastExtSep( StringType &p )    { return (p.empty() || !isExtSep(p[p.size()-1])) ? false : true; }                                               //!< Возвращает true, если последний символ - разделитель расширения                  
-template<typename StringType> inline bool stripLastExtSep( StringType &p )  { if (hasLastExtSep(p)) { p.erase( p.size()-1, 1 ); return true; } return false; }                               //!< Возвращает true, если последний символ - разделитель расширения, обрезая его     
-template<typename StringType> inline StringType stripLastExtSepCopy( const StringType &p ) { if (!hasLastExtSep(p)) return p; StringType res = p; stripLastExtSep(res); return res; }        //!< Возвращает копию аргумента, обрезая разделитель расширения в конце, если он есть 
-template<typename StringType> inline bool hasFirstExtSep( StringType &p )   { return (p.empty() || !isExtSep(p[0])) ? false : true; }                                                        //!< Возвращает true, если первый символ - разделитель расширения                     
-template<typename StringType> inline bool stripFirstExtSep(StringType &p)   { if (hasFirstExtSep(p)) { p.erase( 0, 1 ); return true; } return false; }                                       //!< Возвращает true, если первый символ - разделитель расширения, обрезая его        
+template<typename StringType> inline bool hasLastExtSep( StringType &p )    { return (p.empty() || !isExtSep(p[p.size()-1])) ? false : true; }                                               //!< Возвращает true, если последний символ - разделитель расширения
+template<typename StringType> inline bool stripLastExtSep( StringType &p )  { if (hasLastExtSep(p)) { p.erase( p.size()-1, 1 ); return true; } return false; }                               //!< Возвращает true, если последний символ - разделитель расширения, обрезая его
+template<typename StringType> inline StringType stripLastExtSepCopy( const StringType &p ) { if (!hasLastExtSep(p)) return p; StringType res = p; stripLastExtSep(res); return res; }        //!< Возвращает копию аргумента, обрезая разделитель расширения в конце, если он есть
+template<typename StringType> inline bool hasFirstExtSep( StringType &p )   { return (p.empty() || !isExtSep(p[0])) ? false : true; }                                                        //!< Возвращает true, если первый символ - разделитель расширения
+template<typename StringType> inline bool stripFirstExtSep(StringType &p)   { if (hasFirstExtSep(p)) { p.erase( 0, 1 ); return true; } return false; }                                       //!< Возвращает true, если первый символ - разделитель расширения, обрезая его
 template<typename StringType> inline StringType stripFirstExtSepCopy( const StringType &p ) { if (!hasFirstExtSep(p)) return p; StringType res = p; stripFirstExtSep(res); return res; }     //!< Возвращает копию аргумента, обрезая разделитель расширения в начале, если он есть
 
 
@@ -430,7 +430,7 @@ StringType makeCanonicalSimple( StringType fileName, typename StringType::value_
     {
         fileName.append(1, pathSep);
     }
-        
+
     return fileName;
 }
 
@@ -438,7 +438,7 @@ StringType makeCanonicalSimple( StringType fileName, typename StringType::value_
 //! Делает "каноническое" имя, схлопывая все лишние алиасы (".." и "."), и дублирующиеся разделители пути
 template<typename StringType> inline
 StringType makeCanonical( StringType fileName
-                        , typename StringType::value_type pathSep 
+                        , typename StringType::value_type pathSep
                         , const StringType &currentDirAlias
                         , const StringType &parentDirAlias
                         , bool keepLeadingParents
@@ -529,7 +529,7 @@ StringType makeCanonical( StringType fileName
     {
         fileName.append(1, pathSep);
     }
-        
+
 
     #if 0
     if (lastPathSep)
@@ -561,7 +561,7 @@ StringType makeCanonicalForCompare( StringType                      fileName
 {
     #if defined(WIN32) || defined(_WIN32)
     // namespace ustrp = umba::string_plus;
-    //  
+    //
     // NativePrefixFlagsInfo npfi = stripNativePrefixes(fileName, pathSep);
     // // npfi.networkUncPrefix      = false;
     // // npfi.uncPrefix             = false;
@@ -569,7 +569,7 @@ StringType makeCanonicalForCompare( StringType                      fileName
 
     // StringType canoname        = makeCanonical(fileName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
     // canoname = ustrp::tolower_copy(canoname);
-    //  
+    //
     // return addNativePrefixes(canoname, npfi, pathSep);
 
     return umba::string_plus::tolower_copy(makeCanonical(fileName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents));
@@ -591,7 +591,7 @@ StringType makeCanonicalForCompare( StringType                      fileName
 
 //-----------------------------------------------------------------------------
 //! Возвращает true,  если путь абсолютный
-template<typename StringType> inline 
+template<typename StringType> inline
 bool isAbsPath( StringType p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
 {
     namespace ustrp = umba::string_plus;
@@ -640,23 +640,23 @@ StringType prepareForNativeUsage( const StringType &fileName )
             StringType canoname = fileName; //makeCanonical(fileName);
 
             namespace ustrp = umba::string_plus;
-    
+
             //if (hasNativeNetworkPathPrefix(canoname))
             //{
             //    return canoname;
             //}
             if (ustrp::starts_with(canoname, getNativeNetworkUncPrefix<StringType>()))
                 return canoname; // already UNC name
-    
+
             StringType nativeUncPrefix = getNativeUncPrefix<StringType>();
             if (ustrp::starts_with(canoname, nativeUncPrefix))
                 return canoname; // already UNC name
-    
+
             if (ustrp::starts_with_and_strip(canoname, getNativeNetworkPathPrefix<StringType>()))
             {
                 return getNativeNetworkUncPrefix<StringType>() + canoname;
             }
-    
+
             return getNativeUncPrefix<StringType>() + canoname;
         }
 
@@ -668,8 +668,8 @@ StringType prepareForNativeUsage( const StringType &fileName )
 }
 
 //-----------------------------------------------------------------------------
-//! Делает абсолютный путь под CWD, если задан относительный path 
-template<typename StringType> inline 
+//! Делает абсолютный путь под CWD, если задан относительный path
+template<typename StringType> inline
 StringType makeAbsPath( const StringType &path
                       , const StringType &cwd  = umba::filesys::getCurrentDirectory<StringType>()
                       , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
@@ -683,7 +683,7 @@ StringType makeAbsPath( const StringType &path
 
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
-template<typename StringType> inline 
+template<typename StringType> inline
 bool isSubPathName( StringType                      commonPath
                   , StringType                      fullName
                   , StringType                      *pResName          = 0
@@ -717,7 +717,7 @@ bool isSubPathName( StringType                      commonPath
 
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
-template<typename StringType> inline 
+template<typename StringType> inline
 bool makeRelPath( StringType                      &foundRelName
                 , const StringType                &commonPath
                 , const StringType                &fullName
@@ -758,7 +758,7 @@ bool makeRelPath( StringType                      &foundRelName
 
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
-template<typename StringType> inline 
+template<typename StringType> inline
 StringType makeRelPath( const StringType                &fullName
                       , const StringType                &commonPath
                       , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
@@ -771,13 +771,13 @@ StringType makeRelPath( const StringType                &fullName
     StringType res;
     if (makeRelPath(res, commonPath, fullName, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents, tryReverseRelPath))
         return res;
-    
+
     return fullName;
 }
 
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
-template<typename StringType> inline 
+template<typename StringType> inline
 bool makeRelPath( StringType                      &foundRelName
                 , const std::vector<StringType>   &commonPaths
                 , const StringType                &fullName
@@ -808,7 +808,7 @@ bool makeRelPath( StringType                      &foundRelName
 
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
-template<typename StringType> inline 
+template<typename StringType> inline
 StringType makeRelPath( const std::vector<StringType>   &commonPaths
                       , const StringType                &fullName
                       , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
@@ -865,7 +865,7 @@ StringType appendExt( const StringType &n, const StringType &e, typename StringT
 /*
     if (n.empty())
         return e;
-    
+
     if (e.empty())
         return n;
 
@@ -960,7 +960,7 @@ StringType getFileExtention( const StringType &path )
 
     // if (lastPathSepIt==path.end())
     //    lastPathSepIt = path.begin();
-    
+
     // if (lastExtSepIt==path.end())
     //     lastExtSepIt = path.end();
 
@@ -1053,7 +1053,7 @@ StringType getDrive( StringType n )
 }
 
 //-----------------------------------------------------------------------------
-//! Проверяет путь на присутствие имени диска, и если отсутствует, то обновляет его, извлекая имя диска из другого пути 
+//! Проверяет путь на присутствие имени диска, и если отсутствует, то обновляет его, извлекая имя диска из другого пути
 template<typename StringType> inline
 StringType checkPathPrependDrive( const StringType &n, const StringType &curDir = filesys::getCurrentDirectory<StringType>())
 {
@@ -1061,7 +1061,7 @@ StringType checkPathPrependDrive( const StringType &n, const StringType &curDir 
     namespace ustrp = umba::string_plus;
 
     StringType tmpCaninical = makeCanonical<StringType>(n);
-    if ( ustrp::starts_with(tmpCaninical, getNativeUncPrefix<StringType>()) 
+    if ( ustrp::starts_with(tmpCaninical, getNativeUncPrefix<StringType>())
       || ustrp::starts_with_and_strip(tmpCaninical, getNativeNetworkPathPrefix<StringType>())
        )
         return n;
@@ -1158,20 +1158,20 @@ std::string generateOutputFilename( const std::string &inputFilename, const std:
 
     std::string inputPath = getPath(inputFilename);
 
-    
+
     if (outputFinalName.empty())
         path = getPath(inputFilename);
-    
+
     if (name.empty())
     {
         outputFinalName = defName;
         if (!path.empty())
             outputFinalName = path + std::string(1, getPathSep()) /* std::string("\\") */  + outputFinalName;
     }
-    
+
     //if (ext.empty())
     //    ext = defExt;
-    
+
     if (ext.empty())
     {
         if (!defExt.empty())

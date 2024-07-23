@@ -34,7 +34,7 @@
 
 #endif
 
-//! Просто сократил 
+//! Просто сократил
 #define UMBA_SIZE_T UMBA_STD_SIZE_T
 
 //---------------------------------------------------------
@@ -48,7 +48,7 @@
         #undef max
     #endif
 
-#endif  /* UMBA_KEEP_MINMAX */ 
+#endif  /* UMBA_KEEP_MINMAX */
 
 
 #ifdef UMBA_CXX_HAS_STD11
@@ -61,7 +61,7 @@
 #else
 
     //! Совместимый constexpr
-    #define UMBA_CONSTEXPR  
+    #define UMBA_CONSTEXPR
     //! Совместимый explicit
     #define UMBA_EXPLICIT
 
@@ -132,9 +132,9 @@ namespace umba
 
     #define UMBA_ALIGNED(x)                __attribute__((aligned ( x )))
 
-#else 
+#else
 
-    #define UMBA_ALIGNED(x)                
+    #define UMBA_ALIGNED(x)
 
 #endif
 
@@ -162,7 +162,7 @@ namespace umba
     #define UMBA_DEPRECATED
     #define UMBA_DEPRECATED_MSG(msg)
 
-#elif defined(UMBA_KEIL_CLANG_COMPILER_USED) 
+#elif defined(UMBA_KEIL_CLANG_COMPILER_USED)
 
     #define UMBA_DEPRECATED                __attribute__((deprecated))
     #define UMBA_DEPRECATED_MSG(msg)       __attribute__((deprecated(msg)))
@@ -327,7 +327,7 @@ namespace umba
 
         #define UMBA_DECLARE_WEAK_FUNCTION( funcFullSignature )   __attribute__ ((weakref)) funcFullSignature
 
-    #else 
+    #else
 
         #define UMBA_DECLARE_WEAK_FUNCTION( funcFullSignature )   funcFullSignature
 

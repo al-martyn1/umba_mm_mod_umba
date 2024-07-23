@@ -1,7 +1,7 @@
 #pragma once
 
 //----------------------------------------------------------------------------
-/*! 
+/*!
     \file
     \brief Работа с номерами версий
  */
@@ -29,7 +29,7 @@ struct NumericVersion
     uint16_t    minorVersion;  //!< Minor часть
 
 
-    //! Упаковка версии в 32х битное целое 
+    //! Упаковка версии в 32х битное целое
     uint32_t    pack() const
     {
         return ((uint32_t)majorVersion) << 16 |
@@ -44,7 +44,7 @@ struct NumericVersion
     }
 
     //! Создаёт версию "любая версия"
-    static 
+    static
     NumericVersion any()
     {
         return NumericVersion{ (uint16_t)-1, (uint16_t)-1 };
@@ -61,7 +61,7 @@ struct NumericVersion
                ) const
     {
         if (isAny() || ver.isAny())
-            return 0; 
+            return 0;
 
         if (majorVersion < ver.majorVersion)
             return -1;
@@ -112,7 +112,7 @@ struct NumericVersionEx
     }
 
     //! Создаёт версию "любая версия"
-    static 
+    static
     NumericVersionEx any()
     {
         return NumericVersionEx{ (uint16_t)-1, (uint16_t)-1, (uint32_t)-1 };

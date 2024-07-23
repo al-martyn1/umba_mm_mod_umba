@@ -43,9 +43,9 @@ class AutoLock
 {
 
     public:
-        
+
         //! Сохраняет ссылку на объект блокировки и производит его захват
-        AutoLock( LockObject &lockObject ) 
+        AutoLock( LockObject &lockObject )
             : m_lockObject(lockObject)
         {
             m_lockObject.lock();
@@ -56,9 +56,9 @@ class AutoLock
         {
             m_lockObject.unlock();
         }
-      
+
     private:
-      
+
         LockObject &m_lockObject;
 
 }; // class AutoLock

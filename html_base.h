@@ -18,7 +18,7 @@
 #include "string_plus.h"
 
 
-// 
+//
 
 //----------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ struct HtmlTagT
     std::string                                   name      ;
     std::string                                   text      ;
     std::unordered_map<std::string, std::string>  attributes;
-    std::vector<HtmlTagT>                         childs    ;  // Content 
+    std::vector<HtmlTagT>                         childs    ;  // Content
 
 
     constexpr
@@ -65,13 +65,13 @@ struct HtmlTagT
     {
         return AttrAppendSeparatorChar;
     }
-    
+
     constexpr
     static bool getAttrAppendMode()
     {
         return AttrAppendSeparatorChar!=0;
     }
-    
+
 
     constexpr // Пусть будет, ведь tolower_copy не всегда вызывается
     static
@@ -173,7 +173,7 @@ struct HtmlTagT
         auto it = attributes.find(prepareName(attrName));
         return it==attributes.end() ? defVal : it->second;
     }
-    
+
 
 }; // struct HtmlTag
 
@@ -195,12 +195,12 @@ using HtmlTagCaseSens      = HtmlTagCaseSensitive;
    Возможные символы остановки:
    '>' - разбор завершен успешно
    '<' - неожиданно начался новый тэг - такое допустимо в маркдауне, например
-   '/' - в закрывающем тэге однаружен второй символ '/', который начинает закрывать пустой тэг 
-   
+   '/' - в закрывающем тэге однаружен второй символ '/', который начинает закрывать пустой тэг
+
    Ничего другого пока вроде не должно появлятся.
 
    Первый обрабатываемый символ должен быть '<', иначе никакой обработки не начнётся.
-   
+
    На этой базе можно строить какой-то более высокоуровневый разбор.
 
 */

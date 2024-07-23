@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Разная всячина для строк в C++ стиле
  */
@@ -12,7 +12,7 @@
 #include "alloca.h"
 #include "exception.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <cctype>
 #include <exception>
 #include <fstream>
@@ -136,7 +136,7 @@ inline bool is_linefeed ( wchar_t ch ) { return is_linefeed((char)ch); }
 
 //-----------------------------------------------------------------------------
 //! Возвращает отрицание функционального объекта-предиката
-/*! 
+/*!
     \tparam ActualPred Тип предиката
     \tparam ParamType  Тип аргумента предиката
     \return Отрицание предиката
@@ -244,16 +244,16 @@ struct dec_digit_pred
 };
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если аргумент входит в строку 
+//! Возвращает true, если аргумент входит в строку
 // template<typename CharType>
 // struct is_one_of
 // {
 //     const CharType *m_pstr;
-//  
+//
 //     is_one_of(const CharType *pstr) : m_pstr(pstr) {}
-//  
+//
 //     //! Оператор функционального объекта
-//     bool operator()( CharType ch )  const 
+//     bool operator()( CharType ch )  const
 //     {
 //         const CharType *pstr = m_pstr;
 //         while(*pstr++) { if (*pstr==ch) return true; }
@@ -262,7 +262,7 @@ struct dec_digit_pred
 // };
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если аргумент входит в строку 
+//! Возвращает true, если аргумент входит в строку
 template<typename CharType>
 struct is_one_of
 {
@@ -274,7 +274,7 @@ struct is_one_of
     is_one_of(const CharType   *pstr) : m_str(pstr) {}
 
     //! Оператор функционального объекта
-    bool operator()( typename StringType::value_type ch )  const 
+    bool operator()( typename StringType::value_type ch )  const
     {
         return m_str.find(ch)!=m_str.npos;
     }
@@ -536,7 +536,7 @@ template <typename ContainerType> inline ContainerType  cont_trim_copy(Container
 
 
 
-                                                                   
+
 
 //-----------------------------------------------------------------------------
 // Starts/Ends
@@ -801,10 +801,10 @@ StringType textCompress( const StringType &text, const StringType &compressChars
 
 //-----------------------------------------------------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param b            Итератор начала последовательности
     \param e            Итератор конца последовательности
@@ -828,10 +828,10 @@ StringType merge( Iter b, Iter e, const std::string &delim, const ToStringObj &s
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param b            Итератор начала последовательности
     \param e            Итератор конца последовательности
@@ -855,10 +855,10 @@ StringType merge( Iter b, Iter e, const std::wstring &delim, const ToStringObj &
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param b            Итератор начала последовательности
     \param e            Итератор конца последовательности
@@ -875,10 +875,10 @@ StringType merge( Iter b, Iter e, char delim, const ToStringObj &stringifier )
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param b            Итератор начала последовательности
     \param e            Итератор конца последовательности
@@ -895,10 +895,10 @@ StringType merge( Iter b, Iter e, const char *delim, const ToStringObj &stringif
 
 //-----------------------------------------------------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param b            Итератор начала последовательности
     \param e            Итератор конца последовательности
@@ -915,10 +915,10 @@ StringType merge( Iter b, Iter e, wchar_t delim, const ToStringObj &stringifier 
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param b            Итератор начала последовательности
     \param e            Итератор конца последовательности
@@ -940,10 +940,10 @@ StringType merge( Iter b, Iter e, const wchar_t *delim, const ToStringObj &strin
 
 //-----------------------------------------------------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam ItemType    Тип элемента/объекта
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param tokens       Вектор элементов для склеивания в строку
     \param delim        Разделитель элементов в результирующей строке. Перегружен для std::string, std::wstring, const char*, const wchar_t*, char, wchar_t
@@ -959,10 +959,10 @@ std::string merge( const std::vector<ItemType> &tokens, char delim, const ToStri
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam ItemType    Тип элемента/объекта
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param tokens       Вектор элементов для склеивания в строку
     \param delim        Разделитель элементов в результирующей строке. Перегружен для std::string, std::wstring, const char*, const wchar_t*, char, wchar_t
@@ -978,10 +978,10 @@ std::string merge( const std::vector<ItemType> &tokens, const char *delim, const
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam ItemType    Тип элемента/объекта
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param tokens       Вектор элементов для склеивания в строку
     \param delim        Разделитель элементов в результирующей строке. Перегружен для std::string, std::wstring, const char*, const wchar_t*, char, wchar_t
@@ -997,10 +997,10 @@ std::string merge( const std::vector<ItemType> &tokens, const std::string &delim
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam ItemType    Тип элемента/объекта
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param tokens       Вектор элементов для склеивания в строку
     \param delim        Разделитель элементов в результирующей строке. Перегружен для std::string, std::wstring, const char*, const wchar_t*, char, wchar_t
@@ -1016,10 +1016,10 @@ std::string merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToS
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam ItemType    Тип элемента/объекта
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param tokens       Вектор элементов для склеивания в строку
     \param delim        Разделитель элементов в результирующей строке. Перегружен для std::string, std::wstring, const char*, const wchar_t*, char, wchar_t
@@ -1035,10 +1035,10 @@ std::string merge( const std::vector<ItemType> &tokens, const wchar_t *delim, co
 
 //------------------------------
 //! Производит слияние строковых представлений объектов в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam ItemType    Тип элемента/объекта
-    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType 
+    \tparam ToStringObj Тип преобразователя в строку. operator( *Iter ) должен возвращать значение типа StringType
 
     \param tokens       Вектор элементов для склеивания в строку
     \param delim        Разделитель элементов в результирующей строке. Перегружен для std::string, std::wstring, const char*, const wchar_t*, char, wchar_t
@@ -1082,7 +1082,7 @@ struct lambda_is_empty
 
 //----------------------------------------------------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
 
@@ -1100,7 +1100,7 @@ StringType merge( Iter b, Iter e, char delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
 
@@ -1118,7 +1118,7 @@ StringType merge( Iter b, Iter e, const char *delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
 
@@ -1136,7 +1136,7 @@ StringType merge( Iter b, Iter e, const std::string &delim )
 
 //----------------------------------------------------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
 
@@ -1154,7 +1154,7 @@ StringType merge( Iter b, Iter e, wchar_t delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
 
@@ -1172,7 +1172,7 @@ StringType merge( Iter b, Iter e, const wchar_t *delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
     \tparam Iter        Тип итератора по объектам
 
@@ -1195,7 +1195,7 @@ StringType merge( Iter b, Iter e, const std::wstring &delim )
 
 //-----------------------------------------------------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
 
     \param tokens       Вектор элементов для склеивания в строку
@@ -1211,7 +1211,7 @@ StringType merge( const std::vector<StringType> &tokens, char delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
 
     \param tokens       Вектор элементов для склеивания в строку
@@ -1227,7 +1227,7 @@ StringType merge( const std::vector<std::string> &tokens, const char *delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
 
     \param tokens       Вектор элементов для склеивания в строку
@@ -1243,7 +1243,7 @@ StringType merge( const std::vector<std::string> &tokens, const std::string &del
 
 //----------------------------------------------------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
 
     \param tokens       Вектор элементов для склеивания в строку
@@ -1259,7 +1259,7 @@ StringType merge( const std::vector<StringType> &tokens, wchar_t delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
 
     \param tokens       Вектор элементов для склеивания в строку
@@ -1275,7 +1275,7 @@ StringType merge( const std::vector<std::string> &tokens, const wchar_t *delim )
 
 //------------------------------
 //! Производит слияние строк в одну строку
-/*! 
+/*!
     \tparam StringType  Тип результирующей строки (std::basic_string)
 
     \param tokens       Вектор элементов для склеивания в строку
@@ -1295,7 +1295,7 @@ StringType merge( const std::vector<std::string> &tokens, const std::wstring &de
 
 
 //-----------------------------------------------------------------------------
-// Misc string algorithms 
+// Misc string algorithms
 
 
 //-----------------------------------------------------------------------------
@@ -1498,7 +1498,7 @@ void build_pairs( const StringType &braces, StringType &lefts, StringType &right
 
 //------------------------------
 //! Утилита. Пробегаем последовательно по вектору счётчиков, сравниваем с параметром, возвращаем true, только если все значения равны заданному параметру.
-/*! 
+/*!
     \tparam CounterType Тип счётчика
 
     \param cntVec       Вектор счётчиков
@@ -1678,15 +1678,15 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
         if (lIdx!=StringType::npos && nonPairedBraceOpen)
         {
             // Opening brace
-        
+
             if (strictOrder)
             {
                 bracesStack.push_back(ch);
             }
-        
+
             if (startPos!=pos && util_check_all_exact( nestingCounts, 0 ))
                 nonBraceRanges.push_back( std::make_pair(startPos,pos) );
-            
+
             nestingCounts[lIdx]++;
 
             ++pos;
@@ -1701,10 +1701,10 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
             {
                 throw umba::FileParsingException("Found closing brace, but there is no opening brace found before", fileName, lineNumber, linePos);
             }
-        
+
             CharType openingBrace = bracesStack.back();
             bracesStack.pop_back();
-        
+
             if (get_pair(openingBrace)!=ch)
             {
                 throw umba::FileParsingException("Opening brace doesn't match closing brace", fileName, lineNumber, linePos);
@@ -1794,7 +1794,7 @@ void split_against_braces_impl( std::vector<StringType> &splits   //!< [out] К�
 {
     typename StringType::size_type sepSize = util_get_sep_size(sep);
 
-    std::vector< typename StringType::size_type > sepPositions = 
+    std::vector< typename StringType::size_type > sepPositions =
         split_against_braces_get_sep_positions( str, braces, sep, fileName, lineNumber, linePos, strictOrder );
 
     if (sepPositions.empty())
@@ -1838,14 +1838,14 @@ void split_against_braces( std::vector<StringType> &splits      //!< [out] Вы�
 //------------------------------
 //! Сплит строки по разделителю с учетом скобок
 template<typename StringType> inline
-void split_against_braces( std::vector<StringType>                &splits  //!< [out] Выхлоп         
-                         , const StringType                       &str     //!< Входная строка       
+void split_against_braces( std::vector<StringType>                &splits  //!< [out] Выхлоп
+                         , const StringType                       &str     //!< Входная строка
                          , const typename StringType::value_type  *braces  //!< Обрабатываемые скобки
-                         , typename StringType::value_type         sep     //!< Разделитель          
-                         , const std::string& fileName = ""                //!< Имя файла?           
-                         , size_t lineNumber = (size_t)-1                  //!< Номер строки         
-                         , size_t linePos = (size_t)-1                     //!< Позиция в строке     
-                         , bool strictOrder = false                        //!< Строгий порядок?     
+                         , typename StringType::value_type         sep     //!< Разделитель
+                         , const std::string& fileName = ""                //!< Имя файла?
+                         , size_t lineNumber = (size_t)-1                  //!< Номер строки
+                         , size_t linePos = (size_t)-1                     //!< Позиция в строке
+                         , bool strictOrder = false                        //!< Строгий порядок?
                          )
 {
     split_against_braces_impl<StringType, typename StringType::value_type>( splits, str, braces, sep, fileName, lineNumber, linePos, strictOrder );
@@ -1854,14 +1854,14 @@ void split_against_braces( std::vector<StringType>                &splits  //!< 
 //------------------------------
 //! Сплит строки по разделителю с учетом скобок
 template<typename StringType> inline
-void split_against_braces( std::vector<StringType> &splits   //!< [out] Выхлоп         
-                         , const StringType        &str      //!< Входная строка       
+void split_against_braces( std::vector<StringType> &splits   //!< [out] Выхлоп
+                         , const StringType        &str      //!< Входная строка
                          , const StringType        &braces   //!< Обрабатываемые скобки
-                         , const StringType        &sep      //!< Разделитель          
-                         , const std::string& fileName = ""  //!< Имя файла?           
-                         , size_t lineNumber = (size_t)-1    //!< Номер строки         
-                         , size_t linePos = (size_t)-1       //!< Позиция в строке     
-                         , bool strictOrder = false          //!< Строгий порядок?     
+                         , const StringType        &sep      //!< Разделитель
+                         , const std::string& fileName = ""  //!< Имя файла?
+                         , size_t lineNumber = (size_t)-1    //!< Номер строки
+                         , size_t linePos = (size_t)-1       //!< Позиция в строке
+                         , bool strictOrder = false          //!< Строгий порядок?
                          )
 {
     split_against_braces_impl<StringType, StringType>( splits, str, braces, sep, fileName, lineNumber, linePos, strictOrder );
@@ -1870,14 +1870,14 @@ void split_against_braces( std::vector<StringType> &splits   //!< [out] Выхл
 //------------------------------
 //! Сплит строки по разделителю с учетом скобок
 template<typename StringType> inline
-void split_against_braces( std::vector<StringType>               &splits  //!< [out] Выхлоп         
-                         , const StringType                      &str     //!< Входная строка       
+void split_against_braces( std::vector<StringType>               &splits  //!< [out] Выхлоп
+                         , const StringType                      &str     //!< Входная строка
                          , const typename StringType::value_type *braces  //!< Обрабатываемые скобки
-                         , const StringType                       &sep    //!< Разделитель          
-                         , const std::string& fileName = ""               //!< Имя файла?           
-                         , size_t lineNumber = (size_t)-1                 //!< Номер строки         
-                         , size_t linePos = (size_t)-1                    //!< Позиция в строке     
-                         , bool strictOrder = false                       //!< Строгий порядок?     
+                         , const StringType                       &sep    //!< Разделитель
+                         , const std::string& fileName = ""               //!< Имя файла?
+                         , size_t lineNumber = (size_t)-1                 //!< Номер строки
+                         , size_t linePos = (size_t)-1                    //!< Позиция в строке
+                         , bool strictOrder = false                       //!< Строгий порядок?
                          )
 {
     split_against_braces_impl<StringType, StringType>( splits, str, braces, sep, fileName, lineNumber, linePos, strictOrder );
@@ -1899,10 +1899,10 @@ void split_against_braces( std::vector<StringType>               &splits  //!< [
 template<typename StringType> inline
 void eraseEmptiesHelper( std::vector<StringType> &v /*!< Вектор элементов */)
 {
-    
+
     // Чукич, стр 62
-    #ifdef UMBA_CXX_HAS_STD11 
-    
+    #ifdef UMBA_CXX_HAS_STD11
+
     // В 2005 студии оно не работает
     typename std::vector<StringType>::iterator rmIt = std::remove_if(v.begin(), v.end(), [](const StringType& s) { return s.empty(); });
     //if (rmIt!=v.end())
@@ -1946,8 +1946,8 @@ std::vector<StringType> split( const StringType &str                  //!< Вх�
 //------------------------------
 //! Тупой сплит строки, используется версия сплита по скобкам с редуцированным набором скобок
 template<typename StringType> inline
-std::vector<StringType> split( const StringType &str    //!< Входная строка             
-                             , const StringType &delim  //!< Разделитель                
+std::vector<StringType> split( const StringType &str    //!< Входная строка
+                             , const StringType &delim  //!< Разделитель
                              , bool skipEmpty = true    //!< Пропускать пустые элементы?
                              )
 {
@@ -1991,7 +1991,7 @@ std::vector<StringType> split_by_class( const StringType &str          //!< Вх
 
     if (str.empty())
         return res;
-    
+
     res.push_back( StringType() );
     CharClassType prevCharClass = pred(str[0]);
 
@@ -2163,8 +2163,8 @@ void simple_string_split(OutputIterator inserterIt, const StringType &str, const
 
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если строка закавычена. 
-/*! 
+//! Возвращает true, если строка закавычена.
+/*!
     Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
  */
 template<typename StringType> inline
@@ -2190,7 +2190,7 @@ bool is_quoted( const StringType &s                        //!< Строка д�
 
 //-----------------------------------------------------------------------------
 //! Возвращает раскавыченную строку
-/*! 
+/*!
     Строка заключена в одинаковые символы кавычек, внутри они дублируются
     Используется в bat-файлах, и тп
  */
@@ -2245,8 +2245,8 @@ StringType unquoteSimpleQuoted( StringType &str //!< Строка для рас�
 }
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если строка была закавычена, и раскавычивает её. 
-/*! 
+//! Возвращает true, если строка была закавычена, и раскавычивает её.
+/*!
     Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
  */
 template<typename StringType> inline
@@ -2257,17 +2257,17 @@ bool unquote( StringType &s                             //!< Строка для
 {
     if (!is_quoted(s, quotStart, quotEnd))
         return false;
-    
+
     s.erase( s.size()-1 );
     s.erase( 0, 1 );
     trim(s);
     return true;
-    
+
 }
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если строка была закавычена, и раскавычивает её. 
-/*! 
+//! Возвращает true, если строка была закавычена, и раскавычивает её.
+/*!
     Используются первые символы параметров strStart и strEnd. Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
  */
 template<typename StringType> inline
@@ -2308,7 +2308,7 @@ bool unquote_if_quoted( StringType &s, const StringType &quotStart, const String
 template<typename StringType> inline
 StringType quote( const typename StringType::value_type *str                                         //!< Строка для закавычивания
                 , typename StringType::value_type quotStart = (typename StringType::value_type)'\''  //!< Открывающая кавычка
-                , typename StringType::value_type quotEnd = 0                                        //!< Закрывающая кавычка, если 0 - то срабатывает автоопределение обоих кавычек (используются парные символы по открывающией кавычке) 
+                , typename StringType::value_type quotEnd = 0                                        //!< Закрывающая кавычка, если 0 - то срабатывает автоопределение обоих кавычек (используются парные символы по открывающией кавычке)
                 )
 {
     if (quotEnd==0)
@@ -2363,7 +2363,7 @@ inline std::size_t calc_buf_char_size_for_format_print( std::size_t fmtStringSiz
 }
 //-----------------------------------------------------------------------------
 //! Хелпер-обертка для sprintf и аналогичных платформо-зависимых аналогов.
-/*! 
+/*!
     Используется vsnprintf.
     Теоретически, vsnprintf есть везде, но имя обычно чуть-чуть, но не такое как у других.
     Второе - не надо следить за буфером, его выделением, переполнением, и тп.

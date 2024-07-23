@@ -17,21 +17,21 @@ namespace std
     #if defined(UMBA_CXX_HAS_STD11)
     template< class T > struct remove_reference<T&&> {typedef T type;};
 
-    template<class T> 
+    template<class T>
     typename remove_reference<T>::type&&
     move(T&& a) noexcept
     {
         typedef typename remove_reference<T>::type&& RvalRef;
         return static_cast<RvalRef>(a);
-    } 
+    }
 
     // Defined in header <utility>
-    template<class T> 
+    template<class T>
     T&&
     forward(typename remove_reference<T>::type& a) noexcept
     {
         return static_cast<T&&>(a);
-    } 
+    }
     #endif
 
 } // namespace std

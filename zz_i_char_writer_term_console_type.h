@@ -11,7 +11,7 @@
 
 #ifdef UMBA_CXX_HAS_STD11
 
-    
+
     //! Типы консолей/терминалов
     enum class ConsoleType
     {
@@ -33,8 +33,8 @@
     enum ConsoleType
     {
         ConsoleType_file,              //!< Обычный файл, не терминал
-        ConsoleType_windows_console,   //!< Виндовая консоль         
-        ConsoleType_ansi_terminal      //!< ANSI-терминал            
+        ConsoleType_windows_console,   //!< Виндовая консоль
+        ConsoleType_ansi_terminal      //!< ANSI-терминал
     };
 
     //! Обычный файл, не терминал

@@ -82,14 +82,14 @@ std::string getCompilerVersionString()
     #else
 
         static const char vMajor[] = { COMPILER_VERSION_MAJOR , '\0' };
-        static const char vMinor[] = { 
+        static const char vMinor[] = {
             #if defined(COMPILER_VERSION_MINOR)
                 COMPILER_VERSION_MINOR, '\0'
             #else
                 '\0'
             #endif
             };
-        static const char vPatch[] = { 
+        static const char vPatch[] = {
             #if defined(COMPILER_VERSION_PATCH)
                 COMPILER_VERSION_PATCH, '\0'
             #else
@@ -164,14 +164,14 @@ std::string getCompilerSimulateVersionString()
     #else
 
         static const char vMajor[] = { SIMULATE_VERSION_MAJOR , '\0' };
-        static const char vMinor[] = { 
+        static const char vMinor[] = {
             #if defined(SIMULATE_VERSION_MINOR)
                 SIMULATE_VERSION_MINOR, '\0'
             #else
                 '\0'
             #endif
             };
-        static const char vPatch[] = { 
+        static const char vPatch[] = {
             #if defined(SIMULATE_VERSION_PATCH)
                 SIMULATE_VERSION_PATCH, '\0'
             #else
@@ -237,16 +237,16 @@ std::string getAppPlatformName()
     {
         res = "Windows-Cygwin";
     }
-    //else 
+    //else
 
 
 
 // #elif defined(__MINGW32__)
 // # define PLATFORM_ID "MinGW"
-//  
+//
 // #elif defined(__APPLE__)
 // # define PLATFORM_ID "Darwin"
-//  
+//
 // #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 // # define PLATFORM_ID "Windows"
 
@@ -287,7 +287,7 @@ std::string getAppArchitectureName()
 
             res = "ARM";
 
-        #else 
+        #else
 
             res = std::string("Unknown Architecture");
 

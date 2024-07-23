@@ -8,7 +8,7 @@ UMBA_DECLARE_ERROR_CODE_ALIAS(no_error                , ok, "Ok, no error")
 UMBA_DECLARE_ERROR_CODE_ALIAS(bool_true               , ok, "True condition")
 UMBA_DECLARE_ERROR_CODE      (already                 ,  1, "Ok, but already done")
 UMBA_DECLARE_ERROR_CODE      (need_reopen             ,  2, "Device need to be reopened before changes will take effect")
-                                                     
+
 UMBA_DECLARE_ERROR_CODE(bool_false                    ,  0 | errorFlag, "False condition")
 UMBA_DECLARE_ERROR_CODE(fail                          ,  1 | errorFlag, "Generic fail")
 UMBA_DECLARE_ERROR_CODE(not_implemented               ,  2 | errorFlag, "Method/function not implemented")
@@ -56,4 +56,4 @@ UMBA_DECLARE_ERROR_CODE(eof_reached                   , 42 | errorFlag, "End of 
 
 
 //UMBA_DECLARE_ERROR_CODE(       ,  | errorFlag, "")
-    
+

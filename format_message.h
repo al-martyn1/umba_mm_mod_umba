@@ -1,5 +1,5 @@
 #pragma once
-/*! 
+/*!
     \file
     \brief Форматирование сообщений при помощи макросов $(Macro)
  */
@@ -61,7 +61,7 @@ protected: // utils
     {
         if (str.size()>=sz)
             return StringType();
-    
+
         return StringType( sz-str.size(), fillChar );
     }
 
@@ -84,7 +84,7 @@ protected: // utils
     }
 
     template< typename UnsignedType >
-    static 
+    static
     typename std::enable_if<std::is_unsigned<UnsignedType>::value,  /* typename  */ StringType >::type
     formatIntDecimal(UnsignedType u, bool showSign = false)
     {
@@ -106,7 +106,7 @@ protected: // utils
         std::reverse(resStr.begin(), resStr.end());
 
         return resStr;
-    
+
     }
 
     template< typename IntType >
@@ -335,7 +335,7 @@ public:
             std::size_t prefixWidth = getUnsignedPrefixLen((UnsignedType)uBase);
             std::size_t numberWidth = prefixWidth<fieldWidth ? fieldWidth-prefixWidth : 0;
 
-            valFormatted = fShowbase 
+            valFormatted = fShowbase
                          ? getUnsignedPrefix((UnsignedType)uBase) + formatUnsigned<UnsignedType>(val, getCorrectBase(uBase), numberWidth)
                          :                                          formatUnsigned<UnsignedType>(val, getCorrectBase(uBase), numberWidth)
                          ;
@@ -403,7 +403,7 @@ StreamType& operator<<(StreamType &s, const FormatMessage<StringType> &fm)
     return s;
 }
 
-    
+
 
 template<typename StringType> inline
 FormatMessage<StringType> formatMessage(const StringType &msg, const std::string &ltag=std::string())

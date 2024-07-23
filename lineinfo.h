@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief LineInfo и сопутствующее. Устаревшая (непосредственно содержащая строку) версия API
  */
@@ -39,7 +39,7 @@ namespace umba
 
 //----------------------------------------------------------------------------
 //! Информация о строке файла, вместе со строкой
-/*! 
+/*!
     \tparam StringType Тип строки
  */
 
@@ -108,7 +108,7 @@ LineInfo<StringType> makeLineInfo( const typename StringType::value_type *pAllTe
 //----------------------------------------------------------------------------
 //! Создаёт экземпляр LineInfo из LineView и текста файла, заданного строкой
 template<typename StringType > inline
-LineInfo<StringType> makeLineInfo( const StringType &allText                                   //!< Текст файла  
+LineInfo<StringType> makeLineInfo( const StringType &allText                                   //!< Текст файла
                                  , const LineView< typename StringType::size_type > &lineView  //!< Вьюшка строки
                                  )
 {
@@ -118,9 +118,9 @@ LineInfo<StringType> makeLineInfo( const StringType &allText                    
 //----------------------------------------------------------------------------
 //! Создаёт экземпляр LineInfo из LineView и текста файла, заданного строкой с учётом признака модифицированности
 template<typename StringType > inline
-LineInfo<StringType> makeLineInfo( const StringType &allText                                    //!< Текст файла    
+LineInfo<StringType> makeLineInfo( const StringType &allText                                    //!< Текст файла
                                  , const StringType &modifiedTextBuf                            //!< Буфер изменений
-                                 , const LineView< typename StringType::size_type > &lineView   //!< Вьюшка строки  
+                                 , const LineView< typename StringType::size_type > &lineView   //!< Вьюшка строки
                                  )
 {
     return makeLineInfo<StringType>( lineView.modified ? modifiedTextBuf : allText, lineView );
@@ -134,7 +134,7 @@ LineInfo<StringType> makeLineInfo( const StringType &allText                    
 //----------------------------------------------------------------------------
 //! Создаёт вектор LineInfo из вектора LineView и текста файла, заданного сырым указателем на данные
 template<typename StringType > inline
-std::vector< LineInfo< StringType > > makeLineInfoVector( const typename StringType::value_type *pAllText                         //!< Текст файла  
+std::vector< LineInfo< StringType > > makeLineInfoVector( const typename StringType::value_type *pAllText                         //!< Текст файла
                                                         , const std::vector< LineView< typename StringType::size_type > > &views  //!< Вектор вьюшек
                                                         )
 {
@@ -168,7 +168,7 @@ std::vector< LineInfo< StringType > > makeLineInfoVector( const typename StringT
 //! Разбирает текст на строки и создаёт вектор LineInfo
 template<typename StringType > inline
 std::vector< LineInfo< StringType > >
-splitToLineInfos( const typename StringType::value_type *pData    //!< Текст файла  
+splitToLineInfos( const typename StringType::value_type *pData    //!< Текст файла
                 , typename StringType::size_type         sz       //!< Размер файла
                 , std::size_t                            fileId   //!< Идентификатор файла
                 )
@@ -206,7 +206,7 @@ splitToLineInfos( const typename StringType::value_type *pData    //!< Текс�
 //! Разбирает текст на строки и создаёт вектор LineInfo
 template<typename StringType > inline
 std::vector< LineInfo< StringType > >
-splitToLineInfos( const StringType &str      //!< Текст файла  
+splitToLineInfos( const StringType &str      //!< Текст файла
                 , std::size_t       fileId   //!< Идентификатор файла
                 )
 {
@@ -227,13 +227,13 @@ StringType makeLineInfoDebugPresentationStr( const LineInfo< StringType > &li, L
 
     switch(li.lineFeedType)
     {
-        case lineFeedCRLF: 
-        case lineFeedLFCR: 
-        case lineFeedCR  : 
-        case lineFeedLF  : 
+        case lineFeedCRLF:
+        case lineFeedLFCR:
+        case lineFeedCR  :
+        case lineFeedLF  :
                            strRes.append( makeLineFeedTypeDebugPresentationStr<StringType>(li.lineFeedType));
                            break;
-        default          : 
+        default          :
         {
             if (lineFeedType != lineFeedUnknown)
             {

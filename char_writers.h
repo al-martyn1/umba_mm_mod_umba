@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief Реализации интерфейса ICharWritter для различных целевых шляп типа COM-порта или файла
  */
@@ -163,7 +163,7 @@ protected:
 
 
 //-----------------------------------------------------------------------------
-//! Реализация интерфейса "писателя символов" ICharWriter в собственный буфер 
+//! Реализация интерфейса "писателя символов" ICharWriter в собственный буфер
 /*!
     \tparam BufSize  задаёт размер буфера
     \tparam ZeroTerm указывает, требуется ли поддерживать zero-termination в буфере вывода
@@ -178,7 +178,7 @@ struct SelfBufCharWriter : UMBA_INHERITS MemCharWriter< ZeroTerm >
     SelfBufCharWriter() : MemCharWriter<ZeroTerm>( (void*)m_buf, BufSize ) {}
 
 protected:
-    
+
     uint8_t m_buf[BufSize]; //!< Буфер для записи
 
 }; // class SelfBufCharWriter
@@ -299,7 +299,7 @@ struct StringCharWriter : UMBA_IMPLEMENTS ICharWriter
     //! Запись заданного буфера
     virtual
     void writeBuf( const uint8_t* pBuf  //!< Указатель на записываемый буфер
-                 , size_t len           //!< Количество символов для записи 
+                 , size_t len           //!< Количество символов для записи
                  ) override
     {
         m_buf.append( (const std::string::value_type*)pBuf, len );
@@ -365,8 +365,8 @@ protected:
    colors::SgrColor convertColorFromConsole( WORD conColor )
    WORD convertColorToConsole( colors::SgrColor clr )
 
-STD_INPUT_HANDLE (DWORD)-10	
-STD_OUTPUT_HANDLE (DWORD)-11	
+STD_INPUT_HANDLE (DWORD)-10
+STD_OUTPUT_HANDLE (DWORD)-11
 STD_ERROR_HANDLE (DWORD)-12
 HANDLE WINAPI GetStdHandle(
   _In_ DWORD nStdHandle
@@ -471,7 +471,7 @@ public:
             m_defColor = term::win32::getConsoleTextAttribute( m_hCon );
         #endif
     }
-    
+
     //! Запись одного символа
     virtual
     void writeChar( char ch  //!< Символ для записи
@@ -483,7 +483,7 @@ public:
         beforeWriteChar( ch );
 
         m_stream.put(ch);
-        
+
 
         #if defined(WIN32) || defined(_WIN32)
 
@@ -527,7 +527,7 @@ public:
     bool isTextMode() override
     {
         /*
-        //m_stream.openmode & 
+        //m_stream.openmode &
         //std::ios_base::openmode
         if (isAttachedToConsole())
             return true;
@@ -658,20 +658,20 @@ protected:
         COORD getConsoleCursorPosition() const
         {
             CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
-       
+
             if (!GetConsoleScreenBufferInfo(m_hCon, &csbiInfo))
                 return COORD{ 0, 0 };
-       
+
             return csbiInfo.dwCursorPosition;
         }
 
         COORD getConsoleScreenSize() const
         {
             CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
-       
+
             if (!GetConsoleScreenBufferInfo(m_hCon, &csbiInfo))
                 return COORD{ 0, 0 };
-       
+
             return csbiInfo.dwSize;
         }
 
@@ -683,7 +683,7 @@ protected:
         int     linesScrolled      = 0;
         int     curLineCharsPutted = 0;
         // int     spinnerEndLine  = 0;
-    
+
     #endif
 
     void beforeWriteChar( char ch )
@@ -708,7 +708,7 @@ protected:
             // if (curLineCharsPutted)
 
         #endif
-    
+
     }
 
     void afterWriteChar( char ch )
@@ -718,7 +718,7 @@ protected:
 
 public:
 
-    
+
     //! Установка каретки (курсора) консоли. 0 - выключена, 1 - полоска внизу, 2 - половина, 3 - во всю высоту
     virtual void terminalSetCaret( int csz ) override
     {
@@ -741,7 +741,7 @@ public:
                 case 2: ci.dwSize   = 55; // 60; // 50;
                         break;
 
-                default: 
+                default:
                         ci.dwSize   = 100;
             }
 
@@ -880,7 +880,7 @@ public:
             }
         }
         #endif
-    
+
     }
 
     virtual void terminalClearRemaining( int maxLines = -1 ) override
@@ -982,15 +982,15 @@ protected:
     #if ( (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) )
 
         asm(".global __use_no_semihosting_swi\n");
-        
+
     #elif __CC_ARM
-    
+
         #pragma import(__use_no_semihosting_swi)
-        
+
     #endif
 
     extern "C"
-    { 
+    {
         int fputc(int c, FILE *f)
         {
             return ITM_SendChar(c);
@@ -1010,19 +1010,19 @@ protected:
 
         void _ttywrch(int ch)
         {
-            ITM_SendChar(ch);            
+            ITM_SendChar(ch);
         }
-        
+
         char *_sys_command_string(char *cmd, int len)
         {
             return NULL;
         }
-        
+
         // вызывается после main
-        void _sys_exit(int return_code) 
+        void _sys_exit(int return_code)
         {
             while(1);
-        }        
+        }
     }
 */
 
@@ -1079,7 +1079,7 @@ struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
 
 //-----------------------------------------------------------------------------
 #ifdef LUART_UART_HANDLE_H
-// Заголовок legacy uart подключен перед использованием райтера, 
+// Заголовок legacy uart подключен перед использованием райтера,
 // поэтому мы можем сделать реализацию райтера, пихающую всё в uart
 
 } // namespace umba
@@ -1184,8 +1184,8 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
                         len = BufSize;
                     break;
                 }
-            } 
-            
+            }
+
             if (len) // У нас осталось только такой кусок, который гарантированно влезает в буфер
             {
                 // кладем остаток себе в буфер
@@ -1282,7 +1282,7 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
         //if (!isTextMode())
         //    return false;
 
-        return m_term; // 
+        return m_term; //
     }
 
     //! Возвращает true, если данный CharWriter - Ansi-терминал с поддержкой ESC-последовательностей
@@ -1362,7 +1362,7 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
     virtual
     size_t getNonBlockMax()
     {
-        return BufSize - m_endIdx;  
+        return BufSize - m_endIdx;
     }
 
 
@@ -1414,7 +1414,7 @@ protected:
             {
                 // Защищаем момент изменения буфера и индекса
                 UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-                
+
                 // в двоичном режиме тупо пересылаем массивами
                 size_t bufAvailSize = BufSize - m_endIdx;
                 size_t numBytesToCopy = bufAvailSize > len ? len : bufAvailSize;
@@ -1473,7 +1473,7 @@ protected:
     //! Возвращает true, если находимся в обработчике прерывания
     bool isIrqProcessed() const
     {
-        if (UMBA_IS_IN_ISR()) 
+        if (UMBA_IS_IN_ISR())
             return true;
         return false;
     }
@@ -1600,7 +1600,7 @@ struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
 
 //-----------------------------------------------------------------------------
 #ifdef LUART_UART_HANDLE_H
-// Заголовок legacy uart подключен перед использованием райтера, 
+// Заголовок legacy uart подключен перед использованием райтера,
 // поэтому мы можем сделать реализацию райтера, пихающую всё в uart
 
 } // namespace umba
@@ -1757,7 +1757,7 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
         //if (!isTextMode())
         //    return false;
 
-        return m_term; // 
+        return m_term; //
     }
 
     //! Возвращает true, если данный CharWriter - Ansi-терминал с поддержкой ESC-последовательностей
@@ -1837,7 +1837,7 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
     virtual
     size_t getNonBlockMax()
     {
-        return BufSize - m_endIdx;  
+        return BufSize - m_endIdx;
     }
 
 
@@ -1889,7 +1889,7 @@ protected:
             {
                 // Защищаем момент изменения буфера и индекса
                 UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-                
+
                 // в двоичном режиме тупо пересылаем массивами
                 size_t bufAvailSize = BufSize - m_endIdx;
                 size_t numBytesToCopy = bufAvailSize > len ? len : bufAvailSize;
@@ -1948,7 +1948,7 @@ protected:
     //! Возвращает true, если находимся в обработчике прерывания
     bool isIrqProcessed() const
     {
-        if (UMBA_IS_IN_ISR()) 
+        if (UMBA_IS_IN_ISR())
             return true;
         return false;
     }

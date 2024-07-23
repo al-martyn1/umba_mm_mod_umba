@@ -43,7 +43,7 @@ namespace umba
     который может открывать или закрывать имя искомого файла. Так, для C/C++ символы '<' и '>' можно
     сделать шорткатами для SystemLevel, а символ '\\"' - шорткатом для UserLevel.
 
-    Некоторые термины. 
+    Некоторые термины.
     \b Базовый \b файл (base file) - это файл, из которого производится инклюд.
     \b Базовый \b каталог - это каталог, в котором ф котором расположен файл, из которого производится инклюд.
     \b Base \b name - это имя базового файла или каталога. Если имя заканчивается символом-разделителем пути - это каталог, иначе - файл.
@@ -84,21 +84,21 @@ protected:
 public:
 
     //! Конструктор, принимает указатель на файловый кэш
-    IncludeFinder( FileCache *pCache ) 
+    IncludeFinder( FileCache *pCache )
     : m_pCache(pCache)
     , m_lookupMap()
     , m_easyMarkers()
     {}
 
     //! Конструктор копирования
-    IncludeFinder( const IncludeFinder &finder ) 
+    IncludeFinder( const IncludeFinder &finder )
     : m_pCache(finder.m_pCache)
     , m_lookupMap(finder.m_lookupMap)
     , m_easyMarkers(finder.m_easyMarkers)
     {}
 
     //! Конструктор копирования с заменой файлового кэша
-    IncludeFinder( const IncludeFinder &finder, FileCache *pCache ) 
+    IncludeFinder( const IncludeFinder &finder, FileCache *pCache )
     : m_pCache(pCache)
     , m_lookupMap(finder.m_lookupMap)
     , m_easyMarkers(finder.m_easyMarkers)
@@ -178,7 +178,7 @@ public:
             addLookupOrder(lvl, *it);
     }
 
-    //! Добавляет лукап шорткат для уровня поиска 
+    //! Добавляет лукап шорткат для уровня поиска
     void addLookupShortcut( IncludeLevelsType lvl, CharType braceCharShortcut )
     {
         m_easyMarkers[braceCharShortcut] = lvl;
@@ -215,7 +215,7 @@ public:
         {
             return m_pCache->findFileId( lookupFor, checkModified, basePath /* curDir */ );
         }
-        
+
 
         std::map< IncludeLevelsType, IncludeTypeInfo >::iterator lvlIt = m_lookupMap.find(lookupLvlType);
 
@@ -224,7 +224,7 @@ public:
 
         IncludeTypeInfo &includeTypeInfo = lvlIt->second;
 
-                                    
+
         // basePath has path sep as last symbol here
 
         std::vector<IncludeLevelsType> lvlOrder;
@@ -237,20 +237,20 @@ public:
         {
             //std::set<FilenameStringType>    alreadyUsedLookupDirs;
             std::set<IncludeLevelsType>     alreadyUsedLvls;
-           
+
             // Делаем список каталогов, в которых ищем файл, по использованным levels
             std::vector<IncludeLevelsType>::const_iterator lvlOrdIt = lvlOrder.begin();
             for(; lvlOrdIt!=lvlOrder.end(); ++lvlOrdIt)
             {
                 if (alreadyUsedLvls.find(*lvlOrdIt)!=alreadyUsedLvls.end())
                     continue;
-           
+
                 alreadyUsedLvls.insert(*lvlOrdIt);
-           
+
                 std::map< IncludeLevelsType, IncludeTypeInfo >::const_iterator lvlIt = m_lookupMap.find(*lvlOrdIt);
                 if (lvlIt == m_lookupMap.end())
                     continue;
-           
+
                 std::vector<FilenameStringType>::const_iterator ldIt = lvlIt->second.lookupDirs.begin();
                 for(; ldIt!=lvlIt->second.lookupDirs.end(); ++ldIt)
                 {
@@ -263,7 +263,7 @@ public:
                     else if ( umba::string_plus::unquote_if_quoted(lkpDir, umba::string_plus::make_string<FilenameStringType>("%"))     // Windows style env var - %VARNAME%
                            || umba::string_plus::unquote_if_quoted(lkpDir, umba::string_plus::make_string<FilenameStringType>("$"))     // Combo - Unix like Windows style env var - $VARNAME$
                            || umba::string_plus::starts_with_and_strip(lkpDir, umba::string_plus::make_string<FilenameStringType>("$")) // Unix style env var - $VARNAME
-                            ) 
+                            )
                     {
                         FilenameStringType pathListStr;
                         if ( umba::env::getVar(lkpDir,pathListStr) )
@@ -287,7 +287,7 @@ public:
             FilenameStringType testName = umba::filename::appendPath( *ldIt, lookupFor );
             //const FileDataVectorType *pData = m_pCache->getFileData( testName, checkModified, &foundName );
             FileIdType fileId = m_pCache->findFileId( testName, checkModified, basePath /* curDir */ );
-            
+
             if (fileId!=invalidFileId)
                return fileId;
         }

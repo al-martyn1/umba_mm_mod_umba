@@ -29,7 +29,7 @@ namespace umba
     Предполагается, что файлы текстовые и имеют разумный размер, и их разумное количество, для помещения их всех в оперативную
     память (если это не так, просто переходите на 64 бита).
 
-    Энкодер требуется, если есть желание как-то обработать файл после чтения и до последующего парсинга - перекодировать, или 
+    Энкодер требуется, если есть желание как-то обработать файл после чтения и до последующего парсинга - перекодировать, или
     преобразовать в Unicode.
 
     Простой энкодер может просто перекидывать данные со входа на выход.
@@ -51,7 +51,7 @@ namespace umba
     //TODO: Хочется запилить версию для MCU, чтобы использовать единый API файлового кэша
 
     \todo
-    //TODO: Нужно отвязать от вызовов umba::filesys и umba::filename, параметризовав данный класс соответствующими API объектами 
+    //TODO: Нужно отвязать от вызовов umba::filesys и umba::filename, параметризовав данный класс соответствующими API объектами
 
     \todo
     //TODO: От MCU требуется наличие большого куска оперативы.
@@ -71,8 +71,8 @@ class FileCache
 
 public:
 
-    typedef FilenameStringType         FilenameStringType;  //!< Тип строки имён файлов                                                                               
-    typedef ByteType                   ByteType;            //!< Тип байта содержимого файла, обычно char/uint8_t                                                     
+    typedef FilenameStringType         FilenameStringType;  //!< Тип строки имён файлов
+    typedef ByteType                   ByteType;            //!< Тип байта содержимого файла, обычно char/uint8_t
     typedef DataType                   DataType;            //!< Тип данных раскодированного файла, обычно uint8_t, возможно, будет wchar_t при перекодировке в Юникод
     typedef std::vector<ByteType>      ByteVectorType;      //!< Вектор исходных данных файла
     typedef std::vector<DataType>      DataVectorType;      //!< Вуктор перекодированных данных файла
@@ -80,14 +80,14 @@ public:
 
     static const FileIdType            invalidFileId = (FileIdType)-1; //!< Неверный/недопустимый идентификатор
 
-    //! Информация по кешированному файлу 
+    //! Информация по кешированному файлу
     struct FileCacheInfo
     {
         FilenameStringType                 orgFilename;      //!< Исходное имя файла
-        FilenameStringType                 ntvFilename;      //!< Нативное имя файла 
+        FilenameStringType                 ntvFilename;      //!< Нативное имя файла
         FilenameStringType                 cmpFilename;      //!< Имя файла для сравнения
         umba::filesys::FileStat            fileStat;         //!< Статистика по файлу - размер, дата рождения и тп
-        
+
         mutable ByteVectorType             originalFileData; //!< Исходные данные файла
         mutable DataVectorType             encodedFileData ; //!< Перекодированные данные файла
 
@@ -116,7 +116,7 @@ protected:
 
     FileIdType                                  m_fileIdCounter;    //!< Счетчик для генерации FileId
     std::map<FilenameStringType, FileIdType>    m_fileIdMap;        //!< Мапа для поиска FileId по имени
-    std::map<FileIdType, FilenameStringType>    m_fileIdMapToName;  //!< Мапа для поиска имени по FileId 
+    std::map<FileIdType, FilenameStringType>    m_fileIdMapToName;  //!< Мапа для поиска имени по FileId
 
     //------------------------------
     //! Хелпер для формирования абсолютного имени
@@ -144,7 +144,7 @@ protected:
         resName = checkPathPrependDrive<FilenameStringType>(resName, curDir);
 
         return umba::filename::makeCanonical<FilenameStringType>(resName);
-        
+
         //return resName;
     }
 
@@ -205,16 +205,16 @@ protected:
 public:
 
     //! Конструктор по умолчанию, получает только энкодер
-    FileCache( const EncoderType &encoder ) 
+    FileCache( const EncoderType &encoder )
         : m_cache(), m_encoder(encoder), m_fileIdCounter(0), m_fileIdMap(), m_fileIdMapToName() {}
 
     //! Конструктор копирования
-    FileCache( const FileCache &fileCache ) 
+    FileCache( const FileCache &fileCache )
         : m_cache(fileCache.m_cache), m_encoder(fileCache.m_encoder), m_fileIdCounter(fileCache.m_fileIdCounter), m_fileIdMap(fileCache.m_fileIdMap), m_fileIdMapToName(fileCache.m_fileIdMapToName) {}
 
     //! Конструктор копрования с заменой энкодера
     FileCache( const FileCache &fileCache
-             , const EncoderType &encoder ) 
+             , const EncoderType &encoder )
         : m_cache(fileCache.m_cache), m_encoder(encoder), m_fileIdCounter(fileCache.m_fileIdCounter), m_fileIdMap(fileCache.m_fileIdMap), m_fileIdMapToName(fileCache.m_fileIdMapToName) {}
 
 
@@ -338,7 +338,7 @@ public:
     {
         return readFileStat( makeFileInfoForReading( fileName ) );
     }
-    
+
     //! Возвращает кешированную статистику по файлу
     const umba::filesys::FileStat* getCachedFileStat( const FilenameStringType &fileName ) const
     {
@@ -350,7 +350,7 @@ public:
 
         if (it==m_cache.end())
             return 0;
-        
+
         const FileCacheInfo &fileInfo = it->second;
 
         return &fileInfo.fileStat;

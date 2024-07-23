@@ -18,7 +18,7 @@
 : - in reference to macro perform a parameter substitution (like params in function call)
 CALLED_MACRO := $(%0) $(%1) $(%2) $(%3)
                  ^ - number of passed args
-usage 
+usage
 CALLED_MACRO(A:B) expands to '2 A B ' (trailing space included)
 CALLED_MACRO(A:B:C) expands to '3 A B C' (no trailing space)
 
@@ -134,7 +134,7 @@ template < char startBr
          , typename Traits
          , typename Allocator
          > inline
-typename ::std::basic_string<CharType, Traits, Allocator>::size_type 
+typename ::std::basic_string<CharType, Traits, Allocator>::size_type
 findChar(const ::std::basic_string<CharType, Traits, Allocator> &str, typename ::std::basic_string<CharType, Traits, Allocator>::size_type pos = 0)
 {
     int depth = 0;
@@ -149,12 +149,12 @@ findChar(const ::std::basic_string<CharType, Traits, Allocator> &str, typename :
 }
 
 //----------------------------------------------------------------------------
-//! 
+//!
 template < typename CharType
          , typename Traits
          , typename Allocator
          > inline
-::std::basic_string<CharType, Traits, Allocator> 
+::std::basic_string<CharType, Traits, Allocator>
 prepareMacroName( const ::std::basic_string<CharType, Traits, Allocator>  &name, int flags )
    {
     if (flags&smf_uppercaseNames)
@@ -282,15 +282,15 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
             mstartIt = it;
             ++it;
             if (it==str.end()) continue;
-            
+
             if (*it==(CharType)'$')
-               { 
+               {
                 res.append(1, *it);
                 continue;
                }
-            
+
             if (*it!=(CharType)'(')
-               { 
+               {
                 res.append(1, (CharType)'$');
                 res.append(1, *it);
                 continue;
@@ -300,18 +300,18 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
             if (it==str.end()) continue;
 
             typename StringType::const_iterator start = it;
-            int brCnt = 1;            
+            int brCnt = 1;
             for(; it!=str.end(); ++it)
                {
                 if (*it==(CharType)'(') { ++brCnt; continue; }
-                if (*it==(CharType)')') 
+                if (*it==(CharType)')')
                    {
                     --brCnt;
                     if (!brCnt) break;
                    }
                }
 
-            if (it==str.end()) 
+            if (it==str.end())
                {
                 res.append(start, it);
                 continue;
@@ -338,13 +338,13 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                         parts.push_back(StringType(macroName, startPos));
                         break;
                        }
-                    
+
                    } while(1);
 
                 //
                 if (parts.size()<=1)
                    {
-                    StringType 
+                    StringType
                            macroNameChanged = util::prepareMacroName(util::filterDotsSlashes(macroName, flags), flags);
                     if (usedMacros.find(macroNameChanged)!=usedMacros.end())
                        continue; // allready used
@@ -374,7 +374,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                        }
 
                     StringType macroNameChanged = util::prepareMacroName(util::filterDotsSlashes(parts[0], flags), flags);
-                    
+
                     if (usedMacros.find(macroNameChanged)!=usedMacros.end())
                        continue; // allready used
 
@@ -386,7 +386,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                     usedMacrosCopy.insert(macroNameChanged);
 
                     StringStringMap<StringType> tmpMacros; // = macros;
-                    
+
                     typename StringType::size_type pi = 1, piSize = parts.size();
 
                     for(; pi<piSize; ++pi)
@@ -405,7 +405,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                         StringType paramMacroName(1, (CharType)'%'); paramMacroName.append(idxStr);
                         tmpMacros[ paramMacroName ] = parts[pi];
                        }
-                    
+
                     #if 1
                         //!!! Чего-то с прокси не срослось - компилятор помирает от вложенности шаблонов
                         // Порешал, сделав getter нешаблонным параметром с виртуальным оператором ()
@@ -450,7 +450,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                }
 
             typename StringType::size_type colonPos = util::findChar<'(', ')', ':'>(macroName, truthBranchStart);
-            
+
             StringType truthPart, falsePart;
             if (colonPos==StringType::npos || colonPos>=macroName.size())
                {
@@ -480,7 +480,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                }
 
             macroText = cond ? truthPart : falsePart;
-            StringType 
+            StringType
                 strToAppend = (flags&smf_DisableRecursion) ? macroText : substMacros(macroText, getMacroText, flags, usedMacros);
             res.append(strToAppend);
            }

@@ -50,7 +50,7 @@ bool isWindows32OnWindows64()
             if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
             {
                 //handle error
-            }                
+            }
         }
     }
 
@@ -90,7 +90,7 @@ HKEY regCreateKey(HKEY hKeyRoot, const std::wstring &path, REGSAM samDesired)
     {
         samDesired |= KEY_WOW64_64KEY;
     }
-    
+
     HKEY hKeyRes = 0;
     DWORD dwDisposition = 0;
 
@@ -121,7 +121,7 @@ HKEY regCreateKey(HKEY hKeyRoot, const std::string &path, REGSAM samDesired)
     {
         samDesired |= KEY_WOW64_64KEY;
     }
-    
+
     HKEY hKeyRes = 0;
     DWORD dwDisposition = 0;
 
@@ -265,7 +265,7 @@ bool regQueryAppInstallLocation(const StringType &appUninstallSectionName, Strin
     for(const auto rp: regPaths)
     {
         HKEY hk = 0;
-        LSTATUS 
+        LSTATUS
         status = regOpenKeyEx( HKEY_LOCAL_MACHINE
                              , rp + umba::string_plus::make_string<StringType>("\\") + appUninstallSectionName
                              , 0 // ulOptions
@@ -311,7 +311,7 @@ bool regQueryAppInstallLocationBin(const StringType &appUninstallSectionName, St
         {
             foundPath = umba::filename::appendPath(foundPath, string_plus::make_string<StringType>("bin"));
         }
-    
+
         return true;
     }
 

@@ -18,7 +18,7 @@
 //---------------------------------------------------------
 /*! Instruction Synchronization Barrier сбрасывает конвеер инструкций процессора
     и заставляет его перечитать инструкции из мамяти (или кэша).
-    Аппаратная оптимизация может переупорядочивать исполнение иструкций, и в случае, 
+    Аппаратная оптимизация может переупорядочивать исполнение иструкций, и в случае,
     когда необходимо гарантировать порядок их выполнения, следует вставлять данный барьер.
 */
 #define UMBA_INSTRUCTION_BARRIER()               __ISB()
@@ -63,7 +63,7 @@
     будут выполнятся до инструкций обращения к памяти, заданных после барьера.
     Данный барьер дает гарантии окончания выполнения иструкций.
 
-    \note В общем случае следует использовать именно его, а не UMBA_DATA_MEMORY_BARRIER 
+    \note В общем случае следует использовать именно его, а не UMBA_DATA_MEMORY_BARRIER
     или UMBA_DATA_SYNCHRONIZATION_BARRIER. Это несколько излишне аппаратнозависимые
     барьеры, и при их прямом использовании нужно каждый раз вспоминать, какой из них следует использовать.
 */
@@ -122,7 +122,7 @@ namespace umba{
      */
     inline bool interruptLock()
     {
-        uint32_t isMasked = UMBA_INTERRUPTS_DISABLED(); 
+        uint32_t isMasked = UMBA_INTERRUPTS_DISABLED();
         UMBA_MEMORY_BARRIER();
         UMBA_DISABLE_IRQ();
         return isMasked ? true : false;
@@ -136,7 +136,7 @@ namespace umba{
            UMBA_ENABLE_IRQ();
     }
 
-    //! Проверка, что выполняется, обработчик прерывания или основной код 
+    //! Проверка, что выполняется, обработчик прерывания или основной код
     inline bool isInInterrupt()
     {
         return UMBA_IS_IN_ISR() ? true : false;
@@ -150,18 +150,18 @@ namespace umba{
 #if defined UMBA_USE_FREERTOS
 
     // это псевдоним, который, вроде бы, лучше отражает суть
-    // т.к. макросы FreeRTOS на самом деле запрещают только прерывания, у которых приоритет ниже 
+    // т.к. макросы FreeRTOS на самом деле запрещают только прерывания, у которых приоритет ниже
     // configMAX_SYSCALL_INTERRUPT_PRIORITY ( это должны быть только прерывания от диспетчера и т.п.)
-    
+
     // однако, если ваше прерывание имеет приоритет ниже - оно тоже будет запрещено!
-    
+
     // помните, что меньший номер приоритета соответствует большей важности (0 - самое важное)
-    
+
     // если диспетчер еще не запущен - совершенно логичным образом ничего не происходит
-    
+
     #define ENTER_UNSCHEDULED_SECTION()   if( xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED ) { taskENTER_CRITICAL(); }
     #define LEAVE_UNSCHEDULED_SECTION()   if( xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED ) { taskEXIT_CRITICAL();  }
-    
+
     #define EXIT_UNSCHEDULED_SECTION()    LEAVE_UNSCHEDULED_SECTION()
 
 #endif

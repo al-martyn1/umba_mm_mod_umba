@@ -41,7 +41,7 @@ namespace units {
 //----------------------------------------------------------------------------
 template<typename StringType> inline
 void splitValueAndUnits( const StringType     &valWithUnits
-                       , StringType           &valStr 
+                       , StringType           &valStr
                        , StringType           &unitsStr
                        , const StringType     &valAllowedChars
                        , const StringType     &ignoreValChars

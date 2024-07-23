@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------
 
-/*! 
+/*!
     \file
     \brief Хелперы для работы с консолью под Windows
  */
@@ -66,7 +66,7 @@
 
 
 #ifdef DEBUG_WINCONHELPERS
-    
+
     #include <fcntl.h>
     #include <io.h>
 
@@ -125,7 +125,7 @@ char toLower( char ch )
 inline
 std::string toUpper( std::string s )
 {
-    //for (char& ch : s) 
+    //for (char& ch : s)
     for(std::string::iterator it = s.begin(); it != s.end(); ++it)
     {
         //ch = toUpper(ch);
@@ -139,7 +139,7 @@ std::string toUpper( std::string s )
 inline
 std::string toLower( std::string s )
 {
-    //for (char& ch : s) 
+    //for (char& ch : s)
     for(std::string::iterator it = s.begin(); it != s.end(); ++it)
     {
         //ch = toLower(ch);
@@ -154,7 +154,7 @@ std::string toLower( std::string s )
 inline
 std::vector<std::string> toUpper( std::vector<std::string> v )
 {
-    //for (std::string& s : v) 
+    //for (std::string& s : v)
     for(std::vector<std::string>::iterator it = v.begin(); it != v.end(); ++it)
     {
         //s = toUpper(s);
@@ -168,7 +168,7 @@ std::vector<std::string> toUpper( std::vector<std::string> v )
 inline
 std::vector<std::string> toLower( std::vector<std::string> v )
 {
-    //for (std::string& s : v) 
+    //for (std::string& s : v)
     for(std::vector<std::string>::iterator it = v.begin(); it != v.end(); ++it)
     {
         //s = toLower(s);
@@ -338,7 +338,7 @@ LONG /* NTSTATUS */  NtQueryInformationProcessImpl(
 
         // Ебаный GCC
         // https://en.cppreference.com/w/cpp/numeric/bit_cast
-       
+
         NtQueryInformationProcessFnPtrT NtQueryInformationProcessFnPtr = 0;
         {
             auto procAddr = GetProcAddress(LoadLibraryA("NTDLL.DLL"), "NtQueryInformationProcess");
@@ -351,12 +351,12 @@ LONG /* NTSTATUS */  NtQueryInformationProcessImpl(
         #include "warnings/push_disable_C4191.h"
         NtQueryInformationProcessFnPtrT NtQueryInformationProcessFnPtr = (NtQueryInformationProcessFnPtrT)GetProcAddress(LoadLibraryA("NTDLL.DLL"), "NtQueryInformationProcess");
         #include "warnings/pop.h"
-       
+
         // NtQueryInformationProcessFnPtrT NtQueryInformationProcessFnPtr = reinterpret_cast<NtQueryInformationProcessFnPtrT>(GetProcAddress(LoadLibraryA("NTDLL.DLL"), "NtQueryInformationProcess"));
 
     #endif
 
-    
+
 
     #ifdef __GNUC__
         #pragma GCC diagnostic pop
@@ -396,7 +396,7 @@ ULONG_PTR GetParentProcessIdByPid( ULONG_PTR /* DWORD */  pid = GetCurrentProces
     #endif
     //HANDLE h = OpenProcess( SYNCHRONIZE, FALSE, pid );
     //HANDLE h = OpenProcess(SYNCHRONIZE, TRUE, pid);
-    
+
     if (h!=0)
     {
         ULONG_PTR res = GetParentProcessIdByHandle( h );
@@ -465,7 +465,7 @@ std::vector<std::string> getProcessParentNames( ULONG_PTR pid = GetCurrentProces
                 res.push_back( utils::toLower(exeName) );
                 pidSet.insert(pid);
             }
-            
+
             pid = GetParentProcessIdByPid(pid);
         }
     }
@@ -551,7 +551,7 @@ ConsoleType detectConsoleType( int fd )
 
             if (parentName=="bash")
             {
-                // Виндовый bash от гита всегда аттачит потоки stdout/stderr к файлам, 
+                // Виндовый bash от гита всегда аттачит потоки stdout/stderr к файлам,
                 // потом видимо сам парсит и обрабатывает управляющие escape-последовательности
                 // и если вывод на консоль - то раскрашивает, если в файл - то отрезает
                 return UMBA_WCH_CONSOLETYPE_ANSI_TERMINAL;
@@ -591,7 +591,7 @@ IsWow64Process2 - https://docs.microsoft.com/ru-ru/windows/desktop/api/wow64apis
 
 
 
-/* 
+/*
 
 SetConsoleTextAttribute работает
 

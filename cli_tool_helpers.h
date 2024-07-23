@@ -124,7 +124,7 @@ StreamType& printNameVersion( StreamType &os, const std::string &indent = "" )
             compilerFullInfoString += ")";
         }
     }
-     
+
     os << "Built with " << compilerFullInfoString <<" compiler\n";
     #endif
 
@@ -311,7 +311,7 @@ inline
 bool readStream(std::istream &fileIn, std::string &data)
 {
     std::vector<char> buf;
-    
+
     if (!umba::filesys::readFile(fileIn, buf))
         return false;
 
@@ -340,7 +340,7 @@ inline
 bool readFile( const std::string &fileName, std::string &data )
 {
     std::vector<char> buf;
-    
+
     if (!umba::filesys::readFile(fileName, buf))
         return false;
 
@@ -475,7 +475,7 @@ void writeOutput( const std::string &outputFilename, umba::cli_tool_helpers::IoF
             //resultText = encoding::toUtf8(bomData+resultText);
             utfSource  = true;
         }
-    
+
         #if defined(WIN32) || defined(_WIN32)
         if (!umba::win32::clipboardTextSet(text, fromUtfConverter, utfSource, umba::win32::clipboardGetConsoleHwnd()))
         #else

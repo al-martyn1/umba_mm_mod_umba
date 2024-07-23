@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file
     \brief Шляпы с текстом
  */
@@ -26,7 +26,7 @@ namespace text_utils{
 // void strAlphaStat( const std::string &s, size_t &nUppers, size_t &nLowers, size_t &nDigits, size_t &nOthers );
 // bool isUpperAlphasOnly( const std::string &s );
 // bool isLowerAlphasOnly( const std::string &s );
-//  
+//
 // char toUpper( char ch );
 // char toLower( char ch );
 // std::string toUpper( std::string s );
@@ -201,13 +201,13 @@ std::string alignStringWithWidth( std::string str, std::string::size_type width,
                                          std::string::size_type widthToAddRight = widthToAddTotal - widthToAddLeft;
                                          return std::string(widthToAddLeft, ' ') + str + std::string(widthToAddRight,' ');
                                      }
-                                     
+
         case TextAlignment::right  :
                                      {
                                          std::string::size_type widthToAddRight = str.size() - width;
                                          return str + std::string(widthToAddRight,' ');
                                      }
-                                     
+
         case TextAlignment::width  : return expandStringWidth(str,width);
 
         default                    : return str;
@@ -304,7 +304,7 @@ std::vector<std::string> prepareTextParaMakeLines( const std::string &para, std:
     {
         const auto &lw = *lineWordsIt;
 
-        if (lineWordsIt==lastLineIt && textAlignment==TextAlignment::width) 
+        if (lineWordsIt==lastLineIt && textAlignment==TextAlignment::width)
             res.push_back(umba::string_plus::merge(lw, ' ')); // если строка последняя и выравнивание по ширине, то не ничего не делаем, просто мержим слова
         else // Иначе (left/center/right или не последняя строка) - можно выравнивать
             res.push_back(umba::text_utils::alignStringWithWidth( umba::string_plus::merge(lw, ' '), paraWidth, textAlignment ));
@@ -347,7 +347,7 @@ std::string prepareTextParaMakeString( const std::string &para, std::string::siz
 //     center ,
 //     right  ,
 //     width
-//  
+//
 // };
 
 //! Форматирует параграфы. Разбивает текст по символу LF, форматирует, склеивает обратно

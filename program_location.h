@@ -1,5 +1,5 @@
 /*! \file
-    \brief Поиск месторасположения self EXE-шника 
+    \brief Поиск месторасположения self EXE-шника
 */
 
 #pragma once
@@ -28,7 +28,7 @@
 
     #if defined(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME_FORCE_CONF)
         #define UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME      "conf"
-    #else 
+    #else
         #define UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME      "etc"
     #endif
 
@@ -110,7 +110,7 @@ StringType getExeName(); // { return throw std::runtime_error("getExeName: not s
         DWORD res = GetModuleFileNameA( 0, buf, bufSize );
         if (res==bufSize)
             buf[bufSize-1] = 0;
-    
+
         return std::string(buf);
     }
 
@@ -123,7 +123,7 @@ StringType getExeName(); // { return throw std::runtime_error("getExeName: not s
         DWORD res = GetModuleFileNameW( 0, buf, bufSize );
         if (res==bufSize)
             buf[bufSize-1] = 0;
-    
+
         return std::wstring(buf);
     }
 
@@ -183,7 +183,7 @@ void detectLocation( StringType &exeFullName, StringType &progBinPath, StringTyp
 
                )
             {
-                // 
+                //
                 isExeFolderBin = true;
             }
         }
@@ -239,7 +239,7 @@ struct ProgramLocation
 
         m[umba::string_plus::make_string<StringType>("AppName")] = exeName;
 
-        
+
         m[umba::string_plus::make_string<StringType>("AppPath")] = rootPath; // For compatibility
 
         m[umba::string_plus::make_string<StringType>("AppBinPath"   )] = binPath ;
@@ -261,7 +261,7 @@ struct ProgramLocation
 
 
         StringType logPath;
-        
+
         #if defined(WIN32) || defined(_WIN32)
 
             StringType logRoot;
@@ -286,11 +286,11 @@ struct ProgramLocation
         // LogPath
 
         // UserTemp
-        
+
         // Windows
         //   System-wide persistent
         //   System-wide
-        //   User 
+        //   User
 
         // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha
 
@@ -301,11 +301,11 @@ struct ProgramLocation
         // https://superuser.com/questions/332610/where-is-the-temporary-directory-in-linux/332616
 
         // Temp
-        // In Unix and Linux, the global temporary directories are /tmp and /var/tmp. 
-        // Web browsers periodically write data to the tmp directory during page views and downloads. 
+        // In Unix and Linux, the global temporary directories are /tmp and /var/tmp.
+        // Web browsers periodically write data to the tmp directory during page views and downloads.
         // Typically, /var/tmp is for persistent files (as it may be preserved over reboots), and /tmp is for more temporary files.
 
-        // In addition, a user can set their TMPDIR environment variable to point to a preferred directory 
+        // In addition, a user can set their TMPDIR environment variable to point to a preferred directory
         // (where the creation and modification of files is allowed).
 
         // https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
@@ -539,7 +539,7 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
     ProgramLocation<StringType> loc;
 
     // Detect main location values
-    detectLocation( loc.exeFullName, loc.binPath, loc.rootPath ); 
+    detectLocation( loc.exeFullName, loc.binPath, loc.rootPath );
 
     loc.exeFileName = umba::filename::getFileName(loc.exeFullName);
 
@@ -552,7 +552,7 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
         exeName = overrideExeName;
 
     loc.exeName     = exeName;
-               
+
     loc.userConf    = umba::filename::appendPath( umba::filesys::getCurrentUserHomeDirectory<StringType>() , umba::filename::appendExt(StringType(), exeName) );
 
     loc.cwd         = umba::filesys::getCurrentDirectory<StringType>();
@@ -564,7 +564,7 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
 }
 
 //! Возвращает информацию по расположению исполняемого файла и основных файлов/каталогов программы
-inline 
+inline
 ProgramLocation<std::string> getProgramLocation( int argc, char    **argv
                                                , bool              useUserFolder   = false        //!< If false single file(s) used
                                                , std::string       overrideExeName = std::string()
@@ -583,7 +583,7 @@ ProgramLocation<std::string> getProgramLocation( int argc, char    **argv
 }
 
 //! Возвращает информацию по расположению исполняемого файла и основных файлов/каталогов программы
-inline 
+inline
 ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
                                                 , bool              useUserFolder    = false        //!< If false single file(s) used
                                                 , std::wstring overrideExeName       = std::wstring()

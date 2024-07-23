@@ -1,6 +1,6 @@
 #pragma once
 
-/*! 
+/*!
     \file
     \brief Структура LineView и соответствующие функции
  */
@@ -28,8 +28,8 @@ namespace umba
  */
 
 //! View для строк на массиве символов.
-/*! 
-    Оператор [] не может быть реализован для данного класса, так как LineView хранит только 
+/*!
+    Оператор [] не может быть реализован для данного класса, так как LineView хранит только
     индексы в массиве символов, которым не управляет, а для получения ссылки на символ из строки в LineView
     необходимо передать базовый массив символов, на который текущий LineView ссылается.
 
@@ -57,16 +57,16 @@ struct LineView
     SizeType           modifiedMaxSize   ; //!< \brief Признак модифицированности строки.
                                            //!
                                            //!  Если не равно нолю, то: 1) строка хранится в хранилище модифицированных данных;
-                                           //!  2) указывает на максимально допустимый размер в текущем месторасположении, 
+                                           //!  2) указывает на максимально допустимый размер в текущем месторасположении,
                                            //!  до которого можно увеличивать модифицированную строку без переаллокаций
 
     LineFeedType       lineFeedType      ; //!< Тип перевода строки
 
-    std::uint8_t       toBeContinued     ; //!< \brief Признак логического продолжения строки. 
+    std::uint8_t       toBeContinued     ; //!< \brief Признак логического продолжения строки.
                                            //!<
                                            //!< Если не равно нулю, то текущая строка заканчивается переводом строки, но логически она не заканчивается.
                                            //!< Пример: континуация строк символом '\\'.
-                                           //!< Содержит количество символов, которое надо пропустить, чтобы пропустить символы континуации и 
+                                           //!< Содержит количество символов, которое надо пропустить, чтобы пропустить символы континуации и
                                            //!< символы перевода строки, чтобы перейти к следующим значащим символам
 
     //! Возвращает размер View, включая перевод строки
@@ -87,7 +87,7 @@ struct LineView
 
         //! Возвращает константную ссылку на символ в строке данного View, принимая константную базу всего текста и индекс в текущем View
         template< typename StringType > const typename StringType::value_type& cat( const StringType &str, std::size_t idx )  const { return str[viewPos+idx]; }
-       
+
         //! Возвращает итератор на начало строки
         template< typename StringType > typename StringType::iterator          begin(StringType &str)        const { return str.begin()+viewPos; }
 
@@ -136,7 +136,7 @@ makeLineView( SizeType fileId                             //!< Идентифи�
             , SizeType viewPos                            //!< Индекс символа в файле (от начала файла), с которого будет работать создаваемый экземпляр View
             , SizeType viewSize                           //!< Размер создаваемого View
             , LineFeedType lineFeedType = lineFeedUnknown //!< Тип перевода строки
-            , uint8_t toBeContinued = 0                   //!< Признак логического продолжения строки. 
+            , uint8_t toBeContinued = 0                   //!< Признак логического продолжения строки.
             , std::size_t modifiedMaxSize = 0             //!< Признак модифицированности строки.
             )
 {
@@ -155,7 +155,7 @@ makeLineView( SizeType fileId                             //!< Идентифи�
 
 //----------------------------------------------------------------------------
 //! Разделяет входной текст на строки.
-/*! 
+/*!
     Производит автоопределение типа перевода строки.
 
     \tparam OutputIterator Итератор, который помещает значение в результирующий контейнер/поток.
@@ -305,7 +305,7 @@ splitToLineViews( const CharType *pData         //!< Указатель на д�
 
 //----------------------------------------------------------------------------
 //! Разделяет входной текст на строки.
-/*! 
+/*!
     Производит автоопределение типа перевода строки.
 
     \tparam CharType Тип символов - char, wchar_t etc.
@@ -330,7 +330,7 @@ splitToLineViews( const CharType *pData         //!< Указатель на д�
 
 //----------------------------------------------------------------------------
 //! Производит обработку континуаций строк
-/*! 
+/*!
     Континуация (продолжение) - приём, используемый во многих языках программирования,
     в различных форматах конфигурационных файлов, в различных DSL etc.
     Суть в том, что задаётся некоторый маркер, обозначающий, что следующая строка является
@@ -339,7 +339,7 @@ splitToLineViews( const CharType *pData         //!< Указатель на д�
 
     Обычно используется символ '\\'.
 
-    Данная функция позволяет использовать многосимвольные continuation-последовательности 
+    Данная функция позволяет использовать многосимвольные continuation-последовательности
     (до 255 символов длиной).
 
     Данная функция не меняет размеры входного массива, не производит вставки или удаления элементов.
@@ -454,7 +454,7 @@ namespace liv
 
 //----------------------------------------------------------------------------
 //! Базовая реализация итератора по символам входных данных посредством LineView
-/*! 
+/*!
 
     \tparam CharType         Тип символов - char, wchar_t etc.
     \tparam SizeType         Тип размера/индексов - обычно std::size_t.
@@ -720,7 +720,7 @@ public:
                     ++it;
             }
         }
-        
+
         LineViewSymbolIteratorBaseImpl res = *this;
         //res.initWithLviIterator(m_lviIterator);
         res.initWithLviIterator(it);
@@ -746,7 +746,7 @@ class LineViewSymbolIterator;
 
 //----------------------------------------------------------------------------
 //! Итератор по символам входных данных посредством LineView. Указатель нассимвол возвращается в структуре LinePosInfoEx
-/*! 
+/*!
 
     \tparam CharType         Тип символов - char, wchar_t etc.
     \tparam SizeType         Тип размера/индексов - обычно std::size_t.
@@ -780,7 +780,7 @@ public:
 
 public:
 
-    
+
     //! Оператор разыменования
     umba::LinePosInfoEx<SizeType,CharType> operator*() const
     {
@@ -838,7 +838,7 @@ public:
 
 //----------------------------------------------------------------------------
 //! Итератор по символам входных данных посредством LineView
-/*! 
+/*!
 
     \tparam CharType         Тип символов - char, wchar_t etc.
     \tparam SizeType         Тип размера/индексов - обычно std::size_t.
@@ -939,7 +939,7 @@ template< typename CharType, typename SizeType, typename DataGetter, typename Li
 LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator >
 makeLineViewSymbolIterator( DataGetter dataGetter, LineViewIterator cur, LineViewIterator end, CharType dummyLF )
 {
-    LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator > res = 
+    LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator > res =
         LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator >(dataGetter, end, dummyLF);
     //LineViewSymbolIteratorBaseImpl( const DataGetter &dataGetter, LineViewIterator cur, LineViewIterator end, CharType dummyLinefeed = (CharType)0 )
 
@@ -959,7 +959,7 @@ template< typename CharType, typename SizeType, typename DataGetter, typename Li
 LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator >
 makeLineViewSymbolIterator( DataGetter dataGetter, LineViewIterator cur, LineViewIterator end, CharType dummyLF )
 {
-    LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator > res = 
+    LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator > res =
         LineViewSymbolIteratorBaseImpl< CharType, SizeType, DataGetter, LineViewIterator >(dataGetter, end, dummyLF);
     //LineViewSymbolIteratorBaseImpl( const DataGetter &dataGetter, LineViewIterator cur, LineViewIterator end, CharType dummyLinefeed = (CharType)0 )
 
@@ -1063,7 +1063,7 @@ T& operator* ()
     SizeType           viewPos       ;
     SizeType           viewSize      ;
     LineFeedType       lineFeedType  ;
-    bool               toBeContinued ; // flag, that marks that next line is the continuation of current line 
+    bool               toBeContinued ; // flag, that marks that next line is the continuation of current line
     bool               modified      ; // line is modified and data itself is located in modified strings pool
 
     inline SizeType size() const { return viewSize; }

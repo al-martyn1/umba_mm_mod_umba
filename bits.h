@@ -1,7 +1,7 @@
 #pragma once
 
 /*! \file
-    \brief Манипуляции с битами 
+    \brief Манипуляции с битами
 */
 
 #include "i_char_writer.h"
@@ -34,7 +34,7 @@ namespace bits
 
 //-----------------------------------------------------------------------------
 //! Делает IntTypeT из набора байт в порядке Little Endian
-/*! \tparam IntTypeT Тип результирующего целого \param pBytes Указатель на сырые байты \param numBytes Число байт для обработки. 
+/*! \tparam IntTypeT Тип результирующего целого \param pBytes Указатель на сырые байты \param numBytes Число байт для обработки.
     \note Нет проверки, сходится ли указанное число байт с размером типа-результата
  */
 template< typename IntTypeT > inline
@@ -67,7 +67,7 @@ IntTypeT makeIntFromBytesLE( const uint8_t *pBytes )
 
 //-----------------------------------------------------------------------------
 //! Делает IntTypeT из набора байт в порядке Big Endian
-/*! \tparam IntTypeT Тип результирующего целого \param pBytes Указатель на сырые байты \param numBytes Число байт для обработки. 
+/*! \tparam IntTypeT Тип результирующего целого \param pBytes Указатель на сырые байты \param numBytes Число байт для обработки.
     \note Нет проверки, сходится ли указанное число байт с размером типа-результата
  */
 template< typename IntTypeT > inline
@@ -327,7 +327,7 @@ size_t getMsbNo( IntType i )
     size_t bitNo = 0;
     do
     {
-        i >>= 1;    
+        i >>= 1;
         if (i)
             bitNo++;
 
@@ -342,7 +342,7 @@ template<typename IntType>
 size_t getLog2( IntType i )
 {
     if (!i)
-       return 0; 
+       return 0;
     size_t res = umba::bits::getMsbNo( umba::bits::getMsb(i) );
     if ( ( ((IntType)1) << res) != i)
        return res + 1;
@@ -424,7 +424,7 @@ BitsStorageType reverseBits( BitsStorageType b )
     BitsStorageType res = b & 1;
 
     for (b >>= 1; b; b >>= 1)
-    {   
+    {
         res <<= 1;
         res |= b & 1;
         bitsPerItem--;
@@ -609,7 +609,7 @@ public:
                 pData++;
         }
     }
-    
+
     //! Генерация двоичного текстового представления массива бит (запись в писателя символов)
     static
     void writeBinView(RawPtrType pRawBitSet, BitSetSizeType totalBits, ICharWriter *pWriter, BitSetSizeType groupSize = npos )
@@ -644,7 +644,7 @@ public:
                 curByte = reverseBits(*pData);
             }
         }
-    
+
     }
 
 }; // class BitSetOperations
@@ -677,7 +677,7 @@ class BitSetHexView
 {
 
 public:
-    
+
     template< typename RawPtrTypeT, typename BitsStorageTypeT, typename BitSetSizeTypeT>
     friend
     umba::SimpleFormatter& operator<<( umba::SimpleFormatter& fmt, const BitSetHexView<RawPtrTypeT, BitsStorageTypeT, BitSetSizeTypeT> &v );
@@ -711,7 +711,7 @@ class BitSetBinView
 {
 
 public:
- 
+
     template< typename RawPtrTypeT, typename BitsStorageTypeT, typename BitSetSizeTypeT>
     friend
     umba::SimpleFormatter& operator<<( umba::SimpleFormatter& fmt, const BitSetBinView<RawPtrTypeT, BitsStorageTypeT, BitSetSizeTypeT> &v );
@@ -728,7 +728,7 @@ protected:
     , m_groupSize(groupSize)
     {}
 
-    BitSetType      *m_pBitSet;    //!< Указатель на битики               
+    BitSetType      *m_pBitSet;    //!< Указатель на битики
     BitSetSizeType   m_groupSize;  //!< Размер группы при выводе на печать
 
 }; // class BitSetBinView
