@@ -277,6 +277,7 @@ bool regQueryAppInstallLocation(const StringType &appUninstallSectionName, Strin
             if (regQueryValueEx(hk, umba::string_plus::make_string<StringType>("InstallLocation"), foundPath))
             {
                 RegCloseKey(hk);
+                umba::string_plus::unquote( foundPath, '\"', '\"');
                 return true;
             }
 
@@ -284,13 +285,8 @@ bool regQueryAppInstallLocation(const StringType &appUninstallSectionName, Strin
             {
                 RegCloseKey(hk);
 
+                umba::string_plus::unquote( foundPath, '\"', '\"');
                 foundPath = umba::filename::getPath(foundPath);
-
-                // if (umba::filesys::isPathDirectory(umba::filename::appendPath(foundPath, string_plus::make_string<StringType>("bin"))))
-                // {
-                //     foundPath = umba::filename::appendPath(foundPath, string_plus::make_string<StringType>("bin"));
-                // }
-
                 return true;
             }
 
