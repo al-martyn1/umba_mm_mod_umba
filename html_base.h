@@ -67,7 +67,7 @@ struct HtmlTagT
     }
 
     constexpr
-    static bool getAttrAppendMode()
+    static bool isAttrAppendMode()
     {
         return AttrAppendSeparatorChar!=0;
     }
@@ -115,7 +115,7 @@ struct HtmlTagT
 
         auto preparedName = prepareName(attrName);
 
-        if (getAttrAppendMode())
+        if (!isAttrAppendMode())
         {
             attributes[preparedName] = attrVal;
         }
@@ -483,6 +483,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
         }
         else // используем quote и apos как ограничители, чтобы можно было противоположное использовать внутри (но не оба сразу)
         {
+            ++b; // Пропускаем открывающую кавычку
             b = helpers::readUntilQuot(std::back_inserter(attrVal), b, e, quotChar);
             if (b!=e)
                 ++b;  // пропускаем закрывающую скобку
