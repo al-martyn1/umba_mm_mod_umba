@@ -1,5 +1,17 @@
 #pragma once
 
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+    #if !defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
+        #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
+    #endif
+#endif
+
+#if defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
+    #if !defined(UMBA_TOKENISER_TYPES_COMPACT)
+        #define UMBA_TOKENISER_TYPES_COMPACT
+    #endif
+#endif
+
 #include "char_class.h"
 
 
@@ -16,7 +28,7 @@ namespace tokeniser {
 
 Пробелы - это сами пробелы, табуляция, переводы строки и тп.
 
-Операторы. Это все символы пунктуации, операторов, скобок, брейсов и тп в различных комбинациях.
+Операторы. Это все символы пунктуации, операторов, скобок, брейсов и тп в различных комбинациях. (или скобки, брейсы - не операторные символы?)
 
 Литералы.
 
@@ -46,7 +58,7 @@ namespace tokeniser {
    а) Имеем список операторов с названиями - "!==" -> "STRICT_NEQ"
       Все операторы разбираем посимвольно, для каждого символа ставим флаг CharClass::opchar
 
-   б) Всё, что меньше пробела - флаг nonprintable
+   б) Всё, что меньше пробела - флаг nonprintable, а также 0x7F
       \r, \n - linefeed
       \t     - tab
       \r, \n, \t, ' ' - space
