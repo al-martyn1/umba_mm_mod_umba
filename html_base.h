@@ -186,6 +186,98 @@ using HtmlTagCaseSens      = HtmlTagCaseSensitive;
 //----------------------------------------------------------------------------
 
 
+//----------------------------------------------------------------------------
+namespace helpers {
+
+inline
+bool isWhiteSpace(char ch)
+{
+    return ch==' ' || ch=='\r' || ch=='\n' || ch=='\t';
+};
+
+inline
+char isSimpleQuot(char ch)
+{
+    return (ch=='\'' || ch=='\"') ? ch : (char)0;
+}
+
+template<typename InputIterator>
+InputIterator skipSpaces(InputIterator b, InputIterator e)
+{
+    while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы перед именем тэга
+    return b;
+}
+
+//! Читаем текст до конца строки
+template<typename OutputIterator, typename InputIterator>
+InputIterator readUntilEnd(OutputIterator out, InputIterator b, InputIterator e)
+{
+    while(b!=e)
+    {
+        *out++ = *b++;
+    }
+    return b;
+}
+
+//! Читаем текст до пробела или конца строки
+template<typename OutputIterator, typename InputIterator>
+InputIterator readUntilSpace(OutputIterator out, InputIterator b, InputIterator e)
+{
+    while(b!=e && !isWhiteSpace(*b))
+    {
+        *out++ = *b++;
+    }
+    return b;
+}
+
+//! Читаем текст до заданной кавычки или конца строки
+template<typename OutputIterator, typename InputIterator>
+InputIterator readUntilQuot(OutputIterator out, InputIterator b, InputIterator e, char quot)
+{
+    while(b!=e && *b!=quot)
+    {
+        *out++ = *b++;
+    }
+    return b;
+}
+
+template<typename OutputIterator, typename InputIterator>
+InputIterator readQuotedOrUntilSpace(OutputIterator out, InputIterator b, InputIterator e)
+{
+    if (b==e)
+        return b;
+
+    if (isSimpleQuot(*b))
+    {
+        char quotChar = *b;
+        ++b;
+        return readUntilQuot(out, b, e, quotChar);
+    }
+        
+    return readUntilSpace(out, b, e);
+}
+
+template<typename OutputIterator, typename InputIterator>
+InputIterator readQuotedOrUntilEnd(OutputIterator out, InputIterator b, InputIterator e)
+{
+    if (b==e)
+        return b;
+
+    if (isSimpleQuot(*b))
+    {
+        char quotChar = *b;
+        ++b;
+        return readUntilQuot(out, b, e, quotChar);
+    }
+        
+    return readUntilEnd(out, b, e);
+}
+
+} // namespace helpers
+//----------------------------------------------------------------------------
+
+
+
 
 //----------------------------------------------------------------------------
 //! Разбирает одиночный HTML-тэг. Возвращает итератор, указывающий на конец последовательности, или на символ завершивший сканирование
@@ -209,10 +301,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
 {
     parseTo.clear();
 
-    auto isWhiteSpace = [](char ch)
-    {
-        return ch==' ' || ch=='\r' || ch=='\n' || ch=='\t';
-    };
+    auto isWhiteSpace = [](char ch) { return helpers::isWhiteSpace(ch); };
 
     // Переехали в HtmlTag
     auto isNameChar      = [&](char ch) { return parseTo.isNameChar(ch);      };
@@ -281,7 +370,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
 
     ++b;
 
-    while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы перед именем тэга
+    b = helpers::skipSpaces(b, e); // while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы перед именем тэга
 
     if (b==e)
         return b;
@@ -325,7 +414,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
 
     while(b!=e)
     {
-        while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
+        b = helpers::skipSpaces(b, e); // while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
 
         if (b==e)
             return finalizeTag();
@@ -362,7 +451,7 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
             return finalizeTag();
 
         // ждём символ равно '=' перед значением атрибута
-        while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
+        b = helpers::skipSpaces(b, e); // while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
         if (b==e)
             return finalizeTag(); // символ равно '=' не дождались
 
@@ -373,12 +462,30 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
             return finalizeTag();
 
         ++b;
-        while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
+        b = helpers::skipSpaces(b, e); // while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
 
-        // Значения у нас пока без кавычек, ибо лень. Надо будет - прикрутим
-        for(; b!=e && !isWhiteSpace(*b) && *b!=TagCloseChar && *b!=TagOpenChar; ++b)
+        // После символа равно если тэг закрывается должен быть пробел
+        char quotChar = 0;
+        if (b!=e)
         {
-            attrVal.append(1, *b);
+            // if (helpers::isSimpleQuot(*b))
+            //     quotChar = *b;
+            quotChar = helpers::isSimpleQuot(*b);
+        }
+
+        if (quotChar==0)
+        {
+            // Значения у нас пока без кавычек, ибо лень. Надо будет - прикрутим
+            for(; b!=e && !isWhiteSpace(*b) && *b!=TagCloseChar && *b!=TagOpenChar; ++b)
+            {
+                attrVal.append(1, *b);
+            }
+        }
+        else // используем quote и apos как ограничители, чтобы можно было противоположное использовать внутри (но не оба сразу)
+        {
+            b = helpers::readUntilQuot(std::back_inserter(attrVal), b, e, quotChar);
+            if (b!=e)
+                ++b;  // пропускаем закрывающую скобку
         }
 
         addAttribute();
