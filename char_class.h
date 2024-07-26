@@ -15,9 +15,12 @@
 #include "c_char_class.h"
 
 
-#if 0
 
-// CharClass table generator
+/*
+
+// !!! Do not remove this comment, it is not "dead" code
+
+// CharClass table generator sample
 
 #include "umba/umba.h"
 #include "umba/tokeniser.h"
@@ -39,13 +42,21 @@ int main(int argc, char* argv[])
         typeNameType = umba::tokeniser::generation::TypeNameType::cLike;
     }
 
-    umba::tokeniser::generation::printCharClassArray( charClasses, commentType, arrayType, typeNameType /* , const std::string &varName="charClassesTable" */ );
+    umba::tokeniser::generation::printCharClassArray( charClasses, commentType, arrayType, typeNameType);  // , const std::string &varName="charClassesTable"
 
     return 0;
 }
 
-#endif
+*/
 
+
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+
+    #if !defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
+        #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
+    #endif
+
+#endif
 
 
 
