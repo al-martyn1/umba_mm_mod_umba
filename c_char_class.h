@@ -1,0 +1,61 @@
+#pragma once
+
+
+#if !defined(__cplusplus)
+
+    #if defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
+        #define UMBA_TOKENISER_CHARCLASS  uint_least16_t
+    #else
+        #define UMBA_TOKENISER_CHARCLASS  uint_fast32_t
+    #endif
+
+#else
+
+    #if defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
+        #define UMBA_TOKENISER_CHARCLASS  std::uint_least16_t
+    #else
+        #define UMBA_TOKENISER_CHARCLASS  std::uint_fast32_t
+    #endif
+
+#endif
+
+
+
+#define UMBA_TOKENISER_CHARCLASS_NONE             0x0000u
+#define UMBA_TOKENISER_CHARCLASS_NONPRINTABLE     0x0001u
+#define UMBA_TOKENISER_CHARCLASS_LINEFEED         0x0002u
+#define UMBA_TOKENISER_CHARCLASS_SPACE            0x0004u
+#define UMBA_TOKENISER_CHARCLASS_TAB              0x0008u
+#define UMBA_TOKENISER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
+#define UMBA_TOKENISER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
+#define UMBA_TOKENISER_CHARCLASS_BRACE            0x0040u
+#define UMBA_TOKENISER_CHARCLASS_QUOT             0x0080u
+#define UMBA_TOKENISER_CHARCLASS_OPCHAR           0x0100u
+#define UMBA_TOKENISER_CHARCLASS_OPERATOR_CHAR    0x0100u
+#define UMBA_TOKENISER_CHARCLASS_PUNCTUATION      0x0200u
+#define UMBA_TOKENISER_CHARCLASS_DIGIT            0x0400u
+#define UMBA_TOKENISER_CHARCLASS_ALPHA            0x0800u
+#define UMBA_TOKENISER_CHARCLASS_IDENTIFIER       0x1000u
+#define UMBA_TOKENISER_CHARCLASS_IDENTIFIER_FIRST 0x2000u
+#define UMBA_TOKENISER_CHARCLASS_SEMIALPHA        0x4000u /* Для символов, которые никуда не вошли, такие как @ # $ */
+#define UMBA_TOKENISER_CHARCLASS_ESCAPE           0x8000u /* Для символа '\', который везде используется как escape-символ */
+
+
+
+// https://www.geeksforgeeks.org/inline-function-in-c/
+// https://stackoverflow.com/questions/31108159/what-is-the-use-of-the-inline-keyword-in-c
+
+static inline
+UMBA_TOKENISER_CHARCLASS umbaTokeniserGetCharClass(char ch)
+{
+    static
+    #include "c_char_class_table.h.inc"
+
+    size_t idx = (size_t)(unsigned char)ch;
+    if (idx>=0x80u)
+        idx = 0x7Fu;
+
+    return charClassesTable[idx];
+}
+
+
