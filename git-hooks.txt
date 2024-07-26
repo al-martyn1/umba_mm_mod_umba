@@ -1,0 +1,13 @@
+8.3 Customizing Git - Git Hooks - https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks
+
+Отрабатываем Git hooks на автоматизации commit message - https://habr.com/ru/companies/dins/articles/584562/
+  https://github.com/Elanlum/python_git_hooks
+  https://www.atlassian.com/git/tutorials/git-hooks
+  https://codeburst.io/understanding-git-hooks-in-the-easiest-way-bad9afcbb1b3
+  https://learngitbranching.js.org/?locale=ru_RU
+  https://www.conventionalcommits.org/en/v1.0.0/
+
+  Onboarding page - Website Onboarding is the process of guiding a first-time user through 
+    the product features and getting them to become loyal customers. ‍ Website onboarding, 
+    or any kind of onboarding process, is often thought of as a simple product tour. 
+    However, it starts way before the product tour.
