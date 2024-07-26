@@ -12,12 +12,26 @@
     #endif
 #endif
 
+
+#include "c_tokeniser.h"
+//
 #include "char_class.h"
 
 
-// umba::tokeniser::
+
+//
 namespace umba {
 namespace tokeniser {
+
+
+
+using trie_index_type               = UMBA_TOKENISER_TRIE_INDEX_TYPE;
+inline constexpr trie_index_invalid = UMBA_TOKENISER_TRIE_INDEX_INVALID;
+
+using token_id_type                 = UMBA_TOKENISER_TOKEN_ID_TYPE;
+inline constexpr token_id_invalid   = UMBA_TOKENISER_TOKEN_ID_INVALID;
+
+
 
 
 /*
