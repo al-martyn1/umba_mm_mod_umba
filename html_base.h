@@ -254,7 +254,7 @@ InputIterator readQuotedOrUntilSpace(OutputIterator out, InputIterator b, InputI
         ++b;
         return readUntilQuot(out, b, e, quotChar);
     }
-        
+
     return readUntilSpace(out, b, e);
 }
 
@@ -270,7 +270,7 @@ InputIterator readQuotedOrUntilEnd(OutputIterator out, InputIterator b, InputIte
         ++b;
         return readUntilQuot(out, b, e, quotChar);
     }
-        
+
     return readUntilEnd(out, b, e);
 }
 

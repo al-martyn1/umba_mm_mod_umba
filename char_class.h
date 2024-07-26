@@ -34,9 +34,9 @@ int main(int argc, char* argv[])
 
     if (argc>1)
     {
-        commentType  = umba::tokeniser::generation::CommentType ::cLike; 
+        commentType  = umba::tokeniser::generation::CommentType ::cLike;
         arrayType    = umba::tokeniser::generation::ArrayType   ::cLike;
-        typeNameType = umba::tokeniser::generation::TypeNameType::cLike; 
+        typeNameType = umba::tokeniser::generation::TypeNameType::cLike;
     }
 
     umba::tokeniser::generation::printCharClassArray( charClasses, commentType, arrayType, typeNameType /* , const std::string &varName="charClassesTable" */ );
@@ -345,7 +345,7 @@ void setCharClassFlagsForBracePair( umba::tokeniser::CharClass (&charClasses)[N]
 Делаем таблицу, из которой получаем класс символа
 Таблица - это 128 позиций на базоые ASCII-символы
 Делаем это не вручную.
-Таблица генерируется не константная, надо уметь менять её в рантайме - например, 
+Таблица генерируется не константная, надо уметь менять её в рантайме - например,
 чтобы управлять поведением символов $/@ в зависимости от контекста - то ли они могутт быть в идентификаторе, то ли нет
 
 а) Имеем список операторов с названиями - "!==" -> "STRICT_NEQ"
@@ -508,8 +508,8 @@ std::string transformName(const std::string &name, TypeNameType typeNameType)
 }
 
 // Можно напечатать, как массив, можно - как template<class T, std::size_t N> struct array;
-// int varName[N] = 
-// std::array<int, N> varName = {1, 2, 3};. 
+// int varName[N] =
+// std::array<int, N> varName = {1, 2, 3};.
 
 template< std::size_t N >
 void printCharClassArray( umba::tokeniser::CharClass (&charClasses)[N], CommentType commentType, ArrayType arrayType, TypeNameType typeNameType, const std::string &varName="charClassesTable")
