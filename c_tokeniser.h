@@ -9,6 +9,13 @@
 
 #endif
 
+#if defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
+    #if !defined(UMBA_TOKENISER_TYPES_COMPACT)
+        #define UMBA_TOKENISER_TYPES_COMPACT
+    #endif
+#endif
+
+
 
 #include "c_char_class.h"
 
