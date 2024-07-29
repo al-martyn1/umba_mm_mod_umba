@@ -1,5 +1,12 @@
 #pragma once
 
+#if !defined(__cplusplus)
+    #include <stddef.h>
+    #include <stdint.h>
+#else
+    #include <cstddef>
+    #include <cstdint>
+#endif
 
 #if defined(UMBA_TOKENISER_TYPES_COMPACT)
 
@@ -16,9 +23,20 @@
 #endif
 
 
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+
+    #if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+        #define UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE
+    #endif
+
+#endif
+
+
 
 #include "c_char_class.h"
 
+
+// std::size_t https://stackoverflow.com/questions/36594569/which-header-should-i-include-for-size-t
 
 #if !defined(UMBA_TOKENISER_TRIE_INDEX_TYPE)
     #if !defined(__cplusplus)
@@ -78,9 +96,12 @@
 typedef struct tag_umba_tokeniser_trie_node
 {
     UMBA_TOKENISER_TRIE_INDEX_TYPE       parentNodeIndex      ;
-    UMBA_TOKENISER_TRIE_INDEX_TYPE       lookupChunkStartIndex; /* Îäíî è òî æå çíà÷åíèå äëÿ âñåõ ýëåìåíòîâ lookupChunk'à */
-    UMBA_TOKENISER_TRIE_INDEX_TYPE       lookupChunkSize      ; /* Îäíî è òî æå çíà÷åíèå äëÿ âñåõ ýëåìåíòîâ lookupChunk'à */
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       lookupChunkStartIndex; /* ÐžÐ´Ð½Ð¾ Ð¸ Ñ‚Ð¾ Ð¶Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ Ð´Ð»Ñ Ð²ÑÐµÑ… ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ð² lookupChunk'Ð° */
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       lookupChunkSize      ; /* ÐžÐ´Ð½Ð¾ Ð¸ Ñ‚Ð¾ Ð¶Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ Ð´Ð»Ñ Ð²ÑÐµÑ… ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ð² lookupChunk'Ð° */
     UMBA_TOKENISER_TRIE_INDEX_TYPE       childsIndex          ;
+#if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       level                ; // ÐÑƒÐ¶Ð½Ð¾, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð´ÐµÐ»Ð°Ñ‚ÑŒ ÐºÑ€Ð°ÑÐ¸Ð²Ñ‹Ð¹ Ð³Ñ€Ð°Ñ„ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ trie
+#endif
     UMBA_TOKENISER_TOKEN_ID_TYPE         tokenId              ;
     char                                 symbol               ;
 
@@ -90,12 +111,15 @@ typedef struct tag_umba_tokeniser_trie_node
 static inline
 void umba_tokeniser_trie_node_init_make_uninitialized(umba_tokeniser_trie_node *pNode)
 {
-    parentNodeIndex       = UMBA_TOKENISER_TRIE_INDEX_INVALID;
-    lookupChunkStartIndex = UMBA_TOKENISER_TRIE_INDEX_INVALID
-    lookupChunkSize       = 0;
-    childsIndex           = UMBA_TOKENISER_TRIE_INDEX_INVALID;
-    tokenId               = UMBA_TOKENISER_TOKEN_ID_INVALID
-    symbol                = 0;
+    pNode->parentNodeIndex       = UMBA_TOKENISER_TRIE_INDEX_INVALID;
+    pNode->lookupChunkStartIndex = UMBA_TOKENISER_TRIE_INDEX_INVALID;
+    pNode->lookupChunkSize       = 0;
+    pNode->childsIndex           = UMBA_TOKENISER_TRIE_INDEX_INVALID;
+#if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+    pNode->level                 = 0;
+#endif
+    pNode->tokenId               = UMBA_TOKENISER_TOKEN_ID_INVALID;
+    pNode->symbol                = 0;
 }
 
 
