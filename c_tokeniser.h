@@ -40,6 +40,15 @@
     #endif
 #endif
 
+#if !defined(UMBA_TOKENISER_TRIE_INDEX_INVALID)
+    #define UMBA_TOKENISER_TRIE_INDEX_INVALID ((UMBA_TOKENISER_TRIE_INDEX_TYPE)-1)
+#endif
+
+#if !defined(UMBA_TOKENISER_TRIE_INDEX_INITIAL)
+    #define UMBA_TOKENISER_TRIE_INDEX_INITIAL ((UMBA_TOKENISER_TRIE_INDEX_TYPE)0)
+#endif
+
+
 
 #if !defined(UMBA_TOKENISER_TOKEN_ID_TYPE)
     #if !defined(__cplusplus)
@@ -61,17 +70,37 @@
     #endif
 #endif
 
-
 #if !defined(UMBA_TOKENISER_TOKEN_ID_INVALID)
-
-    #defined UMBA_TOKENISER_TOKEN_ID_INVALID ((UMBA_TOKENISER_TOKEN_ID_TYPE)-1)
-
+    #define UMBA_TOKENISER_TOKEN_ID_INVALID ((UMBA_TOKENISER_TOKEN_ID_TYPE)-1)
 #endif
 
 
+typedef struct tag_umba_tokeniser_trie_node
+{
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       parentNodeIndex      ;
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       lookupChunkStartIndex; /* Одно и то же значение для всех элементов lookupChunk'а */
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       lookupChunkSize      ; /* Одно и то же значение для всех элементов lookupChunk'а */
+    UMBA_TOKENISER_TRIE_INDEX_TYPE       childsIndex          ;
+    UMBA_TOKENISER_TOKEN_ID_TYPE         tokenId              ;
+    char                                 symbol               ;
+
+} umba_tokeniser_trie_node;
 
 
-#define UMBA_TOKENISER_TOKEN_OPERATOR_FIRST
+static inline
+void umba_tokeniser_trie_node_init_make_uninitialized(umba_tokeniser_trie_node *pNode)
+{
+    parentNodeIndex       = UMBA_TOKENISER_TRIE_INDEX_INVALID;
+    lookupChunkStartIndex = UMBA_TOKENISER_TRIE_INDEX_INVALID
+    lookupChunkSize       = 0;
+    childsIndex           = UMBA_TOKENISER_TRIE_INDEX_INVALID;
+    tokenId               = UMBA_TOKENISER_TOKEN_ID_INVALID
+    symbol                = 0;
+}
+
+
+
+#define UMBA_TOKENISER_TOKEN_OPERATOR_FIRST                                    0
 
 // C++
 // https://en.wikipedia.org/wiki/Operators_in_C_and_C%2B%2B
@@ -137,7 +166,7 @@
 //  "new slot" operator '<-' - http://squirrel-lang.org/doc/squirrel3.html#tableconstructor
 //  => C# - operator lambda  - https://learn.microsoft.com/ru-ru/dotnet/csharp/language-reference/operators/lambda-operator
 //     JS - https://ru.stackoverflow.com/questions/528707/%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80-%D0%B2-javascript
-            https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Functions/Arrow_functions
+//          https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Functions/Arrow_functions
 
 #define UMBA_TOKENISER_TOKEN_OPERATOR_LAMBDA                                   UMBA_TOKENISER_TOKEN_OPERATOR_FIRST+0x80u   /*  =>  */
 
