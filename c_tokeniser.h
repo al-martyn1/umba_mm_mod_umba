@@ -62,35 +62,83 @@
     #define UMBA_TOKENISER_TRIE_INDEX_INVALID ((UMBA_TOKENISER_TRIE_INDEX_TYPE)-1)
 #endif
 
-#if !defined(UMBA_TOKENISER_TRIE_INDEX_INITIAL)
-    #define UMBA_TOKENISER_TRIE_INDEX_INITIAL ((UMBA_TOKENISER_TRIE_INDEX_TYPE)0)
-#endif
+// #if !defined(UMBA_TOKENISER_TRIE_INDEX_INITIAL)
+//     #define UMBA_TOKENISER_TRIE_INDEX_INITIAL ((UMBA_TOKENISER_TRIE_INDEX_TYPE)0)
+// #endif
 
 
 
-#if !defined(UMBA_TOKENISER_TOKEN_ID_TYPE)
+#if !defined(UMBA_TOKENISER_TOKEN_TYPE)
     #if !defined(__cplusplus)
 
         #if defined(UMBA_TOKENISER_TYPES_COMPACT)
-            #define UMBA_TOKENISER_TOKEN_ID_TYPE  uint_least16_t
+            #define UMBA_TOKENISER_TOKEN_TYPE  uint_least16_t
         #else
-            #define UMBA_TOKENISER_TOKEN_ID_TYPE  size_t
+            #define UMBA_TOKENISER_TOKEN_TYPE  size_t
         #endif
 
     #else
 
         #if defined(UMBA_TOKENISER_TYPES_COMPACT)
-            #define UMBA_TOKENISER_TOKEN_ID_TYPE  std::uint_least16_t
+            #define UMBA_TOKENISER_TOKEN_TYPE  std::uint_least16_t
         #else
-            #define UMBA_TOKENISER_TOKEN_ID_TYPE  std::size_t
+            #define UMBA_TOKENISER_TOKEN_TYPE  std::size_t
         #endif
 
     #endif
 #endif
 
-#if !defined(UMBA_TOKENISER_TOKEN_ID_INVALID)
-    #define UMBA_TOKENISER_TOKEN_ID_INVALID ((UMBA_TOKENISER_TOKEN_ID_TYPE)-1)
+#if !defined(UMBA_TOKENISER_TOKEN_INVALID)
+    #define UMBA_TOKENISER_TOKEN_INVALID ((UMBA_TOKENISER_TOKEN_TYPE)-1)
 #endif
+
+
+
+#if !defined(UMBA_TOKENISER_PAYLOAD_TYPE)
+    #if !defined(__cplusplus)
+
+        #if defined(UMBA_TOKENISER_TYPES_COMPACT)
+            #define UMBA_TOKENISER_PAYLOAD_TYPE  uint_least16_t
+        #else
+            #define UMBA_TOKENISER_PAYLOAD_TYPE  size_t
+        #endif
+
+    #else
+
+        #if defined(UMBA_TOKENISER_TYPES_COMPACT)
+            #define UMBA_TOKENISER_PAYLOAD_TYPE  std::uint_least16_t
+        #else
+            #define UMBA_TOKENISER_PAYLOAD_TYPE  std::size_t
+        #endif
+
+    #endif
+#endif
+
+#if !defined(UMBA_TOKENISER_PAYLOAD_INVALID)
+    #define UMBA_TOKENISER_PAYLOAD_INVALID ((UMBA_TOKENISER_PAYLOAD_TYPE)-1)
+#endif
+
+
+#if !defined(UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE)
+    #if !defined(__cplusplus)
+
+        #if defined(UMBA_TOKENISER_TYPES_COMPACT)
+            #define UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE  uint_least16_t
+        #else
+            #define UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE  uint_least32_t
+        #endif
+
+    #else
+
+        #if defined(UMBA_TOKENISER_TYPES_COMPACT)
+            #define UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE  std::uint_least16_t
+        #else
+            #define UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE  std::uint_least32_t
+        #endif
+
+    #endif
+#endif
+
 
 
 typedef struct tag_umba_tokeniser_trie_node
@@ -102,8 +150,9 @@ typedef struct tag_umba_tokeniser_trie_node
 #if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
     UMBA_TOKENISER_TRIE_INDEX_TYPE       level                ; // Нужно, чтобы делать красивый граф таблицы trie
 #endif
-    UMBA_TOKENISER_TOKEN_ID_TYPE         tokenId              ;
-    char                                 symbol               ;
+    UMBA_TOKENISER_TOKEN_TYPE            token                ; // Токен или символ
+    UMBA_TOKENISER_PAYLOAD_TYPE          payload              ; // Полезная нагрузка
+    UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE    payloadFlags         ; // Пользовательские флаги
 
 } umba_tokeniser_trie_node;
 
@@ -118,8 +167,9 @@ void umba_tokeniser_trie_node_init_make_uninitialized(umba_tokeniser_trie_node *
 #if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
     pNode->level                 = 0;
 #endif
-    pNode->tokenId               = UMBA_TOKENISER_TOKEN_ID_INVALID;
-    pNode->symbol                = 0;
+    pNode->token                 = UMBA_TOKENISER_TOKEN_INVALID;
+    pNode->payload               = UMBA_TOKENISER_PAYLOAD_INVALID;
+    pNode->payloadFlags          = 0;
 }
 
 
