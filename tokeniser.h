@@ -54,8 +54,15 @@ inline constexpr const trie_index_type trie_index_invalid  = UMBA_TOKENISER_TRIE
 //inline constexpr const trie_index_type trie_index_initial  = UMBA_TOKENISER_TRIE_INDEX_INITIAL;
 
 //----------------------------------------------------------------------------
-using  token_id_type                                       = UMBA_TOKENISER_TOKEN_ID_TYPE;
-inline constexpr const token_id_type token_id_invalid      = UMBA_TOKENISER_TOKEN_ID_INVALID;
+using  token_type                                          = UMBA_TOKENISER_TOKEN_TYPE;
+inline constexpr const token_type token_id_invalid         = UMBA_TOKENISER_TOKEN_INVALID;
+
+//----------------------------------------------------------------------------
+using  payload_type                                        = UMBA_TOKENISER_PAYLOAD_TYPE;
+inline constexpr const payload_type payload_invalid        = UMBA_TOKENISER_PAYLOAD_INVALID;
+
+//----------------------------------------------------------------------------
+using payload_flags_type                                   = UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE;
 
 //----------------------------------------------------------------------------
 using TrieNode = umba_tokeniser_trie_node;
@@ -77,7 +84,7 @@ void trieNodeInitMakeUninitialized(TrieNode &node)
 
 //----------------------------------------------------------------------------
 template<typename ContainerType>
-trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_type curIndex, char ch)
+trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_type curIndex, token_type tk)
 {
     // Если на входе инвалид, то начинать надо со старта
 
@@ -115,10 +122,10 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
         //     return umba::tokeniser::trie_index_invalid;
         // }
 
-        if (tokenTrie[idx].symbol==ch)
+        if (tokenTrie[idx].token==tk)
             return idx;
 
-        if (tokenTrie[idx].symbol>ch)
+        if (tokenTrie[idx].token>tk)
             return trie_index_invalid; // у нас символы отсортированы по возрастанию, и если код искомого символа больше того, что мы обнаружили в очередной entry, то дальше искать нет смысла
     }
 
@@ -132,14 +139,14 @@ void tokenTrieBackTrace(const ContainerType &tokenTrie, trie_index_type curIndex
     while(curIndex!=trie_index_invalid)
     {
         UMBA_ASSERT(curIndex<tokenTrie.size());
-        handler(tokenTrie[curIndex].symbol);
+        handler(tokenTrie[curIndex].token);
         curIndex = tokenTrie[curIndex].parentNodeIndex;
     }
 }
 
 //----------------------------------------------------------------------------
-template<typename ContainerType, typename StreamType>
-void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s)
+template<typename ContainerType, typename StreamType, typename TokenToStringConverter>
+void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToStringConverter converter)
 {
     // requires UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE is not defined
 
@@ -168,13 +175,25 @@ void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s)
 
         s << "{<I" << idx << ">";
 
-        if (t.symbol=='\'' || t.symbol=='\"' || t.symbol=='\\' || t.symbol=='<' || t.symbol=='>')
+        std::string strToken = converter(t.token);
+        if (strToken.empty())
         {
-            s << "\\";
+            s << t.token;
+        }
+        else
+        {
+            for(auto ch : strToken)
+            {
+                if (ch=='\'' || ch=='\"' || ch=='\\' || ch=='<' || ch=='>')
+                {
+                    s << "\\";
+                }
+
+                s << ch;
+            }
         }
 
-
-        s << t.symbol << "|<O" << idx << ">" << idx << "}";
+        s << "|<O" << idx << ">" << idx << "}";
 
         // //l2 [label="
         // {<t4>+|<f4>4}
@@ -218,10 +237,10 @@ public:
 
     struct TrieBuilderMapNode
     {
-        TrieNode                              trieNode ;
-        std::map<char, TrieBuilderMapNode>    childs   ;
-        trie_index_type                       nodeIndex;
-        trie_index_type                       level    ;
+        TrieNode                                    trieNode ;
+        std::map<token_type, TrieBuilderMapNode>    childs   ;
+        trie_index_type                             nodeIndex;
+        trie_index_type                             level    ;
 
         TrieBuilderMapNode() : trieNode(), childs()
         {
@@ -235,7 +254,7 @@ public:
 
     };
 
-    typedef std::map<char, TrieBuilderMapNode> TrieNodesMap;
+    typedef std::map<token_type, TrieBuilderMapNode> TrieNodesMap;
 
 
 public: // пока public, потом, скорее всего, будет спрятано
@@ -244,21 +263,25 @@ public: // пока public, потом, скорее всего, будет сп
 
 public:
 
-    bool addTokenSequence(const std::string &seqStr, token_id_type tokenId)
+
+    template<typename TokenSequenceIterator>
+    TrieNode& addTokenSequence(TokenSequenceIterator b, TokenSequenceIterator e, payload_type payload)
     {
-        UMBA_ASSERT(!seqStr.empty());
+        //UMBA_ASSERT(!seqStr.empty());
+        UMBA_ASSERT(b!=e);
 
         TrieNodesMap *pCurMap  = &m_trieNodesMap;
         TrieBuilderMapNode  *pCurNode = 0;
 
-        for(auto ch: seqStr)
+        //for(auto ch: seqStr)
+        for(; b!=e; ++b)
         {
             TrieNodesMap
             &curMap  = *pCurMap;
-            pCurNode = &curMap[ch]; // .second;
+            pCurNode = &curMap[*b]; // .second;
             pCurMap  = &pCurNode->childs;
 
-            pCurNode->trieNode.symbol = ch;
+            pCurNode->trieNode.token = static_cast<token_type>(*b);
 
             // ++finalTableNumEntries;
         }
@@ -266,14 +289,20 @@ public:
         // Прошагали всё символы обрабатываемой строки
         // Финальный узел у нас есть
 
-        if (pCurNode->trieNode.tokenId!=token_id_invalid && pCurNode->trieNode.tokenId!=tokenId)
-            return false; // Такой путь в дереве уже есть, и там другой корректный идентификатор токена
+        if (pCurNode->trieNode.payload!=token_id_invalid && pCurNode->trieNode.payload!=payload)
+            return pCurNode->trieNode; // Такой путь в дереве уже есть, и там другой корректный идентификатор токена
 
         // Записываем туда идентификатор оператора
-        pCurNode->trieNode.tokenId = tokenId;
+        pCurNode->trieNode.payload = payload;
 
-        return true;
+        return pCurNode->trieNode;
     }
+
+    TrieNode& addTokenSequence(const std::string &seqStr, payload_type payload)
+    {
+        return addTokenSequence(seqStr.begin(), seqStr.end(), payload);
+    }
+
 
     template<typename ContainerType>
     void buildTokenTrie(ContainerType &buildTo) const
@@ -336,7 +365,7 @@ public:
                 buildTo.back().parentNodeIndex       = curParentNodeIndex;
                 buildTo.back().lookupChunkStartIndex = lookupChunkStartIndex;
                 buildTo.back().lookupChunkSize       = m.size();
-                buildTo.back().symbol                = kv.first;
+                buildTo.back().token                 = kv.first;
 #if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
                 buildTo.back().level                 = qi.level;
 #endif
@@ -349,8 +378,6 @@ public:
         }
 
     }
-
-
 
 
 }; // class TrieBuilder
