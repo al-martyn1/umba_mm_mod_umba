@@ -37,13 +37,13 @@
 #define UMBA_TOKENISER_CHARCLASS_TAB              0x0008u
 #define UMBA_TOKENISER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
 #define UMBA_TOKENISER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
-#define UMBA_TOKENISER_CHARCLASS_BRACE            0x0040u
-#define UMBA_TOKENISER_CHARCLASS_QUOT             0x0080u
-#define UMBA_TOKENISER_CHARCLASS_OPCHAR           0x0100u
-#define UMBA_TOKENISER_CHARCLASS_OPERATOR_CHAR    0x0100u
-#define UMBA_TOKENISER_CHARCLASS_PUNCTUATION      0x0200u
-#define UMBA_TOKENISER_CHARCLASS_DIGIT            0x0400u
-#define UMBA_TOKENISER_CHARCLASS_ALPHA            0x0800u
+// #define UMBA_TOKENISER_CHARCLASS_BRACE            0x0040u /* Отдельно brace флаг не надо, наличие либо open, либо close - само по себе признак скобки */
+#define UMBA_TOKENISER_CHARCLASS_QUOT             0x0040u
+#define UMBA_TOKENISER_CHARCLASS_OPCHAR           0x0080u
+#define UMBA_TOKENISER_CHARCLASS_PUNCTUATION      0x0100u
+#define UMBA_TOKENISER_CHARCLASS_DIGIT            0x0200u
+#define UMBA_TOKENISER_CHARCLASS_ALPHA            0x0400u
+#define UMBA_TOKENISER_CHARCLASS_UPPER            0x0800u /* Флаг для символов верхнего регистра */
 #define UMBA_TOKENISER_CHARCLASS_IDENTIFIER       0x1000u
 #define UMBA_TOKENISER_CHARCLASS_IDENTIFIER_FIRST 0x2000u
 #define UMBA_TOKENISER_CHARCLASS_SEMIALPHA        0x4000u /* Для символов, которые никуда не вошли, такие как @ # $, буквоподобные символы */
@@ -60,6 +60,8 @@
 // https://www.geeksforgeeks.org/inline-function-in-c/
 // https://stackoverflow.com/questions/31108159/what-is-the-use-of-the-inline-keyword-in-c
 
+
+#if !defined(UMBA_TOKENISER_DISABLE_UMBA_TOKENISER_GET_CHAR_CLASS_FUNCTION)
 static inline
 UMBA_TOKENISER_CHARCLASS umbaTokeniserGetCharClass(char ch)
 {
@@ -72,5 +74,5 @@ UMBA_TOKENISER_CHARCLASS umbaTokeniserGetCharClass(char ch)
 
     return charClassesTable[idx];
 }
-
+#endif
 

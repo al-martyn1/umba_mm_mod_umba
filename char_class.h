@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <exception>
 #include <stdexcept>
+#include <array>
 
 //
 #include "string_plus.h"
@@ -126,13 +127,14 @@ enum class CharClass : char_class_underlying_uint_t
     tab              = UMBA_TOKENISER_CHARCLASS_TAB             ,
     open             = UMBA_TOKENISER_CHARCLASS_OPEN            , // Флаг для парных символов
     close            = UMBA_TOKENISER_CHARCLASS_CLOSE           , // Флаг для парных символов
-    brace            = UMBA_TOKENISER_CHARCLASS_BRACE           ,
+    //brace            = UMBA_TOKENISER_CHARCLASS_BRACE           ,
     quot             = UMBA_TOKENISER_CHARCLASS_QUOT            ,
     opchar           = UMBA_TOKENISER_CHARCLASS_OPCHAR          ,
-    operator_char    = UMBA_TOKENISER_CHARCLASS_OPERATOR_CHAR   ,
+    //operator_char    = UMBA_TOKENISER_CHARCLASS_OPERATOR_CHAR   ,
     punctuation      = UMBA_TOKENISER_CHARCLASS_PUNCTUATION     ,
     digit            = UMBA_TOKENISER_CHARCLASS_DIGIT           ,
     alpha            = UMBA_TOKENISER_CHARCLASS_ALPHA           ,
+    upper            = UMBA_TOKENISER_CHARCLASS_UPPER           , // Флаг для символов верхнего регистра
     identifier       = UMBA_TOKENISER_CHARCLASS_IDENTIFIER      ,
     identifier_first = UMBA_TOKENISER_CHARCLASS_IDENTIFIER_FIRST,
     semialpha        = UMBA_TOKENISER_CHARCLASS_SEMIALPHA       , // Для символов, которые никуда не вошли, такие как @ # $
@@ -242,7 +244,7 @@ std::string enum_serialize_single_flag(CharClass f, const std::string &prefix=st
         case CharClass::space           : return prefix+std::string("space");
         case CharClass::tab             : return prefix+std::string("tab");
         case CharClass::quot            : return prefix+std::string("quot");
-        case CharClass::brace           : return prefix+std::string("brace");
+        //case CharClass::brace           : return prefix+std::string("brace");
         case CharClass::open            : return prefix+std::string("open");
         case CharClass::close           : return prefix+std::string("close");
         case CharClass::opchar          : return prefix+std::string("opchar");
@@ -250,6 +252,7 @@ std::string enum_serialize_single_flag(CharClass f, const std::string &prefix=st
         case CharClass::punctuation     : return prefix+std::string("punctuation");
         case CharClass::digit           : return prefix+std::string("digit");
         case CharClass::alpha           : return prefix+std::string("alpha");
+        case CharClass::upper           : return prefix+std::string("upper");
         case CharClass::identifier      : return prefix+std::string("identifier");
         case CharClass::identifier_first: return prefix+std::string("identifier_first");
         case CharClass::semialpha       : return prefix+std::string("semialpha");
@@ -347,8 +350,8 @@ void setCharClassFlagsForBracePair( umba::tokeniser::CharClass (&charClasses)[N]
         throw std::runtime_error("Braces def invalid size");
     }
 
-    setCharClassFlags(charClasses, braceChars[0], umba::tokeniser::CharClass::brace | umba::tokeniser::CharClass::open );
-    setCharClassFlags(charClasses, braceChars[1], umba::tokeniser::CharClass::brace | umba::tokeniser::CharClass::close);
+    setCharClassFlags(charClasses, braceChars[0], umba::tokeniser::CharClass::open );
+    setCharClassFlags(charClasses, braceChars[1], umba::tokeniser::CharClass::close);
 }
 
 
@@ -392,11 +395,11 @@ void generateCharClassTable( umba::tokeniser::CharClass (&charClasses)[N])
     // ranges
     setCharClassFlags( charClasses,   0,  31, umba::tokeniser::CharClass::nonprintable);
     setCharClassFlags( charClasses, '0', '9', umba::tokeniser::CharClass::digit | umba::tokeniser::CharClass::identifier );
-    setCharClassFlags( charClasses, 'A', 'Z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first);
+    setCharClassFlags( charClasses, 'A', 'Z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first | umba::tokeniser::CharClass::upper);
     setCharClassFlags( charClasses, 'a', 'z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first);
 
     // sets
-    setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokeniser::CharClass::operator_char);
+    setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokeniser::CharClass::opchar);
     setCharClassFlags( charClasses, "\r\n"              , umba::tokeniser::CharClass::linefeed);
     setCharClassFlags( charClasses, "\t"                , umba::tokeniser::CharClass::tab);
     setCharClassFlags( charClasses, "\r\n\t "           , umba::tokeniser::CharClass::space);
@@ -440,6 +443,7 @@ struct CommentPrinter
     CommentPrinter& operator<<(const T &t)
     {
         std::cout << t;
+        return *this;
     }
 };
 
@@ -558,6 +562,7 @@ void printCharClassArray( umba::tokeniser::CharClass (&charClasses)[N], CommentT
 
 
 
+#if !defined(UMBA_TOKENISER_DISABLE_UMBA_TOKENISER_GET_CHAR_CLASS_FUNCTION)
 inline
 umba::tokeniser::CharClass getCharClass(char ch)
 {
@@ -570,7 +575,7 @@ umba::tokeniser::CharClass getCharClass(char ch)
 
     return charClassesTable[idx];
 }
-
+#endif
 
 
 
