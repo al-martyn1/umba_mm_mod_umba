@@ -51,7 +51,7 @@ namespace tokeniser {
 //----------------------------------------------------------------------------
 using  trie_index_type                                     = UMBA_TOKENISER_TRIE_INDEX_TYPE;
 inline constexpr const trie_index_type trie_index_invalid  = UMBA_TOKENISER_TRIE_INDEX_INVALID;
-inline constexpr const trie_index_type trie_index_initial  = UMBA_TOKENISER_TRIE_INDEX_INITIAL;
+//inline constexpr const trie_index_type trie_index_initial  = UMBA_TOKENISER_TRIE_INDEX_INITIAL;
 
 //----------------------------------------------------------------------------
 using  token_id_type                                       = UMBA_TOKENISER_TOKEN_ID_TYPE;
@@ -84,10 +84,10 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
     trie_index_type lookupChunkStartIdx  = 0;
     trie_index_type lookupChunkSize      = 0;
 
-    if (curIndex==umba::tokeniser::trie_index_invalid)
+    if (curIndex==trie_index_invalid)
     {
         lookupChunkStartIdx  = tokenTrie[0].lookupChunkStartIndex;
-        lookupChunkSize      = tokenTrie[0].lookupChunkSize;      
+        lookupChunkSize      = tokenTrie[0].lookupChunkSize;
     }
     else
     {
@@ -103,7 +103,7 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
         //     return umba::tokeniser::trie_index_invalid;
         // }
 
-        lookupChunkSize = tokenTrie[levelStartIdx].lookupChunkSize;
+        lookupChunkSize = tokenTrie[lookupChunkStartIdx].lookupChunkSize;
     }
 
     for(trie_index_type i=0; i!=lookupChunkSize; ++i)
@@ -126,6 +126,85 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
 }
 
 //----------------------------------------------------------------------------
+template<typename ContainerType, typename BackTraceHandlerType>
+void tokenTrieBackTrace(const ContainerType &tokenTrie, trie_index_type curIndex, BackTraceHandlerType handler)
+{
+    while(curIndex!=trie_index_invalid)
+    {
+        UMBA_ASSERT(curIndex<tokenTrie.size());
+        handler(tokenTrie[curIndex].symbol);
+        curIndex = tokenTrie[curIndex].parentNodeIndex;
+    }
+}
+
+//----------------------------------------------------------------------------
+template<typename ContainerType, typename StreamType>
+void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s)
+{
+    // requires UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE is not defined
+
+    s << "digraph structs {\nnode [shape=record];\n";
+
+
+    //s << "L"<<lvl<< "[label=\"";
+
+    trie_index_type lvl = trie_index_invalid;
+    trie_index_type idx = 0;
+    bool levelChanged = false;
+    for( const auto &t : tokenTrie)
+    {
+        if (lvl!=t.level)
+        {
+            lvl = t.level;
+            if (lvl!=0)
+                s << "\"];\n";
+            s << "L"<<lvl<< "[label=\"";
+            levelChanged = true;
+        }
+
+        if (!levelChanged)
+           s << "|";
+        levelChanged = false;
+
+        s << "{<I" << idx << ">";
+
+        if (t.symbol=='\'' || t.symbol=='\"' || t.symbol=='\\' || t.symbol=='<' || t.symbol=='>')
+        {
+            s << "\\";
+        }
+
+
+        s << t.symbol << "|<O" << idx << ">" << idx << "}";
+
+        // //l2 [label="
+        // {<t4>+|<f4>4}
+        // |{<t5>-|<f5>5}|{<t6>=|<f6>6}|{<t7>\>|<f7>7}|{<t8>+|<f8>8}|{<t9>-|<f9>9}|{<t10>=|<f10>10}|{<t11>-|<f11>11}|{<t12>=|<f12>12}|{<t13>\>|<f13>13}"] // |{<t15>=|<f15>15}|{<t16>\>|<f16>16}
+
+        ++idx;
+    }
+
+    s << "\"];\n";
+
+    //trie_index_type lvl = trie_index_invalid;
+    //trie_index_type
+    idx = 0;
+    for( const auto &t : tokenTrie)
+    {
+        // l1:f0  -> l2:t4
+
+        if (t.childsIndex!=trie_index_invalid)
+        {
+            s << "L" << t.level << ":O" << idx << " -> L" << tokenTrie[t.childsIndex].level << ":I" << t.childsIndex <<"\n";
+        }
+
+        ++idx;
+    }
+
+    s << "}\n";
+
+}
+//----------------------------------------------------------------------------
+
 
 
 
@@ -135,23 +214,27 @@ class TrieBuilder
 
 protected:
 
+public:
+
     struct TrieBuilderMapNode
     {
-        umba::tokeniser::TrieNode             trieNode;
-        std::map<char, TrieBuilderMapNode>    childs  ;
-    
+        TrieNode                              trieNode ;
+        std::map<char, TrieBuilderMapNode>    childs   ;
+        trie_index_type                       nodeIndex;
+        trie_index_type                       level    ;
+
         TrieBuilderMapNode() : trieNode(), childs()
         {
             trieNodeInitMakeUninitialized(trieNode);
         }
-    
+
         TrieBuilderMapNode(const TrieBuilderMapNode &) = default;
         TrieBuilderMapNode& operator=(const TrieBuilderMapNode &) = default;
         TrieBuilderMapNode(TrieBuilderMapNode &&) = default;
         TrieBuilderMapNode& operator=(TrieBuilderMapNode &&) = default;
-    
+
     };
-    
+
     typedef std::map<char, TrieBuilderMapNode> TrieNodesMap;
 
 
@@ -166,11 +249,11 @@ public:
         UMBA_ASSERT(!seqStr.empty());
 
         TrieNodesMap *pCurMap  = &m_trieNodesMap;
-        MapTrieNode  *pCurNode = 0;
+        TrieBuilderMapNode  *pCurNode = 0;
 
         for(auto ch: seqStr)
         {
-            TrieNodesMap 
+            TrieNodesMap
             &curMap  = *pCurMap;
             pCurNode = &curMap[ch]; // .second;
             pCurMap  = &pCurNode->childs;
@@ -184,13 +267,89 @@ public:
         // Финальный узел у нас есть
 
         if (pCurNode->trieNode.tokenId!=token_id_invalid && pCurNode->trieNode.tokenId!=tokenId)
-            return false; // Такой путь в дереве уже есть, и там другой идентификатор токена
+            return false; // Такой путь в дереве уже есть, и там другой корректный идентификатор токена
 
         // Записываем туда идентификатор оператора
-        pCurNode->trieNode.tokenId = token;
+        pCurNode->trieNode.tokenId = tokenId;
 
         return true;
     }
+
+    template<typename ContainerType>
+    void buildTokenTrie(ContainerType &buildTo) const
+    {
+        buildTo.clear();
+
+        struct QueItem
+        {
+            umba::tokeniser::TrieBuilder::TrieNodesMap   *pMap;
+            umba::tokeniser::trie_index_type             level;
+            umba::tokeniser::trie_index_type             parentNodeIndex;
+        };
+
+        TrieNodesMap trieNodesMapCopy = m_trieNodesMap;
+
+        std::deque<QueItem>  que;
+        que.emplace_back( QueItem{ &trieNodesMapCopy
+                                 , 0                                    // level
+                                 , trie_index_invalid  // parentNodeIndex
+                                 }
+                        );
+
+        std::size_t nodeIdx = 0;
+        while(!que.empty())
+        {
+            QueItem qi = que.front();  que.pop_front();
+            auto &m = *qi.pMap;
+            for(auto &kv : m)
+            {
+                kv.second.nodeIndex = nodeIdx++;
+                kv.second.level     = qi.level;
+                if (!kv.second.childs.empty())
+                {
+                    que.emplace_back(QueItem{&kv.second.childs, kv.second.level+1 });
+                }
+            }
+        }
+
+        que.emplace_back( QueItem{ &trieNodesMapCopy
+                                 , 0                                    // level
+                                 , trie_index_invalid  // parentNodeIndex
+                                 }
+                        );
+
+        while(!que.empty())
+        {
+            QueItem qi = que.front();  que.pop_front();
+            auto &m = *qi.pMap;
+            std::size_t curParentNodeIndex = qi.parentNodeIndex;
+
+            if (m.empty())
+            {
+                continue;
+            }
+
+            umba::tokeniser::trie_index_type lookupChunkStartIndex = m.begin()->second.nodeIndex;
+            for(auto &kv : m)
+            {
+                buildTo.emplace_back(kv.second.trieNode); // tokenId тут уже настроен, а childsIndex - инвалид
+                buildTo.back().parentNodeIndex       = curParentNodeIndex;
+                buildTo.back().lookupChunkStartIndex = lookupChunkStartIndex;
+                buildTo.back().lookupChunkSize       = m.size();
+                buildTo.back().symbol                = kv.first;
+#if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+                buildTo.back().level                 = qi.level;
+#endif
+                if (!kv.second.childs.empty())
+                {
+                    buildTo.back().childsIndex = kv.second.childs.begin()->second.nodeIndex;
+                    que.emplace_back(QueItem{&kv.second.childs, kv.second.level+1, kv.second.nodeIndex});
+                }
+            }
+        }
+
+    }
+
 
 
 
