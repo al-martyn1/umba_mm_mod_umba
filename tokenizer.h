@@ -13,7 +13,7 @@
 #endif
 
 #if !defined(UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT)
-    #defined UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT  4u
+    #define UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT  4u
 #endif
 
 //----------------------------------------------------------------------------
