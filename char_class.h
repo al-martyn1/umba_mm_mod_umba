@@ -121,10 +121,11 @@ enum class CharClass : char_class_underlying_uint_t
 {
     // unknown       = 1,
     none             = UMBA_TOKENISER_CHARCLASS_NONE            ,
+    user_flag        = UMBA_TOKENISER_CHARCLASS_USER_FLAG       ,
     nonprintable     = UMBA_TOKENISER_CHARCLASS_NONPRINTABLE    ,
     linefeed         = UMBA_TOKENISER_CHARCLASS_LINEFEED        ,
     space            = UMBA_TOKENISER_CHARCLASS_SPACE           ,
-    tab              = UMBA_TOKENISER_CHARCLASS_TAB             ,
+    //tab              = UMBA_TOKENISER_CHARCLASS_TAB             ,
     open             = UMBA_TOKENISER_CHARCLASS_OPEN            , // Флаг для парных символов
     close            = UMBA_TOKENISER_CHARCLASS_CLOSE           , // Флаг для парных символов
     //brace            = UMBA_TOKENISER_CHARCLASS_BRACE           ,
@@ -239,10 +240,11 @@ std::string enum_serialize_single_flag(CharClass f, const std::string &prefix=st
     switch(f)
     {
         //case CharClass::none            : return std::string("none");
+        case CharClass::user_flag       : return prefix+std::string("user_flag");
         case CharClass::nonprintable    : return prefix+std::string("nonprintable");
         case CharClass::linefeed        : return prefix+std::string("linefeed");
         case CharClass::space           : return prefix+std::string("space");
-        case CharClass::tab             : return prefix+std::string("tab");
+        //case CharClass::tab             : return prefix+std::string("tab");
         case CharClass::quot            : return prefix+std::string("quot");
         //case CharClass::brace           : return prefix+std::string("brace");
         case CharClass::open            : return prefix+std::string("open");
@@ -393,7 +395,9 @@ void generateCharClassTable( umba::tokeniser::CharClass (&charClasses)[N])
     setCharClassFlagsForBracePair( charClasses, "<>");
 
     // ranges
-    setCharClassFlags( charClasses,   0,  31, umba::tokeniser::CharClass::nonprintable);
+    setCharClassFlags( charClasses,   0,   8, umba::tokeniser::CharClass::nonprintable);
+    // gap for tab
+    setCharClassFlags( charClasses,  10,  31, umba::tokeniser::CharClass::nonprintable);
     setCharClassFlags( charClasses, '0', '9', umba::tokeniser::CharClass::digit | umba::tokeniser::CharClass::identifier );
     setCharClassFlags( charClasses, 'A', 'Z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first | umba::tokeniser::CharClass::upper);
     setCharClassFlags( charClasses, 'a', 'z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first);
@@ -401,7 +405,7 @@ void generateCharClassTable( umba::tokeniser::CharClass (&charClasses)[N])
     // sets
     setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokeniser::CharClass::opchar);
     setCharClassFlags( charClasses, "\r\n"              , umba::tokeniser::CharClass::linefeed);
-    setCharClassFlags( charClasses, "\t"                , umba::tokeniser::CharClass::tab);
+    //setCharClassFlags( charClasses, "\t"                , umba::tokeniser::CharClass::tab);
     setCharClassFlags( charClasses, "\r\n\t "           , umba::tokeniser::CharClass::space);
     setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokeniser::CharClass::punctuation);
     setCharClassFlags( charClasses, "\"\'`"             , umba::tokeniser::CharClass::quot);
@@ -483,6 +487,40 @@ std::string pathToNs(const std::string &p)
     }
 
     return res;
+}
+
+inline
+std::string nameToCpp(std::string name)
+{
+    name = nsToPath(name);
+    //umba::string_plus::toupper(name);
+
+    std::string res; res.reserve(name.size());
+
+    for(auto ch : name)
+    {
+        if (umba::string_plus::is_alpha_upper(ch) || umba::string_plus::is_digit(ch))
+        {
+            res.append(1, ch);
+            continue;
+        }
+
+        if (ch=='|' || ch==' ')
+        {
+            res.append(1, ch);
+            continue;
+        }
+
+        if (ch=='/' || ch=='\\')
+        {
+            res.append(2, ':');
+            continue;
+        }
+
+        ch = '_';
+    }
+
+    return name;
 }
 
 inline

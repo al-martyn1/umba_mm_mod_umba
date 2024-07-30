@@ -8,7 +8,7 @@ std::array<umba::tokeniser::CharClass, 128> charClassesTable =
 , umba::tokeniser::CharClass::nonprintable  //  6
 , umba::tokeniser::CharClass::nonprintable  //  7
 , umba::tokeniser::CharClass::nonprintable  //  8
-, umba::tokeniser::CharClass::nonprintable|umba::tokeniser::CharClass::space|umba::tokeniser::CharClass::tab  //  9
+, umba::tokeniser::CharClass::space         //  9
 , umba::tokeniser::CharClass::nonprintable|umba::tokeniser::CharClass::linefeed|umba::tokeniser::CharClass::space  //  10
 , umba::tokeniser::CharClass::nonprintable  //  11
 , umba::tokeniser::CharClass::nonprintable  //  12
