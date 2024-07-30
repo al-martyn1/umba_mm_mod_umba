@@ -12,6 +12,10 @@
     #endif
 #endif
 
+#if !defined(UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT)
+    #defined UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT  4u
+#endif
+
 //----------------------------------------------------------------------------
 #include "c_tokenizer.h"
 //
@@ -21,7 +25,7 @@
 #include <map>
 #include <deque>
 #include <iostream>
-
+#include <algorithm>
 //
 #include "assert.h"
 
@@ -107,22 +111,41 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
 
         lookupChunkStartIdx = tokenTrie[curIndex].childsIndex;
         UMBA_ASSERT(lookupChunkStartIdx<tokenTrie.size());
-        // if (levelStartIdx>=tokenTrie.size()) // тут бы assert, тут не штатная ситуация
-        // {
-        //     return umba::tokenizer::trie_index_invalid;
-        // }
-
         lookupChunkSize = tokenTrie[lookupChunkStartIdx].lookupChunkSize;
     }
 
+    UMBA_ASSERT((lookupChunkStartIdx+lookupChunkSize)<=tokenTrie.size());
+
+    // Двоичный поиск
+    // https://codelessons.dev/ru/binarnyj-poisk-po-massivu-c/
+    // https://brestprog.by/topics/binsearch/
+    // Интересная статья, может списюганить там поиск? https://habr.com/ru/companies/ruvds/articles/756422/
+    // На самом деле надо будет просто проверить сначала обычный lower_bound
+    // И ещё вопрос для исследования - оставлять ли для мелких чанков линейный поиск или нет?
+
+    if (lookupChunkSize>=UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT)
+    {
+        TrieNode cmpNode;
+        cmpNode.token = tk;
+        auto resIt = std::lower_bound( &tokenTrie[lookupChunkStartIdx]
+                                     , &tokenTrie[lookupChunkStartIdx+lookupChunkSize]
+                                     , cmpNode
+                                     , [](const TrieNode &tn1, const TrieNode &tn2)
+                                       {
+                                           return tn1.token < tn2.token;
+                                       }
+                                     );
+        if (resIt==&tokenTrie[lookupChunkStartIdx+lookupChunkSize] || resIt->token!=tk)
+            return trie_index_invalid; // Не нашли, обломс
+
+        return resIt-&tokenTrie[lookupChunkStartIdx];
+    }
+
+    // Чанк небольшой, фигачим линейным поиском
+    // Линейный поиск
     for(trie_index_type i=0; i!=lookupChunkSize; ++i)
     {
         const auto idx = lookupChunkStartIdx + i;
-        UMBA_ASSERT(idx<tokenTrie.size());
-        // if (idx>=tokenTrie.size()) // тут бы assert, тут не штатная ситуация
-        // {
-        //     return umba::tokenizer::trie_index_invalid;
-        // }
 
         if (tokenTrie[idx].token==tk)
             return idx;
@@ -187,7 +210,7 @@ void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToS
         {
             for(auto ch : strToken)
             {
-                if (ch=='\'' || ch=='\"' || ch=='\\' || ch=='<' || ch=='>')
+                if (ch=='\'' || ch=='\"' || ch=='\\' || ch=='<' || ch=='>' || ch=='|')
                 {
                     s << "\\";
                 }
