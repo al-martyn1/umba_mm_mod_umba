@@ -27,7 +27,9 @@
 
 
 //----------------------------------------------------------------------------
-
+// boost::tokenizer (где-то в середине)
+//  Перевод  - https://habr.com/ru/companies/piter/articles/650945/
+//  Оригинал - https://www.j-labs.pl/blog-technologiczny/find-a-better-solution-with-boost/
 
 
 //----------------------------------------------------------------------------
@@ -230,6 +232,11 @@ void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToS
 
 
 //----------------------------------------------------------------------------
+// Префиксные деревья (без них таки никак)
+// https://ru.hexlet.io/courses/algorithms-trees/lessons/prefix/theory_unit
+// https://habr.com/ru/companies/otus/articles/676692/
+// https://otus.ru/nest/post/676/
+
 class TrieBuilder
 {
 
@@ -381,7 +388,6 @@ public:
 
     }
 
-
 }; // class TrieBuilder
 
 
@@ -453,10 +459,6 @@ public:
 
   opchar - нельзя менять в рантайме
 
-  Префиксные деревья (без них таки никак)
-  https://ru.hexlet.io/courses/algorithms-trees/lessons/prefix/theory_unit
-  https://habr.com/ru/companies/otus/articles/676692/
-  https://otus.ru/nest/post/676/
 
 
 Операторы
