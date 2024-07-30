@@ -141,8 +141,9 @@
 
 
 
-
-
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+    #include "pushpack1.h"
+#endif
 typedef struct tag_umba_tokeniser_trie_node
 {
     UMBA_TOKENISER_TRIE_INDEX_TYPE       parentNodeIndex      ;
@@ -159,6 +160,9 @@ typedef struct tag_umba_tokeniser_trie_node
 #endif
 
 } umba_tokeniser_trie_node;
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+    #include "packpop.h"
+#endif
 
 
 // Standard mode   : Trie size : 32 items, 1024 bytes
