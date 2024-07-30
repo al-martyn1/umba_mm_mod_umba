@@ -229,9 +229,44 @@ public:
          return resPos;
      }
 
-
-
 };
+
+
+template<typename CharType>
+TextPositionCountingIterator<CharType> operator+( const TextPositionCountingIterator<CharType> &it
+                                                , typename TextPositionCountingIterator<CharType>::difference_type diff
+                                                )
+{
+    UMBA_ASSERT(diff>=0);
+    auto itCopy = it;
+    while(diff--)
+        ++itCopy;
+    return itCopy;
+}
+
+template<typename CharType>
+TextPositionCountingIterator<CharType> operator+( typename TextPositionCountingIterator<CharType>::difference_type diff
+                                                , const TextPositionCountingIterator<CharType> &it
+                                                )
+{
+    UMBA_ASSERT(diff>=0);
+    auto itCopy = it;
+    while(diff--)
+        ++itCopy;
+    return itCopy;
+}
+
+template<typename CharType>
+TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator<CharType> &it
+                                                  , typename TextPositionCountingIterator<CharType>::difference_type diff
+                                                  )
+{
+    UMBA_ASSERT(diff>=0);
+    while(diff--)
+        ++it;
+    return it;
+}
+
 
 
 
