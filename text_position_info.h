@@ -1,15 +1,19 @@
 #pragma once
 
 
-// #if defined(UMBA_TOKENISER_TYPES_COMPACT)
-//     #if !defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
-//         #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
-//     #endif
-// #endif
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+    #if !defined(UMBA_TEXT_POSITION_INFO_COMPACT)
+        #define UMBA_TEXT_POSITION_INFO_COMPACT
+    #endif
+#endif
 
 
-// umba::
-namespace umba {
+#if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
+    #if !defined(UMBA_TOKENISER_TYPES_COMPACT)
+        #define UMBA_TOKENISER_TYPES_COMPACT
+    #endif
+#endif
+
 
 
 // Храним
@@ -20,24 +24,67 @@ namespace umba {
 
 #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
 
-    using symbol_offset_type = std::uint_least16_t;  // Тип смещения текущей позиции от начала строки
-    using line_number_type   = std::uint_least16_t;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
-    using line_offset_type   = std::size_t;          // А вот всего текста даже в компактном варианте может быть больше 64К символов
+    typedef std::uint_least16_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки, в компактном варианте строки не могут быть более 64К длиной.
+    typedef std::uint_least16_t umba_text_position_info_line_number_type  ;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
+    typedef std::size_t         umba_text_position_info_line_offset_type  ;  // А вот всего текста даже в компактном варианте может быть больше 64К символов
 
 #else
 
-    using symbol_offset_type = std::size_t;          // Тип смещения текущей позиции от начала строки
-    using line_number_type   = std::size_t;
+    typedef std::size_t umba_text_position_info_symbol_offset_type;          // Тип смещения текущей позиции от начала строки
+    typedef std::size_t umba_text_position_info_line_number_type  ;
+    typedef std::size_t umba_text_position_info_line_offset_type  ;
 
 #endif
 
 
 
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+    #include "pushpack1.h"
+#endif
+typedef struct tag_umba_text_position_info
+{
+#if defined(__cplusplus)
+    using symbol_offset_type = umba_text_position_info_symbol_offset_type;
+    using line_number_type   = umba_text_position_info_line_number_type  ;
+    using line_offset_type   = umba_text_position_info_line_offset_type  ;
+
+#endif // #if defined(__cplusplus)
+
+    umba_text_position_info_line_offset_type    lineOffset  ; //!< From data origin to line start
+    umba_text_position_info_symbol_offset_type  symbolOffset; //!< From line start
+    umba_text_position_info_line_number_type    lineNumber  ; //!< Zero based line number
+
+} umba_text_position_info;
+#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+    #include "packpop.h"
+#endif
+
+static inline
+void umba_text_position_info_init(umba_text_position_info *pPos)
+{
+    pPos->lineOffset   = 0u;
+    pPos->symbolOffset = 0u;
+    pPos->lineNumber   = 0u;
+}
 
 
+#if defined(__cplusplus)
 
+// umba::
+namespace umba {
+
+
+using TextPositionInfo = umba_text_position_info;
+
+inline
+void textPositionInfoInit(TextPositionInfo &tpi)
+{
+    umba_text_position_info_init(&tpi);
+}
 
 
 } // namespace umba
 
+
+#endif // #if defined(__cplusplus)
 
