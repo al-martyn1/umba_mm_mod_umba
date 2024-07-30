@@ -22,20 +22,39 @@
 // Номер текущей строки
 // Что-то ещё?
 
-#if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
-
-    typedef std::uint_least16_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки, в компактном варианте строки не могут быть более 64К длиной.
-    typedef std::uint_least16_t umba_text_position_info_line_number_type  ;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
-    typedef std::size_t         umba_text_position_info_line_offset_type  ;  // А вот всего текста даже в компактном варианте может быть больше 64К символов
-
+#if defined(__cplusplus)
+    #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
+    
+        typedef std::uint_least16_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
+        typedef std::uint_least16_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки, в компактном варианте строки не могут быть более 64К длиной.
+        typedef std::uint_least16_t umba_text_position_info_line_number_type  ;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
+        typedef std::size_t         umba_text_position_info_line_offset_type  ;  // А вот всего текста даже в компактном варианте может быть больше 64К символов
+    
+    #else
+    
+        typedef std::size_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
+        typedef std::size_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки
+        typedef std::size_t umba_text_position_info_line_number_type  ;
+        typedef std::size_t umba_text_position_info_line_offset_type  ;
+    
+    #endif
 #else
-
-    typedef std::size_t umba_text_position_info_symbol_offset_type;          // Тип смещения текущей позиции от начала строки
-    typedef std::size_t umba_text_position_info_line_number_type  ;
-    typedef std::size_t umba_text_position_info_line_offset_type  ;
-
+    #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
+    
+        typedef uint_least16_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
+        typedef uint_least16_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки, в компактном варианте строки не могут быть более 64К длиной.
+        typedef uint_least16_t umba_text_position_info_line_number_type  ;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
+        typedef size_t         umba_text_position_info_line_offset_type  ;  // А вот всего текста даже в компактном варианте может быть больше 64К символов
+    
+    #else
+    
+        typedef size_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
+        typedef size_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки
+        typedef size_t umba_text_position_info_line_number_type  ;
+        typedef size_t umba_text_position_info_line_offset_type  ;
+    
+    #endif
 #endif
-
 
 
 #if defined(UMBA_TOKENISER_TYPES_COMPACT)
@@ -47,12 +66,14 @@ typedef struct tag_umba_text_position_info
     using symbol_offset_type = umba_text_position_info_symbol_offset_type;
     using line_number_type   = umba_text_position_info_line_number_type  ;
     using line_offset_type   = umba_text_position_info_line_offset_type  ;
+    using file_id_type       = umba_text_position_info_file_id_type      ;
 
 #endif // #if defined(__cplusplus)
 
     umba_text_position_info_line_offset_type    lineOffset  ; //!< From data origin to line start
     umba_text_position_info_symbol_offset_type  symbolOffset; //!< From line start
     umba_text_position_info_line_number_type    lineNumber  ; //!< Zero based line number
+    umba_text_position_info_file_id_type        fileId      ; //!< FileID
 
 } umba_text_position_info;
 #if defined(UMBA_TOKENISER_TYPES_COMPACT)
@@ -60,11 +81,12 @@ typedef struct tag_umba_text_position_info
 #endif
 
 static inline
-void umba_text_position_info_init(umba_text_position_info *pPos)
+void umba_text_position_info_init(umba_text_position_info *pPos, umba_text_position_info_file_id_type fileId)
 {
     pPos->lineOffset   = 0u;
     pPos->symbolOffset = 0u;
     pPos->lineNumber   = 0u;
+    pPos->fileId       = fileId;
 }
 
 
@@ -77,9 +99,9 @@ namespace umba {
 using TextPositionInfo = umba_text_position_info;
 
 inline
-void textPositionInfoInit(TextPositionInfo &tpi)
+void textPositionInfoInit(TextPositionInfo &tpi, TextPositionInfo::file_id_type fileId=0u)
 {
-    umba_text_position_info_init(&tpi);
+    umba_text_position_info_init(&tpi, fileId);
 }
 
 

@@ -67,7 +67,7 @@ namespace iterator {
    В последнем варианте инкремент перепрыгнет через \n
  */
 
-
+template<typename CharType=char>
 class TextPositionCountingIterator
 {
 
@@ -76,7 +76,7 @@ class TextPositionCountingIterator
 public:
 
     using difference_type = std::ptrdiff_t;
-    using value_type = char;
+    using value_type = CharType;
 
 
 protected:
@@ -89,11 +89,11 @@ protected:
     // const char*   viewSize  ;
     // std::size_t   baseOffset; // смещение
 
-    const char*       m_pData     = 0;
-    std::size_t       m_dataSize  = 0;
-    std::size_t       m_dataIndex = 0;
+    const CharType*     m_pData     = 0;
+    std::size_t         m_dataSize  = 0;
+    std::size_t         m_dataIndex = 0;
 
-    TextPositionInfo  m_positionInfo;
+    TextPositionInfo    m_positionInfo;
 
     bool isEndReached() const
     {
@@ -143,15 +143,15 @@ protected:
         UMBA_ASSERT(!isEndIterator() && !isEndReached());
 
         char ch = m_pData[m_dataIndex];
-        bool isCr = ch=='\r';
-        bool isLf = ch=='\n';
+        bool isCr = ch==(CharType)'\r';
+        bool isLf = ch==(CharType)'\n';
         if (isCr || isLf)
         {
             ++m_dataIndex;
             if (!isEndReached())
             {
                 // До конца не дошли, надо проверить на CRLF
-                if (isCr && m_pData[m_dataIndex]=='\n')
+                if (isCr && m_pData[m_dataIndex]==(CharType)'\n')
                     ++m_dataIndex; // Пропускаем LF, который идёт за CR
             }
 
@@ -168,17 +168,23 @@ protected:
 public:
 
      TextPositionCountingIterator() = default;
-     explicit TextPositionCountingIterator(const char* pData, std::size_t dataSize)
+     explicit TextPositionCountingIterator(const CharType* pData, std::size_t dataSize, TextPositionInfo::file_id_type fileId=0u)
      : m_pData(pData), m_dataSize(dataSize), m_dataIndex(0)
      {
-         textPositionInfoInit(m_positionInfo);
+         textPositionInfoInit(m_positionInfo, fileId);
      }
-     explicit TextPositionCountingIterator(std::string::iterator b, std::string::iterator e)
+
+     
+     template< class CharT = CharType
+             , class Traits = std::char_traits<CharT>
+             , class Allocator = std::allocator<CharT>
+             >
+     explicit TextPositionCountingIterator(typename std::basic_string<CharT, Traits, Allocator>::const_iterator b, typename std::basic_string<CharT, Traits, Allocator>::const_iterator e, TextPositionInfo::file_id_type fileId=0u)
      : m_pData(0), m_dataSize(0), m_dataIndex(0)
      {
          m_pData = &*b;
          m_dataSize = (std::size_t)std::distance(b, e);
-         textPositionInfoInit(m_positionInfo);
+         textPositionInfoInit(m_positionInfo, fileId);
      }
 
      TextPositionCountingIterator(const TextPositionCountingIterator&) = default;
@@ -186,7 +192,7 @@ public:
      TextPositionCountingIterator(TextPositionCountingIterator&&) = default;
      TextPositionCountingIterator& operator=(TextPositionCountingIterator&&) = default;
 
-     char operator*() const
+     CharType operator*() const
      {
         UMBA_ASSERT(!isEndIterator() && !isEndReached());
         return m_pData[m_dataIndex];
@@ -222,6 +228,7 @@ public:
          resPos.symbolOffset = (TextPositionInfo::symbol_offset_type)(m_dataIndex - m_positionInfo.lineOffset);
          return resPos;
      }
+
 
 
 };
