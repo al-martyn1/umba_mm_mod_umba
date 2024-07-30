@@ -25,26 +25,26 @@
 // CharClass table generator sample
 
 #include "umba/umba.h"
-#include "umba/tokeniser.h"
+#include "umba/tokenizer.h"
 
 int main(int argc, char* argv[])
 {
 
-    umba::tokeniser::CharClass charClasses[128] = { umba::tokeniser::CharClass::none };
-    umba::tokeniser::generation::generateCharClassTable(charClasses);
+    umba::tokenizer::CharClass charClasses[128] = { umba::tokenizer::CharClass::none };
+    umba::tokenizer::generation::generateCharClassTable(charClasses);
 
-    umba::tokeniser::generation::CommentType  commentType  = umba::tokeniser::generation::CommentType ::cppLike;
-    umba::tokeniser::generation::ArrayType    arrayType    = umba::tokeniser::generation::ArrayType   ::stdArray;
-    umba::tokeniser::generation::TypeNameType typeNameType = umba::tokeniser::generation::TypeNameType::cppLike;
+    umba::tokenizer::generation::CommentType  commentType  = umba::tokenizer::generation::CommentType ::cppLike;
+    umba::tokenizer::generation::ArrayType    arrayType    = umba::tokenizer::generation::ArrayType   ::stdArray;
+    umba::tokenizer::generation::TypeNameType typeNameType = umba::tokenizer::generation::TypeNameType::cppLike;
 
     if (argc>1)
     {
-        commentType  = umba::tokeniser::generation::CommentType ::cLike;
-        arrayType    = umba::tokeniser::generation::ArrayType   ::cLike;
-        typeNameType = umba::tokeniser::generation::TypeNameType::cLike;
+        commentType  = umba::tokenizer::generation::CommentType ::cLike;
+        arrayType    = umba::tokenizer::generation::ArrayType   ::cLike;
+        typeNameType = umba::tokenizer::generation::TypeNameType::cLike;
     }
 
-    umba::tokeniser::generation::printCharClassArray( charClasses, commentType, arrayType, typeNameType);  // , const std::string &varName="charClassesTable"
+    umba::tokenizer::generation::printCharClassArray( charClasses, commentType, arrayType, typeNameType);  // , const std::string &varName="charClassesTable"
 
     return 0;
 }
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 */
 
 
-#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+#if defined(UMBA_TOKENIZER_TYPES_COMPACT)
 
     #if !defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
         #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
@@ -62,9 +62,9 @@ int main(int argc, char* argv[])
 
 
 
-// umba::tokeniser::
+// umba::tokenizer::
 namespace umba {
-namespace tokeniser {
+namespace tokenizer {
 
 
 // #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
@@ -121,26 +121,26 @@ $ - alpha и operator
 enum class CharClass : char_class_underlying_uint_t
 {
     // unknown       = 1,
-    none             = UMBA_TOKENISER_CHARCLASS_NONE            ,
-    user_flag        = UMBA_TOKENISER_CHARCLASS_USER_FLAG       ,
-    nonprintable     = UMBA_TOKENISER_CHARCLASS_NONPRINTABLE    ,
-    linefeed         = UMBA_TOKENISER_CHARCLASS_LINEFEED        ,
-    space            = UMBA_TOKENISER_CHARCLASS_SPACE           ,
-    //tab              = UMBA_TOKENISER_CHARCLASS_TAB             ,
-    open             = UMBA_TOKENISER_CHARCLASS_OPEN            , // Флаг для парных символов
-    close            = UMBA_TOKENISER_CHARCLASS_CLOSE           , // Флаг для парных символов
-    //brace            = UMBA_TOKENISER_CHARCLASS_BRACE           ,
-    quot             = UMBA_TOKENISER_CHARCLASS_QUOT            ,
-    opchar           = UMBA_TOKENISER_CHARCLASS_OPCHAR          ,
-    //operator_char    = UMBA_TOKENISER_CHARCLASS_OPERATOR_CHAR   ,
-    punctuation      = UMBA_TOKENISER_CHARCLASS_PUNCTUATION     ,
-    digit            = UMBA_TOKENISER_CHARCLASS_DIGIT           ,
-    alpha            = UMBA_TOKENISER_CHARCLASS_ALPHA           ,
-    upper            = UMBA_TOKENISER_CHARCLASS_UPPER           , // Флаг для символов верхнего регистра
-    identifier       = UMBA_TOKENISER_CHARCLASS_IDENTIFIER      ,
-    identifier_first = UMBA_TOKENISER_CHARCLASS_IDENTIFIER_FIRST,
-    semialpha        = UMBA_TOKENISER_CHARCLASS_SEMIALPHA       , // Для символов, которые никуда не вошли, такие как @ # $
-    escape           = UMBA_TOKENISER_CHARCLASS_ESCAPE            // Для символа '\', который везде используется как escape-символ
+    none             = UMBA_TOKENIZER_CHARCLASS_NONE            ,
+    user_flag        = UMBA_TOKENIZER_CHARCLASS_USER_FLAG       ,
+    nonprintable     = UMBA_TOKENIZER_CHARCLASS_NONPRINTABLE    ,
+    linefeed         = UMBA_TOKENIZER_CHARCLASS_LINEFEED        ,
+    space            = UMBA_TOKENIZER_CHARCLASS_SPACE           ,
+    //tab              = UMBA_TOKENIZER_CHARCLASS_TAB             ,
+    open             = UMBA_TOKENIZER_CHARCLASS_OPEN            , // Флаг для парных символов
+    close            = UMBA_TOKENIZER_CHARCLASS_CLOSE           , // Флаг для парных символов
+    //brace            = UMBA_TOKENIZER_CHARCLASS_BRACE           ,
+    quot             = UMBA_TOKENIZER_CHARCLASS_QUOT            ,
+    opchar           = UMBA_TOKENIZER_CHARCLASS_OPCHAR          ,
+    //operator_char    = UMBA_TOKENIZER_CHARCLASS_OPERATOR_CHAR   ,
+    punctuation      = UMBA_TOKENIZER_CHARCLASS_PUNCTUATION     ,
+    digit            = UMBA_TOKENIZER_CHARCLASS_DIGIT           ,
+    alpha            = UMBA_TOKENIZER_CHARCLASS_ALPHA           ,
+    upper            = UMBA_TOKENIZER_CHARCLASS_UPPER           , // Флаг для символов верхнего регистра
+    identifier       = UMBA_TOKENIZER_CHARCLASS_IDENTIFIER      ,
+    identifier_first = UMBA_TOKENIZER_CHARCLASS_IDENTIFIER_FIRST,
+    semialpha        = UMBA_TOKENIZER_CHARCLASS_SEMIALPHA       , // Для символов, которые никуда не вошли, такие как @ # $
+    escape           = UMBA_TOKENIZER_CHARCLASS_ESCAPE            // Для символа '\', который везде используется как escape-символ
 };
 
 //----------------------------------------------------------------------------
@@ -310,16 +310,16 @@ std::string enum_serialize(CharClass f)
 
 
 //----------------------------------------------------------------------------
-// umba::tokeniser::generation::
+// umba::tokenizer::generation::
 namespace generation {
 
 
 
 //----------------------------------------------------------------------------
 template< std::size_t N >
-void setCharClassFlags( umba::tokeniser::CharClass (&charClasses)[N], char ch, umba::tokeniser::CharClass setClasses)
+void setCharClassFlags( umba::tokenizer::CharClass (&charClasses)[N], char ch, umba::tokenizer::CharClass setClasses)
 {
-    std::size_t idx = umba::tokeniser::charToCharClassTableIndex(ch);
+    std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch);
     UMBA_ASSERT(idx<N);
     // if (idx>=N)
     // {
@@ -331,7 +331,7 @@ void setCharClassFlags( umba::tokeniser::CharClass (&charClasses)[N], char ch, u
 }
 
 template< std::size_t N >
-void setCharClassFlags( umba::tokeniser::CharClass (&charClasses)[N], const std::string &chars, umba::tokeniser::CharClass setClasses)
+void setCharClassFlags( umba::tokenizer::CharClass (&charClasses)[N], const std::string &chars, umba::tokenizer::CharClass setClasses)
 {
     for(auto ch : chars)
     {
@@ -340,7 +340,7 @@ void setCharClassFlags( umba::tokeniser::CharClass (&charClasses)[N], const std:
 }
 
 template< std::size_t N >
-void setCharClassFlags( umba::tokeniser::CharClass (&charClasses)[N], char ch1, char ch2, umba::tokeniser::CharClass setClasses)
+void setCharClassFlags( umba::tokenizer::CharClass (&charClasses)[N], char ch1, char ch2, umba::tokenizer::CharClass setClasses)
 {
     for(auto ch=ch1; ch<=ch2; ++ch)
     {
@@ -349,7 +349,7 @@ void setCharClassFlags( umba::tokeniser::CharClass (&charClasses)[N], char ch1, 
 }
 
 template< std::size_t N >
-void setCharClassFlagsForBracePair( umba::tokeniser::CharClass (&charClasses)[N], const std::string &braceChars)
+void setCharClassFlagsForBracePair( umba::tokenizer::CharClass (&charClasses)[N], const std::string &braceChars)
 {
     UMBA_ASSERT(braceChars.size()==2);
     // if (braceChars.size()!=2)
@@ -358,8 +358,8 @@ void setCharClassFlagsForBracePair( umba::tokeniser::CharClass (&charClasses)[N]
     //     throw std::runtime_error("Braces def invalid size");
     // }
 
-    setCharClassFlags(charClasses, braceChars[0], umba::tokeniser::CharClass::open );
-    setCharClassFlags(charClasses, braceChars[1], umba::tokeniser::CharClass::close);
+    setCharClassFlags(charClasses, braceChars[0], umba::tokenizer::CharClass::open );
+    setCharClassFlags(charClasses, braceChars[1], umba::tokenizer::CharClass::close);
 }
 
 //----------------------------------------------------------------------------
@@ -368,9 +368,9 @@ void setCharClassFlagsForBracePair( umba::tokeniser::CharClass (&charClasses)[N]
 
 //----------------------------------------------------------------------------
 template< std::size_t N >
-void setCharClassFlags( std::array<umba::tokeniser::CharClass, N> &charClasses, char ch, umba::tokeniser::CharClass setClasses)
+void setCharClassFlags( std::array<umba::tokenizer::CharClass, N> &charClasses, char ch, umba::tokenizer::CharClass setClasses)
 {
-    std::size_t idx = umba::tokeniser::charToCharClassTableIndex(ch);
+    std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch);
     UMBA_ASSERT(idx<N);
     // if (idx>=charClasses.size())
     // {
@@ -382,7 +382,7 @@ void setCharClassFlags( std::array<umba::tokeniser::CharClass, N> &charClasses, 
 }
 
 template< std::size_t N >
-void setCharClassFlags( std::array<umba::tokeniser::CharClass, N> &charClasses, const std::string &chars, umba::tokeniser::CharClass setClasses)
+void setCharClassFlags( std::array<umba::tokenizer::CharClass, N> &charClasses, const std::string &chars, umba::tokenizer::CharClass setClasses)
 {
     for(auto ch : chars)
     {
@@ -391,7 +391,7 @@ void setCharClassFlags( std::array<umba::tokeniser::CharClass, N> &charClasses, 
 }
 
 template< std::size_t N >
-void setCharClassFlags( std::array<umba::tokeniser::CharClass, N> &charClasses, char ch1, char ch2, umba::tokeniser::CharClass setClasses)
+void setCharClassFlags( std::array<umba::tokenizer::CharClass, N> &charClasses, char ch1, char ch2, umba::tokenizer::CharClass setClasses)
 {
     for(auto ch=ch1; ch<=ch2; ++ch)
     {
@@ -400,7 +400,7 @@ void setCharClassFlags( std::array<umba::tokeniser::CharClass, N> &charClasses, 
 }
 
 template< std::size_t N >
-void setCharClassFlagsForBracePair( std::array<umba::tokeniser::CharClass, N> &charClasses, const std::string &braceChars)
+void setCharClassFlagsForBracePair( std::array<umba::tokenizer::CharClass, N> &charClasses, const std::string &braceChars)
 {
     UMBA_ASSERT(braceChars.size()==2);
     // if (braceChars.size()!=2)
@@ -409,8 +409,8 @@ void setCharClassFlagsForBracePair( std::array<umba::tokeniser::CharClass, N> &c
     //     throw std::runtime_error("Braces def invalid size");
     // }
 
-    setCharClassFlags(charClasses, braceChars[0], umba::tokeniser::CharClass::open );
-    setCharClassFlags(charClasses, braceChars[1], umba::tokeniser::CharClass::close);
+    setCharClassFlags(charClasses, braceChars[0], umba::tokenizer::CharClass::open );
+    setCharClassFlags(charClasses, braceChars[1], umba::tokenizer::CharClass::close);
 }
 
 //----------------------------------------------------------------------------
@@ -443,7 +443,7 @@ void setCharClassFlagsForBracePair( std::array<umba::tokeniser::CharClass, N> &c
 */
 
 template< std::size_t N >
-void generateCharClassTable( umba::tokeniser::CharClass (&charClasses)[N], bool addOperatorChars = true)
+void generateCharClassTable( umba::tokenizer::CharClass (&charClasses)[N], bool addOperatorChars = true)
 {
     for(std::size_t i=0; i!=N; ++i)
         charClasses[i] = CharClass::none;
@@ -455,34 +455,34 @@ void generateCharClassTable( umba::tokeniser::CharClass (&charClasses)[N], bool 
     setCharClassFlagsForBracePair( charClasses, "<>");
 
     // ranges
-    setCharClassFlags( charClasses,   0,   8, umba::tokeniser::CharClass::nonprintable);
+    setCharClassFlags( charClasses,   0,   8, umba::tokenizer::CharClass::nonprintable);
     // gap for tab
-    setCharClassFlags( charClasses,  10,  31, umba::tokeniser::CharClass::nonprintable);
-    setCharClassFlags( charClasses, '0', '9', umba::tokeniser::CharClass::digit | umba::tokeniser::CharClass::identifier );
-    setCharClassFlags( charClasses, 'A', 'Z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first | umba::tokeniser::CharClass::upper);
-    setCharClassFlags( charClasses, 'a', 'z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first);
+    setCharClassFlags( charClasses,  10,  31, umba::tokenizer::CharClass::nonprintable);
+    setCharClassFlags( charClasses, '0', '9', umba::tokenizer::CharClass::digit | umba::tokenizer::CharClass::identifier );
+    setCharClassFlags( charClasses, 'A', 'Z', umba::tokenizer::CharClass::alpha | umba::tokenizer::CharClass::identifier | umba::tokenizer::CharClass::identifier_first | umba::tokenizer::CharClass::upper);
+    setCharClassFlags( charClasses, 'a', 'z', umba::tokenizer::CharClass::alpha | umba::tokenizer::CharClass::identifier | umba::tokenizer::CharClass::identifier_first);
 
     // sets
     if (addOperatorChars)
     {
-        setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokeniser::CharClass::opchar);
+        setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokenizer::CharClass::opchar);
     }
-    setCharClassFlags( charClasses, "\r\n"              , umba::tokeniser::CharClass::linefeed);
-    setCharClassFlags( charClasses, "\r\n\t "           , umba::tokeniser::CharClass::space);
-    setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokeniser::CharClass::punctuation);
-    setCharClassFlags( charClasses, "\"\'`"             , umba::tokeniser::CharClass::quot);
-    setCharClassFlags( charClasses, "@#$"               , umba::tokeniser::CharClass::semialpha);
+    setCharClassFlags( charClasses, "\r\n"              , umba::tokenizer::CharClass::linefeed);
+    setCharClassFlags( charClasses, "\r\n\t "           , umba::tokenizer::CharClass::space);
+    setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokenizer::CharClass::punctuation);
+    setCharClassFlags( charClasses, "\"\'`"             , umba::tokenizer::CharClass::quot);
+    setCharClassFlags( charClasses, "@#$"               , umba::tokenizer::CharClass::semialpha);
 
     // single chars
-    setCharClassFlags( charClasses,   0x7F, umba::tokeniser::CharClass::nonprintable); // DEL
-    setCharClassFlags( charClasses,   '\\', umba::tokeniser::CharClass::escape);
-    setCharClassFlags( charClasses,   '_' , umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first); // underscore
+    setCharClassFlags( charClasses,   0x7F, umba::tokenizer::CharClass::nonprintable); // DEL
+    setCharClassFlags( charClasses,   '\\', umba::tokenizer::CharClass::escape);
+    setCharClassFlags( charClasses,   '_' , umba::tokenizer::CharClass::identifier | umba::tokenizer::CharClass::identifier_first); // underscore
 
 }
 
 
 template< std::size_t N >
-void generateCharClassTable( std::array<umba::tokeniser::CharClass, N> &charClasses, bool addOperatorChars = true)
+void generateCharClassTable( std::array<umba::tokenizer::CharClass, N> &charClasses, bool addOperatorChars = true)
 {
     for(std::size_t i=0; i!=charClasses.size(); ++i)
         charClasses[i] = CharClass::none;
@@ -494,28 +494,28 @@ void generateCharClassTable( std::array<umba::tokeniser::CharClass, N> &charClas
     setCharClassFlagsForBracePair( charClasses, "<>");
 
     // ranges
-    setCharClassFlags( charClasses,   0,   8, umba::tokeniser::CharClass::nonprintable);
+    setCharClassFlags( charClasses,   0,   8, umba::tokenizer::CharClass::nonprintable);
     // gap for tab
-    setCharClassFlags( charClasses,  10,  31, umba::tokeniser::CharClass::nonprintable);
-    setCharClassFlags( charClasses, '0', '9', umba::tokeniser::CharClass::digit | umba::tokeniser::CharClass::identifier );
-    setCharClassFlags( charClasses, 'A', 'Z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first | umba::tokeniser::CharClass::upper);
-    setCharClassFlags( charClasses, 'a', 'z', umba::tokeniser::CharClass::alpha | umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first);
+    setCharClassFlags( charClasses,  10,  31, umba::tokenizer::CharClass::nonprintable);
+    setCharClassFlags( charClasses, '0', '9', umba::tokenizer::CharClass::digit | umba::tokenizer::CharClass::identifier );
+    setCharClassFlags( charClasses, 'A', 'Z', umba::tokenizer::CharClass::alpha | umba::tokenizer::CharClass::identifier | umba::tokenizer::CharClass::identifier_first | umba::tokenizer::CharClass::upper);
+    setCharClassFlags( charClasses, 'a', 'z', umba::tokenizer::CharClass::alpha | umba::tokenizer::CharClass::identifier | umba::tokenizer::CharClass::identifier_first);
 
     // sets
     if (addOperatorChars)
     {
-        setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokeniser::CharClass::opchar);
+        setCharClassFlags( charClasses, "!%&*+,-./:;<=>?^|~", umba::tokenizer::CharClass::opchar);
     }
-    setCharClassFlags( charClasses, "\r\n"              , umba::tokeniser::CharClass::linefeed);
-    setCharClassFlags( charClasses, "\r\n\t "           , umba::tokeniser::CharClass::space);
-    setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokeniser::CharClass::punctuation);
-    setCharClassFlags( charClasses, "\"\'`"             , umba::tokeniser::CharClass::quot);
-    setCharClassFlags( charClasses, "@#$"               , umba::tokeniser::CharClass::semialpha);
+    setCharClassFlags( charClasses, "\r\n"              , umba::tokenizer::CharClass::linefeed);
+    setCharClassFlags( charClasses, "\r\n\t "           , umba::tokenizer::CharClass::space);
+    setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokenizer::CharClass::punctuation);
+    setCharClassFlags( charClasses, "\"\'`"             , umba::tokenizer::CharClass::quot);
+    setCharClassFlags( charClasses, "@#$"               , umba::tokenizer::CharClass::semialpha);
 
     // single chars
-    setCharClassFlags( charClasses,   0x7F, umba::tokeniser::CharClass::nonprintable); // DEL
-    setCharClassFlags( charClasses,   '\\', umba::tokeniser::CharClass::escape);
-    setCharClassFlags( charClasses,   '_' , umba::tokeniser::CharClass::identifier | umba::tokeniser::CharClass::identifier_first); // underscore
+    setCharClassFlags( charClasses,   0x7F, umba::tokenizer::CharClass::nonprintable); // DEL
+    setCharClassFlags( charClasses,   '\\', umba::tokenizer::CharClass::escape);
+    setCharClassFlags( charClasses,   '_' , umba::tokenizer::CharClass::identifier | umba::tokenizer::CharClass::identifier_first); // underscore
 
 }
 
@@ -667,9 +667,9 @@ std::string transformName(const std::string &name, TypeNameType typeNameType)
 // std::array<int, N> varName = {1, 2, 3};.
 
 template< std::size_t N >
-void printCharClassArray( umba::tokeniser::CharClass (&charClasses)[N], CommentType commentType, ArrayType arrayType, TypeNameType typeNameType, const std::string &varName="charClassesTable")
+void printCharClassArray( umba::tokenizer::CharClass (&charClasses)[N], CommentType commentType, ArrayType arrayType, TypeNameType typeNameType, const std::string &varName="charClassesTable")
 {
-    static const std::string charClassType = "umba::tokeniser::CharClass";
+    static const std::string charClassType = "umba::tokenizer::CharClass";
 
     if (arrayType==ArrayType::cLike)
     {
@@ -707,9 +707,9 @@ void printCharClassArray( umba::tokeniser::CharClass (&charClasses)[N], CommentT
 
 //----------------------------------------------------------------------------
 // Using pregenerated char class table
-#if !defined(UMBA_TOKENISER_DISABLE_UMBA_TOKENISER_GET_CHAR_CLASS_FUNCTION)
+#if !defined(UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
 inline
-umba::tokeniser::CharClass getCharClass(char ch)
+umba::tokenizer::CharClass getCharClass(char ch)
 {
     static
     #include "char_class_table.h.inc"
@@ -724,6 +724,6 @@ umba::tokeniser::CharClass getCharClass(char ch)
 
 
 
-} // namespace tokeniser
+} // namespace tokenizer
 } // namespace umba
 

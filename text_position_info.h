@@ -1,7 +1,7 @@
 #pragma once
 
 
-#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+#if defined(UMBA_TOKENIZER_TYPES_COMPACT)
     #if !defined(UMBA_TEXT_POSITION_INFO_COMPACT)
         #define UMBA_TEXT_POSITION_INFO_COMPACT
     #endif
@@ -9,8 +9,8 @@
 
 
 #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
-    #if !defined(UMBA_TOKENISER_TYPES_COMPACT)
-        #define UMBA_TOKENISER_TYPES_COMPACT
+    #if !defined(UMBA_TOKENIZER_TYPES_COMPACT)
+        #define UMBA_TOKENIZER_TYPES_COMPACT
     #endif
 #endif
 
@@ -57,7 +57,7 @@
 #endif
 
 
-#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+#if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
     #include "pushpack1.h"
 #endif
 typedef struct tag_umba_text_position_info
@@ -76,7 +76,7 @@ typedef struct tag_umba_text_position_info
     umba_text_position_info_file_id_type        fileId      ; //!< FileID
 
 } umba_text_position_info;
-#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+#if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
     #include "packpop.h"
 #endif
 

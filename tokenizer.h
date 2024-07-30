@@ -1,19 +1,19 @@
 #pragma once
 
-#if defined(UMBA_TOKENISER_TYPES_COMPACT)
+#if defined(UMBA_TOKENIZER_TYPES_COMPACT)
     #if !defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
         #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
     #endif
 #endif
 
 #if defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
-    #if !defined(UMBA_TOKENISER_TYPES_COMPACT)
-        #define UMBA_TOKENISER_TYPES_COMPACT
+    #if !defined(UMBA_TOKENIZER_TYPES_COMPACT)
+        #define UMBA_TOKENIZER_TYPES_COMPACT
     #endif
 #endif
 
 //----------------------------------------------------------------------------
-#include "c_tokeniser.h"
+#include "c_tokenizer.h"
 //
 #include "char_class.h"
 
@@ -44,30 +44,30 @@
 
 //----------------------------------------------------------------------------
 
-// umba::tokeniser::
+// umba::tokenizer::
 namespace umba {
-namespace tokeniser {
+namespace tokenizer {
 
 
 
 //----------------------------------------------------------------------------
-using  trie_index_type                                     = UMBA_TOKENISER_TRIE_INDEX_TYPE;
-inline constexpr const trie_index_type trie_index_invalid  = UMBA_TOKENISER_TRIE_INDEX_INVALID;
-//inline constexpr const trie_index_type trie_index_initial  = UMBA_TOKENISER_TRIE_INDEX_INITIAL;
+using  trie_index_type                                     = UMBA_TOKENIZER_TRIE_INDEX_TYPE;
+inline constexpr const trie_index_type trie_index_invalid  = UMBA_TOKENIZER_TRIE_INDEX_INVALID;
+//inline constexpr const trie_index_type trie_index_initial  = UMBA_TOKENIZER_TRIE_INDEX_INITIAL;
 
 //----------------------------------------------------------------------------
-using  token_type                                          = UMBA_TOKENISER_TOKEN_TYPE;
-inline constexpr const token_type token_id_invalid         = UMBA_TOKENISER_TOKEN_INVALID;
+using  token_type                                          = UMBA_TOKENIZER_TOKEN_TYPE;
+inline constexpr const token_type token_id_invalid         = UMBA_TOKENIZER_TOKEN_INVALID;
 
 //----------------------------------------------------------------------------
-using  payload_type                                        = UMBA_TOKENISER_PAYLOAD_TYPE;
-inline constexpr const payload_type payload_invalid        = UMBA_TOKENISER_PAYLOAD_INVALID;
+using  payload_type                                        = UMBA_TOKENIZER_PAYLOAD_TYPE;
+inline constexpr const payload_type payload_invalid        = UMBA_TOKENIZER_PAYLOAD_INVALID;
 
 //----------------------------------------------------------------------------
-using payload_flags_type                                   = UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE;
+using payload_flags_type                                   = UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE;
 
 //----------------------------------------------------------------------------
-using TrieNode = umba_tokeniser_trie_node;
+using TrieNode = umba_tokenizer_trie_node;
 
 //----------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ using TrieNode = umba_tokeniser_trie_node;
 inline
 void trieNodeInitMakeUninitialized(TrieNode &node)
 {
-    umba_tokeniser_trie_node_init_make_uninitialized(&node);
+    umba_tokenizer_trie_node_init_make_uninitialized(&node);
 }
 
 //----------------------------------------------------------------------------
@@ -109,7 +109,7 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
         UMBA_ASSERT(lookupChunkStartIdx<tokenTrie.size());
         // if (levelStartIdx>=tokenTrie.size()) // тут бы assert, тут не штатная ситуация
         // {
-        //     return umba::tokeniser::trie_index_invalid;
+        //     return umba::tokenizer::trie_index_invalid;
         // }
 
         lookupChunkSize = tokenTrie[lookupChunkStartIdx].lookupChunkSize;
@@ -121,7 +121,7 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
         UMBA_ASSERT(idx<tokenTrie.size());
         // if (idx>=tokenTrie.size()) // тут бы assert, тут не штатная ситуация
         // {
-        //     return umba::tokeniser::trie_index_invalid;
+        //     return umba::tokenizer::trie_index_invalid;
         // }
 
         if (tokenTrie[idx].token==tk)
@@ -147,11 +147,11 @@ void tokenTrieBackTrace(const ContainerType &tokenTrie, trie_index_type curIndex
 }
 
 //----------------------------------------------------------------------------
-#if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+#if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
 template<typename ContainerType, typename StreamType, typename TokenToStringConverter>
 void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToStringConverter converter)
 {
-    // requires UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE is not defined
+    // requires UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE is not defined
 
     s << "digraph structs {\nnode [shape=record];\n";
 
@@ -320,9 +320,9 @@ public:
 
         struct QueItem
         {
-            umba::tokeniser::TrieBuilder::TrieNodesMap   *pMap;
-            umba::tokeniser::trie_index_type             level;
-            umba::tokeniser::trie_index_type             parentNodeIndex;
+            umba::tokenizer::TrieBuilder::TrieNodesMap   *pMap;
+            umba::tokenizer::trie_index_type             level;
+            umba::tokenizer::trie_index_type             parentNodeIndex;
         };
 
         TrieNodesMap trieNodesMapCopy = m_trieNodesMap;
@@ -367,7 +367,7 @@ public:
                 continue;
             }
 
-            umba::tokeniser::trie_index_type lookupChunkStartIndex = m.begin()->second.nodeIndex;
+            umba::tokenizer::trie_index_type lookupChunkStartIndex = m.begin()->second.nodeIndex;
             for(auto &kv : m)
             {
                 buildTo.emplace_back(kv.second.trieNode); // tokenId тут уже настроен, а childsIndex - инвалид
@@ -375,7 +375,7 @@ public:
                 buildTo.back().lookupChunkStartIndex = lookupChunkStartIndex;
                 buildTo.back().lookupChunkSize       = m.size();
                 buildTo.back().token                 = kv.first;
-#if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+#if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
                 buildTo.back().level                 = qi.level;
 #endif
                 if (!kv.second.childs.empty())
@@ -390,7 +390,17 @@ public:
 
 }; // class TrieBuilder
 
+//----------------------------------------------------------------------------
 
+
+
+
+
+
+//----------------------------------------------------------------------------
+// Tokenizer
+
+// TrieBuilder
 /*
 
 Разбираем текст на токены.
@@ -520,5 +530,5 @@ $
 */
 
 
-} // namespace tokeniser
+} // namespace tokenizer
 } // namespace umba
