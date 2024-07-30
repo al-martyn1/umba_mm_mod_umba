@@ -145,6 +145,7 @@ void tokenTrieBackTrace(const ContainerType &tokenTrie, trie_index_type curIndex
 }
 
 //----------------------------------------------------------------------------
+#if !defined(UMBA_TOKENISER_TRIE_NODE_LEVEL_FIELD_DISABLE)
 template<typename ContainerType, typename StreamType, typename TokenToStringConverter>
 void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToStringConverter converter)
 {
@@ -222,6 +223,7 @@ void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToS
     s << "}\n";
 
 }
+#endif
 //----------------------------------------------------------------------------
 
 
@@ -320,7 +322,7 @@ public:
 
         std::deque<QueItem>  que;
         que.emplace_back( QueItem{ &trieNodesMapCopy
-                                 , 0                                    // level
+                                 , 0u                                    // level
                                  , trie_index_invalid  // parentNodeIndex
                                  }
                         );
@@ -336,13 +338,13 @@ public:
                 kv.second.level     = qi.level;
                 if (!kv.second.childs.empty())
                 {
-                    que.emplace_back(QueItem{&kv.second.childs, kv.second.level+1 });
+                    que.emplace_back(QueItem{&kv.second.childs, kv.second.level+1u });
                 }
             }
         }
 
         que.emplace_back( QueItem{ &trieNodesMapCopy
-                                 , 0                                    // level
+                                 , 0u                                    // level
                                  , trie_index_invalid  // parentNodeIndex
                                  }
                         );
@@ -372,7 +374,7 @@ public:
                 if (!kv.second.childs.empty())
                 {
                     buildTo.back().childsIndex = kv.second.childs.begin()->second.nodeIndex;
-                    que.emplace_back(QueItem{&kv.second.childs, kv.second.level+1, kv.second.nodeIndex});
+                    que.emplace_back(QueItem{&kv.second.childs, kv.second.level+1u, kv.second.nodeIndex});
                 }
             }
         }

@@ -141,6 +141,8 @@
 
 
 
+
+
 typedef struct tag_umba_tokeniser_trie_node
 {
     UMBA_TOKENISER_TRIE_INDEX_TYPE       parentNodeIndex      ;
@@ -152,10 +154,16 @@ typedef struct tag_umba_tokeniser_trie_node
 #endif
     UMBA_TOKENISER_TOKEN_TYPE            token                ; // Токен или символ
     UMBA_TOKENISER_PAYLOAD_TYPE          payload              ; // Полезная нагрузка
+#if !defined(UMBA_TOKENISER_NO_PAYLOAD_FLAGS)
     UMBA_TOKENISER_PAYLOAD_FLAGS_TYPE    payloadFlags         ; // Пользовательские флаги
+#endif
 
 } umba_tokeniser_trie_node;
 
+
+// Standard mode   : Trie size : 32 items, 1024 bytes
+// Compact mode    : Trie size : 32 items, 448 bytes
+// Compact no flags: Trie size : 32 items, 384 bytes
 
 static inline
 void umba_tokeniser_trie_node_init_make_uninitialized(umba_tokeniser_trie_node *pNode)
@@ -169,7 +177,9 @@ void umba_tokeniser_trie_node_init_make_uninitialized(umba_tokeniser_trie_node *
 #endif
     pNode->token                 = UMBA_TOKENISER_TOKEN_INVALID;
     pNode->payload               = UMBA_TOKENISER_PAYLOAD_INVALID;
+#if !defined(UMBA_TOKENISER_NO_PAYLOAD_FLAGS)
     pNode->payloadFlags          = 0;
+#endif
 }
 
 
