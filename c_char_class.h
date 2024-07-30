@@ -31,10 +31,11 @@
 
 
 #define UMBA_TOKENISER_CHARCLASS_NONE             0x0000u
-#define UMBA_TOKENISER_CHARCLASS_NONPRINTABLE     0x0001u
-#define UMBA_TOKENISER_CHARCLASS_LINEFEED         0x0002u
-#define UMBA_TOKENISER_CHARCLASS_SPACE            0x0004u
-#define UMBA_TOKENISER_CHARCLASS_TAB              0x0008u
+#define UMBA_TOKENISER_CHARCLASS_USER_FLAG        0x0001u
+#define UMBA_TOKENISER_CHARCLASS_NONPRINTABLE     0x0002u
+#define UMBA_TOKENISER_CHARCLASS_LINEFEED         0x0004u
+#define UMBA_TOKENISER_CHARCLASS_SPACE            0x0008u
+//#define UMBA_TOKENISER_CHARCLASS_TAB              0x0008u
 #define UMBA_TOKENISER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
 #define UMBA_TOKENISER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
 // #define UMBA_TOKENISER_CHARCLASS_BRACE            0x0040u /* Отдельно brace флаг не надо, наличие либо open, либо close - само по себе признак скобки */
