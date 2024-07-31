@@ -188,7 +188,13 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST                                    0
+#define UMBA_TOKENIZER_TOKEN_UNASSIGNED                                        0u
+#define UMBA_TOKENIZER_TOKEN_LINEFEED                                          1u
+#define UMBA_TOKENIZER_TOKEN_SPACE                                             2u
+
+
+
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST                                    0x1000u
 
 // C++
 // https://en.wikipedia.org/wiki/Operators_in_C_and_C%2B%2B
