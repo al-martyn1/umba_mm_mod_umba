@@ -78,7 +78,7 @@ public:
     constexpr
     bool oneOf() const
     {
-        auto flags = ((TFlags)0 | ...);
+        auto flags = ((TFlags)0 | ... | VArgs);
         return (tFlags & flags)!=(TFlags)0;
     }
 
@@ -94,7 +94,7 @@ public:
     constexpr
     bool allOf() const
     {
-        auto flags = ((TFlags)0 | ... | args);
+        auto flags = ((TFlags)0 | ... | VArgs);
         return (tFlags & flags)==flags;
     }
 

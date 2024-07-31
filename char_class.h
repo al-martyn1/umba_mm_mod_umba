@@ -126,13 +126,10 @@ enum class CharClass : char_class_underlying_uint_t
     nonprintable     = UMBA_TOKENIZER_CHARCLASS_NONPRINTABLE    ,
     linefeed         = UMBA_TOKENIZER_CHARCLASS_LINEFEED        ,
     space            = UMBA_TOKENIZER_CHARCLASS_SPACE           ,
-    //tab              = UMBA_TOKENIZER_CHARCLASS_TAB             ,
     open             = UMBA_TOKENIZER_CHARCLASS_OPEN            , // Флаг для парных символов
     close            = UMBA_TOKENIZER_CHARCLASS_CLOSE           , // Флаг для парных символов
-    //brace            = UMBA_TOKENIZER_CHARCLASS_BRACE           ,
-    quot             = UMBA_TOKENIZER_CHARCLASS_QUOT            ,
+    xdigit           = UMBA_TOKENIZER_CHARCLASS_XDIGIT          ,
     opchar           = UMBA_TOKENIZER_CHARCLASS_OPCHAR          ,
-    //operator_char    = UMBA_TOKENIZER_CHARCLASS_OPERATOR_CHAR   ,
     punctuation      = UMBA_TOKENIZER_CHARCLASS_PUNCTUATION     ,
     digit            = UMBA_TOKENIZER_CHARCLASS_DIGIT           ,
     alpha            = UMBA_TOKENIZER_CHARCLASS_ALPHA           ,
@@ -246,7 +243,7 @@ std::string enum_serialize_single_flag(CharClass f, const std::string &prefix=st
         case CharClass::linefeed        : return prefix+std::string("linefeed");
         case CharClass::space           : return prefix+std::string("space");
         //case CharClass::tab             : return prefix+std::string("tab");
-        case CharClass::quot            : return prefix+std::string("quot");
+        case CharClass::xdigit          : return prefix+std::string("xdigit");
         //case CharClass::brace           : return prefix+std::string("brace");
         case CharClass::open            : return prefix+std::string("open");
         case CharClass::close           : return prefix+std::string("close");
@@ -470,7 +467,8 @@ void generateCharClassTable( umba::tokenizer::CharClass (&charClasses)[N], bool 
     setCharClassFlags( charClasses, "\r\n"              , umba::tokenizer::CharClass::linefeed);
     setCharClassFlags( charClasses, "\r\n\t "           , umba::tokenizer::CharClass::space);
     setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokenizer::CharClass::punctuation);
-    setCharClassFlags( charClasses, "\"\'`"             , umba::tokenizer::CharClass::quot);
+    //setCharClassFlags( charClasses, "\"\'`"             , umba::tokenizer::CharClass::quot);
+    setCharClassFlags( charClasses, "ABCDEFabcdef"      , umba::tokenizer::CharClass::xdigit);
     setCharClassFlags( charClasses, "@#$"               , umba::tokenizer::CharClass::semialpha);
 
     // single chars
@@ -509,7 +507,8 @@ void generateCharClassTable( std::array<umba::tokenizer::CharClass, N> &charClas
     setCharClassFlags( charClasses, "\r\n"              , umba::tokenizer::CharClass::linefeed);
     setCharClassFlags( charClasses, "\r\n\t "           , umba::tokenizer::CharClass::space);
     setCharClassFlags( charClasses, ".,!?()\"\'"        , umba::tokenizer::CharClass::punctuation);
-    setCharClassFlags( charClasses, "\"\'`"             , umba::tokenizer::CharClass::quot);
+    //setCharClassFlags( charClasses, "\"\'`"             , umba::tokenizer::CharClass::quot);
+    setCharClassFlags( charClasses, "ABCDEFabcdef"      , umba::tokenizer::CharClass::xdigit);
     setCharClassFlags( charClasses, "@#$"               , umba::tokenizer::CharClass::semialpha);
 
     // single chars

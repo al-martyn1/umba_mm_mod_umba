@@ -172,11 +172,11 @@ void tokenTrieBackTrace(const ContainerType &tokenTrie, trie_index_type curIndex
 //----------------------------------------------------------------------------
 #if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
 template<typename ContainerType, typename StreamType, typename TokenToStringConverter>
-void tokenTriePrintGraph(const ContainerType &tokenTrie, StreamType &s, TokenToStringConverter converter)
+void tokenTriePrintTableGraph(const std::string &name, const ContainerType &tokenTrie, StreamType &s, TokenToStringConverter converter)
 {
     // requires UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE is not defined
 
-    s << "digraph structs {\nnode [shape=record];\n";
+    s << "digraph " << name << " {\nnode [shape=record];\n";
 
 
     //s << "L"<<lvl<< "[label=\"";
@@ -333,6 +333,12 @@ public:
     TrieNode& addTokenSequence(const std::string &seqStr, payload_type payload)
     {
         return addTokenSequence(seqStr.begin(), seqStr.end(), payload);
+    }
+
+    TrieNode& addTokenSequence(char ch, payload_type payload)
+    {
+        const char *pCh = &ch;
+        return addTokenSequence(pCh, pCh+1, payload);
     }
 
 

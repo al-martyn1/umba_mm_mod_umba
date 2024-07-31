@@ -76,6 +76,7 @@ typedef struct tag_umba_text_position_info
 
     umba_text_position_info_line_offset_type    lineOffset  ; //!< From data origin to line start
     umba_text_position_info_symbol_offset_type  symbolOffset; //!< From line start
+    umba_text_position_info_symbol_offset_type  lineLen     ; //!< From start to first line end symbol or to end of text
     umba_text_position_info_line_number_type    lineNumber  ; //!< Zero based line number
     umba_text_position_info_file_id_type        fileId      ; //!< FileID
 
@@ -90,6 +91,7 @@ void umba_text_position_info_init(umba_text_position_info *pPos, umba_text_posit
     pPos->lineOffset   = 0u;
     pPos->symbolOffset = 0u;
     pPos->lineNumber   = 0u;
+    pPos->lineLen      = 0u;
     pPos->fileId       = fileId;
 }
 
@@ -110,9 +112,9 @@ void textPositionInfoInit(TextPositionInfo &tpi, TextPositionInfo::file_id_type 
 
 
 template<typename StringType>
-StringType makeSimpleTextPositionInfoString(const TextPositionInfo &tpi)
+StringType makeSimpleTextPositionInfoString(const TextPositionInfo &tpi, bool forHumans=true)
 {
-    return umba::string_plus::make_string<StringType>(std::to_string(tpi.lineNumber) + ":" + std::to_string(tpi.symbolOffset));
+    return umba::string_plus::make_string<StringType>(std::to_string(tpi.lineNumber+(forHumans?1:0)) + ":" + std::to_string(tpi.symbolOffset+(forHumans?1:0)));
 }
 
 

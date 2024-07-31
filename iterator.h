@@ -158,6 +158,18 @@ protected:
         ++m_dataIndex;
     }
 
+    std::size_t findNearestLinefeedIndex() const
+    {
+        for(std::size_t i=m_dataIndex; i!=m_dataSize; ++i)
+        {
+            char ch = m_pData[i];
+            if (ch=='\n' || ch=='\r')
+                return i;
+        }
+
+        return m_dataSize;
+    }
+
 
 public:
 
@@ -215,15 +227,32 @@ public:
         return res;
     }
 
-    TextPositionInfo getPosition() const
+
+
+    TextPositionInfo getPosition(bool findLineLen=false) const // длина строки не всегда нужна, а только чтобы, например, вывести ошибочную строку при возникновении ошибки
     {
         // Положение в строке мы не вычисляем каждый раз при инкременте итератора, а только тогда, когда у нас запрашивают позиции
         TextPositionInfo resPos = m_positionInfo;
         resPos.symbolOffset = (TextPositionInfo::symbol_offset_type)(m_dataIndex - m_positionInfo.lineOffset);
+        resPos.lineLen      = findLineLen ? (TextPositionInfo::symbol_offset_type)(findNearestLinefeedIndex() - m_positionInfo.lineOffset) : 0;
         return resPos;
     }
 
-};
+    TextPositionCountingIterator getLineStartIterator() const
+    {
+        TextPositionCountingIterator res = *this;
+        res.m_dataIndex = m_positionInfo.lineOffset; // перемотали на начало строки
+        return res;
+    }
+
+    TextPositionCountingIterator getLineEndIterator() const
+    {
+        TextPositionCountingIterator res = getLineStartIterator();
+        res.m_dataIndex = res.findNearestLinefeedIndex(); // перемотали на конец строки
+        return res;
+    }
+
+}; // class TextPositionCountingIterator
 
 //----------------------------------------------------------------------------
 
