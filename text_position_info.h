@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__cplusplus)
+    #include <string>
+    #include "string_plus.h"
+#endif
 
 #if defined(UMBA_TOKENIZER_TYPES_COMPACT)
     #if !defined(UMBA_TEXT_POSITION_INFO_COMPACT)
@@ -24,35 +28,35 @@
 
 #if defined(__cplusplus)
     #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
-    
+
         typedef std::uint_least16_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
         typedef std::uint_least16_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки, в компактном варианте строки не могут быть более 64К длиной.
         typedef std::uint_least16_t umba_text_position_info_line_number_type  ;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
         typedef std::size_t         umba_text_position_info_line_offset_type  ;  // А вот всего текста даже в компактном варианте может быть больше 64К символов
-    
+
     #else
-    
+
         typedef std::size_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
         typedef std::size_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки
         typedef std::size_t umba_text_position_info_line_number_type  ;
         typedef std::size_t umba_text_position_info_line_offset_type  ;
-    
+
     #endif
 #else
     #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
-    
+
         typedef uint_least16_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
         typedef uint_least16_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки, в компактном варианте строки не могут быть более 64К длиной.
         typedef uint_least16_t umba_text_position_info_line_number_type  ;  // В компактном варианте строк не должно быть больше 64К - ну а куда больше-то для микроконтроллера?
         typedef size_t         umba_text_position_info_line_offset_type  ;  // А вот всего текста даже в компактном варианте может быть больше 64К символов
-    
+
     #else
-    
+
         typedef size_t umba_text_position_info_file_id_type      ;  // Пользовательский идентификатор файла
         typedef size_t umba_text_position_info_symbol_offset_type;  // Тип смещения текущей позиции от начала строки
         typedef size_t umba_text_position_info_line_number_type  ;
         typedef size_t umba_text_position_info_line_offset_type  ;
-    
+
     #endif
 #endif
 
@@ -102,6 +106,13 @@ inline
 void textPositionInfoInit(TextPositionInfo &tpi, TextPositionInfo::file_id_type fileId=0u)
 {
     umba_text_position_info_init(&tpi, fileId);
+}
+
+
+template<typename StringType>
+StringType makeSimpleTextPositionInfoString(const TextPositionInfo &tpi)
+{
+    return umba::string_plus::make_string<StringType>(std::to_string(tpi.lineNumber) + ":" + std::to_string(tpi.symbolOffset));
 }
 
 
