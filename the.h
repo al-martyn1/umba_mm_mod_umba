@@ -29,14 +29,14 @@ public:
     }
 
     template <typename... TArgs>
-    constexpr 
+    constexpr
     bool oneOf(TArgs&&... args) const
     {
         return ((tVal == args) || ...);
     }
 
     template <auto... VArgs>
-    constexpr 
+    constexpr
     bool oneOf() const
     {
         return ((tVal == VArgs) || ...);
