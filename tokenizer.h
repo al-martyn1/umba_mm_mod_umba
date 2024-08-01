@@ -20,6 +20,8 @@
 #include "c_tokenizer.h"
 //
 #include "char_class.h"
+//
+#include "iterator.h"
 
 //
 #include <map>
@@ -563,7 +565,7 @@ int getNumberBaseFromExplicitAndDefault(int explicitBase, int defaultBase)
     return (explicitBase<=0) ? defaultBase : explicitBase;
 }
 
-
+//----------------------------------------------------------------------------
 
 
 
@@ -574,6 +576,450 @@ int getNumberBaseFromExplicitAndDefault(int explicitBase, int defaultBase)
 
 
 
+
+//----------------------------------------------------------------------------
+enum class StringLiteralParsingResult : unsigned
+{
+    okContinue    , // Нормас, продолжаем парсить
+    okStop        , // Нормас, обнаружен конец литерала
+    warnContinue  , // Предупреждение - некорректная строка, но обработку можно продолжить
+    warnStop      , // Предупреждение - некорректная строка, и производим нормальную обработку парсинга
+    error           // Ошибка, останавливает парсинг
+};
+
+//----------------------------------------------------------------------------
+
+template<typename CharType>
+struct ITokenizerLiteralCharInserter
+{
+    using difference_type = std::ptrdiff_t;
+    using value_type = CharType;
+
+    virtual void insert(CharType ch) = 0;
+};
+
+template<typename CharType>
+struct ITokenizerLiteralCharNulInserterImpl : public ITokenizerLiteralCharInserter<CharType>
+{
+    virtual void insert(CharType ch) override
+    {
+        UMBA_USED(ch);
+    }
+};
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+
+// Вообще, LiteralProcessor'ы должны не только проверять корректность строки для токенизера,
+// но и уметь разбирать, может, даже в то же самое время, как и парсить
+
+
+// Токенизер получает и хранит сырые указатели на литерал парсеры, но не владеет ими. Пользовательский
+// код сам должен обеспечивать достаточное время жизни объектам парсеров, хоть в куче, хоть на стеке.
+// Можно было бы попробовать заморочиться, и сделать, чтобы всё работало в компайл-тайме, чтобы запихывать
+// эффективно в микроконтроллер, но одна из идей токенизера - это возможность настройки в рантайме, например,
+// для раскрашивания кода произвольных языков программирования в текстовом редакторе.
+
+// Хорошо ли использовать для сообщений тот же CharType, что и для обрабатываемых данных?
+// Или сообщения будем всегда, например, в std::string помещать?
+// Наверное, второе, а потом где-то выше уровнем, можно и локализованное сообщение подогнать.
+// Исходим из того, что MessageStringType всегда строка однобайтовых символов
+
+
+//----------------------------------------------------------------------------
+// Или не задаём в компайл-тайме inserter?
+// template< typename CharType
+//         , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+//         , typename InserterIteratorType = umba::null_insert_iterator<CharType>
+//         >
+template< typename CharType
+        , typename MessageStringType    = std::string // std::basic_string<CharType>
+        , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        >
+struct ITokenizerLiteralParser
+{
+    using value_type = CharType;
+
+    virtual void reset() = 0;
+    virtual StringLiteralParsingResult parseChar(InputIteratorType it, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) = 0;
+
+protected:
+
+    void setMessage(MessageStringType *pMsg, const MessageStringType &msg)
+    {
+        if (pMsg)
+           *pMsg = msg;
+    }
+
+    void insertChar(ITokenizerLiteralCharInserter<CharType> *pInserter, CharType ch)
+    {
+        if (pInserter)
+            pInserter->insert(ch);
+    }
+
+}; // struct ITokenizerLiteralParser
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Литерал парсер, который тупо заканчивает разбор на закрывающей кавычке, никаких escape-последовательностей не умеет, может обрабатывать как quot, так и apos литералы, quot может быть внутри apos литерала, и наоборот, но quot не может быть внутри quot литерала
+/*! Литерал парсер... Что я тут хотел написать?
+*/
+
+template< typename CharType
+        , typename MessageStringType    = std::string // std::basic_string<CharType>
+        , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        >
+class SimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>
+{
+
+protected:
+
+    enum State
+    {
+        stInitial,
+        stRead
+    };
+
+    CharType quotType = 0;
+    State    st       = stInitial;
+
+
+public:
+
+    void reset()
+    {
+        quotType = 0;
+        st       = stInitial;
+    }
+
+    virtual StringLiteralParsingResult parseChar(InputIteratorType it, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
+    {
+        if (st==stInitial)
+        {
+            quotType = *it;
+            st = stRead;
+        }
+        else
+        {
+            if (*it==quotType)
+            {
+                return StringLiteralParsingResult::okStop;
+            }
+            else
+            {
+                insertChar(pInserter, *it);
+            }
+        }
+
+        return StringLiteralParsingResult::okContinue;
+    }
+
+
+}; // class SimpleQuotedStringLiteralParser
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! SimpleQuoted, хотя и CppEscaped - потому, что он не парсит сырые литералы, и всякие другие новые модные плюсовые строковые литералы
+template< typename CharType
+        , typename MessageStringType    = std::string // std::basic_string<CharType>
+        , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        >
+class CppEscapedSimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>
+{
+
+protected:
+
+    // Про плюсовые литералы ссылок
+    // Пользовательские литералы в C++11 - https://habr.com/ru/articles/140357/
+    // Escape-последовательности - https://learn.microsoft.com/ru-ru/cpp/c-language/escape-sequences?view=msvc-170
+    // Строковые и символьные литералы (C++) - https://learn.microsoft.com/ru-ru/cpp/cpp/string-and-character-literals-cpp?view=msvc-170
+
+    // Юникодные литералы поддерживаем, но юникодные HEX последовательности не поддерживаем пока при выводе в в inserter, если у нас парсер char, а не wchar_t.
+
+    enum State
+    {
+        stInitial,
+        stWideWaitQuot,
+        stReadChars,
+        stWaitEscapeData
+        stReadEscapeNumericSequence
+    };
+
+    CharType quotType              = 0;
+    State    st                    = stInitial;
+    bool     wideLiteral           = false;
+    std::uint_least32_t hexCode    = 0; // also for octal code too
+    unsigned numReadedHexItems     = 0; // also for octal code too
+    unsigned hexBase               = 0; // also for octal code too
+
+    bool     allowEscapedLfContinuation = true;
+
+
+    static
+    CharType getKnownEcapedCharCode(CharType ch)
+    {
+        switch(ch)
+        {
+            case (CharType)'n': return (CharType)'\n';
+            case (CharType)'t': return (CharType)'\t';
+            case (CharType)'\'': return (CharType)'\'';
+            case (CharType)'\"': return (CharType)'\"';
+            case (CharType)'\\': return (CharType)'\\';
+            case (CharType)'r': return (CharType)'\r';
+            case (CharType)'b': return (CharType)'\b';
+            case (CharType)'f': return (CharType)'\f';
+            case (CharType)'v': return (CharType)'\v';
+            case (CharType)'a': return (CharType)'\a';
+            case (CharType)'?': return (CharType)'?';
+            default: return (CharType)0; // если ничего не найдено
+        }
+    }
+
+    void initHexSequence(unsigned base, int d=0)
+    {
+        UMBA_ASSERT(base==8u || base==16u);
+        hexCode           = (base==8) ? (unsigned)d : 0u; // воьмеричная - есть сразу первая цифра, для HEX'а первой цифры нет
+        numReadedHexItems = (base==8) ? 1 : 0;
+        hexBase           = base;
+    }
+
+    bool addHexSequenceChar(int d)
+    {
+        if (d<0)
+            return false;
+        if ((unsigned)d>=hexBase)
+            return false;
+
+        hexCode*=hexBase;
+        hexCode+=(unsigned)d;
+
+        ++numReadedHexItems;
+    }
+
+    bool canAddHexDigit() const
+    {
+        if (hexBase==8)
+        {
+            return numReadedHexItems < 3;
+        }
+        else
+        {
+            unsigned maxHexDigits = wideLiteral ? 8 : 2;
+            return numReadedHexItems < maxHexDigits;
+        }
+    }
+
+
+public:
+
+    CppEscapedSimpleQuotedStringLiteralParser& setContinuationMode(bool allowEscapedLfContinuation_=true)
+    {
+        allowEscapedLfContinuation = allowEscapedLfContinuation_;
+        return *this;
+    }
+
+    void reset()
+    {
+        quotType          = 0;
+        st                = stInitial;
+        wideLiteral       = false;
+        hexCode           = 0;
+        numReadedHexItems = 0;
+        hexBase           = 0;
+    }
+
+    // \a     Звонок (предупреждение)
+    // \b     Backspace
+    // \f     Подача страницы
+    // \n     Новая строка
+    // \r     Возврат каретки
+    // \t     Горизонтальная табуляция
+    // \v     Вертикальная табуляция
+    // \'     Одиночная кавычка
+    // \"     Двойная кавычка
+    // \\     Обратная косая черта
+    // \?     Литерал вопросительного знака
+    // \ooo     Символ ASCII в восьмеричной нотации
+    // \x hh     Символ ASCII в шестнадцатеричной нотации
+    // \x hhhh     Символ юникода в шестнадцатеричном формате, если эта escape-последовательность используется в многобайтовой знаковой константе или строковом литерале юникода.
+
+    virtual StringLiteralParsingResult parseChar(InputIteratorType it, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
+    {
+        CharType ch = *it;
+
+        switch(st)
+        {
+            case stInitial:
+            {
+                 if (ch=='L') // а маленькая L считается за маркер юникодного литерала?
+                 {
+                     st = stWideWaitQuot;
+                     wideLiteral = true;
+                 }
+                 else if (ch=='\'' || ch=='\"')
+                 {
+                     st = stReadChars;
+                     quotType = ch;
+                 }
+                 else
+                 {
+                     setMessage(pMsg, "unrecognised string literal type");
+                     return StringLiteralParsingResult::error;
+                 }
+            }
+            break;
+
+            case stWideWaitQuot:
+            {
+                 if (ch=='\'' || ch=='\"')
+                 {
+                     st = stReadChars;
+                     quotType = ch;
+                 }
+                 else
+                 {
+                     setMessage(pMsg, "unrecognised wide string literal type");
+                     return StringLiteralParsingResult::error;
+                 }
+            }
+            break;
+
+            case stReadChars:
+            {
+                if (ch=='\\')
+                {
+                    st = stWaitEscapeData;
+                }
+                else if (ch==quotType) // противоположные кавычки '<->" внутри допустимы, они не заканчивают строку
+                {
+                    return StringLiteralParsingResult::okStop;
+                }
+                else if (ch=='\r' || ch=='\n')
+                {
+                    setMessage(pMsg, (quotType=='\"') ? "missing terminating quot ('\"')" : "missing terminating apos (\"'\")");
+                    return StringLiteralParsingResult::error;
+                }
+                else // просто символ
+                {
+                    insertChar(pInserter, ch);
+                    return StringLiteralParsingResult::okContinue;
+                }
+            }
+            break;
+
+            case stWaitEscapeData:
+            {
+                CharType knownEsc = getKnownEcapedCharCode(ch);
+                int d = utils::charToDigit(ch);
+                if (knownEsc!=0)
+                {
+                    insertChar(pInserter, knownEsc);
+                    return StringLiteralParsingResult::okContinue;
+                }
+                else if (ch=='x' || ch=='X') // А большой X допустим в шестнадцатиричных esc-последовательностях?
+                {
+                    st = stReadEscapeNumericSequence;
+                    initHexSequence(16);
+                    return StringLiteralParsingResult::okContinue;
+                }
+                else if (d>=0 && d<8)
+                {
+                    st = stReadEscapeNumericSequence;
+                    initHexSequence(8, d);
+                    return StringLiteralParsingResult::okContinue;
+                }
+                else if (ch=='\n' || ch=='\r')
+                {
+                    if (allowEscapedLfContinuation)
+                    {
+                        return StringLiteralParsingResult::okContinue;
+                    }
+                    else
+                    {
+                        setMessage(pMsg, (quotType=='\"') ? "missing terminating quot ('\"')" : "missing terminating apos (\"'\")");
+                        return StringLiteralParsingResult::error;
+                    }
+                }
+                else // вроде все варианты проверили
+                {
+                    insertChar(pInserter, ch);
+                    setMessage(pMsg, "unknown escape sequence char");
+                    return StringLiteralParsingResult::warnContinue;
+                }
+            }
+            break;
+
+    // bool addHexSequenceChar(int d)
+    // bool canAddHexDigit() const
+
+            case stReadEscapeNumericSequence:
+            {
+            }
+            break;
+
+            //
+            // case :
+            // {
+            // }
+            // break;
+            //
+            // case :
+            // {
+            // }
+            // break;
+            //
+            // case :
+            // {
+            // }
+            // break;
+            //
+            // case :
+            // {
+            // }
+            // break;
+
+        }
+
+        //static auto strMultiline = "";
+        static char testCh = '"';
+
+        // utils::
+        //int utils::charToDigit(CharType ch)
+        return StringLiteralParsingResult::okStop;
+    }
+
+}; // class CppEscapedSimpleQuotedStringLiteralParser
+
+    // enum State
+    // {
+    //     stInitial,
+    //     stWideWaitQuot,
+    //     stReadChars,
+    //     stWaitEscape
+    // };
+
+
+
+
+
+// enum class StringLiteralParsingResult : unsigned
+// {
+//     okContinue    , // Нормас, продолжаем парсить
+//     okStop        , // Нормас, обнаружен конец литерала
+//     warnContinue  , // Предупреждение - некорректная строка, но обработку можно продолжить
+//     warnStop      , // Предупреждение - некорректная строка, и производим нормальную обработку парсинга
+//     error           // Ошибка, останавливает парсинг
+// };
 
 
 //----------------------------------------------------------------------------
