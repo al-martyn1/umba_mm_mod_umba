@@ -16,6 +16,11 @@
 
   CLANG - https://clang.llvm.org/docs/AttributeReference.html#weak
           https://clang.llvm.org/docs/AttributeReference.html#selectany
+
+          Вообще по шланговским атрибутам - https://clang.llvm.org/docs/AttributeReference.html
+
+  Wiki - https://en.wikipedia.org/wiki/Weak_symbol
+
 */
 
 #if defined(UMBA_MSVC_COMPILER_USED)
