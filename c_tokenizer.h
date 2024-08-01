@@ -233,74 +233,78 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_USER_LITERAL_LAST                                 0x3FFFu
 
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST                UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x10u  /*  //    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_LAST                 UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1Fu  /*  #     */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x010u)  /*  //    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_LAST                        (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x01Fu)  /*        */
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START                 UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x21u  /*  //    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_END                   UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x22u  /*  //    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START                        (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x021u)  /*        */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_END                          (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x022u)  /*        */
+
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FLAG_AS_REGULAR_OPERATOR                                         0x040u   /*        */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST_AS_REGULAR_OPERATOR   (UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST|UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FLAG_AS_REGULAR_OPERATOR)
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_LAST_AS_REGULAR_OPERATOR    (UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_LAST |UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FLAG_AS_REGULAR_OPERATOR)
 
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST_GENERIC                            UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x30u
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST_GENERIC                            (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x030u)
 
 // C++
 // https://en.wikipedia.org/wiki/Operators_in_C_and_C%2B%2B
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_ADDITION                                 UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x30u  /*  +    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_SUBTRACTION                              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x31u  /*  -    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION                           UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x32u  /*  *    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_DIVISION                                 UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x33u  /*  /    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MODULO                                   UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x34u  /*  %    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_INCREMENT                                UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x35u  /*  ++   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_DECREMENT                                UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x36u  /*  --   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_ADDITION                                 (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x130u)  /*  +    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SUBTRACTION                              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x131u)  /*  -    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION                           (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x132u)  /*  *    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_DIVISION                                 (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x133u)  /*  /    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MODULO                                   (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x134u)  /*  %    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_INCREMENT                                (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x135u)  /*  ++   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_DECREMENT                                (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x136u)  /*  --   */
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_EQUAL                                    UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x40u   /*  ==   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_NOT_EQUAL                                UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x41u   /*  !=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_GREATER                                  UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x42u   /*  >    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LESS                                     UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x43u   /*  <    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_GREATER_EQUAL                            UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x44u   /*  >=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LESS_EQUAL                               UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x45u   /*  <=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_THREE_WAY_COMPARISON                     UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x46u   /*  <=>  */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_EQUAL                                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x140u)   /*  ==   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_NOT_EQUAL                                (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x141u)   /*  !=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_GREATER                                  (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x142u)   /*  >    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LESS                                     (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x143u)   /*  <    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_GREATER_EQUAL                            (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x144u)   /*  >=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LESS_EQUAL                               (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x145u)   /*  <=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_THREE_WAY_COMPARISON                     (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x146u)   /*  <=>  */
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_NOT                              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x50u   /*  !    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_AND                              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x51u   /*  &&   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_OR                               UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x52u   /*  ||   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_NOT                              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x150u)   /*  !    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_AND                              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x151u)   /*  &&   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_OR                               (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x152u)   /*  ||   */
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_NOT                              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x60u   /*  ~    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_AND                              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x61u   /*  &    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR                               UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x62u   /*  |    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_XOR                              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x63u   /*  ^    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_LEFT                       UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x64u   /*  <<   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_RIGHT                      UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x65u   /*  >>   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_NOT                              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x160u)   /*  ~    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_AND                              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x161u)   /*  &    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR                               (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x162u)   /*  |    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_XOR                              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x163u)   /*  ^    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_LEFT                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x164u)   /*  <<   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_RIGHT                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x165u)   /*  >>   */
 
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_ASSIGNMENT                               UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x70u   /*  =    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_ADDITION_ASSIGNMENT                      UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x71u   /*  +=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_SUBTRACTION_ASSIGNMENT                   UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x72u   /*  -=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION_ASSIGNMENT                UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x73u   /*  *=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_DIVISION_ASSIGNMENT                      UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x74u   /*  /=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MODULO_ASSIGNMENT                        UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x75u   /*  %=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_AND_ASSIGNMENT                   UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x76u   /*  &=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR_ASSIGNMENT                    UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x77u   /*  |=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_XOR_ASSIGNMENT                   UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x78u   /*  ^=   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_LEFT_ASSIGNMENT            UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x79u   /*  <<=  */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_RIGHT_ASSIGNMENT           UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x7Au   /*  >>=  */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_ASSIGNMENT                               (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x170u)   /*  =    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_ADDITION_ASSIGNMENT                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x171u)   /*  +=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SUBTRACTION_ASSIGNMENT                   (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x172u)   /*  -=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION_ASSIGNMENT                (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x173u)   /*  *=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_DIVISION_ASSIGNMENT                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x174u)   /*  /=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MODULO_ASSIGNMENT                        (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x175u)   /*  %=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_AND_ASSIGNMENT                   (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x176u)   /*  &=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR_ASSIGNMENT                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x177u)   /*  |=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_XOR_ASSIGNMENT                   (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x178u)   /*  ^=   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_LEFT_ASSIGNMENT            (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x179u)   /*  <<=  */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_RIGHT_ASSIGNMENT           (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x17Au)   /*  >>=  */
 
-// https://en.cppreference.com/w/cpp/language/operator_member_access
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRUCTURE_DEREFERENCE                    UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x70u   /*  ->   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_MEMBER_OF_POINTER                        UMBA_TOKENIZER_TOKEN_OPERATOR_STRUCTURE_DEREFERENCE
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_POINTER_TO_MEMBER_OF_POINTER             UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x72u   /*  ->*  */ /* Member of object   selected by pointer-to-member b of object pointed to by a 'a->*b' */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_POINTER_TO_MEMBER_OF_OBJECT              UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x73u   /*  .*   */ /* Member of object a selected by pointer-to-member b 'a.*b' */
+// https://en.cppreference.com/w/cpp/language/operator_member_access           
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRUCTURE_DEREFERENCE                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x170u)   /*  ->   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MEMBER_OF_POINTER                        (UMBA_TOKENIZER_TOKEN_OPERATOR_STRUCTURE_DEREFERENCE
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_POINTER_TO_MEMBER_OF_POINTER             (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x172u)   /*  ->*  */ /* Member of object   selected by pointer-to-member b of object pointed to by a 'a->*b' */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_POINTER_TO_MEMBER_OF_OBJECT              (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x173u)   /*  .*   */ /* Member of object a selected by pointer-to-member b 'a.*b' */
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_DOT                                      UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x80u   /*  .    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_COMMA                                    UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x81u   /*  ,    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_COLON                                    UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x82u   /*  :    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON                                UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x83u   /*  ;    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK                                    UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x84u   /*  ?    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_CONDITIONAL                      UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_ALTERNATIVE                      UMBA_TOKENIZER_TOKEN_OPERATOR_COLON
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_EXPRESSION_END                           UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_DOT                                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x180u)   /*  .    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_COMMA                                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x181u)   /*  ,    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_COLON                                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x182u)   /*  :    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON                                (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x183u)   /*  ;    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK                                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x184u)   /*  ?    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_CONDITIONAL                      (UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK       
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_ALTERNATIVE                      (UMBA_TOKENIZER_TOKEN_OPERATOR_COLON       
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_EXPRESSION_END                           (UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_SCOPE_RESOLUTION                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x90u   /*  ::   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_SCOPE_RESOLUTION                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x190u)   /*  ::   */
 
 
 //  "new slot" operator '<-' - http://squirrel-lang.org/doc/squirrel3.html#tableconstructor
@@ -308,32 +312,32 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 //     JS - https://ru.stackoverflow.com/questions/528707/%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80-%D0%B2-javascript
 //          https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Functions/Arrow_functions
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LAMBDA                                   UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0xA0u   /*  =>  */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LAMBDA                                   (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A0u)   /*  =>  */
 
 
 // ===  JS Strict_equality -  https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Operators/Strict_equality
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_EQUAL                             UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0xA1u   /*  ===   */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_NOT_EQUAL                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0xA2u   /*  !==   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_EQUAL                             (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A1u)   /*  ===   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_NOT_EQUAL                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A2u)   /*  !==   */
 
 #if 0
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x00u   /*    */
-#endif
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
+#endif                                                                         
 
 
 
