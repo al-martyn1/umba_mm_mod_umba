@@ -289,7 +289,7 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_LEFT_ASSIGNMENT            (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x179u)   /*  <<=  */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_RIGHT_ASSIGNMENT           (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x17Au)   /*  >>=  */
 
-// https://en.cppreference.com/w/cpp/language/operator_member_access           
+// https://en.cppreference.com/w/cpp/language/operator_member_access
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_STRUCTURE_DEREFERENCE                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x170u)   /*  ->   */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_MEMBER_OF_POINTER                        (UMBA_TOKENIZER_TOKEN_OPERATOR_STRUCTURE_DEREFERENCE
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_POINTER_TO_MEMBER_OF_POINTER             (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x172u)   /*  ->*  */ /* Member of object   selected by pointer-to-member b of object pointed to by a 'a->*b' */
@@ -300,8 +300,8 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_COLON                                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x182u)   /*  :    */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON                                (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x183u)   /*  ;    */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK                                    (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x184u)   /*  ?    */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_CONDITIONAL                      (UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK       
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_ALTERNATIVE                      (UMBA_TOKENIZER_TOKEN_OPERATOR_COLON       
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_CONDITIONAL                      (UMBA_TOKENIZER_TOKEN_OPERATOR_QMARK
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_TERNARY_ALTERNATIVE                      (UMBA_TOKENIZER_TOKEN_OPERATOR_COLON
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_EXPRESSION_END                           (UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_SCOPE_RESOLUTION                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x190u)   /*  ::   */
@@ -337,7 +337,7 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_                                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x100)u   /*    */
-#endif                                                                         
+#endif
 
 
 
