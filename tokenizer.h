@@ -109,6 +109,12 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
             return trie_index_invalid;
         }
 
+        if (tokenTrie[curIndex].childsIndex==trie_index_invalid)
+        {
+            // Детей нет, дальше искать нечего
+            return trie_index_invalid;
+        }
+
         lookupChunkStartIdx = tokenTrie[curIndex].childsIndex;
         UMBA_ASSERT(lookupChunkStartIdx<tokenTrie.size());
         lookupChunkSize = tokenTrie[lookupChunkStartIdx].lookupChunkSize;
@@ -123,6 +129,8 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
     // На самом деле надо будет просто проверить сначала обычный lower_bound
     // И ещё вопрос для исследования - оставлять ли для мелких чанков линейный поиск или нет?
 
+    // С двоичным поиском что-то не так идёт, добавил возможность его запретить
+    #if !defined(UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_DISABLED)
     if (lookupChunkSize>=UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT)
     {
         TrieNode cmpNode;
@@ -140,8 +148,10 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
 
         return resIt-&tokenTrie[lookupChunkStartIdx];
     }
+    #endif
 
     // Чанк небольшой, фигачим линейным поиском
+    // Или, возможно, двоичный поиск запрещён настройками
     // Линейный поиск
     for(trie_index_type i=0; i!=lookupChunkSize; ++i)
     {
@@ -210,7 +220,7 @@ void tokenTriePrintTableGraph(const std::string &name, const ContainerType &toke
         {
             for(auto ch : strToken)
             {
-                if (ch=='\'' || ch=='\"' || ch=='\\' || ch=='<' || ch=='>' || ch=='|')
+                if (ch=='\'' || ch=='\"' || ch=='\\' || ch=='<' || ch=='>' || ch=='|' || ch=='{' || ch=='}')
                 {
                     s << "\\";
                 }
@@ -419,6 +429,146 @@ public:
 
 }; // class TrieBuilder
 
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+namespace utils {
+
+
+
+
+//----------------------------------------------------------------------------
+// bool isCommentToken(payload_type tokenType)
+// bool isSingleLineCommentToken(payload_type tokenType)
+// bool isMultiLineCommentStartToken(payload_type tokenType)
+// bool isMultiLineCommentEndToken(payload_type tokenType)
+
+//----------------------------------------------------------------------------
+constexpr
+inline
+bool isCommentToken(payload_type tokenType)
+{
+    return ((tokenType>=UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST && tokenType<=UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_END))
+         ? true
+         : false
+         ;
+};
+
+// Тут надо, чтобы это уже был коммент - вызывать только после вызова isCommentToken
+constexpr
+inline
+bool isSingleLineCommentToken(payload_type tokenType)
+{
+    return (tokenType<=UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_LAST) ? true : false;
+}
+
+// Тут надо, чтобы это уже был коммент, и не однострочный - вызывать только после вызова isCommentToken
+constexpr
+inline
+bool isMultiLineCommentStartToken(payload_type tokenType)
+{
+    return tokenType==UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START;
+}
+
+// Тут надо, чтобы это уже был коммент, и не однострочный - вызывать только после вызова isCommentToken
+constexpr
+inline
+bool isMultiLineCommentEndToken(payload_type tokenType)
+{
+    return tokenType==UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_END;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+// bool isNumberPrefixRequiresDigits(payload_type tokenType)
+// bool isNumberPrefixAllowMissDigits(payload_type tokenType)
+// int numberPrefixGetBase(payload_type tokenType)
+// bool isNumberHexDigitsAllowed(int base)
+// bool isDigitAllowed(CharType ch, int base)
+// int getNumberBaseFromExplicitAndDefault(int explicitBase, int defaultBase)
+
+//----------------------------------------------------------------------------
+// Достаточно ли только префикса для валидного числа, или обязательно нужны цыфры?
+constexpr
+inline
+bool isNumberPrefixRequiresDigits(payload_type tokenType)
+{
+    return (tokenType & UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FLAG_MISS_DIGIT)==0;
+}
+
+// Превикс допускает отсутствие дополнительных цифр
+constexpr
+inline
+bool isNumberPrefixAllowMissDigits(payload_type tokenType)
+{
+    return (tokenType & UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FLAG_MISS_DIGIT)!=0;
+}
+
+//constexpr
+inline
+int numberPrefixGetBase(payload_type tokenType)
+{
+    auto masked = tokenType&UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_MASK;
+    switch(masked)
+    {
+        case UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC : return 10u;
+        case UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_BIN : return  2u;
+        case UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_QUAT: return  4u;
+        case UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT : return  8u;
+        case UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DUOD: return 12u;
+        case UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_HEX : return 16u;
+        default: return 10u;
+    }
+}
+
+constexpr
+inline
+bool isNumberHexDigitsAllowed(int base)
+{
+    return base > 10;
+}
+
+template<typename CharType>
+inline
+int charToDigit(CharType ch)
+{
+    if (ch>=(CharType)'0' && ch<=(CharType)'9') return ch-(CharType)'0';
+    if (ch>=(CharType)'A' && ch<=(CharType)'F') return ch-(CharType)'0'+10;
+    if (ch>=(CharType)'a' && ch<=(CharType)'f') return ch-(CharType)'0'+10;
+    return -1;
+}
+
+template<typename CharType>
+inline
+bool isDigitAllowed(CharType ch, int base)
+{
+    int d = charToDigit(ch);
+    if (d<0)
+        return false;
+    return d<base ? true : false;
+}
+
+//----------------------------------------------------------------------------
+constexpr
+inline
+int getNumberBaseFromExplicitAndDefault(int explicitBase, int defaultBase)
+{
+    return (explicitBase<=0) ? defaultBase : explicitBase;
+}
+
+
+
+
+
+
+} // namespace utils
 //----------------------------------------------------------------------------
 
 
