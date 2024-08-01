@@ -8,19 +8,24 @@ namespace umba {
 
 
 // UMBA_USED
-
+template<typename ValueType>
 struct null_insert_iterator
 {
 
-    template<typename ValueType> constexpr
+    using difference_type = std::ptrdiff_t;
+    using value_type = ValueType;
+
+    //template<typename ValueType>
+    constexpr
     null_insert_iterator& operator=(const ValueType& value)
     {
         UMBA_USED(value);
         return *this;
     }
 
-    template<typename ValueType> constexpr
-    null_insert_iterator& operator=(ValueType&& value)
+    template<typename OtherValueType>
+    constexpr
+    null_insert_iterator& operator=(OtherValueType&& value)
     {
         UMBA_USED(value);
         return *this;
@@ -39,16 +44,16 @@ struct null_insert_iterator
 
 
 template<typename ContainerType> inline
-null_insert_iterator null_inserter(const ContainerType &c)
+null_insert_iterator<typename ContainerType::value_type> null_inserter(const ContainerType &c)
 {
     UMBA_USED(c);
-    return null_insert_iterator();
+    return null_insert_iterator<typename ContainerType::value_type>();
 }
 
 inline
-null_insert_iterator null_inserter()
+null_insert_iterator<char> null_inserter()
 {
-    return null_insert_iterator();
+    return null_insert_iterator<char>(); // нехай будет char, всё равно operator= шаблонный и нифига не делает
 }
 
 
