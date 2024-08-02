@@ -176,10 +176,13 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 
 #define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               0x0000u
-#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0001u
-#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0002u
-#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0003u
-#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0004u
+#define UMBA_TOKENIZER_TOKEN_FIN                                                      0x0001u /* empty token, finalizes processing current text */
+#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0002u
+#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0003u
+#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0004u
+#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0005u
+#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0006u
+#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x0007u
 
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                       0x0011u
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                                      0x0012u
@@ -194,11 +197,16 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 // #define UMBA_TOKENIZER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
 // #define UMBA_TOKENIZER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
 
+#define UMBA_TOKENIZER_TOKEN_FLOAT_FLAG                                               0x0080u
+
 #define UMBA_TOKENIZER_TOKEN_NUMBER                                                   0x1000u
-#define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                             0x1001u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST                                     0x1002u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_LAST                                      0x11FFu
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_TOTAL_LAST                                0x1FFFu
+#define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                             (UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST                                     UMBA_TOKENIZER_TOKEN_NUMBER
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_LAST                                      0x1FFFu
+
+#define UMBA_TOKENIZER_TOKEN_NUMBER_USER_LITERAL_FIRST                                (UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST+1)
+#define UMBA_TOKENIZER_TOKEN_NUMBER_USER_LITERAL_LAST                                 0x11FFu
+
 
 // Кодируем признаки
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FLAG_MISS_DIGIT                           0x0800u  /* После префикса может не быть ни одной цифры */
