@@ -649,12 +649,14 @@ struct ITokenizerLiteralParser
 
 protected:
 
-    void setMessage(MessageStringType *pMsg, const MessageStringType &msg)
+    static
+    void setMessage(MessageStringType *pMsg, const MessageStringType &msg) 
     {
         if (pMsg)
            *pMsg = msg;
     }
 
+    static
     void insertChar(ITokenizerLiteralCharInserter<CharType> *pInserter, CharType ch)
     {
         if (pInserter)
@@ -736,6 +738,8 @@ template< typename CharType
         >
 class CppEscapedSimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>
 {
+
+    using InterfaceParentType = ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>;
 
 protected:
 
@@ -893,7 +897,8 @@ public:
                  }
                  else
                  {
-                     setMessage(pMsg, "unrecognised string literal type");
+                     //!!! В MSVC работает, в GCC надо через явное указание базы
+                     InterfaceParentType::setMessage(pMsg, "unrecognised string literal type");
                      return StringLiteralParsingResult::error;
                  }
             }
@@ -908,7 +913,7 @@ public:
                  }
                  else
                  {
-                     setMessage(pMsg, "unrecognised wide string literal type");
+                     InterfaceParentType::setMessage(pMsg, "unrecognised wide string literal type");
                      return StringLiteralParsingResult::error;
                  }
             }
@@ -927,12 +932,12 @@ public:
                 }
                 else if (ch=='\r' || ch=='\n')
                 {
-                    setMessage(pMsg, (quotType=='\"') ? "missing terminating quot ('\"')" : "missing terminating apos (\"'\")");
+                    InterfaceParentType::setMessage(pMsg, (quotType=='\"') ? "missing terminating quot ('\"')" : "missing terminating apos (\"'\")");
                     return StringLiteralParsingResult::error;
                 }
                 else // просто символ
                 {
-                    insertChar(pInserter, ch);
+                    InterfaceParentType::insertChar(pInserter, ch);
                     return StringLiteralParsingResult::okContinue;
                 }
             }
@@ -945,7 +950,7 @@ public:
                 if (knownEsc!=0)
                 {
                     st = stReadChars;
-                    insertChar(pInserter, knownEsc);
+                    InterfaceParentType::insertChar(pInserter, knownEsc);
                     return StringLiteralParsingResult::okContinue;
                 }
                 else if (ch=='x' || ch=='X') // А большой X допустим в шестнадцатиричных esc-последовательностях?
@@ -969,15 +974,15 @@ public:
                     }
                     else
                     {
-                        setMessage(pMsg, (quotType=='\"') ? "missing terminating quot ('\"')" : "missing terminating apos (\"'\")");
+                        InterfaceParentType::setMessage(pMsg, (quotType=='\"') ? "missing terminating quot ('\"')" : "missing terminating apos (\"'\")");
                         return StringLiteralParsingResult::error;
                     }
                 }
                 else // вроде все варианты проверили
                 {
                     st = stReadChars;
-                    insertChar(pInserter, ch);
-                    setMessage(pMsg, "unknown escape sequence char");
+                    InterfaceParentType::insertChar(pInserter, ch);
+                    InterfaceParentType::setMessage(pMsg, "unknown escape sequence char");
                     return StringLiteralParsingResult::warnContinue;
                 }
             }
