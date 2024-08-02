@@ -542,8 +542,8 @@ inline
 int charToDigit(CharType ch)
 {
     if (ch>=(CharType)'0' && ch<=(CharType)'9') return ch-(CharType)'0';
-    if (ch>=(CharType)'A' && ch<=(CharType)'F') return ch-(CharType)'0'+10;
-    if (ch>=(CharType)'a' && ch<=(CharType)'f') return ch-(CharType)'0'+10;
+    if (ch>=(CharType)'A' && ch<=(CharType)'F') return ch-(CharType)'A'+10;
+    if (ch>=(CharType)'a' && ch<=(CharType)'f') return ch-(CharType)'a'+10;
     return -1;
 }
 
