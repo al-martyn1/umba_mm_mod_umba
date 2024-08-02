@@ -112,6 +112,8 @@ OutputIterator escapeStringGraphViz(OutputIterator outIt, InputIterator b, Input
                     outIt = appendOctalEscapeSequence<CharType>(outIt, (unsigned)ch);
         }
     }
+
+    return outIt;
 }
 
 //----------------------------------------------------------------------------
