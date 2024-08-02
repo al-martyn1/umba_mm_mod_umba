@@ -22,6 +22,7 @@
 #include "char_class.h"
 //
 #include "iterator.h"
+#include "escape_string.h"
 
 //
 #include <map>
@@ -30,7 +31,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <type_traits>
-		
+
 
 //
 #include "assert.h"
@@ -224,15 +225,7 @@ void tokenTriePrintTableGraph(const std::string &name, const ContainerType &toke
         }
         else
         {
-            for(auto ch : strToken)
-            {
-                if (ch=='\'' || ch=='\"' || ch=='\\' || ch=='<' || ch=='>' || ch=='|' || ch=='{' || ch=='}')
-                {
-                    s << "\\";
-                }
-
-                s << ch;
-            }
+            s << escapeStringGraphViz(strToken);
         }
 
         s << "|<O" << idx << ">" << idx << "}";
@@ -654,7 +647,7 @@ struct ITokenizerLiteralParser
 protected:
 
     static
-    void setMessage(MessageStringType *pMsg, const MessageStringType &msg) 
+    void setMessage(MessageStringType *pMsg, const MessageStringType &msg)
     {
         if (pMsg)
            *pMsg = msg;
