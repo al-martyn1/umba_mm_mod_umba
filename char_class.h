@@ -121,23 +121,23 @@ $ - alpha и operator
 enum class CharClass : char_class_underlying_uint_t
 {
     // unknown       = 1,
-    none             = UMBA_TOKENIZER_CHARCLASS_NONE            ,
-    user_flag        = UMBA_TOKENIZER_CHARCLASS_USER_FLAG       ,
-    nonprintable     = UMBA_TOKENIZER_CHARCLASS_NONPRINTABLE    ,
-    linefeed         = UMBA_TOKENIZER_CHARCLASS_LINEFEED        ,
-    space            = UMBA_TOKENIZER_CHARCLASS_SPACE           ,
-    open             = UMBA_TOKENIZER_CHARCLASS_OPEN            , // Флаг для парных символов
-    close            = UMBA_TOKENIZER_CHARCLASS_CLOSE           , // Флаг для парных символов
-    xdigit           = UMBA_TOKENIZER_CHARCLASS_XDIGIT          ,
-    opchar           = UMBA_TOKENIZER_CHARCLASS_OPCHAR          ,
-    punctuation      = UMBA_TOKENIZER_CHARCLASS_PUNCTUATION     ,
-    digit            = UMBA_TOKENIZER_CHARCLASS_DIGIT           ,
-    alpha            = UMBA_TOKENIZER_CHARCLASS_ALPHA           ,
-    upper            = UMBA_TOKENIZER_CHARCLASS_UPPER           , // Флаг для символов верхнего регистра
-    identifier       = UMBA_TOKENIZER_CHARCLASS_IDENTIFIER      ,
-    identifier_first = UMBA_TOKENIZER_CHARCLASS_IDENTIFIER_FIRST,
-    semialpha        = UMBA_TOKENIZER_CHARCLASS_SEMIALPHA       , // Для символов, которые никуда не вошли, такие как @ # $
-    escape           = UMBA_TOKENIZER_CHARCLASS_ESCAPE            // Для символа '\', который везде используется как escape-символ
+    none                       = UMBA_TOKENIZER_CHARCLASS_NONE            ,
+    string_literal_prefix      = UMBA_TOKENIZER_CHARCLASS_STRING_LITERAL_PREFIX,
+    nonprintable               = UMBA_TOKENIZER_CHARCLASS_NONPRINTABLE    ,
+    linefeed                   = UMBA_TOKENIZER_CHARCLASS_LINEFEED        ,
+    space                      = UMBA_TOKENIZER_CHARCLASS_SPACE           ,
+    open                       = UMBA_TOKENIZER_CHARCLASS_OPEN            , // Флаг для парных символов
+    close                      = UMBA_TOKENIZER_CHARCLASS_CLOSE           , // Флаг для парных символов
+    xdigit                     = UMBA_TOKENIZER_CHARCLASS_XDIGIT          ,
+    opchar                     = UMBA_TOKENIZER_CHARCLASS_OPCHAR          ,
+    punctuation                = UMBA_TOKENIZER_CHARCLASS_PUNCTUATION     ,
+    digit                      = UMBA_TOKENIZER_CHARCLASS_DIGIT           ,
+    alpha                      = UMBA_TOKENIZER_CHARCLASS_ALPHA           ,
+    upper                      = UMBA_TOKENIZER_CHARCLASS_UPPER           , // Флаг для символов верхнего регистра
+    identifier                 = UMBA_TOKENIZER_CHARCLASS_IDENTIFIER      ,
+    identifier_first           = UMBA_TOKENIZER_CHARCLASS_IDENTIFIER_FIRST,
+    semialpha                  = UMBA_TOKENIZER_CHARCLASS_SEMIALPHA       , // Для символов, которые никуда не вошли, такие как @ # $
+    escape                     = UMBA_TOKENIZER_CHARCLASS_ESCAPE            // Для символа '\', который везде используется как escape-символ
 };
 
 //----------------------------------------------------------------------------
@@ -238,25 +238,25 @@ std::string enum_serialize_single_flag(CharClass f, const std::string &prefix=st
     switch(f)
     {
         //case CharClass::none            : return std::string("none");
-        case CharClass::user_flag       : return prefix+std::string("user_flag");
-        case CharClass::nonprintable    : return prefix+std::string("nonprintable");
-        case CharClass::linefeed        : return prefix+std::string("linefeed");
-        case CharClass::space           : return prefix+std::string("space");
+        case CharClass::string_literal_prefix       : return prefix+std::string("string_literal_prefix");
+        case CharClass::nonprintable                : return prefix+std::string("nonprintable");
+        case CharClass::linefeed                    : return prefix+std::string("linefeed");
+        case CharClass::space                       : return prefix+std::string("space");
         //case CharClass::tab             : return prefix+std::string("tab");
-        case CharClass::xdigit          : return prefix+std::string("xdigit");
+        case CharClass::xdigit                      : return prefix+std::string("xdigit");
         //case CharClass::brace           : return prefix+std::string("brace");
-        case CharClass::open            : return prefix+std::string("open");
-        case CharClass::close           : return prefix+std::string("close");
-        case CharClass::opchar          : return prefix+std::string("opchar");
+        case CharClass::open                        : return prefix+std::string("open");
+        case CharClass::close                       : return prefix+std::string("close");
+        case CharClass::opchar                      : return prefix+std::string("opchar");
         //case CharClass::operator_char   : return prefix+std::string("operator_char");
-        case CharClass::punctuation     : return prefix+std::string("punctuation");
-        case CharClass::digit           : return prefix+std::string("digit");
-        case CharClass::alpha           : return prefix+std::string("alpha");
-        case CharClass::upper           : return prefix+std::string("upper");
-        case CharClass::identifier      : return prefix+std::string("identifier");
-        case CharClass::identifier_first: return prefix+std::string("identifier_first");
-        case CharClass::semialpha       : return prefix+std::string("semialpha");
-        case CharClass::escape          : return prefix+std::string("escape");
+        case CharClass::punctuation                 : return prefix+std::string("punctuation");
+        case CharClass::digit                       : return prefix+std::string("digit");
+        case CharClass::alpha                       : return prefix+std::string("alpha");
+        case CharClass::upper                       : return prefix+std::string("upper");
+        case CharClass::identifier                  : return prefix+std::string("identifier");
+        case CharClass::identifier_first            : return prefix+std::string("identifier_first");
+        case CharClass::semialpha                   : return prefix+std::string("semialpha");
+        case CharClass::escape                      : return prefix+std::string("escape");
         default: return std::string("");
     }
 }
