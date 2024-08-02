@@ -748,10 +748,10 @@ protected:
 
     enum State
     {
-        stInitial,
-        stWideWaitQuot,
-        stReadChars,
-        stWaitEscapeData
+        stInitial                   ,
+        stWideWaitQuot              ,
+        stReadChars                 ,
+        stWaitEscapeData            ,
         stReadEscapeNumericSequence
     };
 
@@ -785,6 +785,19 @@ protected:
         }
     }
 
+
+    bool isValidHexDigit(CharType ch) const
+    {
+        int d = utils::charToDigit(ch);
+        if (d<0)
+            return false;
+
+        if ((unsigned)d<hexBase)
+            return true;
+
+        return false;
+    }
+
     void initHexSequence(unsigned base, int d=0)
     {
         UMBA_ASSERT(base==8u || base==16u);
@@ -793,7 +806,7 @@ protected:
         hexBase           = base;
     }
 
-    bool addHexSequenceChar(int d)
+    bool addHexSequenceDigit(int d)
     {
         if (d<0)
             return false;
@@ -804,6 +817,13 @@ protected:
         hexCode+=(unsigned)d;
 
         ++numReadedHexItems;
+
+        return true;
+    }
+
+    bool addHexSequenceChar(CharType ch)
+    {
+        return addHexSequenceDigit(utils::charToDigit(ch));
     }
 
     bool canAddHexDigit() const
@@ -894,13 +914,14 @@ public:
             }
             break;
 
+            ReadCharsLabel:
             case stReadChars:
             {
                 if (ch=='\\')
                 {
                     st = stWaitEscapeData;
                 }
-                else if (ch==quotType) // противоположные кавычки '<->" внутри допустимы, они не заканчивают строку
+                else if (ch==quotType) // сравниваем с той кавычкой, что была на входе, противоположные кавычки '<->" внутри допустимы, они не заканчивают строку
                 {
                     return StringLiteralParsingResult::okStop;
                 }
@@ -923,6 +944,7 @@ public:
                 int d = utils::charToDigit(ch);
                 if (knownEsc!=0)
                 {
+                    st = stReadChars;
                     insertChar(pInserter, knownEsc);
                     return StringLiteralParsingResult::okContinue;
                 }
@@ -942,6 +964,7 @@ public:
                 {
                     if (allowEscapedLfContinuation)
                     {
+                        st = stReadChars;
                         return StringLiteralParsingResult::okContinue;
                     }
                     else
@@ -952,6 +975,7 @@ public:
                 }
                 else // вроде все варианты проверили
                 {
+                    st = stReadChars;
                     insertChar(pInserter, ch);
                     setMessage(pMsg, "unknown escape sequence char");
                     return StringLiteralParsingResult::warnContinue;
@@ -959,43 +983,20 @@ public:
             }
             break;
 
-    // bool addHexSequenceChar(int d)
-    // bool canAddHexDigit() const
-
             case stReadEscapeNumericSequence:
             {
+                if (isValidHexDigit(ch) && canAddHexDigit())
+                {
+                    addHexSequenceChar(ch);
+                    return StringLiteralParsingResult::okContinue;
+                }
+                goto ReadCharsLabel;
             }
             break;
 
-            //
-            // case :
-            // {
-            // }
-            // break;
-            //
-            // case :
-            // {
-            // }
-            // break;
-            //
-            // case :
-            // {
-            // }
-            // break;
-            //
-            // case :
-            // {
-            // }
-            // break;
-
         }
 
-        //static auto strMultiline = "";
-        static char testCh = '"';
-
-        // utils::
-        //int utils::charToDigit(CharType ch)
-        return StringLiteralParsingResult::okStop;
+        return StringLiteralParsingResult::okContinue;
     }
 
 }; // class CppEscapedSimpleQuotedStringLiteralParser
