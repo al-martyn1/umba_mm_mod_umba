@@ -121,21 +121,9 @@
 
 #if !defined(UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE)
     #if !defined(__cplusplus)
-
-        #if defined(UMBA_TOKENIZER_TYPES_COMPACT)
-            #define UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE  uint_least16_t
-        #else
-            #define UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE  uint_least32_t
-        #endif
-
+        #define UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE  uintptr_t
     #else
-
-        #if defined(UMBA_TOKENIZER_TYPES_COMPACT)
-            #define UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE  std::uint_least16_t
-        #else
-            #define UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE  std::uint_least32_t
-        #endif
-
+        #define UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE  std::uintptr_t
     #endif
 #endif
 
@@ -150,13 +138,12 @@ typedef struct tag_umba_tokenizer_trie_node
     UMBA_TOKENIZER_TRIE_INDEX_TYPE       lookupChunkStartIndex; /* Одно и то же значение для всех элементов lookupChunk'а */
     UMBA_TOKENIZER_TRIE_INDEX_TYPE       lookupChunkSize      ; /* Одно и то же значение для всех элементов lookupChunk'а */
     UMBA_TOKENIZER_TRIE_INDEX_TYPE       childsIndex          ;
-#if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
-    UMBA_TOKENIZER_TRIE_INDEX_TYPE       level                ; // Нужно, чтобы делать красивый граф таблицы trie
-#endif
     UMBA_TOKENIZER_TOKEN_TYPE            token                ; // Токен или символ
     UMBA_TOKENIZER_PAYLOAD_TYPE          payload              ; // Полезная нагрузка
-#if !defined(UMBA_TOKENIZER_NO_PAYLOAD_FLAGS)
-    UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE    payloadFlags         ; // Пользовательские флаги
+    UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE    payloadFlags         ; // Пользовательские флаги или данные, влезает указатель
+
+#if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+    UMBA_TOKENIZER_TRIE_INDEX_TYPE       level                ; // Нужно, чтобы делать красивый граф таблицы trie
 #endif
 
 } umba_tokenizer_trie_node;
@@ -188,49 +175,61 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 
 
-#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                        0x0000u
-#define UMBA_TOKENIZER_TOKEN_LINEFEED                                          0x0001u
-#define UMBA_TOKENIZER_TOKEN_SPACE                                             0x0002u
-#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                        0x0003u
-#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                         0x0004u
+#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               0x0000u
+#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0001u
+#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0002u
+#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0003u
+#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0004u
 
-#define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                0x0011u
-#define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                               0x0012u
-#define UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_OPEN                                0x0021u
-#define UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_CLOSE                               0x0022u
-#define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_OPEN                                0x0031u
-#define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_CLOSE                               0x0032u
-#define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN                               0x0041u
-#define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE                              0x0042u
+#define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                       0x0011u
+#define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                                      0x0012u
+#define UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_OPEN                                       0x0021u
+#define UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_CLOSE                                      0x0022u
+#define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_OPEN                                       0x0031u
+#define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_CLOSE                                      0x0032u
+#define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN                                      0x0041u
+#define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE                                     0x0042u
 
 
 // #define UMBA_TOKENIZER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
 // #define UMBA_TOKENIZER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
 
-#define UMBA_TOKENIZER_TOKEN_NUMBER                                            0x1000u
-#define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                      0x1001u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST                              0x1002u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_LAST                               0x11FFu
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_TOTAL_LAST                         0x1FFFu
+#define UMBA_TOKENIZER_TOKEN_NUMBER                                                   0x1000u
+#define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                             0x1001u
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST                                     0x1002u
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_LAST                                      0x11FFu
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_TOTAL_LAST                                0x1FFFu
 
 // Кодируем признаки
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FLAG_MISS_DIGIT                    0x0800u  /* После префикса может не быть ни одной цифры */
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_MASK                          0x0700u  /* Маска для системы счисления */
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC                           0x0000u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_BIN                           0x0100u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_QUAT                          0x0200u  /* четвертичная quaternary number system */
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT                           0x0300u
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DUOD                          0x0400u  /* двенадцатеричная duodecimal number system */
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_HEX                           0x0500u
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FLAG_MISS_DIGIT                           0x0800u  /* После префикса может не быть ни одной цифры */
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_MASK                                 0x0700u  /* Маска для системы счисления */
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC                                  0x0000u
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_BIN                                  0x0100u
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_QUAT                                 0x0200u  /* четвертичная quaternary number system */
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT                                  0x0300u
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DUOD                                 0x0400u  /* двенадцатеричная duodecimal number system */
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_HEX                                  0x0500u
 
 // quaternary number system
 
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST                                    0x2000u
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_LAST                                     0x2FFFu
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST                                           0x2000u
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_LAST                                            0x2FFFu
 
-#define UMBA_TOKENIZER_TOKEN_USER_LITERAL_FIRST                                0x3000u
-#define UMBA_TOKENIZER_TOKEN_USER_LITERAL_LAST                                 0x3FFFu
+#define UMBA_TOKENIZER_TOKEN_USER_OPERATOR_FIRST                                      0x2800u
+#define UMBA_TOKENIZER_TOKEN_USER_OPERATOR_LAST                                       UMBA_TOKENIZER_TOKEN_OPERATOR_LAST
+
+
+#define UMBA_TOKENIZER_TOKEN_STRING_LITERAL_FIRST                                     0x3000u
+#define UMBA_TOKENIZER_TOKEN_STRING_LITERAL_LAST                                      0x3FFFu
+
+#define UMBA_TOKENIZER_TOKEN_CHAR_LITERAL                                             0x3000u
+#define UMBA_TOKENIZER_TOKEN_STRING_LITERAL                                           0x3001u
+#define UMBA_TOKENIZER_TOKEN_RAW_STRING_LITERAL                                       0x3002u
+
+#define UMBA_TOKENIZER_TOKEN_STRING_USER_LITERAL_FIRST                                0x3010u
+#define UMBA_TOKENIZER_TOKEN_STRING_USER_LITERAL_LAST                                 UMBA_TOKENIZER_TOKEN_LITERAL_LAST
+
 
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x010u)  /*  //    */
