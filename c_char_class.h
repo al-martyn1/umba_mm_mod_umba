@@ -30,24 +30,24 @@
 #endif
 
 
-#define UMBA_TOKENIZER_CHARCLASS_NONE             0x0000u
+#define UMBA_TOKENIZER_CHARCLASS_NONE                           0x0000u
 
-#define UMBA_TOKENIZER_CHARCLASS_USER_FLAG        0x0001u
-#define UMBA_TOKENIZER_CHARCLASS_NONPRINTABLE     0x0002u
-#define UMBA_TOKENIZER_CHARCLASS_LINEFEED         0x0004u
-#define UMBA_TOKENIZER_CHARCLASS_SPACE            0x0008u
-#define UMBA_TOKENIZER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
-#define UMBA_TOKENIZER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
-#define UMBA_TOKENIZER_CHARCLASS_XDIGIT           0x0040u
-#define UMBA_TOKENIZER_CHARCLASS_OPCHAR           0x0080u
-#define UMBA_TOKENIZER_CHARCLASS_PUNCTUATION      0x0100u
-#define UMBA_TOKENIZER_CHARCLASS_DIGIT            0x0200u
-#define UMBA_TOKENIZER_CHARCLASS_ALPHA            0x0400u
-#define UMBA_TOKENIZER_CHARCLASS_UPPER            0x0800u /* Флаг для символов верхнего регистра */
-#define UMBA_TOKENIZER_CHARCLASS_IDENTIFIER       0x1000u
-#define UMBA_TOKENIZER_CHARCLASS_IDENTIFIER_FIRST 0x2000u
-#define UMBA_TOKENIZER_CHARCLASS_SEMIALPHA        0x4000u /* Для символов, которые никуда не вошли, такие как @ # $, буквоподобные символы */
-#define UMBA_TOKENIZER_CHARCLASS_ESCAPE           0x8000u /* Для символа '\', который везде используется как escape-символ */
+#define UMBA_TOKENIZER_CHARCLASS_STRING_LITERAL_PREFIX          0x0001u
+#define UMBA_TOKENIZER_CHARCLASS_NONPRINTABLE                   0x0002u
+#define UMBA_TOKENIZER_CHARCLASS_LINEFEED                       0x0004u
+#define UMBA_TOKENIZER_CHARCLASS_SPACE                          0x0008u
+#define UMBA_TOKENIZER_CHARCLASS_OPEN                           0x0010u /* Флаг для парных символов */
+#define UMBA_TOKENIZER_CHARCLASS_CLOSE                          0x0020u /* Флаг для парных символов */
+#define UMBA_TOKENIZER_CHARCLASS_XDIGIT                         0x0040u
+#define UMBA_TOKENIZER_CHARCLASS_OPCHAR                         0x0080u
+#define UMBA_TOKENIZER_CHARCLASS_PUNCTUATION                    0x0100u
+#define UMBA_TOKENIZER_CHARCLASS_DIGIT                          0x0200u
+#define UMBA_TOKENIZER_CHARCLASS_ALPHA                          0x0400u
+#define UMBA_TOKENIZER_CHARCLASS_UPPER                          0x0800u /* Флаг для символов верхнего регистра */
+#define UMBA_TOKENIZER_CHARCLASS_IDENTIFIER                     0x1000u
+#define UMBA_TOKENIZER_CHARCLASS_IDENTIFIER_FIRST               0x2000u
+#define UMBA_TOKENIZER_CHARCLASS_SEMIALPHA                      0x4000u /* Для символов, которые никуда не вошли, такие как @ # $, буквоподобные символы */
+#define UMBA_TOKENIZER_CHARCLASS_ESCAPE                         0x8000u /* Для символа '\', который везде используется как escape-символ */
 
 // Obsolete
 // #define UMBA_TOKENIZER_CHARCLASS_QUOT             0x0040u
