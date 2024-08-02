@@ -28,6 +28,10 @@
 #include <deque>
 #include <iostream>
 #include <algorithm>
+#include <unordered_map>
+#include <type_traits>
+		
+
 //
 #include "assert.h"
 
@@ -732,9 +736,11 @@ public:
 
 //----------------------------------------------------------------------------
 //! SimpleQuoted, хотя и CppEscaped - потому, что он не парсит сырые литералы, и всякие другие новые модные плюсовые строковые литералы
+//! ExtraEscapes позволяют заменять кастомные escape последовательности на произвольные строки
 template< typename CharType
         , typename MessageStringType    = std::string // std::basic_string<CharType>
         , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename ExtraEscapesMapType  = std::unordered_map<CharType, std::basic_string<CharType> >
         >
 class CppEscapedSimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>
 {
@@ -747,6 +753,7 @@ protected:
     // Пользовательские литералы в C++11 - https://habr.com/ru/articles/140357/
     // Escape-последовательности - https://learn.microsoft.com/ru-ru/cpp/c-language/escape-sequences?view=msvc-170
     // Строковые и символьные литералы (C++) - https://learn.microsoft.com/ru-ru/cpp/cpp/string-and-character-literals-cpp?view=msvc-170
+    // Numeric, boolean, and pointer literals - https://learn.microsoft.com/en-us/cpp/cpp/numeric-boolean-and-pointer-literals-cpp?view=msvc-170
 
     // Юникодные литералы поддерживаем, но юникодные HEX последовательности не поддерживаем пока при выводе в в inserter, если у нас парсер char, а не wchar_t.
 
@@ -759,26 +766,36 @@ protected:
         stReadEscapeNumericSequence
     };
 
-    CharType quotType              = 0;
-    State    st                    = stInitial;
-    bool     wideLiteral           = false;
-    std::uint_least32_t hexCode    = 0; // also for octal code too
-    unsigned numReadedHexItems     = 0; // also for octal code too
-    unsigned hexBase               = 0; // also for octal code too
+    CharType             quotType              = 0;
+    State                st                    = stInitial;
+    bool                 wideLiteral           = false;
+    std::uint_least32_t  hexCode               = 0; // also for octal code too
+    unsigned             numReadedHexItems     = 0; // also for octal code too
+    unsigned             hexBase               = 0; // also for octal code too
 
-    bool     allowEscapedLfContinuation = true;
+    bool                 allowEscapedLfContinuation = true ;
+    bool                 warnOnUnknownEscape        = true ;
+    bool                 disableStandardEscapes     = false;
+    ExtraEscapesMapType  extraEscapes;
 
 
-    static
-    CharType getKnownEcapedCharCode(CharType ch)
+    CharType getKnownEcapedCharCode(CharType ch) const
     {
+        // Совсем-совсем базовые последовательности не запрещаются
+        switch(ch)
+        {
+            case (CharType)'\'': return (CharType)'\'';
+            case (CharType)'\"': return (CharType)'\"';
+            case (CharType)'\\': return (CharType)'\\';
+        }
+
+        if (disableStandardEscapes)
+            return (CharType)0; // если ничего не найдено
+
         switch(ch)
         {
             case (CharType)'n': return (CharType)'\n';
             case (CharType)'t': return (CharType)'\t';
-            case (CharType)'\'': return (CharType)'\'';
-            case (CharType)'\"': return (CharType)'\"';
-            case (CharType)'\\': return (CharType)'\\';
             case (CharType)'r': return (CharType)'\r';
             case (CharType)'b': return (CharType)'\b';
             case (CharType)'f': return (CharType)'\f';
@@ -787,6 +804,17 @@ protected:
             case (CharType)'?': return (CharType)'?';
             default: return (CharType)0; // если ничего не найдено
         }
+    }
+
+    auto getExtraEscapeCharSequence(CharType ch) const
+    {
+        auto it = extraEscapes.find(ch);
+
+        // Секреты auto и decltype - https://habr.com/ru/articles/206458/
+        // https://stackoverflow.com/questions/25732386/what-is-stddecay-and-when-it-should-be-used
+        if (it==extraEscapes.end())
+            return std::decay_t<decltype(it->second)>();
+        return it->second;
     }
 
 
@@ -851,6 +879,25 @@ public:
         allowEscapedLfContinuation = allowEscapedLfContinuation_;
         return *this;
     }
+
+    CppEscapedSimpleQuotedStringLiteralParser& setWarnOnUnknownEscape(bool warn=true)
+    {
+        warnOnUnknownEscape = warn;
+        return *this;
+    }
+
+    CppEscapedSimpleQuotedStringLiteralParser& setDisableStandardEscapes(bool disable=true)
+    {
+        disableStandardEscapes = disable;
+        return *this;
+    }
+
+    CppEscapedSimpleQuotedStringLiteralParser& setExtraEscapes(const ExtraEscapesMapType &extra)
+    {
+        extraEscapes = extra;
+    }
+
+
 
     void reset()
     {
@@ -945,9 +992,18 @@ public:
 
             case stWaitEscapeData:
             {
+                auto extraEsc = getExtraEscapeCharSequence(ch);
                 CharType knownEsc = getKnownEcapedCharCode(ch);
                 int d = utils::charToDigit(ch);
-                if (knownEsc!=0)
+
+                if (!extraEsc.empty())
+                {
+                    st = stReadChars;
+                    for(auto ech : extraEsc)
+                        InterfaceParentType::insertChar(pInserter, ech);
+                    return StringLiteralParsingResult::okContinue;
+                }
+                else if (knownEsc!=0)
                 {
                     st = stReadChars;
                     InterfaceParentType::insertChar(pInserter, knownEsc);
@@ -982,7 +1038,8 @@ public:
                 {
                     st = stReadChars;
                     InterfaceParentType::insertChar(pInserter, ch);
-                    InterfaceParentType::setMessage(pMsg, "unknown escape sequence char");
+                    if (warnOnUnknownEscape)
+                        InterfaceParentType::setMessage(pMsg, "unknown escape sequence char");
                     return StringLiteralParsingResult::warnContinue;
                 }
             }
