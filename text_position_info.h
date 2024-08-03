@@ -80,6 +80,38 @@ typedef struct tag_umba_text_position_info
     umba_text_position_info_line_number_type    lineNumber  ; //!< Zero based line number
     umba_text_position_info_file_id_type        fileId      ; //!< FileID
 
+#if defined(__cplusplus)
+
+    std::string to_string() const
+    {
+        return std::to_string(lineNumber+1) + ":" + std::to_string(symbolOffset+1);
+    }
+
+    std::string to_wstring() const
+    {
+        return std::to_wstring(lineNumber+1) + ":" + std::to_wstring(symbolOffset+1);
+    }
+
+    template<typename StringType>
+    StringType toString() const
+    {
+        return string_plus::make_string<StringType>(to_string());
+        // if constexpr (sizeof(typename StringType::value_type)>1)
+        //     return to_wstring();
+        // else
+        //     return to_string();
+    }
+
+#endif // #if defined(__cplusplus)
+
+
+// inline
+// void printPos(const umba::TextPositionInfo &pos)
+// {
+//     cout << pos.lineNumber+1 << ":" << pos.symbolOffset+1; // печатаем человеческие номера
+// }
+
+
 } umba_text_position_info;
 #if defined(UMBA_TEXT_POSITION_INFO_COMPACT)
     #include "packpop.h"
