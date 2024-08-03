@@ -48,6 +48,8 @@
 //
 #include "tokenizer/string_literal_parsing.h"
 //
+#include "tokenizer/tokenizer_base.h"
+//
 #include "tokenizer/tokenizer.h"
 //
 #include "tokenizer/tokenizer_builder.h"
