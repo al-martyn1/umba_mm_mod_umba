@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef UMBA_TOKENIZER_H__DCAEEDE0_7624_4E47_9919_08460EF65A3B__
+#define UMBA_TOKENIZER_H__DCAEEDE0_7624_4E47_9919_08460EF65A3B__
+
+
 #if defined(UMBA_TOKENIZER_TYPES_COMPACT)
     #if !defined(UMBA_CHAR_CLASS_UNDERLYING_COMPACT)
         #define UMBA_CHAR_CLASS_UNDERLYING_COMPACT
@@ -43,6 +47,14 @@
 #include "tokenizer/trie_builder.h"
 //
 #include "tokenizer/string_literal_parsing.h"
+//
+#include "tokenizer/tokenizer.h"
+//
+#include "tokenizer/tokenizer_builder.h"
+
+
+
+
 
 
 /*
@@ -165,4 +177,6 @@ $
 } // namespace tokenizer
 } // namespace umba
 
+
+#endif /* UMBA_TOKENIZER__DCAEEDE0_7624_4E47_9919_08460EF65A3B__ */
 

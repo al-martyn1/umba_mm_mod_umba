@@ -140,7 +140,7 @@ typedef struct tag_umba_tokenizer_trie_node
     UMBA_TOKENIZER_TRIE_INDEX_TYPE       childsIndex          ;
     UMBA_TOKENIZER_TOKEN_TYPE            token                ; // Токен или символ
     UMBA_TOKENIZER_PAYLOAD_TYPE          payload              ; // Полезная нагрузка
-    UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE    payloadFlags         ; // Пользовательские флаги или данные, влезает указатель
+    UMBA_TOKENIZER_PAYLOAD_FLAGS_TYPE    payloadExtra         ; // Пользовательские флаги или данные, влезает указатель
 
 #if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
     UMBA_TOKENIZER_TRIE_INDEX_TYPE       level                ; // Нужно, чтобы делать красивый граф таблицы trie
@@ -169,7 +169,7 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
     pNode->token                 = UMBA_TOKENIZER_TOKEN_INVALID;
     pNode->payload               = UMBA_TOKENIZER_PAYLOAD_INVALID;
 #if !defined(UMBA_TOKENIZER_NO_PAYLOAD_FLAGS)
-    pNode->payloadFlags          = 0;
+    pNode->payloadExtra          = 0;
 #endif
 }
 
