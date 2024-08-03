@@ -57,13 +57,13 @@ protected:
     bool         insertionDisabled = false;
 
 public:
-    TokenizerLiteralCharStringInserter(StringType &str) : strAppendTo(str) {}
+    TokenizerLiteralCharStringRefInserter(StringType &str) : strAppendTo(str) {}
 
-    TokenizerLiteralCharStringInserter() = delete;
-    TokenizerLiteralCharStringInserter(const ITokenizerLiteralCharStringInserter &) = default;
-    TokenizerLiteralCharStringInserter& operator=(const ITokenizerLiteralCharStringInserter &) = default;
-    TokenizerLiteralCharStringInserter(ITokenizerLiteralCharStringInserter &&) = default;
-    TokenizerLiteralCharStringInserter& operator=(ITokenizerLiteralCharStringInserter &&) = default;
+    TokenizerLiteralCharStringRefInserter() = delete;
+    TokenizerLiteralCharStringRefInserter(const TokenizerLiteralCharStringRefInserter &) = default;
+    TokenizerLiteralCharStringRefInserter& operator=(const TokenizerLiteralCharStringRefInserter &) = default;
+    TokenizerLiteralCharStringRefInserter(TokenizerLiteralCharStringRefInserter &&) = default;
+    TokenizerLiteralCharStringRefInserter& operator=(TokenizerLiteralCharStringRefInserter &&) = default;
 
 
     void  clear() { strAppendTo.clear(); }
@@ -90,10 +90,10 @@ protected:
 public:
 
     TokenizerLiteralCharStringInserter() = delete;
-    TokenizerLiteralCharStringInserter(const ITokenizerLiteralCharStringInserter &) = default;
-    TokenizerLiteralCharStringInserter& operator=(const ITokenizerLiteralCharStringInserter &) = default;
-    TokenizerLiteralCharStringInserter(ITokenizerLiteralCharStringInserter &&) = default;
-    TokenizerLiteralCharStringInserter& operator=(ITokenizerLiteralCharStringInserter &&) = default;
+    TokenizerLiteralCharStringInserter(const TokenizerLiteralCharStringInserter &) = default;
+    TokenizerLiteralCharStringInserter& operator=(const TokenizerLiteralCharStringInserter &) = default;
+    TokenizerLiteralCharStringInserter(TokenizerLiteralCharStringInserter &&) = default;
+    TokenizerLiteralCharStringInserter& operator=(TokenizerLiteralCharStringInserter &&) = default;
 
     void  clear() { strAppendTo.clear(); }
     const StringType& str() const { return strAppendTo; }
