@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef UMBA_TOKENIZER_H__DCAEEDE0_7624_4E47_9919_08460EF65A3B__
+    #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
+#endif
 
 
 // umba::tokenizer::
@@ -17,6 +20,13 @@ void trieNodeInitMakeUninitialized(TrieNode &node)
 //----------------------------------------------------------------------------
 
 
+
+//----------------------------------------------------------------------------
+// trie_index_type tokenTrieFindFirst(const ContainerType &tokenTrie, token_type tk)
+// trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_type curIndex, token_type tk)
+// trie_index_type tokenTrieTraverse(const ContainerType &tokenTrie, TokenSequenceIteratorType b, TokenSequenceIteratorType e)
+// void tokenTrieBackTrace(const ContainerType &tokenTrie, trie_index_type curIndex, BackTraceHandlerType handler)
+// void tokenTriePrintTableGraph(const std::string &name, const ContainerType &tokenTrie, StreamType &s, TokenToStringConverter converter)
 
 //----------------------------------------------------------------------------
 template<typename ContainerType>
@@ -96,6 +106,48 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
 
     return trie_index_invalid; // Не нашли, обломс
 }
+
+//----------------------------------------------------------------------------
+template<typename ContainerType>
+trie_index_type tokenTrieFindFirst(const ContainerType &tokenTrie, token_type tk)
+{
+    return tokenTrieFindNext(tokenTrie, trie_index_invalid, tk);
+}
+
+//----------------------------------------------------------------------------
+template<typename ContainerType, typename TokenSequenceIteratorType>
+trie_index_type tokenTrieTraverse(const ContainerType &tokenTrie, TokenSequenceIteratorType b, TokenSequenceIteratorType e)
+{
+    if (b==e)
+        return trie_index_invalid;
+
+    trie_index_type idx = tokenTrieFindFirst(tokenTrie, *b);
+
+    for(++b; idx!=trie_index_invalid && b!=e; ++b)
+    {
+        idx = tokenTrieFindNext(tokenTrie, idx, *b);
+    }
+
+    return idx;
+}
+
+//----------------------------------------------------------------------------
+// // Надо прошагать по последовательности от seqB, seqE,
+// template<typename ContainerType, typename TokenSequenceIteratorType>
+// trie_index_type tokenTrieTraverse(const ContainerType &tokenTrie, TokenSequenceIteratorType seqB, TokenSequenceIteratorType seqE, TokenSequenceIteratorType globalE)
+// {
+//     if (b==e)
+//         return trie_index_invalid;
+//
+//     trie_index_type idx = tokenTrieFindFirst(tokenTrie, *b);
+//
+//     for(++b; idx!=trie_index_invalid && b!=e; ++b)
+//     {
+//         idx = tokenTrieFindNext(tokenTrie, idx, *b);
+//     }
+//
+//     return idx;
+// }
 
 //----------------------------------------------------------------------------
 template<typename ContainerType, typename BackTraceHandlerType>
@@ -187,6 +239,38 @@ void tokenTriePrintTableGraph(const std::string &name, const ContainerType &toke
 
 //----------------------------------------------------------------------------
 namespace utils {
+
+
+
+
+//----------------------------------------------------------------------------
+//! Базовый false-тип для детекта наличия метода rebase у объекта
+template< typename C, typename = void >
+struct iterator_has_rebase : std::false_type
+{};
+
+//------------------------------
+//! Специализация, тестирующая наличие метода reserve у объекта
+template< typename C >
+struct iterator_has_rebase< C, std::enable_if_t< std::is_same<decltype( std::declval<C>().reserve( reinterpret_cast<const typename C::value_type *>(1)) ), void >::value > >
+  : std::true_type
+{};
+
+//------------------------------
+template< typename C >
+std::enable_if_t< iterator_has_rebase< C >::value > inline
+iterator_rebase( C& c, const typename C::value_type * newBase )
+{
+  c.rebase( newBase );
+}
+
+//------------------------------
+//! Версия для итераторов, не имеющих метода rebase. Не делает ничего.
+template< typename C >
+std::enable_if_t< !iterator_has_rebase< C >::value > inline
+iterator_rebase( C& c, const typename C::value_type * newBase ) {}
+
+//----------------------------------------------------------------------------
 
 
 

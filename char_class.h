@@ -147,6 +147,22 @@ enum class CharClass : char_class_underlying_uint_t
 //----------------------------------------------------------------------------
 using CharClassUnderlyingType = typename std::underlying_type<CharClass>::type;
 
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline constexpr CharClass operator~(CharClass a)
+{
+    using TUnder = typename std::underlying_type<CharClass>::type;
+    return static_cast<CharClass>(~static_cast<TUnder>(a));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 inline constexpr CharClass operator|(CharClass a, CharClass b)
 {
     using TUnder = typename std::underlying_type<CharClass>::type;
@@ -231,39 +247,40 @@ inline constexpr bool operator!=(std::underlying_type<CharClass>::type a, CharCl
 
 
 
+#if !defined(UMBA_TOKENIZER_DISABLE_TYPES_META)
 //----------------------------------------------------------------------------
-inline
-std::string enum_serialize_single_flag(CharClass f, const std::string &prefix=std::string())
+template<typename StringType>
+StringType enum_serialize_single_flag(CharClass f, const StringType &prefix=StringType())
 {
     switch(f)
     {
         //case CharClass::none            : return std::string("none");
-        case CharClass::string_literal_prefix       : return prefix+std::string("string_literal_prefix");
-        case CharClass::nonprintable                : return prefix+std::string("nonprintable");
-        case CharClass::linefeed                    : return prefix+std::string("linefeed");
-        case CharClass::space                       : return prefix+std::string("space");
-        //case CharClass::tab             : return prefix+std::string("tab");
-        case CharClass::xdigit                      : return prefix+std::string("xdigit");
-        //case CharClass::brace           : return prefix+std::string("brace");
-        case CharClass::open                        : return prefix+std::string("open");
-        case CharClass::close                       : return prefix+std::string("close");
-        case CharClass::opchar                      : return prefix+std::string("opchar");
-        //case CharClass::operator_char   : return prefix+std::string("operator_char");
-        case CharClass::punctuation                 : return prefix+std::string("punctuation");
-        case CharClass::digit                       : return prefix+std::string("digit");
-        case CharClass::alpha                       : return prefix+std::string("alpha");
-        case CharClass::upper                       : return prefix+std::string("upper");
-        case CharClass::identifier                  : return prefix+std::string("identifier");
-        case CharClass::identifier_first            : return prefix+std::string("identifier_first");
-        case CharClass::semialpha                   : return prefix+std::string("semialpha");
-        case CharClass::escape                      : return prefix+std::string("escape");
-        default: return std::string("");
+        case CharClass::string_literal_prefix       : return prefix+umba::string_plus::make_string<StringType>("string_literal_prefix");
+        case CharClass::nonprintable                : return prefix+umba::string_plus::make_string<StringType>("nonprintable");
+        case CharClass::linefeed                    : return prefix+umba::string_plus::make_string<StringType>("linefeed");
+        case CharClass::space                       : return prefix+umba::string_plus::make_string<StringType>("space");
+        //case CharClass::tab             : return prefix+umba::string_plus::make_string<StringType>("tab");
+        case CharClass::xdigit                      : return prefix+umba::string_plus::make_string<StringType>("xdigit");
+        //case CharClass::brace           : return prefix+umba::string_plus::make_string<StringType>("brace");
+        case CharClass::open                        : return prefix+umba::string_plus::make_string<StringType>("open");
+        case CharClass::close                       : return prefix+umba::string_plus::make_string<StringType>("close");
+        case CharClass::opchar                      : return prefix+umba::string_plus::make_string<StringType>("opchar");
+        //case CharClass::operator_char   : return prefix+umba::string_plus::make_string<StringType>("operator_char");
+        case CharClass::punctuation                 : return prefix+umba::string_plus::make_string<StringType>("punctuation");
+        case CharClass::digit                       : return prefix+umba::string_plus::make_string<StringType>("digit");
+        case CharClass::alpha                       : return prefix+umba::string_plus::make_string<StringType>("alpha");
+        case CharClass::upper                       : return prefix+umba::string_plus::make_string<StringType>("upper");
+        case CharClass::identifier                  : return prefix+umba::string_plus::make_string<StringType>("identifier");
+        case CharClass::identifier_first            : return prefix+umba::string_plus::make_string<StringType>("identifier_first");
+        case CharClass::semialpha                   : return prefix+umba::string_plus::make_string<StringType>("semialpha");
+        case CharClass::escape                      : return prefix+umba::string_plus::make_string<StringType>("escape");
+        default: return StringType("");
     }
 }
 
 //----------------------------------------------------------------------------
-inline
-std::string enum_serialize_flags(CharClass f, const std::string &prefix=std::string())
+template<typename StringType>
+StringType enum_serialize_flags(CharClass f, const StringType &prefix=std::string())
 {
     char_class_underlying_uint_t fu = (char_class_underlying_uint_t)f;
 
@@ -274,7 +291,7 @@ std::string enum_serialize_flags(CharClass f, const std::string &prefix=std::str
     {
         if (fu&flagBit)
         {
-            std::string flagStr = enum_serialize_single_flag((CharClass)flagBit, prefix);
+            std::string flagStr = enum_serialize_single_flag<StringType>((CharClass)flagBit, prefix);
             if (!flagStr.empty())
             {
                 if (!res.empty())
@@ -299,10 +316,14 @@ std::string enum_serialize_flags(CharClass f, const std::string &prefix=std::str
 inline
 std::string enum_serialize(CharClass f)
 {
-    return enum_serialize_flags(f);
+    return enum_serialize_flags<std::string>(f);
 }
 
 //----------------------------------------------------------------------------
+#endif
+
+//----------------------------------------------------------------------------
+
 
 
 
@@ -594,7 +615,6 @@ inline
 std::string nameToCpp(std::string name)
 {
     name = nsToPath(name);
-    //umba::string_plus::toupper(name);
 
     std::string res; res.reserve(name.size());
 

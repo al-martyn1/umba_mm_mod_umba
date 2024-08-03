@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef UMBA_TOKENIZER_H__DCAEEDE0_7624_4E47_9919_08460EF65A3B__
+    #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
+#endif
 
 
 // umba::tokenizer::
@@ -20,21 +23,86 @@ enum class StringLiteralParsingResult : unsigned
 
 //----------------------------------------------------------------------------
 
+
+//----------------------------------------------------------------------------
 template<typename CharType>
 struct ITokenizerLiteralCharInserter
 {
     using difference_type = std::ptrdiff_t;
     using value_type = CharType;
 
+    // Тут такой вопрос - может, сделать перегрузки для разных типов char?
     virtual void insert(CharType ch) = 0;
 };
 
+//----------------------------------------------------------------------------
 template<typename CharType>
-struct ITokenizerLiteralCharNulInserterImpl : public ITokenizerLiteralCharInserter<CharType>
+struct TokenizerLiteralCharNulInserterImpl : public ITokenizerLiteralCharInserter<CharType>
 {
     virtual void insert(CharType ch) override
     {
         UMBA_USED(ch);
+    }
+};
+
+//----------------------------------------------------------------------------
+template< typename CharType
+        , typename StringType = std::basic_string<CharType>
+        >
+struct TokenizerLiteralCharStringRefInserter : public ITokenizerLiteralCharInserter<CharType>
+{
+
+protected:
+    StringType  &strAppendTo;
+    bool         insertionDisabled = false;
+
+public:
+    TokenizerLiteralCharStringInserter(StringType &str) : strAppendTo(str) {}
+
+    TokenizerLiteralCharStringInserter() = delete;
+    TokenizerLiteralCharStringInserter(const ITokenizerLiteralCharStringInserter &) = default;
+    TokenizerLiteralCharStringInserter& operator=(const ITokenizerLiteralCharStringInserter &) = default;
+    TokenizerLiteralCharStringInserter(ITokenizerLiteralCharStringInserter &&) = default;
+    TokenizerLiteralCharStringInserter& operator=(ITokenizerLiteralCharStringInserter &&) = default;
+
+
+    void  clear() { strAppendTo.clear(); }
+    const StringType& str() const { return strAppendTo; }
+    void  disableInsertion(bool bDisable) { insertionDisabled = bDisable; }
+
+    virtual void insert(CharType ch) override
+    {
+        if (!insertionDisabled)
+            strAppendTo.append(1, ch);
+    }
+};
+
+//----------------------------------------------------------------------------
+template< typename CharType
+        , typename StringType = std::basic_string<CharType>
+        >
+struct TokenizerLiteralCharStringInserter : public ITokenizerLiteralCharInserter<CharType>
+{
+protected:
+    StringType  strAppendTo;
+    bool         insertionDisabled = false;
+
+public:
+
+    TokenizerLiteralCharStringInserter() = delete;
+    TokenizerLiteralCharStringInserter(const ITokenizerLiteralCharStringInserter &) = default;
+    TokenizerLiteralCharStringInserter& operator=(const ITokenizerLiteralCharStringInserter &) = default;
+    TokenizerLiteralCharStringInserter(ITokenizerLiteralCharStringInserter &&) = default;
+    TokenizerLiteralCharStringInserter& operator=(ITokenizerLiteralCharStringInserter &&) = default;
+
+    void  clear() { strAppendTo.clear(); }
+    const StringType& str() const { return strAppendTo; }
+    void  disableInsertion(bool bDisable) { insertionDisabled = bDisable; }
+
+    virtual void insert(CharType ch) override
+    {
+        if (!insertionDisabled)
+            strAppendTo.append(1, ch);
     }
 };
 
@@ -178,6 +246,7 @@ class CppEscapedSimpleQuotedStringLiteralParser : public ITokenizerLiteralParser
 protected:
 
     // Про плюсовые литералы ссылок
+    // String literal - https://en.cppreference.com/w/cpp/language/string_literal
     // Пользовательские литералы в C++11 - https://habr.com/ru/articles/140357/
     // Escape-последовательности - https://learn.microsoft.com/ru-ru/cpp/c-language/escape-sequences?view=msvc-170
     // Строковые и символьные литералы (C++) - https://learn.microsoft.com/ru-ru/cpp/cpp/string-and-character-literals-cpp?view=msvc-170
