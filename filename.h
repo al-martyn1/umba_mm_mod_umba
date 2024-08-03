@@ -1073,6 +1073,25 @@ StringType checkPathPrependDrive( const StringType &n, const StringType &curDir 
     return n;
 }
 
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType replaceExtention( const StringType &fileName, const StringType &newExt)
+{
+    return appendExt(getPathFile(fileName), newExt);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType replaceExt( const StringType &fileName, const StringType &newExt)
+{
+    return replaceExtention(fileName, newExt);
+}
+
+
+
+// template<typename StringType> inline
+// StringType getPathFile( const StringType &path )
+
 
 
 #if 0
