@@ -30,8 +30,8 @@ namespace umba{}
 //
 #include "assert.h"
 //
-#include "autolock.h"
+//#include "autolock.h"
 //
-#include "critical_section.h"
+//#include "critical_section.h"
 //
-#include "umba_cpp.h"
+//#include "umba_cpp.h"
