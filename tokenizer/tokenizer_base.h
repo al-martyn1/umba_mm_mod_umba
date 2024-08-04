@@ -463,7 +463,102 @@ public: // methods - методы собственно разбора
 
     bool tokenizeFinalize(InputIteratorType itEnd) const
     {
+        switch(st)
+        {
+            case TokenizerInternalState::stInitial  : return true;
+
+            case TokenizerInternalState::stReadSpace: 
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, itEnd);
+                 return true;
+
+            case TokenizerInternalState::stReadIdentifier:
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_IDENTIFIER, tokenStartIt, itEnd); // выплюнули
+                 return true;
+
+            case TokenizerInternalState::stReadNumberPrefix:
+            {
+                 if (numberPrefixIdx==trie_index_invalid)
+                     return false;
+
+                 // payload_type curPayload = numbersTrie[numberPrefixIdx].payload;
+                 // if (curPayload==payload_invalid)
+                 {
+                     // Надо проверить, является ли то, что уже есть, чисто числом
+                     // int charToDigit(CharType ch)
+                     bool prefixIsNumber     = true ;
+                     tokenTrieBackTrace( numbersTrie
+                                       , numberPrefixIdx
+                                       , [&](token_type ch)
+                                         {
+                                             if (!utils::isDigitAllowed(ch, numbersBase))
+                                                 prefixIsNumber = false;
+                                         }
+                                       );
+
+                     if (!prefixIsNumber)
+                         return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                     return true;
+                 }
+            }
+
+            case TokenizerInternalState::stReadNumber:
+                 if (numberTokenId==0 || numberTokenId==payload_invalid)
+                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                 else
+                     parsingHandlerLambda(numberTokenId, tokenStartIt, itEnd); // выплёвываем накопленное число с явно указанной системой счисления
+                 return true;
+
+            case TokenizerInternalState::stReadNumberFloat:
+                 if (numberTokenId==0 || numberTokenId==payload_invalid)
+                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd); // выплёвываем накопленное число с системой счисления по умолчанию
+                 else
+                     parsingHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd); // выплёвываем накопленное число с явно указанной системой счисления
+                 return true;
+
+            case TokenizerInternalState::stReadOperator:
+                 if (operatorIdx==trie_index_invalid)
+                 {
+                     reportPossibleUnknownOperatorLambda(tokenStartIt, itEnd);
+                     return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+                 }
+                 else
+                 {
+                     auto curPayload = operatorsTrie[operatorIdx].payload;
+                     if (curPayload==payload_invalid) // текущий оператор нифига не оператор
+                     {
+                         reportPossibleUnknownOperatorLambda(tokenStartIt, itEnd);
+                         return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+                     }
+ 
+                     if (utils::isCommentToken(curPayload)) // на каждом операторе в обрабатываемом тексте у нас это срабатывает. Жирно или нет?
+                     {
+                         //TODO: !!! Надо уточнить, что за комент
+                         return true; // Пока считаем, что всё нормально
+                     }
+ 
+                     parsingHandlerLambda(curPayload, tokenStartIt, itEnd); // выплюнули текущий оператор
+ 
+                     return true;
+                 }
+
+            case TokenizerInternalState::stReadSingleLineComment:
+                 parsingHandlerLambda(commentTokenId, tokenStartIt, itEnd, commentStartIt, itEnd);
+                 return true;
+
+            case TokenizerInternalState::stReadMultilineLineComment:
+                 return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+
+            case TokenizerInternalState::stReadStringLiteral:
+                 return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+
+            case TokenizerInternalState::stContinuationWaitLinefeed:
+                 return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+
+            default: return false;
+        }
         return true;
+
     }
 
     bool tokenize(InputIteratorType it, InputIteratorType itEnd) const
@@ -523,7 +618,7 @@ public: // methods - методы собственно разбора
                 else if (umba::TheFlags(charClass).oneOf(CharClass::opchar))
                 {
                     if (!performStartReadingOperatorLambda(ch, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::identifier_first))
                 {
@@ -538,7 +633,7 @@ public: // methods - методы собственно разбора
                 else if (umba::TheFlags(charClass).oneOf(CharClass::open, CharClass::close)) // Открывающая или закрывающая скобка
                 {
                     if (!performProcessBracketLambda(ch, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::semialpha))
                 {
@@ -550,7 +645,7 @@ public: // methods - методы собственно разбора
                 }
                 else
                 {
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
 
                 //if ((charClass::linefeed))
@@ -610,7 +705,7 @@ public: // methods - методы собственно разбора
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it);
                     if (!performStartReadingOperatorLambda(ch, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::identifier_first))
                 {
@@ -627,7 +722,7 @@ public: // methods - методы собственно разбора
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it); // выплюнули
                     if (!performProcessBracketLambda(ch, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::semialpha))
                 {
@@ -642,7 +737,7 @@ public: // methods - методы собственно разбора
                 }
                 else
                 {
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
             } break;
 
@@ -682,12 +777,12 @@ public: // methods - методы собственно разбора
                 else if (umba::TheFlags(charClass).oneOf(CharClass::opchar))
                 {
                     if (!performStartReadingOperatorLambda(ch, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::open, CharClass::close)) // Открывающая или закрывающая скобка
                 {
                     if (!performProcessBracketLambda(ch, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::escape))
                 {
@@ -695,7 +790,7 @@ public: // methods - методы собственно разбора
                 }
                 else
                 {
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
             } break;
 
@@ -737,7 +832,7 @@ public: // methods - методы собственно разбора
                                           );
 
                         if (!prefixIsNumber)
-                            return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                            return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                         //parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                         //st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                         //goto explicit_initial;
@@ -778,7 +873,7 @@ public: // methods - методы собственно разбора
 
 
                     if (requiresDigits)
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__); // нужна хоть одна цифра, а её нет
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__); // нужна хоть одна цифра, а её нет
 
                     parsingHandlerLambda(numberTokenId, tokenStartIt, it); // выплёвываем префикс (он является годным числом и без доп цифр)
 
@@ -824,7 +919,7 @@ public: // methods - методы собственно разбора
                 }
 
                 numberTokenId = 0;
-                //return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                //return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 // Далее у нас всё как начальном состоянии
                 st = TokenizerInternalState::stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                 goto explicit_initial;
@@ -851,12 +946,12 @@ public: // methods - методы собственно разбора
                 if (umba::TheFlags(dotCharClass).oneOf(CharClass::opchar)) // Точка - операторный символ?
                 {
                     if (!performStartReadingOperatorLambda((std::decay_t<decltype(ch)>)'.', tokenStartIt))
-                        return unexpectedHandlerLambda(tokenStartIt, __FILE__, __LINE__); // но у нас нет операторов, начинающихся с точки
+                        return unexpectedHandlerLambda(tokenStartIt, itEnd, __FILE__, __LINE__); // но у нас нет операторов, начинающихся с точки
                     goto explicit_readoperator; // Надо обработать текущий символ
                 }
                 else // точка - не операторный символ, и не начало дробной части плавающего числа
                 {
-                    return unexpectedHandlerLambda(tokenStartIt, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(tokenStartIt, itEnd, __FILE__, __LINE__);
                 }
 
                 st = TokenizerInternalState::stReadNumberFloat;
@@ -917,12 +1012,12 @@ public: // methods - методы собственно разбора
                         if (curPayload==payload_invalid) // текущий оператор нифига не оператор
                         {
                             reportPossibleUnknownOperatorLambda(tokenStartIt, it);
-                            return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                            return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                         }
                         if (utils::isCommentToken(curPayload)) // на каждом операторе в обрабатываемом тексте у нас это срабатывает. Жирно или нет?
                         {
                             if (!processCommentStartFromNonCommentedLambda(curPayload, it))
-                                return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                                return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                             break;
                         }
 
@@ -933,7 +1028,7 @@ public: // methods - методы собственно разбора
                         if (operatorIdx==trie_index_invalid)
                         {
                             reportPossibleUnknownOperatorLambda(it,it+1);
-                            return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                            return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                         }
                     }
                     break; // коллекционируем символы оператора
@@ -942,12 +1037,12 @@ public: // methods - методы собственно разбора
                 // Заканчиваем обработку оператора на неоператорном символе
 
                 if (operatorIdx==trie_index_invalid) // Текущий оператор почему-то не оператор
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
 
                 if (operatorsTrie[operatorIdx].payload==payload_invalid)
                 {
                     reportPossibleUnknownOperatorLambda(tokenStartIt, it);
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
 
                 auto curPayload = operatorsTrie[operatorIdx].payload;
@@ -956,7 +1051,7 @@ public: // methods - методы собственно разбора
                 if (utils::isCommentToken(curPayload)) // на каждом операторе в обрабатываемом тексте у нас это срабатывает. Жирно или нет?
                 {
                     if (!processCommentStartFromNonCommentedLambda(curPayload, it))
-                        return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                     break;
                 }
 
@@ -981,7 +1076,7 @@ public: // methods - методы собственно разбора
                 if (res==StringLiteralParsingResult::error)
                 {
                     reportStringLiteralMessageLambda(true /* bErr */ , it, externHandlerMessage);
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
                 }
 
                 if (res==StringLiteralParsingResult::warnContinue || res==StringLiteralParsingResult::warnStop)
@@ -1043,7 +1138,7 @@ public: // methods - методы собственно разбора
             {
                 // auto nextOperatorIdx = tokenTrieFindNext(operatorsTrie, operatorIdx, (token_type)ch);
                 if (multiLineCommentEndStr.empty())
-                    return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
 
                 if (multiLineCommentEndStr[0]!=*it) // текущий входной символ не является первым символом маркера конца коментария
                     break;
@@ -1101,7 +1196,7 @@ public: // methods - методы собственно разбора
             //------------------------------
             default:
             {
-                return unexpectedHandlerLambda(it, __FILE__, __LINE__);
+                return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
             }
 
         } // end switch
@@ -1179,9 +1274,9 @@ protected: // methods - хандлеры из "грязного" проекта,
         static_cast<const TBase*>(this)->hadleToken(tokenType, inputDataBegin, inputDataEnd, parsedData);
     }
 
-    bool unexpectedHandlerLambda(InputIteratorType it, const char* srcFile, int srcLine) const
+    bool unexpectedHandlerLambda(InputIteratorType it, InputIteratorType itEnd, const char* srcFile, int srcLine) const
     {
-        return static_cast<const TBase*>(this)->hadleUnexpected(it, srcFile, srcLine);
+        return static_cast<const TBase*>(this)->hadleUnexpected(it, itEnd, srcFile, srcLine);
     }
 
     // Дополнительное сообщение о неизвестном операторе, перед вызовом unexpectedHandlerLambda - типа чуть чуть улучшили диагностику
