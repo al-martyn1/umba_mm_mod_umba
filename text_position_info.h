@@ -87,15 +87,15 @@ typedef struct tag_umba_text_position_info
         return std::to_string(lineNumber+1) + ":" + std::to_string(symbolOffset+1);
     }
 
-    std::string to_wstring() const
+    std::wstring to_wstring() const
     {
-        return std::to_wstring(lineNumber+1) + ":" + std::to_wstring(symbolOffset+1);
+        return std::to_wstring(lineNumber+1) + L":" + std::to_wstring(symbolOffset+1);
     }
 
     template<typename StringType>
     StringType toString() const
     {
-        return string_plus::make_string<StringType>(to_string());
+        return umba::string_plus::make_string<StringType>(to_string());
         // if constexpr (sizeof(typename StringType::value_type)>1)
         //     return to_wstring();
         // else

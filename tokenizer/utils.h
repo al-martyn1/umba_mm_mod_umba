@@ -244,6 +244,9 @@ namespace utils {
 
 
 //----------------------------------------------------------------------------
+// https://stackoverflow.com/questions/19392361/adding-element-to-back-of-stl-container
+// https://stackoverflow.com/questions/14882588/correct-signature-of-detect-presence-of-containerreserve
+//----------------------------------------------------------------------------
 //! Базовый false-тип для детекта наличия метода rebase у объекта
 template< typename C, typename = void >
 struct iterator_has_rebase : std::false_type
@@ -252,7 +255,7 @@ struct iterator_has_rebase : std::false_type
 //------------------------------
 //! Специализация, тестирующая наличие метода reserve у объекта
 template< typename C >
-struct iterator_has_rebase< C, std::enable_if_t< std::is_same<decltype( std::declval<C>().reserve( reinterpret_cast<const typename C::value_type *>(1)) ), void >::value > >
+struct iterator_has_rebase< C, std::enable_if_t< std::is_same<decltype( std::declval<C>().rebase( reinterpret_cast<const typename C::value_type *>(1)) ), void >::value > >
   : std::true_type
 {};
 
@@ -271,6 +274,39 @@ std::enable_if_t< !iterator_has_rebase< C >::value > inline
 iterator_rebase( C& c, const typename C::value_type * newBase ) {}
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Базовый false-тип для детекта наличия метода rebase у объекта
+template< typename C, typename = void >
+struct iterator_has_getRawValueTypePointer : std::false_type
+{};
+
+//------------------------------
+//! Специализация, тестирующая наличие метода reserve у объекта
+template< typename C >
+struct iterator_has_getRawValueTypePointer< C, std::enable_if_t< std::is_same<decltype( std::declval<C>().getRawValueTypePointer()), void >::value > >
+  : std::true_type
+{};
+
+//------------------------------
+template< typename C >
+std::enable_if_t< iterator_has_getRawValueTypePointer< C >::value > inline
+iterator_getRawValueTypePointer( C& c )
+{
+  c.getRawValueTypePointer( );
+}
+
+//------------------------------
+//! Версия для итераторов, не имеющих метода getRawValueTypePointer
+template< typename C >
+std::enable_if_t< !iterator_has_rebase< C >::value > inline
+iterator_getRawValueTypePointer( C& c ) { return &*c; }
+
+//----------------------------------------------------------------------------
+
+
 
 
 

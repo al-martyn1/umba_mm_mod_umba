@@ -50,6 +50,8 @@
 //
 #include "tokenizer/tokenizer_base.h"
 //
+#include "tokenizer/tokenizer_function_handlers.h"
+//
 #include "tokenizer/tokenizer.h"
 //
 #include "tokenizer/tokenizer_builder.h"

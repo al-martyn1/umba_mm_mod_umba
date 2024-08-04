@@ -4,7 +4,7 @@
     #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
 #endif
 
-
+#include "../the.h"
 
 //----------------------------------------------------------------------------
 // umba::tokenizer::
@@ -129,8 +129,8 @@ StringType getTokenizerTokenStr(payload_type p)
 //----------------------------------------------------------------------------
 template< typename TBase
         , typename CharType            // Input chars type
-        , typename CharClassTable      = std::array<CharClass, 128>
-        , typename TrieVector          = std::vector<TrieNode>
+        , typename CharClassTableType  = std::array<CharClass, 128>
+        , typename TrieVectorType      = std::vector<TrieNode>
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
         , typename MessagesStringType  = std::string  // Тип строки, которая используется для сообщений (в том числе и от внешних суб-парсеров)
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
@@ -143,8 +143,8 @@ public: // depending types
 
     using char_type                = CharType;
     using value_type               = CharType;
-    using char_class_table_type    = CharClassTable;
-    using trie_vector_type         = TrieVector;
+    using char_class_table_type    = CharClassTableType;
+    using trie_vector_type         = TrieVectorType;
     using string_type              = StringType;
     using iterator_type            = InputIteratorType;
     using messages_string_type     = MessagesStringType;
@@ -152,21 +152,31 @@ public: // depending types
     using ITokenizerLiteralParser  = umba::tokenizer::ITokenizerLiteralParser<CharType, MessagesStringType, InputIteratorType>;
 
 
+//------------------------------
+public: // ctors and op=
+
+    TokenizerBaseImpl() = default;
+    TokenizerBaseImpl(const TokenizerBaseImpl &) = delete;
+    TokenizerBaseImpl& operator=(const TokenizerBaseImpl &) = delete;
+    TokenizerBaseImpl(TokenizerBaseImpl &&) = default;
+    TokenizerBaseImpl& operator=(TokenizerBaseImpl &&) = default;
+
+
+//------------------------------
 protected: // internal types
 
     using TokenizerLiteralCharStringInserter  = umba::tokenizer::TokenizerLiteralCharStringInserter<CharType, StringType>;
 
 
-
 //------------------------------
 protected: // fileds
 
-    CharClassTable        charClassTable;
+    CharClassTableType    charClassTable;
 
-    TrieVector            numbersTrie   ;
-    TrieVector            bracketsTrie  ;
-    TrieVector            operatorsTrie ;
-    TrieVector            literalsTrie  ;
+    TrieVectorType        numbersTrie   ;
+    TrieVectorType        bracketsTrie  ;
+    TrieVectorType        operatorsTrie ;
+    TrieVectorType        literalsTrie  ;
 
     StringType            multiLineCommentEndStr;
 
@@ -214,7 +224,7 @@ protected: // methods
 //------------------------------
 public: // methods
 
-    void setCharClassTable( const CharClassTable &cht)
+    void setCharClassTable( const CharClassTableType &cht)
     {
         UMBA_ASSERT(cht.size()>=128);
         charClassTable = cht;
@@ -224,7 +234,7 @@ public: // methods
     // Если его надо сохранять, то charClassTable надо сохранять вручную, потому что по умолчанию сохранять
     // в состоянии всю charClassTable слишком жирно. Пользователь может сохранять лишь те элементы, которые
     // модифицировал сам.
-    CharClassTable getCharClassTable() const { return charClassTable; }
+    CharClassTableType getCharClassTable() const { return charClassTable; }
 
     //! Возвращает предыдущее состояние флагов
     umba::tokenizer::CharClass setResetCharClassFlags(CharType ch, umba::tokenizer::CharClass setFlags, umba::tokenizer::CharClass clrFlags)
@@ -265,12 +275,12 @@ public: // methods
     }
 
     // Конец многострочного коментария ищется тупо как текст, поэтому он не входит в operatorsTrie (в отличие от начала)
-    void setMultiLineCommentEndString(const StringType s) { multiLineCommentEndStr = s; };
+    void setMultiLineCommentEndString(const StringType s) { multiLineCommentEndStr = s; }
 
-    void setNumbersTrie  (const TrieVector &tv) { numbersTrie   = tv; }
-    void setBracketsTrie (const TrieVector &tv) { bracketsTrie  = tv; }
-    void setOperatorsTrie(const TrieVector &tv) { operatorsTrie = tv; }
-    void setLiteralsTrie (const TrieVector &tv) { literalsTrie  = tv; }
+    void setNumbersTrie  (const TrieVectorType &tv) { numbersTrie   = tv; }
+    void setBracketsTrie (const TrieVectorType &tv) { bracketsTrie  = tv; }
+    void setOperatorsTrie(const TrieVectorType &tv) { operatorsTrie = tv; }
+    void setLiteralsTrie (const TrieVectorType &tv) { literalsTrie  = tv; }
 
 
     // Если у нас standalone токенизер, а не был получен из TokenizerBuilder, то
@@ -290,67 +300,6 @@ public: // methods
         UMBA_ASSERT(umba::TheFlags(getCharClass(strLiteralPrefix[0])).oneOf(CharClass::string_literal_prefix));
 
         literalsTrie[tokenIdx].payloadExtra = reinterpret_cast<umba::tokenizer::payload_type>(pParser);
-    }
-
-
-//------------------------------
-protected: // methods - хандлеры из "грязного" проекта, где я наговнякал первую версию, выносим лямбды.
-           // Это переходники к обработчикам, которые будут в дочернем классе
-           // Нормальные имена потом сделаем, если захочется
-           // Все хелперы и вся обработка трогают только то, что отвечает за состояние парсера. Все входные таблицы/деревья,
-           // опции и тп - оно не должно трогать, поэтому состояние - mutable, а методы логически константные
-
-    //! Эта "лямбда" вызывается при распознавании очередного токена. Тут надо вызвать метода класса-наследника, пока не будем
-    /* @param b, e - итераторы начала и конца текста токена
-
-       Итераторы передаем по значению. Предполагается, что у нас будет использоваться TextPositionCountingIterator, он жирный,
-       но, теоретически, можно использовать и обычные итераторы или указатели, если не нужна информация о строке и позиции в ней.
-       В принципе, TextPositionCountingIterator можно сделать полегче на 8 байт (24 vs 32 сейчас на x86)
-
-       Для некоторых типов токенов нужно отдавать дополнительную информацию:
-       - для строковых литералов - разобранную строку
-       - для цифровых - пока хз что
-       - для коментариев - текст без маркеров коментария
-
-       Т.е. нужна вторая пара итераторов
-
-       во внешний обработчик будем передавать string_view с полным варантом всегда
-       и string_view с доп инфой.
-       сли доп инфы нет - второй string_view будет пустой - begin==end
-
-    */
-    void parsingHandlerLambda(payload_type tokenType, InputIteratorType b, InputIteratorType e) const
-    {
-        if (tokenType==UMBA_TOKENIZER_TOKEN_LINEFEED)
-            curPosAtLineBeginning = true; // Для поддержки однострочного комента только в начале строки
-        else if (tokenType==UMBA_TOKENIZER_TOKEN_SPACE) {} // Пробелы - пропускаем, они ничего не меняют
-        else
-            curPosAtLineBeginning = false; // Для поддержки однострочного комента только в начале строки
-
-        UMBA_USED(b); UMBA_USED(e);
-
-        // !!! Тут надо вызвать хэндлер в наследнике
-    }
-
-    bool unexpectedHandlerLambda(InputIteratorType it, const char* srcFile, int srcLine) const
-    {
-        UMBA_USED(it); UMBA_USED(srcFile); UMBA_USED(srcLine);
-        return false; // ошибка
-        // !!! Тут надо вызвать хэндлер в наследнике, и вернуть его результат
-    }
-
-    // Дополнительное сообщение о неизвестном операторе, перед вызовом unexpectedHandlerLambda - типа чуть чуть улучшили диагностику
-    void reportPossibleUnknownOperatorLambda(InputIteratorType b, InputIteratorType e) const
-    {
-        UMBA_USED(b); UMBA_USED(e);
-        // !!! Тут надо вызвать хэндлер в наследнике
-    }
-
-    // Либо предупреждение, либо сообщение об ошибке от парсера литералов
-    void reportStringLiteralMessageLambda(bool bErr, InputIteratorType it, const std::string msg) const
-    {
-        UMBA_USED(bErr); UMBA_USED(it); UMBA_USED(msg);
-        // !!! Тут надо вызвать хэндлер в наследнике
     }
 
 
@@ -459,7 +408,7 @@ protected: // methods - helpers - из "грязного" проекта, где
     // payload_type                        literalTokenId = 0;
     // MessagesStringType                  externHandlerMessage;
     // TokenizerLiteralCharStringInserter  stringLiteralValueCollector;
-    //  
+    //
     // ITokenizerLiteralParser
 
     ITokenizerLiteralParser* checkIsLiteralPrefix(InputIteratorType it, InputIteratorType end, payload_type &literalToken) const
@@ -487,7 +436,7 @@ protected: // methods - helpers - из "грязного" проекта, где
 
             idx = nextIdx;
         }
-        
+
         return 0;
     };
 
@@ -509,7 +458,7 @@ public: // methods - методы собственно разбора
 //     stReadMultilineLineComment,
 //     stReadStringLiteral       ,
 //     stContinuationWaitLinefeed
-//  
+//
 // };
 
     bool tokenizeFinalize(InputIteratorType itEnd) const
@@ -520,13 +469,14 @@ public: // methods - методы собственно разбора
     bool tokenize(InputIteratorType it, InputIteratorType itEnd) const
     {
         const auto ch = *it;
+        UMBA_ASSERT(charClassTable.size()>charToCharClassTableIndex(ch));
         CharClass charClass = charClassTable[charToCharClassTableIndex(ch)];
 
         switch(st)
         {
             //------------------------------
             explicit_initial:
-            case stInitial:
+            case TokenizerInternalState::stInitial:
             {
 
                 // st = stReadNumber;
@@ -537,13 +487,13 @@ public: // methods - методы собственно разбора
 
                 if (ch==(std::decay_t<decltype(ch)>)'.')
                 {
-                    st = stReadNumberMayBeFloat;
+                    st = TokenizerInternalState::stReadNumberMayBeFloat;
                     tokenStartIt = it;
-			        numberPrefixIdx = trie_index_invalid;
-			        numberTokenId = 0;
-			        numberReadedDigits = 0;
-			        numberExplicitBase = 0;
-                    numbersBase = numberDefaultBase;
+                    numberPrefixIdx = trie_index_invalid;
+                    numberTokenId = 0;
+                    numberReadedDigits = 0;
+                    numberExplicitBase = 0;
+                    numbersBase = options.numberDefaultBase;
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
                         allowedDigitCharClass |= CharClass::xdigit;
@@ -556,7 +506,7 @@ public: // methods - методы собственно разбора
                     if (pCurrentLiteralParser)
                     {
                         tokenStartIt = it;
-                        st = stReadStringLiteral;
+                        st = TokenizerInternalState::stReadStringLiteral;
                         goto explicit_readstringliteral;
                     }
                 }
@@ -568,7 +518,7 @@ public: // methods - методы собственно разбора
                 else if (umba::TheFlags(charClass).oneOf(CharClass::space))
                 {
                     tokenStartIt = it;
-                    st = stReadSpace;
+                    st = TokenizerInternalState::stReadSpace;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::opchar))
                 {
@@ -579,7 +529,7 @@ public: // methods - методы собственно разбора
                 {
                     //parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it); // выплюнули
                     tokenStartIt = it;
-                    st = stReadIdentifier;
+                    st = TokenizerInternalState::stReadIdentifier;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::digit))
                 {
@@ -608,18 +558,18 @@ public: // methods - методы собственно разбора
 
 
             //------------------------------
-            case stReadSpace:
+            case TokenizerInternalState::stReadSpace:
             {
                 if (ch==(std::decay_t<decltype(ch)>)'.')
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it);
-                    st = stReadNumberMayBeFloat;
+                    st = TokenizerInternalState::stReadNumberMayBeFloat;
                     tokenStartIt = it;
-			        numberPrefixIdx = trie_index_invalid;
-			        numberTokenId = 0;
-			        numberReadedDigits = 0;
-			        numberExplicitBase = 0;
-                    numbersBase = numberDefaultBase;
+                    numberPrefixIdx = trie_index_invalid;
+                    numberTokenId = 0;
+                    numberReadedDigits = 0;
+                    numberExplicitBase = 0;
+                    numbersBase = options.numberDefaultBase;
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
                         allowedDigitCharClass |= CharClass::xdigit;
@@ -633,7 +583,7 @@ public: // methods - методы собственно разбора
                     {
                         parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it);
                         tokenStartIt = it;
-                        st = stReadStringLiteral;
+                        st = TokenizerInternalState::stReadStringLiteral;
                         goto explicit_readstringliteral;
                     }
                 }
@@ -642,7 +592,7 @@ public: // methods - методы собственно разбора
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it);
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_LINEFEED, it, it+1); // Перевод строки мы всегда отдельно выплёвываем
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::space))
                 {
@@ -666,7 +616,7 @@ public: // methods - методы собственно разбора
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it); // выплюнули
                     tokenStartIt = it;
-                    st = stReadIdentifier;
+                    st = TokenizerInternalState::stReadIdentifier;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::digit))
                 {
@@ -683,7 +633,7 @@ public: // methods - методы собственно разбора
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it); // выплюнули
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SEMIALPHA, it, it+1); // выплюнули
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::escape))
                 {
@@ -698,7 +648,7 @@ public: // methods - методы собственно разбора
 
 
             //------------------------------
-            case stReadIdentifier:
+            case TokenizerInternalState::stReadIdentifier:
             {
                 if (umba::TheFlags(charClass).oneOf(CharClass::identifier, CharClass::identifier_first))
                 {
@@ -715,7 +665,7 @@ public: // methods - методы собственно разбора
                     if (pCurrentLiteralParser)
                     {
                         tokenStartIt = it;
-                        st = stReadStringLiteral;
+                        st = TokenizerInternalState::stReadStringLiteral;
                         goto explicit_readstringliteral;
                     }
                 }
@@ -723,11 +673,11 @@ public: // methods - методы собственно разбора
                 if (umba::TheFlags(charClass).oneOf(CharClass::linefeed))
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_LINEFEED, it, it+1); // Перевод строки мы всегда отдельно выплёвываем
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::space))
                 {
-                    st = stReadSpace;
+                    st = TokenizerInternalState::stReadSpace;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::opchar))
                 {
@@ -751,7 +701,7 @@ public: // methods - методы собственно разбора
 
 
             //------------------------------
-            case stReadNumberPrefix:
+            case TokenizerInternalState::stReadNumberPrefix:
             {
                 //NOTE: !!! У нас пока так: префикс числа начинается с любой цифры, потом могут следовать любые символы, после префикса - те символы, которые разрешены префиксом
                 payload_type curPayload = payload_invalid;
@@ -772,7 +722,7 @@ public: // methods - методы собственно разбора
                         // Надо проверить, является ли то, что уже есть, чисто числом
                         // int charToDigit(CharType ch)
 
-                        numbersBase = numberDefaultBase;
+                        numbersBase = options.numberDefaultBase;
                         allowedDigitCharClass = CharClass::digit;
                         if (utils::isNumberHexDigitsAllowed(numbersBase))
                             allowedDigitCharClass |= CharClass::xdigit;
@@ -792,7 +742,7 @@ public: // methods - методы собственно разбора
                         //st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                         //goto explicit_initial;
 
-                        st = stReadNumber;
+                        st = TokenizerInternalState::stReadNumber;
                         goto explicit_readnumber; // надо обработать текущий символ
                     }
 
@@ -813,7 +763,7 @@ public: // methods - методы собственно разбора
                     if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
                     {
                         //NOTE: !!! Да, сразу после префикса у нас не может быть разделителя разрядов
-                        st = stReadNumber; // Тут у нас годная цифра, продолжаем
+                        st = TokenizerInternalState::stReadNumber; // Тут у нас годная цифра, продолжаем
                         numberReadedDigits = 1;
                         break;
                     }
@@ -834,7 +784,7 @@ public: // methods - методы собственно разбора
 
                     // у тут понеслась вся та же тема, как и в состоянии stInitial, только без обработки цифр
 
-                    st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
+                    st = TokenizerInternalState::stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                     goto explicit_initial;
 
                 }
@@ -844,11 +794,11 @@ public: // methods - методы собственно разбора
 
             //------------------------------
             explicit_readnumber:
-            case stReadNumber:
+            case TokenizerInternalState::stReadNumber:
             {
                 if (ch==(std::decay_t<decltype(ch)>)'.')
                 {
-                    st = stReadNumberFloat;
+                    st = TokenizerInternalState::stReadNumberFloat;
                     break;
                 }
 
@@ -857,7 +807,7 @@ public: // methods - методы собственно разбора
                     break; // Тут у нас годная цифра
                 }
 
-                if (numbersAllowDigitsSeparator && ch==(std::decay_t<decltype(ch)>)'\'')
+                if (options.numbersAllowDigitsSeparator && ch==(std::decay_t<decltype(ch)>)'\'')
                 {
                     break; // Тут у нас разделитель разрядов
                 }
@@ -876,14 +826,14 @@ public: // methods - методы собственно разбора
                 numberTokenId = 0;
                 //return unexpectedHandlerLambda(it, __FILE__, __LINE__);
                 // Далее у нас всё как начальном состоянии
-                st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
+                st = TokenizerInternalState::stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                 goto explicit_initial;
 
             } break;
 
-            
+
             //------------------------------
-            case stReadNumberMayBeFloat:
+            case TokenizerInternalState::stReadNumberMayBeFloat:
             {
                 if (umba::TheFlags(charClass).oneOf(CharClass::escape))
                 {
@@ -900,7 +850,7 @@ public: // methods - методы собственно разбора
 
                 if (umba::TheFlags(dotCharClass).oneOf(CharClass::opchar)) // Точка - операторный символ?
                 {
-                    if (!performStartReadingOperatorLambda((std::decay_t<decltype(ch)>)'.', tokenStartIt)) 
+                    if (!performStartReadingOperatorLambda((std::decay_t<decltype(ch)>)'.', tokenStartIt))
                         return unexpectedHandlerLambda(tokenStartIt, __FILE__, __LINE__); // но у нас нет операторов, начинающихся с точки
                     goto explicit_readoperator; // Надо обработать текущий символ
                 }
@@ -909,7 +859,7 @@ public: // methods - методы собственно разбора
                     return unexpectedHandlerLambda(tokenStartIt, __FILE__, __LINE__);
                 }
 
-                st = stReadNumberFloat;
+                st = TokenizerInternalState::stReadNumberFloat;
 
                 goto explicit_readnumberfloat; // Текущий символ таки надо обработать
 
@@ -918,7 +868,7 @@ public: // methods - методы собственно разбора
 
             //------------------------------
             explicit_readnumberfloat:
-            case stReadNumberFloat:
+            case TokenizerInternalState::stReadNumberFloat:
             {
                 if (umba::TheFlags(charClass).oneOf(CharClass::escape))
                 {
@@ -936,7 +886,7 @@ public: // methods - методы собственно разбора
                 else
                     parsingHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it); // выплёвываем накопленное число с явно указанной системой счисления
 
-                st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
+                st = TokenizerInternalState::stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                 goto explicit_initial;
 
             } break;
@@ -944,7 +894,7 @@ public: // methods - методы собственно разбора
 
             //------------------------------
             explicit_readoperator:
-            case stReadOperator:
+            case TokenizerInternalState::stReadOperator:
             {
                 if (umba::TheFlags(charClass).oneOf(CharClass::escape))
                 {
@@ -1014,7 +964,7 @@ public: // methods - методы собственно разбора
                 tokenStartIt = it; // Сохранили начало нового токена
 
                 // Далее у нас всё как начальном состоянии
-                st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
+                st = TokenizerInternalState::stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                 goto explicit_initial;
 
             } break;
@@ -1022,11 +972,11 @@ public: // methods - методы собственно разбора
 
             //------------------------------
             explicit_readstringliteral:
-            case stReadStringLiteral:
+            case TokenizerInternalState::stReadStringLiteral:
             {
                 // литералы сами ловят хвостовой escape, если умеют
                 externHandlerMessage.clear();
-                auto res = pCurrentLiteralParser->parseChar(it, &nullInserter, &externHandlerMessage);
+                auto res = pCurrentLiteralParser->parseChar(it, &stringLiteralValueCollector, &externHandlerMessage);
 
                 if (res==StringLiteralParsingResult::error)
                 {
@@ -1042,14 +992,14 @@ public: // methods - методы собственно разбора
                 if (res==StringLiteralParsingResult::okStop || res==StringLiteralParsingResult::warnStop)
                 {
                     parsingHandlerLambda(literalTokenId, tokenStartIt, it+1); // выплюнули текущий литерал
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                 }
 
             } break;
 
 
             //------------------------------
-            case stReadSingleLineComment:
+            case TokenizerInternalState::stReadSingleLineComment:
             {
 
                 if (umba::TheFlags(charClass).oneOf(CharClass::escape))
@@ -1057,7 +1007,7 @@ public: // methods - методы собственно разбора
                     auto nextIt = it+1;
                     if (nextIt==itEnd)
                     {
-                        parsingHandlerLambda(commentTokenId, commentStartIt, it);
+                        parsingHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it);
                         processEscapeSymbolLambda(it /* , stInitial */ );
                         break;
                     }
@@ -1065,20 +1015,20 @@ public: // methods - методы собственно разбора
                     CharClass nextCharClass = charClassTable[charToCharClassTableIndex(*nextIt)];
                     if (umba::TheFlags(nextCharClass).oneOf(CharClass::linefeed))
                     {
-                        parsingHandlerLambda(commentTokenId, commentStartIt, it);
+                        parsingHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it);
                         processEscapeSymbolLambda(it /* , stInitial */ );
                         break;
                     }
-                    
+
                     // Если не конец текста и не перевод строки - то слэш просто внутри строки коментария, и ничего делать не надо
                     break;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::linefeed))
                 {
                     //TODO: !!! Разобраться с continuation
-                    parsingHandlerLambda(commentTokenId, commentStartIt, it);
+                    parsingHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it);
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_LINEFEED, it, it+1); // Перевод строки мы всегда отдельно выплёвываем
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                 }
                 else
                 {
@@ -1089,7 +1039,7 @@ public: // methods - методы собственно разбора
 
 
             //------------------------------
-            case stReadMultilineLineComment:
+            case TokenizerInternalState::stReadMultilineLineComment:
             {
                 // auto nextOperatorIdx = tokenTrieFindNext(operatorsTrie, operatorIdx, (token_type)ch);
                 if (multiLineCommentEndStr.empty())
@@ -1110,16 +1060,16 @@ public: // methods - методы собственно разбора
 
                 if (strIt==strItEnd) // дошли до конца строки окончания коментария, не прервались на общий конец и не прервались по несовпадению символа - значит, целиком совпало
                 {
-                    parsingHandlerLambda(commentTokenId, commentStartIt, it); // выплюнули текст коментария, без обрамления
+                    parsingHandlerLambda(commentTokenId, tokenStartIt, it2, commentStartIt, it); // выплюнули текст коментария
                     it = savedIt2; // переместили it на позицию последнего символа конца многострочника, инкремент в основном цикле переместит его на следующий символ за многострочником, как надо
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                 }
 
             } break;
 
 
             //------------------------------
-            case stContinuationWaitLinefeed:
+            case TokenizerInternalState::stContinuationWaitLinefeed:
             {
                 // stReadSingleLineComment, stInitial
                 if (umba::TheFlags(charClass).oneOf(CharClass::linefeed))
@@ -1133,16 +1083,16 @@ public: // methods - методы собственно разбора
                     // и затем не возвращаемся в предыдущее состояние, а в самое начальное
                     // таким образом, если следующий после continuation токен (помимо пробелов) будет не коментарий
                     // то всё будет отработано нормально, но можно выдать варнинг, что однострок использует continuation
-                    if (st==stReadSingleLineComment)
+                    if (st==TokenizerInternalState::stReadSingleLineComment)
                     {
-                        st = stInitial;
+                        st = TokenizerInternalState::stInitial;
                     }
                     break;
                 }
                 else
                 {
                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_ESCAPE, tokenStartIt, it);
-                    st = stInitial;
+                    st = TokenizerInternalState::stInitial;
                     goto explicit_initial;
                 }
             }
@@ -1157,6 +1107,93 @@ public: // methods - методы собственно разбора
         } // end switch
 
         return true;
+    }
+
+protected:
+
+    void checkLineStart(payload_type tokenType) const
+    {
+        if (tokenType==UMBA_TOKENIZER_TOKEN_LINEFEED)
+            curPosAtLineBeginning = true; // Для поддержки однострочного комента только в начале строки
+        else if (tokenType==UMBA_TOKENIZER_TOKEN_SPACE) {} // Пробелы - пропускаем, они ничего не меняют
+        else
+            curPosAtLineBeginning = false; // Для поддержки однострочного комента только в начале строки
+    }
+
+
+    static
+    std::basic_string_view<value_type> makeStringView( const umba::iterator::TextPositionCountingIterator<CharType> b, const umba::iterator::TextPositionCountingIterator<CharType> &e)
+    {
+        return umba::iterator::makeStringView(b,e);
+    }
+
+    template<typename GenericIteratorType>
+    static
+    std::basic_string_view<value_type> makeStringView(GenericIteratorType b, GenericIteratorType e)
+    {
+        return std::basic_string_view<value_type>(&*b, distance( b, e ));
+    }
+
+
+//------------------------------
+protected: // methods - хандлеры из "грязного" проекта, где я наговнякал первую версию, выносим лямбды.
+           // Это переходники к обработчикам, которые будут в дочернем классе
+           // Нормальные имена потом сделаем, если захочется
+           // Все хелперы и вся обработка трогают только то, что отвечает за состояние парсера. Все входные таблицы/деревья,
+           // опции и тп - оно не должно трогать, поэтому состояние - mutable, а методы логически константные
+
+    //! Эта "лямбда" вызывается при распознавании очередного токена. Тут надо вызвать метода класса-наследника, пока не будем
+    /* @param b, e - итераторы начала и конца текста токена
+
+       Итераторы передаем по значению. Предполагается, что у нас будет использоваться TextPositionCountingIterator, он жирный,
+       но, теоретически, можно использовать и обычные итераторы или указатели, если не нужна информация о строке и позиции в ней.
+       В принципе, TextPositionCountingIterator можно сделать полегче на 8 байт (24 vs 32 сейчас на x86)
+
+       Для некоторых типов токенов нужно отдавать дополнительную информацию:
+       - для строковых литералов - разобранную строку
+       - для цифровых - пока хз что
+       - для коментариев - текст без маркеров коментария
+
+       Т.е. нужна вторая пара итераторов
+
+       во внешний обработчик будем передавать string_view с полным варантом всегда
+       и string_view с доп инфой.
+       если доп инфы нет - второй string_view будет пустой - begin==end
+
+    */
+    void parsingHandlerLambda(payload_type tokenType, InputIteratorType b, InputIteratorType e) const
+    {
+        checkLineStart(tokenType);
+        static_cast<const TBase*>(this)->hadleToken(tokenType, b, e, std::basic_string_view<value_type>());
+    }
+
+    void parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd) const
+    {
+        checkLineStart(tokenType);
+        static_cast<const TBase*>(this)->hadleToken(tokenType, inputDataBegin, inputDataEnd, makeStringView(parsedDataBegin, parsedDataEnd));
+    }
+
+    void parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData) const
+    {
+        checkLineStart(tokenType);
+        static_cast<const TBase*>(this)->hadleToken(tokenType, inputDataBegin, inputDataEnd, parsedData);
+    }
+
+    bool unexpectedHandlerLambda(InputIteratorType it, const char* srcFile, int srcLine) const
+    {
+        return static_cast<const TBase*>(this)->hadleUnexpected(it, srcFile, srcLine);
+    }
+
+    // Дополнительное сообщение о неизвестном операторе, перед вызовом unexpectedHandlerLambda - типа чуть чуть улучшили диагностику
+    void reportPossibleUnknownOperatorLambda(InputIteratorType b, InputIteratorType e) const
+    {
+        static_cast<const TBase*>(this)->reportPossibleUnknownOperator(b, e);
+    }
+
+    // Либо предупреждение, либо сообщение об ошибке от парсера литералов
+    void reportStringLiteralMessageLambda(bool bErr, InputIteratorType it, const MessagesStringType &msg) const
+    {
+        static_cast<const TBase*>(this)->reportStringLiteralMessage(bErr, it, msg);
     }
 
 
