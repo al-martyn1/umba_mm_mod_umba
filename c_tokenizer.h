@@ -186,12 +186,16 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                       0x0011u
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                                      0x0012u
+#define UMBA_TOKENIZER_TOKEN_CURLY_BRACKETS                                           UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN
 #define UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_OPEN                                       0x0021u
 #define UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_CLOSE                                      0x0022u
+#define UMBA_TOKENIZER_TOKEN_ROUND_BRACKETS                                           UMBA_TOKENIZER_TOKEN_ROUND_BRACKET_OPEN
 #define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_OPEN                                       0x0031u
 #define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_CLOSE                                      0x0032u
+#define UMBA_TOKENIZER_TOKEN_ANGLE_BRACKETS                                           UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_OPEN
 #define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN                                      0x0041u
 #define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE                                     0x0042u
+#define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKETS                                          UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN
 
 
 // #define UMBA_TOKENIZER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
