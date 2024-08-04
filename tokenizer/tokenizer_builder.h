@@ -65,7 +65,7 @@ protected: // methods - helpers
     void checkReserveCharClassTable(std::array<CharClass, N> &cct)
     {
         UMBA_USED(cct);
-        UMBA_ASSER(cct.size()>=128);
+        UMBA_ASSERT(cct.size()>=128);
     }
 
     template<typename ContainerType>
@@ -140,9 +140,9 @@ public:
         addTokenToKnownSet(pairBaseToken  );
         addTokenToKnownSet(pairBaseToken+1);
 
-        generation::setCharClassFlagsForBracePair( charClassTable, bracketsPair);
+        generation::setCharClassFlagsForBracePair(charClassTable, bracketsPair);
         bracketsTrieBuilder.addTokenSequence(bracketsPair[0], pairBaseToken  );
-        bracketsTrieBuilder.addTokenSequence(bracketsPair[0], pairBaseToken+1);
+        bracketsTrieBuilder.addTokenSequence(bracketsPair[1], pairBaseToken+1);
 
         return *this;
     }
@@ -232,7 +232,6 @@ public:
         return *this;
     }
 
-
     TokenizerBuilder& addStringLiteralParser(const StringType &seq, ITokenizerLiteralParser *pParser)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
@@ -240,11 +239,11 @@ public:
         if (seq.empty())
             throw std::runtime_error("string literal prefix sequence can't be empty");
 
+        generation::setCharClassFlags(charClassTable, seq[0], CharClass::string_literal_prefix);
         literalsTrieBuilder.addTokenSequence(seq, UMBA_TOKENIZER_TOKEN_CHAR_LITERAL).payloadExtra = reinterpret_cast<payload_type>(pParser);
 
         return *this;
     }
-
 
     tokenizer_type makeTokenizer() const
     {

@@ -89,7 +89,7 @@ protected:
 
 public:
 
-    TokenizerLiteralCharStringInserter() = delete;
+    TokenizerLiteralCharStringInserter() = default;
     TokenizerLiteralCharStringInserter(const TokenizerLiteralCharStringInserter &) = default;
     TokenizerLiteralCharStringInserter& operator=(const TokenizerLiteralCharStringInserter &) = default;
     TokenizerLiteralCharStringInserter(TokenizerLiteralCharStringInserter &&) = default;
