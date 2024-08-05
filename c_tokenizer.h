@@ -242,6 +242,18 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_STRING_USER_LITERAL_FIRST                                0x3010u
 #define UMBA_TOKENIZER_TOKEN_STRING_USER_LITERAL_LAST                                 UMBA_TOKENIZER_TOKEN_LITERAL_LAST
 
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET1_FIRST                                       0x4000u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET1_LAST                                        0x4FFFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_FIRST                                       0x5000u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_LAST                                        0x5FFFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_FIRST                                       0x6000u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_LAST                                        0x6FFFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_FIRST                                       0x7000u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_LAST                                        0x7FFFu
+
 
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FIRST                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x010u)  /*  //    */
