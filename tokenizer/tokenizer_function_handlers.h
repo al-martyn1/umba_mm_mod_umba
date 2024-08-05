@@ -64,7 +64,7 @@ public: // ctors and op=
 //------------------------------
 public: // handler types
 
-    using token_handler_type                         = std::function<void(payload_type, InputIteratorType, InputIteratorType, std::basic_string_view<value_type>)>;
+    using token_handler_type                         = std::function<void(bool, payload_type, InputIteratorType, InputIteratorType, std::basic_string_view<value_type>)>;
     using unexpected_handler_type                    = std::function<bool(InputIteratorType, InputIteratorType, const char*, int)>;
     using report_unknown_operator_handler_type       = std::function<void(InputIteratorType,InputIteratorType)>;
     using report_string_literal_message_handler_type = std::function<void(bool, InputIteratorType, const MessagesStringType &)>;
@@ -82,10 +82,10 @@ public: // handlers
 //------------------------------
 public: // handler methods, called from base
 
-    void hadleToken(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData) const
+    void hadleToken(bool bLineStart, payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData) const
     {
         if (tokenHandler)
-           tokenHandler(tokenType, inputDataBegin, inputDataEnd, parsedData);
+           tokenHandler(bLineStart, tokenType, inputDataBegin, inputDataEnd, parsedData);
     }
 
     bool hadleUnexpected(InputIteratorType it, InputIteratorType itEnd, const char* srcFile, int srcLine) const
