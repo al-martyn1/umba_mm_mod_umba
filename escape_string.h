@@ -36,6 +36,10 @@ OutputIterator appendOctalEscapeSequence(OutputIterator outIt, unsigned uch)
 }
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 template<typename InputIterator, typename OutputIterator> inline
 OutputIterator escapeStringC(OutputIterator outIt, InputIterator b, InputIterator e)
 {
@@ -76,6 +80,10 @@ StringType escapeStringC(const StringType str)
     escapeStringC(std::back_inserter(res), str.begin(), str.end());
     return res;
 }
+
+//----------------------------------------------------------------------------
+
+
 
 //----------------------------------------------------------------------------
 template<typename InputIterator, typename OutputIterator> inline
@@ -122,6 +130,45 @@ StringType escapeStringGraphViz(const StringType str)
 {
     StringType res; res.reserve(str.size());
     escapeStringGraphViz(std::back_inserter(res), str.begin(), str.end());
+    return res;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename InputIterator, typename OutputIterator> inline
+OutputIterator escapeStringXmlHtml(OutputIterator outIt, InputIterator b, InputIterator e)
+{
+    using CharType = typename InputIterator::value_type;
+
+    for(; b!=e; ++b)
+    {
+        auto ch = *b;
+
+        switch(ch)
+        {
+            // https://en.wikipedia.org/w/index.php?title=List_of_XML_and_HTML_character_entity_references&mobile-app=true&theme=dark
+            case (CharType)'&' : outIt = appendToOutputEscapeHelper<CharType>(outIt, "&amp;" ); break;
+            case (CharType)'<' : outIt = appendToOutputEscapeHelper<CharType>(outIt, "&lt;"  ); break;
+            case (CharType)'>' : outIt = appendToOutputEscapeHelper<CharType>(outIt, "&gt;"  ); break;
+            case (CharType)'\'': outIt = appendToOutputEscapeHelper<CharType>(outIt, "&apos;"); break;
+            case (CharType)'\"': outIt = appendToOutputEscapeHelper<CharType>(outIt, "&quot;"); break;
+            default:
+                                *outIt++ = ch;
+        }
+    }
+
+    return outIt;
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType escapeStringXmlHtml(const StringType str)
+{
+    StringType res; res.reserve(str.size());
+    escapeStringXmlHtml(std::back_inserter(res), str.begin(), str.end());
     return res;
 }
 
