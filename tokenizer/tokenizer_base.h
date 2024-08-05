@@ -72,7 +72,7 @@ StringType getTokenizerInternalStateStr(TokenizerInternalState s)
 
         default:                         return umba::string_plus::make_string<StringType>("<UNKNOWN>");
     }
-};
+}
 
 template<typename StringType>
 StringType getTokenizerTokenStr(payload_type p)
@@ -117,9 +117,14 @@ StringType getTokenizerTokenStr(payload_type p)
             if (p>=UMBA_TOKENIZER_TOKEN_STRING_LITERAL_FIRST && p<=UMBA_TOKENIZER_TOKEN_STRING_LITERAL_LAST)
                 return umba::string_plus::make_string<StringType>("KIND_OF_STRING_LITERAL");
 
+            if (p>=UMBA_TOKENIZER_TOKEN_KEYWORD_SET1_FIRST && p<=UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_LAST)
+                return umba::string_plus::make_string<StringType>("KIND_OF_KEYWORD");
+
+
+
             return umba::string_plus::make_string<StringType>("");
     }
-};
+}
 #endif // !defined(UMBA_TOKENIZER_DISABLE_TYPES_META)
 //----------------------------------------------------------------------------
 
@@ -461,18 +466,56 @@ public: // methods - методы собственно разбора
 //
 // };
 
+    void tokenizeInit() const
+    {
+        st            = TokenizerInternalState::stInitial;
+        stEscapeSaved = TokenizerInternalState::stInitial;
+
+        curPosAtLineBeginning = true;
+
+        // Общее
+        //tokenStartIt;
+
+        // Операторы
+        operatorIdx = trie_index_invalid;
+
+        // Числовые литералы
+        numberTokenId         = 0;
+        numberExplicitBase    = 0;
+        numberPrefixIdx       = trie_index_invalid;
+        numberReadedDigits    = 0;
+        allowedDigitCharClass = CharClass::none;
+        numbersBase           = 0;
+
+        // Коментарии
+        //commentStartIt;
+        commentTokenId = 0;
+
+        // Строковые литералы
+        pCurrentLiteralParser = 0;
+        literalTokenId = 0;
+        externHandlerMessage.clear();
+        stringLiteralValueCollector.clear();
+    }
+
+
+
     bool tokenizeFinalize(InputIteratorType itEnd) const
     {
         switch(st)
         {
-            case TokenizerInternalState::stInitial  : return true;
+            case TokenizerInternalState::stInitial  :
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
+                 return true;
 
-            case TokenizerInternalState::stReadSpace: 
+            case TokenizerInternalState::stReadSpace:
                  parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, itEnd);
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                  return true;
 
             case TokenizerInternalState::stReadIdentifier:
                  parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_IDENTIFIER, tokenStartIt, itEnd); // выплюнули
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                  return true;
 
             case TokenizerInternalState::stReadNumberPrefix:
@@ -498,6 +541,7 @@ public: // methods - методы собственно разбора
                      if (!prefixIsNumber)
                          return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
                      parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                      return true;
                  }
             }
@@ -507,6 +551,7 @@ public: // methods - методы собственно разбора
                      parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                  else
                      parsingHandlerLambda(numberTokenId, tokenStartIt, itEnd); // выплёвываем накопленное число с явно указанной системой счисления
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                  return true;
 
             case TokenizerInternalState::stReadNumberFloat:
@@ -514,6 +559,7 @@ public: // methods - методы собственно разбора
                      parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd); // выплёвываем накопленное число с системой счисления по умолчанию
                  else
                      parsingHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd); // выплёвываем накопленное число с явно указанной системой счисления
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                  return true;
 
             case TokenizerInternalState::stReadOperator:
@@ -530,20 +576,22 @@ public: // methods - методы собственно разбора
                          reportPossibleUnknownOperatorLambda(tokenStartIt, itEnd);
                          return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
                      }
- 
+
                      if (utils::isCommentToken(curPayload)) // на каждом операторе в обрабатываемом тексте у нас это срабатывает. Жирно или нет?
                      {
                          //TODO: !!! Надо уточнить, что за комент
+                         parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                          return true; // Пока считаем, что всё нормально
                      }
- 
+
                      parsingHandlerLambda(curPayload, tokenStartIt, itEnd); // выплюнули текущий оператор
- 
+                     parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                      return true;
                  }
 
             case TokenizerInternalState::stReadSingleLineComment:
                  parsingHandlerLambda(commentTokenId, tokenStartIt, itEnd, commentStartIt, itEnd);
+                 parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd);
                  return true;
 
             case TokenizerInternalState::stReadMultilineLineComment:
@@ -1256,22 +1304,28 @@ protected: // methods - хандлеры из "грязного" проекта,
        если доп инфы нет - второй string_view будет пустой - begin==end
 
     */
-    void parsingHandlerLambda(payload_type tokenType, InputIteratorType b, InputIteratorType e) const
+    void parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd) const
     {
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+            return;
+        static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd, std::basic_string_view<value_type>());
         checkLineStart(tokenType);
-        static_cast<const TBase*>(this)->hadleToken(tokenType, b, e, std::basic_string_view<value_type>());
     }
 
     void parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd) const
     {
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+            return;
+        static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd, makeStringView(parsedDataBegin, parsedDataEnd));
         checkLineStart(tokenType);
-        static_cast<const TBase*>(this)->hadleToken(tokenType, inputDataBegin, inputDataEnd, makeStringView(parsedDataBegin, parsedDataEnd));
     }
 
     void parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData) const
     {
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+            return;
+        static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd, parsedData);
         checkLineStart(tokenType);
-        static_cast<const TBase*>(this)->hadleToken(tokenType, inputDataBegin, inputDataEnd, parsedData);
     }
 
     bool unexpectedHandlerLambda(InputIteratorType it, InputIteratorType itEnd, const char* srcFile, int srcLine) const
