@@ -48,7 +48,8 @@ char* formatAnsiTermColor( char* pBuf, colors::SgrColor clr, bool fastBlink = fa
 {
     //#define UMBA_TERM_DEBUG_TERM_ESC_CSI
 
-    clr &= ~colors::full_mask;
+    // clr &= ~colors::full_mask; // Тут что-то странное
+    clr &= colors::full_mask;
 
     #if defined(UMBA_TERM_DEBUG_TERM_ESC_CSI)
     *pBuf++ = '\\';
