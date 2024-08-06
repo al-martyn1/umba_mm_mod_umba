@@ -212,7 +212,10 @@ protected: // fileds - состояние токенизатора
 
     // Коментарии
     mutable InputIteratorType      commentStartIt;
+    mutable InputIteratorType      commentEndStartIt;
     mutable payload_type           commentTokenId = 0;
+    mutable std::size_t            commentEndMatchIndex = 0;
+
 
     // Строковые литералы
     mutable ITokenizerLiteralParser*            pCurrentLiteralParser = 0;
@@ -496,6 +499,7 @@ public: // methods - методы собственно разбора
         // Коментарии
         //commentStartIt;
         commentTokenId = 0;
+        commentEndMatchIndex = 0;
 
         // Строковые литералы
         pCurrentLiteralParser = 0;
@@ -1197,7 +1201,7 @@ public: // methods - методы собственно разбора
             {
                 // литералы сами ловят хвостовой escape, если умеют
                 externHandlerMessage.clear();
-                auto res = pCurrentLiteralParser->parseChar(it, &stringLiteralValueCollector, &externHandlerMessage);
+                auto res = pCurrentLiteralParser->parseChar(it, itEnd, &stringLiteralValueCollector, &externHandlerMessage);
 
                 if (res==StringLiteralParsingResult::error)
                 {
@@ -1273,26 +1277,46 @@ public: // methods - методы собственно разбора
                 if (multiLineCommentEndStr.empty())
                     return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
 
+                if (multiLineCommentEndStr[commentEndMatchIndex]==*it)
+                {
+                    if (!commentEndMatchIndex)
+                        commentEndStartIt = it;
+
+                    ++commentEndMatchIndex;
+
+                    if (commentEndMatchIndex>=multiLineCommentEndStr.size())
+                    {
+                        // Нашли
+                        if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it+1, commentStartIt, commentEndStartIt)) // выплюнули текст коментария
+                            return false;
+
+                        commentEndMatchIndex = 0;
+                        st = TokenizerInternalState::stInitial;
+                    }
+                }
+                
+                #if 0
                 if (multiLineCommentEndStr[0]!=*it) // текущий входной символ не является первым символом маркера конца коментария
                     break;
 
                 auto it2 = it;
-                auto savedIt2 = it2;
+                //auto savedIt2 = it2;
                 auto strIt    = multiLineCommentEndStr.begin();
                 auto strItEnd = multiLineCommentEndStr.end();
 
                 for(; it2!=itEnd && strIt!=strItEnd && *it2==*strIt; ++/*Проверка многострочника*/it2, ++strIt)
                 {
-                    savedIt2 = it2; // Сохраняем предыдущее (до инкремента) значение it2
+                    //savedIt2 = it2; // Сохраняем предыдущее (до инкремента) значение it2
                 }
 
                 if (strIt==strItEnd) // дошли до конца строки окончания коментария, не прервались на общий конец и не прервались по несовпадению символа - значит, целиком совпало
                 {
                     if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it2, commentStartIt, it)) // выплюнули текст коментария
                         return false;
-                    it = savedIt2; // переместили it на позицию последнего символа конца многострочника, инкремент в основном цикле переместит его на следующий символ за многострочником, как надо
+                    it = it2; // savedIt2; // переместили it на позицию последнего символа конца многострочника, инкремент в основном цикле переместит его на следующий символ за многострочником, как надо
                     st = TokenizerInternalState::stInitial;
                 }
+                #endif
 
             } break;
 

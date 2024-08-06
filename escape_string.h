@@ -74,7 +74,7 @@ OutputIterator escapeStringC(OutputIterator outIt, InputIterator b, InputIterato
 
 //----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType escapeStringC(const StringType str)
+StringType escapeStringC(const StringType &str)
 {
     StringType res; res.reserve(str.size());
     escapeStringC(std::back_inserter(res), str.begin(), str.end());
@@ -126,7 +126,7 @@ OutputIterator escapeStringGraphViz(OutputIterator outIt, InputIterator b, Input
 
 //----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType escapeStringGraphViz(const StringType str)
+StringType escapeStringGraphViz(const StringType &str)
 {
     StringType res; res.reserve(str.size());
     escapeStringGraphViz(std::back_inserter(res), str.begin(), str.end());
@@ -165,7 +165,7 @@ OutputIterator escapeStringXmlHtml(OutputIterator outIt, InputIterator b, InputI
 
 //----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType escapeStringXmlHtml(const StringType str)
+StringType escapeStringXmlHtml(const StringType &str)
 {
     StringType res; res.reserve(str.size());
     escapeStringXmlHtml(std::back_inserter(res), str.begin(), str.end());

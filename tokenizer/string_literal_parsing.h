@@ -145,7 +145,7 @@ struct ITokenizerLiteralParser
     using value_type = CharType;
 
     virtual void reset() = 0;
-    virtual StringLiteralParsingResult parseChar(InputIteratorType it, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) = 0;
+    virtual StringLiteralParsingResult parseChar(InputIteratorType it, InputIteratorType itEnd, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) = 0;
 
 protected:
 
@@ -201,8 +201,9 @@ public:
         st       = stInitial;
     }
 
-    virtual StringLiteralParsingResult parseChar(InputIteratorType it, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
+    virtual StringLiteralParsingResult parseChar(InputIteratorType it, InputIteratorType itEnd, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
     {
+        UMBA_USED(itEnd);
         if (st==stInitial)
         {
             quotType = *it;
@@ -421,7 +422,7 @@ public:
     // \x hh     Символ ASCII в шестнадцатеричной нотации
     // \x hhhh     Символ юникода в шестнадцатеричном формате, если эта escape-последовательность используется в многобайтовой знаковой константе или строковом литерале юникода.
 
-    virtual StringLiteralParsingResult parseChar(InputIteratorType it, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
+    virtual StringLiteralParsingResult parseChar(InputIteratorType it, InputIteratorType itEnd, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
     {
         CharType ch = *it;
 
