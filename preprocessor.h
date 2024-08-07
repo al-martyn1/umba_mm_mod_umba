@@ -184,6 +184,7 @@ namespace umba
 //----------------------------------------------------------------------------
 //! Синтаксический сахар для объявления некопируемых классов
 #define UMBA_NON_COPYABLE_CLASS(className)                                   \
+                                /* запрещаем помещением в protected секцию */\
                                 protected:                                   \
                                     className(const className &);            \
                                     className& operator=(const className &); \
