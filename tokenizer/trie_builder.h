@@ -4,6 +4,8 @@
     #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
 #endif
 
+#include "../rule_of_five.h"
+
 
 // umba::tokenizer::
 namespace umba {
@@ -52,6 +54,7 @@ public: // пока public, потом, скорее всего, будет сп
 
 public:
 
+    UMBA_RULE_OF_FIVE(TrieBuilder, default, default, default, default, default);
 
     template<typename TokenSequenceIterator>
     TrieNode& addTokenSequence(TokenSequenceIterator b, TokenSequenceIterator e, payload_type payload)

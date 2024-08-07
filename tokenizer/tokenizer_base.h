@@ -5,6 +5,8 @@
 #endif
 
 #include "../the.h"
+#include "../rule_of_five.h"
+
 
 //----------------------------------------------------------------------------
 // umba::tokenizer::
@@ -160,11 +162,12 @@ public: // depending types
 //------------------------------
 public: // ctors and op=
 
-    TokenizerBaseImpl() = default;
-    TokenizerBaseImpl(const TokenizerBaseImpl &) = delete;
-    TokenizerBaseImpl& operator=(const TokenizerBaseImpl &) = delete;
-    TokenizerBaseImpl(TokenizerBaseImpl &&) = default;
-    TokenizerBaseImpl& operator=(TokenizerBaseImpl &&) = default;
+    UMBA_RULE_OF_FIVE(TokenizerBaseImpl, default, delete, delete, default, default);
+    // TokenizerBaseImpl() = default;
+    // TokenizerBaseImpl(const TokenizerBaseImpl &) = delete;
+    // TokenizerBaseImpl& operator=(const TokenizerBaseImpl &) = delete;
+    // TokenizerBaseImpl(TokenizerBaseImpl &&) = default;
+    // TokenizerBaseImpl& operator=(TokenizerBaseImpl &&) = default;
 
 
 //------------------------------
@@ -1283,15 +1286,15 @@ public: // methods - методы собственно разбора
                     {
                         if (!commentEndMatchIndex)
                             commentEndStartIt = it;
-    
+
                         ++commentEndMatchIndex;
-    
+
                         if (commentEndMatchIndex>=multiLineCommentEndStr.size())
                         {
                             // Нашли
                             if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it+1, commentStartIt, commentEndStartIt)) // выплюнули текст коментария
                                 return false;
-    
+
                             commentEndMatchIndex = 0;
                             st = TokenizerInternalState::stInitial;
                         }
@@ -1301,7 +1304,7 @@ public: // methods - методы собственно разбора
 
                     commentEndMatchIndex = 0;
                 }
-                
+
                 #if 0
                 if (multiLineCommentEndStr[0]!=*it) // текущий входной символ не является первым символом маркера конца коментария
                     break;
