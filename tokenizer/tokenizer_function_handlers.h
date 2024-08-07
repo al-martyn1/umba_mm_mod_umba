@@ -84,9 +84,17 @@ public: // handlers
     report_unknown_operator_handler_type        reportUnknownOperatorHandler     ;
     report_string_literal_message_handler_type  reportStringLiteralMessageHandler;
 
+    template<typename FilterType, typename... FilterCtorArgs >
+    void installTokenFilter( FilterCtorArgs... args)
+    {
+        tokenHandler = FilterType(tokenHandler, std::forward<Args>(args)...);
+    }
+
 
 //------------------------------
-public: // handler methods, called from base
+protected: // handler methods, called from base
+
+    friend class TBase;
 
     bool hadleToken(bool bLineStart, payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData, MessagesStringType &msg) const
     {

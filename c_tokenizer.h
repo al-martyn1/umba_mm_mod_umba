@@ -212,7 +212,7 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_NUMBER_USER_LITERAL_LAST                                 0x11FFu
 
 
-// Кодируем признаки
+// Кодируем признаки числового литерала
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FLAG_MISS_DIGIT                           0x0800u  /* После префикса может не быть ни одной цифры */
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_MASK                                 0x0700u  /* Маска для системы счисления */
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC                                  0x0000u
@@ -222,7 +222,6 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DUOD                                 0x0400u  /* двенадцатеричная duodecimal number system */
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_HEX                                  0x0500u
 
-// quaternary number system
 
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST                                           0x2000u
