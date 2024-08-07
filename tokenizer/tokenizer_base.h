@@ -1277,22 +1277,29 @@ public: // methods - методы собственно разбора
                 if (multiLineCommentEndStr.empty())
                     return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
 
-                if (multiLineCommentEndStr[commentEndMatchIndex]==*it)
+                for(std::size_t i=0; i!=2; ++i)
                 {
-                    if (!commentEndMatchIndex)
-                        commentEndStartIt = it;
-
-                    ++commentEndMatchIndex;
-
-                    if (commentEndMatchIndex>=multiLineCommentEndStr.size())
+                    if (multiLineCommentEndStr[commentEndMatchIndex]==*it)
                     {
-                        // Нашли
-                        if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it+1, commentStartIt, commentEndStartIt)) // выплюнули текст коментария
-                            return false;
+                        if (!commentEndMatchIndex)
+                            commentEndStartIt = it;
+    
+                        ++commentEndMatchIndex;
+    
+                        if (commentEndMatchIndex>=multiLineCommentEndStr.size())
+                        {
+                            // Нашли
+                            if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it+1, commentStartIt, commentEndStartIt)) // выплюнули текст коментария
+                                return false;
+    
+                            commentEndMatchIndex = 0;
+                            st = TokenizerInternalState::stInitial;
+                        }
 
-                        commentEndMatchIndex = 0;
-                        st = TokenizerInternalState::stInitial;
+                        break;
                     }
+
+                    commentEndMatchIndex = 0;
                 }
                 
                 #if 0
