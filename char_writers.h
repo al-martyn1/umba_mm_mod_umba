@@ -1328,480 +1328,66 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
             setAnsiTermColorsImpl(clr, m_fastBlink);
     }
 
-    //! Устанавливает текстовый режим вывода
-    LegacyUartCharWriter& setTextMode( bool ftm = true )
+    virtual void terminalSetCaret( int csz ) override
     {
-        m_textMode = ftm;
-        return *this;
+        terminalSetCaretImpl(csz);
     }
 
-    //! Устанавливает режим работы в терминал
-    LegacyUartCharWriter& setTerminalMode( bool fTerm = true )
+    virtual void terminalMoveToAbs0()                       override
     {
-        m_term = fTerm;
-        return *this;
+        terminalMoveToAbs0Impl();
     }
 
-    //! Устанавливает режим работы в Ansi-терминал
-    LegacyUartCharWriter& setAnsiTerminalMode( bool fTerm = true )
+    virtual void terminalMoveRelative(int direction, int n) override
     {
-        if (fTerm)
-            m_term = true;
-        m_ansiTerm = fTerm;
-        return *this;
+        terminalMoveRelativeImpl(direction, n);
     }
 
-    //! Устанавливает режим Fast Blink
-    LegacyUartCharWriter& setAtFastBlink( bool fFast = true )
+    virtual void terminalMoveToNextLine(int n)              override
     {
-        m_fastBlink = fFast;
-        return *this;
+        terminalMoveToNextLineImpl(n);
     }
 
-    //! Возвращает максимальное число байт, которое может быть записано без блокировки
-    virtual
-    size_t getNonBlockMax()
+    virtual void terminalMoveToPrevLine(int n)              override
     {
-        return BufSize - m_endIdx;
+        terminalMoveToPrevLineImpl(n);
     }
 
-
-protected:
-
-    uart::Handle     &m_uart;           //!< Хэндл классического UART'а
-    uint8_t          m_buf[BufSize];    //!< Буфер
-    volatile size_t  m_endIdx;          //!< Индекс конца
-    bool             m_textMode;        //!< Флаг текстового режима
-    bool             m_term;            //!< Флаг режима терминала
-    bool             m_ansiTerm;        //!< Флаг режима ANSI-терминала
-    bool             m_fastBlink;       //!< Флаг режима Fast Blink???
-
-    //! Возвращает количество реальных байт для хранения символа
-    size_t getTextModeByteRequiredBufSpace( uint8_t b )
+    virtual void terminalMoveToAbsCol(int n)                override
     {
-        #if defined(UMBA_MCU_USED) || defined(_WIN32)
-        if (b=='\n')
-            return 2;
-        #endif
-        return 1;
+        terminalMoveToAbsColImpl(n);
     }
 
-    //! Кладёт перевод строки в текстовом режиме
-    bool putLinefeedToBufInTextMode()
+    virtual void terminalMoveToLineStart()                  override
     {
-        #if defined(UMBA_MCU_USED) || defined(_WIN32)
-            if ( m_endIdx>=(BufSize-1) )
-                return false;
-            m_buf[m_endIdx++] = '\r';
-            m_buf[m_endIdx++] = '\n';
-        #else
-            m_buf[m_endIdx++] = '\n';
-        #endif
-
-        return true;
+        terminalMoveToLineStartImpl();
     }
 
-    //! Тампит буфер
-    void tampBuffer(const uint8_t* &pBuf, size_t &len)
+    virtual void terminalMoveToAbsPos( int x, int y )       override
     {
-        while(len)
-        {
-            // пытаемся отправить кусочек буфера
-            trySendOwnBuf();
-
-            // пытаемся засунуть хоть что-нибудь в буфер
-            if (!m_textMode)
-            {
-                // Защищаем момент изменения буфера и индекса
-                UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-
-                // в двоичном режиме тупо пересылаем массивами
-                size_t bufAvailSize = BufSize - m_endIdx;
-                size_t numBytesToCopy = bufAvailSize > len ? len : bufAvailSize;
-
-                if (numBytesToCopy)
-                {
-                    std::memcpy( &m_buf[m_endIdx], pBuf, numBytesToCopy );
-                    len      -= numBytesToCopy;
-                    pBuf     += numBytesToCopy;
-                    m_endIdx += numBytesToCopy;
-                }
-            }
-            else
-            {
-                // Защищаем момент изменения буфера и индекса
-                UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-                while( m_endIdx!=BufSize && len )
-                {
-                    if (*pBuf=='\n')
-                    {
-                        if (!putLinefeedToBufInTextMode())
-                            break; // нет места для двух символов
-                        pBuf++;
-                        len--;
-                    }
-                    else
-                    {
-                        m_buf[m_endIdx++] = *pBuf;
-                        pBuf++;
-                        len--;
-                    }
-
-                } // while( m_endIdx!=BufSize && len )
-            }
-
-            if (isIrqProcessed())
-               break;
-
-
-        } // while(len)
+        terminalMoveToAbsPosImpl(x,y);
     }
 
-    //! Возвращает количество байт в буфере UART'а
-    size_t getUartMaxLen() const
+    virtual void terminalClearScreenEnd()                   override
     {
-        return UART_UART_TX_BUF_SIZE;
+        terminalClearScreenEndImpl();
     }
 
-    //! Блокирующая запись в UART
-    void blockingWriteToUart( const uint8_t* pBuf, size_t len )
+    virtual void terminalClearScreen()                      override
     {
-        while(!m_uart.sendLocalArray( (const uint8_t *)pBuf, len ) )
-        {}
+        terminalClearScreenImpl();
     }
 
-    //! Возвращает true, если находимся в обработчике прерывания
-    bool isIrqProcessed() const
+    virtual void terminalClearLine()                        override
     {
-        if (UMBA_IS_IN_ISR())
-            return true;
-        return false;
+        terminalClearLineImpl();
     }
 
-    //! Пытается отправить свой буфер
-    size_t trySendOwnBuf()
+    virtual void terminalClearLineEnd()                     override
     {
-        UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-
-        if (!m_endIdx)
-            return m_endIdx;
-
-        size_t bytesWritten = writeToUartNonBlock( m_buf, m_endIdx );
-        if (bytesWritten)
-        {
-            size_t restSize = m_endIdx - bytesWritten;
-            if (restSize)
-                std::memmove( m_buf, &m_buf[bytesWritten], restSize );
-            m_endIdx = restSize;
-        }
-
-        return m_endIdx;
+        terminalClearLineEndImpl();
     }
 
-
-    //! Неблокирующая запись - возвращает сколько байт записано
-    size_t writeToUartNonBlock( const uint8_t* pBuf, size_t len )
-    {
-        if (len > getUartMaxLen())
-            len = getUartMaxLen();
-
-        //UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-        if (!m_uart.isTransmitComplete())
-            return 0;
-
-        if (!m_uart.sendLocalArray( pBuf, len ) )
-            return 0;
-
-        return len;
-    }
-
-}; // class LegacyUartCharWriter
-
-//-----------------------------------------------------------------------------
-
-
-#endif
-
-#endif /* #if !defined(UMBA_MCU_USED) */
-
-//-----------------------------------------------------------------------------
-
-
-
-//-----------------------------------------------------------------------------
-#if !defined(UMBA_MCU_USED)
-
-
-
-
-#else /* no UMBA_MCU_USED defined else branch */
-
-} // namespace umba
-
-#if __CC_ARM || ( (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) )
-
-    #include <rt_misc.h>
-    #include <rt_sys.h>
-    #include <stdio.h>
-
-#endif
-
-
-
-//-----------------------------------------------------------------------------
-namespace umba
-{
-
-
-
-//-----------------------------------------------------------------------------
-// Serial Wire Viewer - SWV
-// http://blog.atollic.com/cortex-m-debugging-introduction-to-serial-wire-viewer-swv-event-and-data-tracing
-// http://blog.atollic.com/cortex-m-debugging-printf-redirection-to-a-debugger-console-using-swv/itm-part-1
-// http://blog.atollic.com/cortex-m-debugging-printf-redirection-to-a-debugger-console-using-swv/itm-part-2
-// http://www.keil.com/appnotes/files/apnt_297_v102.pdf
-
-//! Реализация CharWriter, производящая вывод в отладчик - SWV - Serial Wire Viewer
-struct SwvCharWritter : UMBA_IMPLEMENTS ICharWriter
-{
-
-    UMBA_NON_COPYABLE_STRUCT(SwvCharWritter)
-
-    SwvCharWritter() : ICharWriter() {};
-
-    //! Запись одного символа
-    virtual
-    void writeChar( char ch  //!< Символ для записи
-                  ) override
-    {
-#if __CC_ARM || ( (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) )
-        ITM_SendChar(ch);
-#endif
-    }
-
-    //! Помещает EOL в поток вывода консоли
-    virtual
-    void putEndl()
-    {
-        writeString( "\r\n" );
-    }
-
-    //! Реализация flush - сброс кешированных данных
-    virtual
-    void flush() override
-    {}
-
-}; // struct SwdCharWritter
-
-//-----------------------------------------------------------------------------
-
-
-
-
-//-----------------------------------------------------------------------------
-#ifdef LUART_UART_HANDLE_H
-// Заголовок legacy uart подключен перед использованием райтера,
-// поэтому мы можем сделать реализацию райтера, пихающую всё в uart
-
-} // namespace umba
-
-// На самом деле нам нужен <algorithm>, но он подключается в umba/stl.h
-#include "stl.h"
-
-// std::strlen
-#include "critical_section.h"
-
-#include <cstring>
-
-// UMBA_IS_IN_ISR()
-
-#define UMBA_LEGACY_UART_CHAR_WRITTER_LOCK()    UMBA_CRITICAL_SECTION(globalCriticalSection)
-
-//-----------------------------------------------------------------------------
-
-
-
-
-
-//-----------------------------------------------------------------------------
-namespace umba
-{
-
-
-
-//-----------------------------------------------------------------------------
-//! Реализация CharWriter, производящая вывод в классический UART
-template< size_t BufSize=512 >
-struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
-{
-
-    UMBA_NON_COPYABLE_STRUCT(LegacyUartCharWriter)
-
-    LegacyUartCharWriter( uart::Handle &uart )
-    : m_uart(uart)
-    , m_endIdx(0)
-    , m_textMode(false)
-    , m_term(false)
-    , m_ansiTerm(false)
-    , m_fastBlink(false)
-    {
-    }
-
-    //! Запись одного символа
-    virtual
-    void writeChar( char ch ) override
-    {
-        writeBuf( (const uint8_t*)&ch, 1 );
-    }
-
-    //! Запись ASCII-Z строки
-    virtual
-    void writeString( const char* str ) override
-    {
-        writeBuf( (const uint8_t*)str, std::strlen(str) );
-    }
-
-    //! Запись буфера/массива символов/байт
-    virtual
-    void writeBuf( const uint8_t* pBuf, size_t len ) override
-    {
-        if (!m_uart.isInited())
-            return;
-        //пытаемся сбросить свой буфер в UART
-        trySendOwnBuf();
-
-        // А ничего отсылать и не надо
-        if (!pBuf || !len)
-            return;
-
-        if (isIrqProcessed())
-        {
-            size_t bufAvailSize = 0;
-
-            {
-                UMBA_LEGACY_UART_CHAR_WRITTER_LOCK();
-                bufAvailSize = BufSize - m_endIdx;
-                if (len>bufAvailSize)
-                    len = bufAvailSize;
-            }
-
-            if (m_textMode)
-            {
-                size_t requiredLen = 0;
-                size_t i = 0;
-                for( ; i!=len; ++i)
-                {
-                    size_t nextRequiredLen = requiredLen + getTextModeByteRequiredBufSpace( pBuf[i] );
-                    if (nextRequiredLen>bufAvailSize)
-                    {
-                        break;
-                    }
-
-                    requiredLen = nextRequiredLen;
-                }
-
-                len = i;
-            }
-        }
-
-        //---
-        //size_t getUartMaxLen() const
-        tampBuffer(pBuf, len);
-        //--
-    }
-
-    //! Выводит перевод строки
-    virtual
-    void putEndl()
-    {
-        if (isTerminal()) // isAnsiTerminal()
-            writeString( "\r\n" );
-        else
-            writeString( "\r\n" );
-        flush();
-    }
-
-    //! Сброс всех выходных буферов
-    virtual
-    void flush() override
-    {
-        if (isIrqProcessed())
-            return; // single time try from IRQ handlers
-
-        size_t rest = trySendOwnBuf();
-
-        while(rest)
-        {
-            rest = trySendOwnBuf();
-        }
-    }
-
-    //! Ожидание сброса буферов
-    virtual
-    void waitFlushDone()
-    {
-        while (!m_uart.isTransmitComplete()) {}
-    }
-
-    //! Возвращает true, если режим вывода - текстовый - символ '\n' транслируется в последовательность CR LF или LF в зависимости от платформы
-    virtual
-    bool isTextMode() override
-    {
-        return m_textMode;
-    }
-
-    //! Возвращает true, если данный CharWriter - терминал
-    virtual
-    bool isTerminal() override
-    {
-        //if (!isTextMode())
-        //    return false;
-
-        return m_term; //
-    }
-
-    //! Возвращает true, если данный CharWriter - Ansi-терминал с поддержкой ESC-последовательностей
-    virtual
-    bool isAnsiTerminal() override
-    {
-        if (!isTerminal())
-            return false;
-        return m_ansiTerm;
-    }
-
-    //! Выводит возврат каретки
-    virtual
-    void putCR() override // carriage return
-    {
-        if (isTerminal())
-            writeChar( '\r' );
-        else
-            putEndl();
-
-        flush();
-    }
-
-    //! Выводит Form Feed
-    virtual
-    void putFF() override // form feed
-    {
-        if (isTerminal())
-        {
-            writeString( "\n----------------\n" ); // Frame separator - для удобства разделения фреймов в логе
-            writeChar( '\f' );
-        }
-        else
-            putEndl();
-
-        flush();
-    }
-
-    //! Производит установку цвета выводимого текста (текст и фон)
-    virtual void setTermColors(term::colors::SgrColor clr) override
-    {
-        if (isAnsiTerminal())
-            setAnsiTermColorsImpl(clr, m_fastBlink);
-    }
 
     //! Устанавливает текстовый режим вывода
     LegacyUartCharWriter& setTextMode( bool ftm = true )
@@ -1995,12 +1581,11 @@ protected:
 //-----------------------------------------------------------------------------
 
 
-#endif
+#endif // #ifdef LUART_UART_HANDLE_H
 
 #endif /* #if !defined(UMBA_MCU_USED) */
 
 //-----------------------------------------------------------------------------
-
 
 
 }; // namespace umba
