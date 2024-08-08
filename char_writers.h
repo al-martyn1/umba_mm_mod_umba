@@ -783,7 +783,7 @@ public:
     }
 
     //! Перейти в абсолютный 0.
-    virtual void terminalMove2Abs0() override
+    virtual void terminalMoveToAbs0() override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {
@@ -799,7 +799,7 @@ public:
     }
 
     //! Перейти ниже на строку на нулевую позицию.
-    virtual void terminalMove2Down() override
+    virtual void terminalMoveToNextLine(int n) override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {
@@ -809,14 +809,14 @@ public:
         else if (m_consoleType==term::UMBA_CONSOLETYPE_WINDOWS_CONSOLE && m_hCon!=INVALID_HANDLE_VALUE)
         {
             consoleCoord.X  = 0;
-            consoleCoord.Y += 1;
+            consoleCoord.Y += n;
             SetConsoleCursorPosition(m_hCon, consoleCoord );
         }
         #endif
     }
 
     //! Перейти в нулевую позицию в текущей строке
-    virtual void terminalMove2Line0() override
+    virtual void terminalMoveToLineStart() override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {
@@ -833,7 +833,7 @@ public:
     }
 
     //! Перейти на заданную позицию в текущей строке
-    virtual void terminalMove2LinePos( int pos ) override
+    virtual void terminalMoveToAbsCol( int pos ) override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {
@@ -850,7 +850,7 @@ public:
     }
 
     //! Очистить в текущей строке N позиции от текущего положения
-    virtual void terminalClearLine( int maxPosToClear=-1 ) override
+    virtual void terminalClearLine() override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {
@@ -859,6 +859,7 @@ public:
         #if defined(WIN32) || defined(_WIN32)
         else if (m_consoleType==term::UMBA_CONSOLETYPE_WINDOWS_CONSOLE && m_hCon!=INVALID_HANDLE_VALUE)
         {
+            const int maxPosToClear=-1;
             COORD curCoords = getConsoleCursorPosition();
             COORD conSize   = getConsoleScreenSize();
             if (conSize.X!=0 && conSize.Y!=0)
@@ -883,7 +884,7 @@ public:
 
     }
 
-    virtual void terminalClearRemaining( int maxLines = -1 ) override
+    virtual void terminalClearScreenEnd() override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {
@@ -911,8 +912,8 @@ public:
                 */
 
                 int remainingLines = conSize.Y-curCoords.Y-1;
-                if (maxLines>=0)
-                    remainingLines = maxLines;
+                // if (maxLines>=0)
+                //     remainingLines = maxLines;
 
                 term::win32::setConsoleTextAttribute( m_hCon, FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE );
                 FillConsoleOutputCharacter( m_hCon, (TCHAR)' ', (DWORD)(conSize.X - curCoords.X) + (remainingLines)*conSize.X , curCoords, &charsWritten);
@@ -923,7 +924,7 @@ public:
 
 
     //! Переход в абсолютную позицию
-    virtual void terminalMove2Pos( int x, int y ) override
+    virtual void terminalMoveToAbsPos( int x, int y ) override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
         {

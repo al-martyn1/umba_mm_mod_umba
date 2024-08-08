@@ -351,7 +351,7 @@ struct ICharWriter
 
 
 
-#define UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION
+// #define UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION
 
     //! Перейти в абсолютный 0.
     virtual void terminalMoveToAbs0()
