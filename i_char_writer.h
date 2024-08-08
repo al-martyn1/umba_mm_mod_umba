@@ -168,6 +168,91 @@ struct ICharWriter
         setAnsiTermColorsImpl( term::colors::makeComposite( term::colors::white, term::colors::black,false, false, false ), false );
     }
 
+    void terminalMoveRelativeImpl(int direction, int n)
+    {
+        char buf[32];
+        term::formatAnsiTermMoveRelative(buf, direction, n);
+        writeString( buf );
+    }
+
+    void terminalMoveToNextLineImpl(int n)
+    {
+        char buf[32];
+        term::formatAnsiTermMoveToNextLine(buf, n);
+        writeString( buf );
+    }
+
+    void terminalMoveToPrevLineImpl(int n)
+    {
+        char buf[32];
+        term::formatAnsiTermMoveToPrevLine(buf, n);
+        writeString( buf );
+    }
+
+    void terminalMoveToAbsColImpl(int n)
+    {
+        char buf[32];
+        term::formatAnsiTermMoveToAbsCol(buf, n);
+        writeString( buf );
+    }
+
+    void terminalMoveToLineStartImpl()
+    {
+        char buf[32];
+        term::formatAnsiTermMoveToLineStart(buf);
+        writeString( buf );
+    }
+
+    void terminalMoveToAbsPosImpl( int x, int y )
+    {
+        char buf[32];
+        term::formatAnsiTermMoveToAbsPos(buf, x, y);
+        writeString( buf );
+    }
+
+    void terminalMoveToAbs0Impl()
+    {
+        char buf[32];
+        term::formatAnsiTermMoveToAbs0(buf);
+        writeString( buf );
+    }
+
+    void terminalClearScreenEndImpl()
+    {
+        char buf[32];
+        term::formatAnsiTermClearScreenEnd(buf);
+        writeString( buf );
+    }
+
+    void terminalClearScreenImpl()
+    {
+        char buf[32];
+        term::formatAnsiTermClearScreen(buf);
+        writeString( buf );
+    }
+
+    void terminalClearLineImpl()
+    {
+        char buf[32];
+        term::formatAnsiTermClearLine(buf);
+        writeString( buf );
+    }
+
+    void terminalClearLineEndImpl()
+    {
+        char buf[32];
+        term::formatAnsiTermClearLineEnd(buf);
+        writeString( buf );
+    }
+
+    void terminalSetCaretImpl(int c)
+    {
+        char buf[32];
+        term::formatAnsiTermSetCaret(buf, c);
+        writeString( buf );
+    }
+
+
 
     //----------------------------------------------------------------------------
     // Позиционирование в консоли
@@ -251,35 +336,137 @@ struct ICharWriter
     //! Helper для спиннера
     virtual void terminalSetSpinnerMode( bool m ) { UMBA_USED(m); }
 
+
+    // virtual void terminalMoveToAbs0()
+    // virtual void terminalMoveRelative(int direction, int n)
+    // virtual void terminalMoveToNextLine(int n)
+    // virtual void terminalMoveToPrevLine(int n)
+    // virtual void terminalMoveToAbsCol(int n)
+    // virtual void terminalMoveToLineStart()
+    // virtual void terminalMoveToAbsPos( int x, int y )
+    // virtual void terminalClearScreenEnd()
+    // virtual void terminalClearScreen()
+    // virtual void terminalClearLine()
+    // virtual void terminalClearLineEnd()
+
+
+
+#define UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION
+
     //! Перейти в абсолютный 0.
-    virtual void terminalMove2Abs0()    {}
+    virtual void terminalMoveToAbs0()
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    {}
+#endif
 
-    //! Перейти ниже на строку на нулевую позицию.
-    virtual void terminalMove2Down()    {}
+    //! Перейти относительно текущей позиции на n шагов в направлении direction: 0 - up, 1 - down, 2 - forward, 3 - backward (A/B/C/D commands)
+    virtual void terminalMoveRelative(int direction, int n)
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    { UMBA_USED(direction); UMBA_USED(n); }
+#endif
 
-    //! Перейти в нулевую позицию в текущей строке
-    virtual void terminalMove2Line0()   {}
+    //! Перейти на n строк ниже и установить курсор в нулевую позицию (E)
+    virtual void terminalMoveToNextLine(int n)
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    { UMBA_USED(n); }
+#endif
 
-    //! Перейти на заданную позицию в текущей строке
-    virtual void terminalMove2LinePos( int pos ) { UMBA_USED(pos); }
+    //! Перейти на n строк выше и установить курсор в нулевую позицию (F)
+    virtual void terminalMoveToPrevLine(int n)
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    { UMBA_USED(n); }
+#endif
 
-    //! Очистить в текущей строке N позиции от текущего положения
-    virtual void terminalClearLine( int n=-1 ) { UMBA_USED(n); }
+    //! Перейти в абсолютную позицию в текущей строке (G)
+    virtual void terminalMoveToAbsCol(int n)
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    { UMBA_USED(n); }
+#endif
 
-    //! Очистить текущую строку до конца, и очистить всё, что ниже, но не больше, чем maxLines - для ускорения
-    virtual void terminalClearRemaining( int maxLines = -1 ) { UMBA_USED(maxLines); }
+    //! Перейти в нулевую позицию в текущей строке (см. выше)
+    virtual void terminalMoveToLineStart()
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    {}
+#endif
 
-    //! Переход в абсолютную позицию
-    virtual void terminalMove2Pos( int x, int y )
-    {
-        // Реализация по умолчанию использует огранниченные методы, перечисленные выше, если терминал не поддерживает такое позиционирование напрямую
-        terminalMove2Abs0();
-        // int i = 0;
-        for( auto j = 0; j<y; ++j)
-            terminalMove2Down();
+    //! Переход в абсолютную позицию (H)
+    virtual void terminalMoveToAbsPos( int x, int y )
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    { UMBA_USED(x); UMBA_USED(y); }
+#endif
 
-        terminalMove2LinePos(x);
-    }
+    //! Очистить от текущего положения до конца экрана (0J)
+    virtual void terminalClearScreenEnd()
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    {}
+#endif
+
+    //! Очистить экран (2J)
+    virtual void terminalClearScreen()
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    {}
+#endif
+
+    //! Очистить текущую строку (2K)
+    virtual void terminalClearLine()
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    {}
+#endif
+
+    //! Очистить от текущего положения до конца строки (0K)
+    virtual void terminalClearLineEnd()
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
+    = 0;    
+#else
+    {}
+#endif
+
+
+
+    // //! Перейти ниже на строку на нулевую позицию.
+    // virtual void terminalMoveDown(int n)
+    // {}
+
+
+
+    // //! Очистить в текущей строке N позиции от текущего положения
+    // virtual void terminalClearLine( int n=-1 ){ UMBA_USED(n); } // Пока не нужно
+
+
+    // Пока не нужно
+    // //! Очистить текущую строку до конца, и очистить всё, что ниже, но не больше, чем maxLines - для ускорения
+    // virtual void terminalClearRemaining( int maxLines = -1 )
+    // { UMBA_USED(maxLines); }
+
+    // {
+    //     // Реализация по умолчанию использует огранниченные методы, перечисленные выше, если терминал не поддерживает такое позиционирование напрямую
+    //     terminalMove2Abs0();
+    //     // int i = 0;
+    //     for( auto j = 0; j<y; ++j)
+    //         terminalMove2Down();
+    //  
+    //     terminalMove2LinePos(x);
+    // }
 
 
 }; // UMBA_INTERFACE ICharWriter
