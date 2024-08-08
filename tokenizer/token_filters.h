@@ -79,7 +79,8 @@ struct SimplePassTroughFilter
     using string_type              = typename TokenizerType::string_type          ;
     using iterator_type            = typename TokenizerType::iterator_type        ;
     using messages_string_type     = typename TokenizerType::messages_string_type ;
-    using payload_type             = umba::tokenizer::payload_type;
+    using payload_type             = umba::tokenizer::payload_type                ;
+    using token_parsed_data        = typename TokenizerType::token_parsed_data     ;
 
 
 protected:
@@ -99,7 +100,7 @@ public:
                    , payload_type                         payloadToken
                    , iterator_type                        b
                    , iterator_type                        e
-                   , std::basic_string_view<value_type>   strValue
+                   , token_parsed_data                    parsedData // std::basic_string_view<value_type>   strValue
                    , messages_string_type                 &msg
                    )
     {
@@ -128,13 +129,15 @@ struct TokenInfo
     using string_type              = typename TokenizerType::string_type          ;
     using iterator_type            = typename TokenizerType::iterator_type        ;
     //using messages_string_type     = typename TokenizerType::messages_string_type ;
-    using payload_type             = umba::tokenizer::payload_type;
+    using payload_type             = umba::tokenizer::payload_type                ;
+    using token_parsed_data        = typename TokenizerType::token_parsed_data    ;
 
     bool                                 lineStartFlag;
     payload_type                         payloadToken;
     iterator_type                        b;
     iterator_type                        e;
-    std::basic_string_view<value_type>   strValue;
+    // std::basic_string_view<value_type>   strValue;
+    token_parsed_data                    parsedData;
 
     UMBA_RULE_OF_FIVE(TokenInfo, default, default, default, default, default);
 
@@ -142,13 +145,14 @@ struct TokenInfo
              , payload_type                         payloadToken_
              , iterator_type                        b_
              , iterator_type                        e_
-             , std::basic_string_view<value_type>   strValue_
+             , token_parsed_data                    parsedData_ // std::basic_string_view<value_type>   strValue_
              )
     : lineStartFlag(lineStartFlag_)
     , payloadToken(payloadToken_)
     , b(b_)
     , e(e_)
-    , strValue(strValue_)
+    //, strValue(strValue_)
+    , parsedData(parsedData_)
     {}
 
 }; // struct TokenInfo
@@ -176,7 +180,8 @@ struct FilterBase
     using string_type              = typename TokenizerType::string_type          ;
     using iterator_type            = typename TokenizerType::iterator_type        ;
     using messages_string_type     = typename TokenizerType::messages_string_type ;
-    using payload_type             = umba::tokenizer::payload_type;
+    using payload_type             = umba::tokenizer::payload_type                ;
+    using token_parsed_data        = typename TokenizerType::token_parsed_data     ;
 
 
 protected:
@@ -196,7 +201,7 @@ protected:
 
         for(const auto &tki : tokenBuffer)
         {
-            if (!nextTokenHandler(tki.lineStartFlag, tki.payloadToken, tki.b, tki.e, tki.strValue, msg))
+            if (!nextTokenHandler(tki.lineStartFlag, tki.payloadToken, tki.b, tki.e, tki.parsedData /*strValue*/, msg))
             {
                 if (bClear)
                    clearTokenBuffer();
@@ -245,7 +250,8 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
     using string_type              = typename TBase::string_type          ;
     using iterator_type            = typename TBase::iterator_type        ;
     using messages_string_type     = typename TBase::messages_string_type ;
-    using payload_type             = umba::tokenizer::payload_type;
+    using payload_type             = umba::tokenizer::payload_type        ;
+    using token_parsed_data        = typename TBase::token_parsed_data    ;
 
 
     UMBA_RULE_OF_FIVE(SimpleNumberSuffixGluing, default, default, default, default, default);
@@ -264,7 +270,7 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
                    , payload_type                         payloadToken
                    , iterator_type                        b
                    , iterator_type                        e
-                   , std::basic_string_view<value_type>   strValue
+                   , token_parsed_data                    parsedData // std::basic_string_view<value_type>   strValue
                    , messages_string_type                 &msg
                    )
     {
@@ -281,12 +287,12 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
         {
             if (isNumberLiteral(payloadToken))
             {
-                this->tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, strValue);
+                this->tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, parsedData /* strValue */ );
                 return true;
             }
             else
             {
-                return this->nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
+                return this->nextTokenHandler(lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
             }
         }
         else // в буфере лежит токен числового литерала
@@ -294,7 +300,7 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
             if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER) // Если после числового токена идёт идентификатор - это число с суффиксом
             {
                 UMBA_ASSERT(!this->tokenBuffer.empty());
-                bool res = this->nextTokenHandler(this->tokenBuffer[0].lineStartFlag, this->tokenBuffer[0].payloadToken, this->tokenBuffer[0].b, e, strValue, msg);
+                bool res = this->nextTokenHandler(this->tokenBuffer[0].lineStartFlag, this->tokenBuffer[0].payloadToken, this->tokenBuffer[0].b, e, parsedData /* strValue */ , msg);
                 this->clearTokenBuffer();
                 return res;
                 //tokenBuffer[0]
@@ -307,7 +313,7 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
                 }
 
                 // прокидываем текущий токен
-                return this->nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
+                return this->nextTokenHandler(lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
             }
         }
 

@@ -7,6 +7,9 @@
 #include "../the.h"
 #include "../rule_of_five.h"
 
+//
+#include <variant>
+
 
 //----------------------------------------------------------------------------
 // umba::tokenizer::
@@ -158,6 +161,39 @@ public: // depending types
 
     using ITokenizerLiteralParser  = umba::tokenizer::ITokenizerLiteralParser<CharType, MessagesStringType, InputIteratorType>;
 
+    struct EmptyData
+    {};
+
+    struct StringLiteralData
+    {
+        std::basic_string_view<value_type>  data;
+
+    }; // struct StringLiteralData
+
+
+    struct IntegerNumericLiteralData
+    {
+        std::uint64_t        data;
+        bool                 hasSuffix = false;
+        iterator_type        suffixPos;
+
+    }; // struct NumericLiteralData
+
+
+    struct FloatNumericLiteralData
+    {
+        std::uint64_t        data;  // Тут только целая часть, потом подумаем, как плавающие числа представлять
+                                    // Возможно, будем использовать marty::Decimal
+        bool                 hasSuffix = false;
+        iterator_type        suffixPos;
+
+    }; // struct NumericLiteralData
+
+    
+    using TokenParsedData = std::variant<EmptyData, StringLiteralData, IntegerNumericLiteralData, FloatNumericLiteralData>;
+
+    using token_parsed_data = TokenParsedData;
+
 
 //------------------------------
 public: // ctors and op=
@@ -212,6 +248,7 @@ protected: // fileds - состояние токенизатора
     mutable payload_type           numberReadedDigits    = 0;
     mutable CharClass              allowedDigitCharClass = CharClass::none;
     mutable int                    numbersBase           = 0;
+    mutable std::uint64_t          numberCurrentIntValue = 0;
 
     // Коментарии
     mutable InputIteratorType      commentStartIt;
@@ -323,9 +360,10 @@ protected: // methods - helpers - из "грязного" проекта, где
     {
         tokenStartIt = it;
         numberPrefixIdx = tokenTrieFindNext(numbersTrie, trie_index_invalid, (token_type)ch);
-        numberTokenId = 0;
-        numberReadedDigits = 0;
-        numberExplicitBase = 0;
+        numberTokenId         = 0;
+        numberReadedDigits    = 0;
+        numberExplicitBase    = 0;
+        numberCurrentIntValue = 0;
         if (numberPrefixIdx!=trie_index_invalid) // Найдено начало префикса числа
         {
             st = TokenizerInternalState::stReadNumberPrefix;
@@ -558,8 +596,11 @@ public: // methods - методы собственно разбора
 
                      if (!prefixIsNumber)
                          return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+
+                     // !!! Тут надо преобразовать префикс в число, и поместить его в numberCurrentIntValue
                      if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                          return false;
+
                      if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
                          return false;
                      return true;
@@ -567,6 +608,7 @@ public: // methods - методы собственно разбора
             }
 
             case TokenizerInternalState::stReadNumber:
+                 // !!! Не забыть передать numberCurrentIntValue
                  if (numberTokenId==0 || numberTokenId==payload_invalid)
                  {
                      if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
@@ -652,6 +694,8 @@ public: // methods - методы собственно разбора
 
     }
 
+
+    //----------------------------------------------------------------------------
     bool tokenize(InputIteratorType it, InputIteratorType itEnd) const
     {
         const auto ch = *it;
@@ -965,6 +1009,7 @@ public: // methods - методы собственно разбора
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
                         allowedDigitCharClass |= CharClass::xdigit;
+                    numberCurrentIntValue = 0;
 
                     // Теперь тут у нас либо цифра, либо что-то другое
                     if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
@@ -972,6 +1017,7 @@ public: // methods - методы собственно разбора
                         //NOTE: !!! Да, сразу после префикса у нас не может быть разделителя разрядов
                         st = TokenizerInternalState::stReadNumber; // Тут у нас годная цифра, продолжаем
                         numberReadedDigits = 1;
+                        // !!! тут надо уже начинать подсчитывать std::uint64_t numberCurrentIntValue
                         break;
                     }
 
@@ -1014,6 +1060,8 @@ public: // methods - методы собственно разбора
 
                 if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
                 {
+                    // numberCurrentIntValue *= 
+                    // !!! std::uint64_t numberCurrentIntValue надо вычислять число
                     break; // Тут у нас годная цифра
                 }
 
@@ -1432,29 +1480,44 @@ protected: // methods - хандлеры из "грязного" проекта,
         if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
-        bool bRes = static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd, std::basic_string_view<value_type>(), msg);
+        bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
+                                                               , EmptyData() // std::basic_string_view<value_type>()
+                                                               , msg
+                                                               );
         checkLineStart(tokenType);
         return bRes;
     }
 
     [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат
-    bool parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd) const
+    bool parsingHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+                             , InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd
+                             ) const
     {
         if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
-        bool bRes = static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd, makeStringView(parsedDataBegin, parsedDataEnd), msg);
+        bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
+                                                               , EmptyData() // makeStringView(parsedDataBegin, parsedDataEnd)
+                                                               , msg
+                                                               );
         checkLineStart(tokenType);
         return bRes;
     }
 
     [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат
-    bool parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData) const
+    bool parsingHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+                             , std::basic_string_view<value_type> parsedData
+                             ) const
     {
         if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
-        bool bRes = static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd, parsedData, msg);
+        bool bRes = static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType
+                                                               , inputDataBegin, inputDataEnd
+                                                               , StringLiteralData{parsedData}
+                                                               , msg
+                                                               );
+        // TokenParsedData StringLiteralData
         checkLineStart(tokenType);
         return bRes;
     }
