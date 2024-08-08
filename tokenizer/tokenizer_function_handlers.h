@@ -51,6 +51,8 @@ public: // depending types
 
     using ITokenizerLiteralParser  = typename TBase::ITokenizerLiteralParser;
 
+    using token_parsed_data        = typename TBase::token_parsed_data;
+
 
 //------------------------------
 public: // ctors and op=
@@ -69,9 +71,10 @@ public: // handler types
                                                                          , payload_type
                                                                          , InputIteratorType
                                                                          , InputIteratorType
-                                                                         , std::basic_string_view<value_type>
-                                                                         , messages_string_type&)
-                                                                         >;
+                                                                         , token_parsed_data // std::basic_string_view<value_type>
+                                                                         , messages_string_type&
+                                                                         )
+                                                                    >;
     using unexpected_handler_type                    = std::function<bool(InputIteratorType, InputIteratorType, const char*, int)>;
     using report_unknown_operator_handler_type       = std::function<void(InputIteratorType,InputIteratorType)>;
     using report_string_literal_message_handler_type = std::function<void(bool, InputIteratorType, const MessagesStringType &)>;
@@ -96,11 +99,16 @@ public: // handlers
 #if defined(UMBA_GCC_COMPILER_USED) // С GCC какая-то проблемка.
 public:
 #else
-protected: // handler methods, called from base
+// protected: // handler methods, called from base
+public:
 #endif
 
 
-    bool hadleToken(bool bLineStart, payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData, MessagesStringType &msg) const
+    bool hadleToken( bool bLineStart, payload_type tokenType
+                   , InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+                   , token_parsed_data parsedData // std::basic_string_view<value_type> parsedData
+                   , MessagesStringType &msg
+                   ) const
     {
         if (tokenHandler)
            return tokenHandler(bLineStart, tokenType, inputDataBegin, inputDataEnd, parsedData, msg);
