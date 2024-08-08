@@ -31,6 +31,7 @@ class TokenizerFunctionHandlers : public TokenizerBaseImpl< TokenizerFunctionHan
 //------------------------------
 public: // depending types
 
+    //friend class TBase;
     using TBase = TokenizerBaseImpl< TokenizerFunctionHandlers
                                    , CharType
                                    , CharClassTableType
@@ -87,14 +88,17 @@ public: // handlers
     template<typename FilterType, typename... FilterCtorArgs >
     void installTokenFilter( FilterCtorArgs... args)
     {
-        tokenHandler = FilterType(tokenHandler, std::forward<Args>(args)...);
+        tokenHandler = FilterType(tokenHandler, std::forward<FilterCtorArgs>(args)...);
     }
 
 
 //------------------------------
+#if defined(UMBA_GCC_COMPILER_USED) // С GCC какая-то проблемка.
+public:
+#else
 protected: // handler methods, called from base
+#endif
 
-    friend class TBase;
 
     bool hadleToken(bool bLineStart, payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, std::basic_string_view<value_type> parsedData, MessagesStringType &msg) const
     {
