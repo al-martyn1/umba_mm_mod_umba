@@ -234,11 +234,24 @@ public:
 template<typename TokenizerType, typename VectorType=std::vector<TokenInfo<TokenizerType> > >
 struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
 {
+    using TBase = FilterBase<TokenizerType, VectorType>;
+
+    using token_handler_type       = typename TBase::token_handler_type;
+
+    using char_type                = typename TBase::char_type            ;
+    using value_type               = typename TBase::value_type           ;
+    using char_class_table_type    = typename TBase::char_class_table_type;
+    using trie_vector_type         = typename TBase::trie_vector_type     ;
+    using string_type              = typename TBase::string_type          ;
+    using iterator_type            = typename TBase::iterator_type        ;
+    using messages_string_type     = typename TBase::messages_string_type ;
+    using payload_type             = umba::tokenizer::payload_type;
+
 
     UMBA_RULE_OF_FIVE(SimpleNumberSuffixGluing, default, default, default, default, default);
 
     SimpleNumberSuffixGluing(token_handler_type curTokenHandler)
-    : FilterBase(curTokenHandler)
+    : TBase(curTokenHandler)
     {}
 
     static
@@ -257,42 +270,44 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_FIN)
         {
-            bool res = flushTokenBuffer(msg);
-            reset();
+            bool res = this->flushTokenBuffer(msg);
+            // https://stackoverflow.com/questions/9941987/there-are-no-arguments-that-depend-on-a-template-parameter
+            // https://web.archive.org/web/20130423054841/http://www.agapow.net/programming/cpp/no-arguments-that-depend-on-a-template-parameter
+            this->reset();
             return res;
         }
 
-        if (tokenBuffer.empty())
+        if (this->tokenBuffer.empty())
         {
             if (isNumberLiteral(payloadToken))
             {
-                tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, strValue);
+                this->tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, strValue);
                 return true;
             }
             else
             {
-                return nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
+                return this->nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
             }
         }
         else // в буфере лежит токен числового литерала
         {
             if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER) // Если после числового токена идёт идентификатор - это число с суффиксом
             {
-                UMBA_ASSERT(!tokenBuffer.empty());
-                bool res = nextTokenHandler(tokenBuffer[0].lineStartFlag, tokenBuffer[0].payloadToken, tokenBuffer[0].b, e, strValue, msg);
-                clearTokenBuffer();
+                UMBA_ASSERT(!this->tokenBuffer.empty());
+                bool res = this->nextTokenHandler(this->tokenBuffer[0].lineStartFlag, this->tokenBuffer[0].payloadToken, this->tokenBuffer[0].b, e, strValue, msg);
+                this->clearTokenBuffer();
                 return res;
                 //tokenBuffer[0]
             }
             else // после числового токена идёт хз что
             {
-                if (!flushTokenBuffer(msg)) // сбрасываем буферизированное (с очисткой буфера)
+                if (!this->flushTokenBuffer(msg)) // сбрасываем буферизированное (с очисткой буфера)
                 {
                      return false;
                 }
 
                 // прокидываем текущий токен
-                return nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
+                return this->nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
             }
         }
 
