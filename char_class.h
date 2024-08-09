@@ -254,7 +254,7 @@ StringType enum_serialize_single_flag(CharClass f, const StringType &prefix=Stri
 {
     switch(f)
     {
-        //case CharClass::none            : return std::string("none");
+        case CharClass::none                        : return std::string("none");
         case CharClass::string_literal_prefix       : return prefix+umba::string_plus::make_string<StringType>("string_literal_prefix");
         case CharClass::nonprintable                : return prefix+umba::string_plus::make_string<StringType>("nonprintable");
         case CharClass::linefeed                    : return prefix+umba::string_plus::make_string<StringType>("linefeed");

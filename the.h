@@ -9,6 +9,8 @@
 // C++20 idioms for parameter packs - https://www.scs.stanford.edu/~dm/blog/param-pack.html
 
 
+#include "rule_of_five.h"
+
 
 namespace umba {
 
@@ -22,6 +24,8 @@ class TheValue
 
 
 public:
+
+    UMBA_RULE_OF_FIVE(TheValue, delete, delete, delete, delete, delete);
 
     constexpr explicit TheValue(const TVal& v) noexcept
       : tVal(v)
@@ -60,6 +64,8 @@ class TheFlags
 
 
 public:
+
+    UMBA_RULE_OF_FIVE(TheFlags, delete, delete, delete, delete, delete);
 
     constexpr explicit TheFlags(const TFlags& f) noexcept
       : tFlags(f)

@@ -31,6 +31,8 @@ struct ITokenizerLiteralCharInserter
     using difference_type = std::ptrdiff_t;
     using value_type = CharType;
 
+    virtual ~ITokenizerLiteralCharInserter() {}
+
     // Тут такой вопрос - может, сделать перегрузки для разных типов char?
     virtual void insert(CharType ch) = 0;
 };
@@ -144,6 +146,8 @@ struct ITokenizerLiteralParser
 {
     using value_type = CharType;
 
+    virtual ~ITokenizerLiteralParser() {}
+
     virtual void reset() = 0;
     virtual StringLiteralParsingResult parseChar(InputIteratorType it, InputIteratorType itEnd, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) = 0;
 
@@ -234,6 +238,7 @@ public:
 //----------------------------------------------------------------------------
 //! SimpleQuoted, хотя и CppEscaped - потому, что он не парсит сырые литералы, и всякие другие новые модные плюсовые строковые литералы
 //! ExtraEscapes позволяют заменять кастомные escape последовательности на произвольные строки
+#include "umba/warnings/push_disable_padding_added.h"
 template< typename CharType
         , typename MessageStringType    = std::string // std::basic_string<CharType>
         , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
@@ -331,8 +336,8 @@ protected:
     void initHexSequence(unsigned base, int d=0)
     {
         UMBA_ASSERT(base==8u || base==16u);
-        hexCode           = (base==8) ? (unsigned)d : 0u; // воьмеричная - есть сразу первая цифра, для HEX'а первой цифры нет
-        numReadedHexItems = (base==8) ? 1 : 0;
+        hexCode           = (base==8u) ? (unsigned)d : 0u; // воьмеричная - есть сразу первая цифра, для HEX'а первой цифры нет
+        numReadedHexItems = (base==8u) ? 1u : 0u;
         hexBase           = base;
     }
 
@@ -358,13 +363,13 @@ protected:
 
     bool canAddHexDigit() const
     {
-        if (hexBase==8)
+        if (hexBase==8u)
         {
-            return numReadedHexItems < 3;
+            return numReadedHexItems < 3u;
         }
         else
         {
-            unsigned maxHexDigits = wideLiteral ? 8 : 2;
+            unsigned maxHexDigits = wideLiteral ? 8u : 2u;
             return numReadedHexItems < maxHexDigits;
         }
     }
@@ -424,6 +429,7 @@ public:
 
     virtual StringLiteralParsingResult parseChar(InputIteratorType it, InputIteratorType itEnd, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
     {
+        UMBA_USED(itEnd);
         CharType ch = *it;
 
         switch(st)
@@ -560,7 +566,7 @@ public:
     }
 
 }; // class CppEscapedSimpleQuotedStringLiteralParser
-
+#include "umba/warnings/pop.h"
 //----------------------------------------------------------------------------
 
 

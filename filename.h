@@ -200,7 +200,7 @@ void appendPathSepInline( StringType &p, typename StringType::value_type pathSep
 template<typename StringType> inline
 StringType appendPathSepCopy( const StringType &p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
 {
-    StringType pCopy = p; appendPathSepInline<StringType>(pCopy); return pCopy;
+    StringType pCopy = p; appendPathSepInline<StringType>(pCopy, pathSep); return pCopy;
 }
 
 //-----------------------------------------------------------------------------

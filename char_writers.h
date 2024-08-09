@@ -374,6 +374,7 @@ HANDLE WINAPI GetStdHandle(
 */
 
 //! Реализация CharWriter, производящая вывод в поток вывода std::ostream&
+#include "warnings/push_disable_padding_added.h"
 struct StdStreamCharWriter : UMBA_IMPLEMENTS ICharWriter
 {
 
@@ -809,7 +810,7 @@ public:
         else if (m_consoleType==term::UMBA_CONSOLETYPE_WINDOWS_CONSOLE && m_hCon!=INVALID_HANDLE_VALUE)
         {
             consoleCoord.X  = 0;
-            consoleCoord.Y += n;
+            consoleCoord.Y += (SHORT)n;
             SetConsoleCursorPosition(m_hCon, consoleCoord );
         }
         #endif
@@ -959,6 +960,7 @@ protected:
     #endif
 
 }; // class StdStreamCharWriter
+#include "warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 
