@@ -31,7 +31,6 @@ class TokenizerFunctionHandlers : public TokenizerBaseImpl< TokenizerFunctionHan
 //------------------------------
 public: // depending types
 
-    //friend class TBase;
     using TBase = TokenizerBaseImpl< TokenizerFunctionHandlers
                                    , CharType
                                    , CharClassTableType
@@ -41,14 +40,16 @@ public: // depending types
                                    , InputIteratorType
                                    >;
 
-    friend class TokenizerBaseImpl< TokenizerFunctionHandlers
-                                   , CharType
-                                   , CharClassTableType
-                                   , TrieVectorType
-                                   , StringType
-                                   , MessagesStringType
-                                   , InputIteratorType
-                                   >;
+    friend TBase;
+
+    // friend class TokenizerBaseImpl< TokenizerFunctionHandlers
+    //                                , CharType
+    //                                , CharClassTableType
+    //                                , TrieVectorType
+    //                                , StringType
+    //                                , MessagesStringType
+    //                                , InputIteratorType
+    //                                >;
 
     using char_type                = typename TBase::char_type            ;
     using value_type               = typename TBase::value_type           ;
