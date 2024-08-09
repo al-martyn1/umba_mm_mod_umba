@@ -41,6 +41,15 @@ public: // depending types
                                    , InputIteratorType
                                    >;
 
+    friend class TokenizerBaseImpl< TokenizerFunctionHandlers
+                                   , CharType
+                                   , CharClassTableType
+                                   , TrieVectorType
+                                   , StringType
+                                   , MessagesStringType
+                                   , InputIteratorType
+                                   >;
+
     using char_type                = typename TBase::char_type            ;
     using value_type               = typename TBase::value_type           ;
     using char_class_table_type    = typename TBase::char_class_table_type;
@@ -99,8 +108,8 @@ public: // handlers
 #if defined(UMBA_GCC_COMPILER_USED) // С GCC какая-то проблемка.
 public:
 #else
-// protected: // handler methods, called from base
-public:
+protected: // handler methods, called from base
+// public:
 #endif
 
 

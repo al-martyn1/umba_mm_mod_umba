@@ -105,7 +105,7 @@ public:
                    )
     {
         if (nextTokenHandler)
-            return nextTokenHandler(lineStartFlag, payloadToken, b, e, strValue, msg);
+            return nextTokenHandler(lineStartFlag, payloadToken, b, e, parsedData, msg);
         return true;
     }
 
