@@ -171,6 +171,13 @@ public: // depending types
     }; // struct StringLiteralData
 
 
+    struct CommentData // Текст комента без обрамляющих символов
+    {
+        std::basic_string_view<value_type>  data;
+
+    }; // struct StringLiteralData
+
+
     struct IntegerNumericLiteralData
     {
         std::uint64_t        data;
@@ -190,7 +197,7 @@ public: // depending types
     }; // struct NumericLiteralData
 
     
-    using TokenParsedData = std::variant<EmptyData, StringLiteralData, IntegerNumericLiteralData, FloatNumericLiteralData>;
+    using TokenParsedData = std::variant<EmptyData, CommentData, StringLiteralData, IntegerNumericLiteralData, FloatNumericLiteralData>;
 
     using token_parsed_data = TokenParsedData;
 
@@ -673,7 +680,7 @@ public: // methods - методы собственно разбора
                  }
 
             case TokenizerInternalState::stReadSingleLineComment:
-                 if (!parsingHandlerLambda(commentTokenId, tokenStartIt, itEnd, commentStartIt, itEnd))
+                 if (!parsingCommentHandlerLambda(commentTokenId, tokenStartIt, itEnd, commentStartIt, itEnd))
                      return false;
                  if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
                      return false;
@@ -1267,7 +1274,7 @@ public: // methods - методы собственно разбора
 
                 if (res==StringLiteralParsingResult::okStop || res==StringLiteralParsingResult::warnStop)
                 {
-                    if (!parsingHandlerLambda(literalTokenId, tokenStartIt, it+1)) // выплюнули текущий литерал
+                    if (!parsingStringLiteralHandlerLambda(literalTokenId, tokenStartIt, it+1, makeStringView(stringLiteralValueCollector.str()))) // выплюнули текущий литерал
                         return false;
                     st = TokenizerInternalState::stInitial;
                 }
@@ -1284,7 +1291,7 @@ public: // methods - методы собственно разбора
                     auto nextIt = it+1;
                     if (nextIt==itEnd)
                     {
-                        if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it))
+                        if (!parsingCommentHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it))
                             return false;
                         if (!processEscapeSymbolLambda(it /* , stInitial */ ))
                             return false;
@@ -1294,7 +1301,7 @@ public: // methods - методы собственно разбора
                     CharClass nextCharClass = charClassTable[charToCharClassTableIndex(*nextIt)];
                     if (umba::TheFlags(nextCharClass).oneOf(CharClass::linefeed))
                     {
-                        if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it))
+                        if (!parsingCommentHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it))
                             return false;
                         if (!processEscapeSymbolLambda(it /* , stInitial */ ))
                             return false;
@@ -1307,7 +1314,7 @@ public: // methods - методы собственно разбора
                 else if (umba::TheFlags(charClass).oneOf(CharClass::linefeed))
                 {
                     //TODO: !!! Разобраться с continuation
-                    if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it))
+                    if (!parsingCommentHandlerLambda(commentTokenId, tokenStartIt, it, commentStartIt, it))
                         return false;
                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_LINEFEED, it, it+1)) // Перевод строки мы всегда отдельно выплёвываем
                         return false;
@@ -1340,7 +1347,7 @@ public: // methods - методы собственно разбора
                         if (commentEndMatchIndex>=multiLineCommentEndStr.size())
                         {
                             // Нашли
-                            if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it+1, commentStartIt, commentEndStartIt)) // выплюнули текст коментария
+                            if (!parsingCommentHandlerLambda(commentTokenId, tokenStartIt, it+1, commentStartIt, commentEndStartIt)) // выплюнули текст коментария
                                 return false;
 
                             commentEndMatchIndex = 0;
@@ -1447,6 +1454,12 @@ protected:
         return std::basic_string_view<value_type>(&*b, distance( b, e ));
     }
 
+    static
+    std::basic_string_view<typename StringType::value_type> makeStringView(const StringType &str)
+    {
+        return std::basic_string_view<value_type>(&str[0], str.size());
+    }
+
 
 //------------------------------
 protected: // methods - хандлеры из "грязного" проекта, где я наговнякал первую версию, выносим лямбды.
@@ -1488,16 +1501,16 @@ protected: // methods - хандлеры из "грязного" проекта,
         return bRes;
     }
 
-    [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат
-    bool parsingHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
-                             , InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd
-                             ) const
+    [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат 
+    bool parsingCommentHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+                                    , InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd
+                                    ) const
     {
         if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
-                                                               , EmptyData() // makeStringView(parsedDataBegin, parsedDataEnd)
+                                                               , CommentData{makeStringView(parsedDataBegin, parsedDataEnd)}
                                                                , msg
                                                                );
         checkLineStart(tokenType);
@@ -1505,7 +1518,7 @@ protected: // methods - хандлеры из "грязного" проекта,
     }
 
     [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат
-    bool parsingHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+    bool parsingStringLiteralHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
                              , std::basic_string_view<value_type> parsedData
                              ) const
     {
