@@ -4,8 +4,9 @@
     #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
 #endif
 
+#include "umba/warnings/push_disable_rel_inc_contains_dbldot.h"
 #include "../rule_of_five.h"
-
+#include "umba/warnings/pop.h"
 
 // umba::tokenizer::
 namespace umba {
@@ -70,7 +71,7 @@ public:
         {
             TrieNodesMap
             &curMap  = *pCurMap;
-            pCurNode = &curMap[*b]; // .second;
+            pCurNode = &curMap[(token_type)*b]; // .second;
             pCurMap  = &pCurNode->childs;
 
             pCurNode->trieNode.token = static_cast<token_type>(*b);

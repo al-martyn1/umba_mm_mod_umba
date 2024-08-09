@@ -4,8 +4,10 @@
     #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
 #endif
 
+#include "umba/warnings/push_disable_rel_inc_contains_dbldot.h"
 #include "../the.h"
 #include "../rule_of_five.h"
+#include "umba/warnings/pop.h"
 
 #if !defined(UMBA_TOKENOZER_DONT_USE_MARTY_DECIMAL)
     #include "marty_decimal/marty_decimal.h"
@@ -25,6 +27,7 @@ namespace tokenizer {
 
 
 //----------------------------------------------------------------------------
+#include "umba/warnings/push_disable_padding_added.h"
 struct TokenizerOptions
 {
     bool  singleLineCommentOnlyAtBeginning = false;
@@ -33,6 +36,7 @@ struct TokenizerOptions
     int   numberDefaultBase                = 10;     // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
 
 };
+#include "umba/warnings/pop.h"
 
 //----------------------------------------------------------------------------
 
@@ -142,6 +146,7 @@ StringType getTokenizerTokenStr(payload_type p)
 
 
 //----------------------------------------------------------------------------
+#include "umba/warnings/push_disable_padding_added.h"
 template< typename TBase
         , typename CharType            // Input chars type
         , typename CharClassTableType  = std::array<CharClass, 128>
@@ -493,10 +498,10 @@ protected: // methods - helpers - из "грязного" проекта, где
         if (it==end)
             return 0;
 
-        auto idx = tokenTrieFindFirst(literalsTrie, *it);
+        auto idx = tokenTrieFindFirst(literalsTrie, (token_type)*it);
         for(; idx!=trie_index_invalid && it!=end; ++it)
         {
-            auto nextIdx = tokenTrieFindNext(literalsTrie, idx, *it);
+            auto nextIdx = tokenTrieFindNext(literalsTrie, idx, (token_type)*it);
             if (nextIdx==trie_index_invalid) // Дошли до конца, проверяем предыдущий индекс
             {
                 if (literalsTrie[idx].payload==payload_invalid)
@@ -1576,6 +1581,7 @@ protected: // methods - хандлеры из "грязного" проекта,
 
 
 }; // class TokenizerBaseImpl
+#include "umba/warnings/pop.h"
 
 
 

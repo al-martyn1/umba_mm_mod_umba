@@ -366,6 +366,7 @@ StringType formatFiletime( filetime_t t, const typename StringType::value_type *
 
 //----------------------------------------------------------------------------
 //! Данные статистики по файлу
+#include "warnings/push_disable_padding_added.h"
 struct FileStat
 {
     FileType     fileType;         //!< Тип файла - файл, каталог, хз, ошибка
@@ -383,7 +384,7 @@ struct FileStat
     //! Возвращает true, если статистика - по файлу
     bool isFile()  const { return fileType==FileTypeFile   ; }
 };
-
+#include "warnings/pop.h"
 //----------------------------------------------------------------------------
 
 
