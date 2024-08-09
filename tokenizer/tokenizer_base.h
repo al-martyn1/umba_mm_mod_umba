@@ -723,6 +723,8 @@ public: // methods - методы собственно разбора
 
 
     //----------------------------------------------------------------------------
+    // Links
+    // Is it possible to use goto with switch? - https://stackoverflow.com/questions/8202199/is-it-possible-to-use-goto-with-switch
     bool tokenize(InputIteratorType it, InputIteratorType itEnd) const
     {
         const auto ch = *it;
