@@ -7,6 +7,11 @@
 #include "../the.h"
 #include "../rule_of_five.h"
 
+#if !defined(UMBA_TOKENOZER_DONT_USE_MARTY_DECIMAL)
+    #include "marty_decimal/marty_decimal.h"
+    #define UMBA_TOKENOZER_MARTY_DECIMAL_USED
+#endif
+
 //
 #include <variant>
 
@@ -197,6 +202,11 @@ public: // depending types
     }; // struct NumericLiteralData
 
     
+    // https://en.cppreference.com/w/cpp/utility/variant
+    // https://en.cppreference.com/w/cpp/utility/variant/get_if
+    // https://en.cppreference.com/w/cpp/utility/variant/get
+    // https://en.cppreference.com/w/cpp/utility/variant/holds_alternative
+    // https://en.cppreference.com/w/cpp/utility/variant/visit
     using TokenParsedData = std::variant<EmptyData, CommentData, StringLiteralData, IntegerNumericLiteralData, FloatNumericLiteralData>;
 
     using token_parsed_data = TokenParsedData;
@@ -249,6 +259,9 @@ protected: // fileds - состояние токенизатора
     mutable trie_index_type        operatorIdx = trie_index_invalid;
 
     // Числовые литералы
+    // https://learn.microsoft.com/ru-ru/cpp/cpp/numeric-boolean-and-pointer-literals-cpp?view=msvc-170
+    // https://en.cppreference.com/w/cpp/language/integer_literal
+    // https://en.cppreference.com/w/cpp/language/floating_literal
     mutable payload_type           numberTokenId         = 0;
     mutable int                    numberExplicitBase    = 0;
     mutable trie_index_type        numberPrefixIdx       = trie_index_invalid;
@@ -256,6 +269,7 @@ protected: // fileds - состояние токенизатора
     mutable CharClass              allowedDigitCharClass = CharClass::none;
     mutable int                    numbersBase           = 0;
     mutable std::uint64_t          numberCurrentIntValue = 0;
+    // UMBA_TOKENOZER_MARTY_DECIMAL_USED
 
     // Коментарии
     mutable InputIteratorType      commentStartIt;
@@ -265,6 +279,7 @@ protected: // fileds - состояние токенизатора
 
 
     // Строковые литералы
+    // https://learn.microsoft.com/ru-ru/cpp/cpp/string-and-character-literals-cpp?view=msvc-170
     mutable ITokenizerLiteralParser*            pCurrentLiteralParser = 0;
     mutable payload_type                        literalTokenId = 0;
     mutable MessagesStringType                  externHandlerMessage;
@@ -1534,6 +1549,7 @@ protected: // methods - хандлеры из "грязного" проекта,
         checkLineStart(tokenType);
         return bRes;
     }
+
 
     bool unexpectedHandlerLambda(InputIteratorType it, InputIteratorType itEnd, const char* srcFile, int srcLine) const
     {
