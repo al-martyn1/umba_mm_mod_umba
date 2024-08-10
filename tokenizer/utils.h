@@ -4,6 +4,13 @@
     #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
 #endif
 
+#if !defined(UMBA_TOKENOZER_DONT_USE_MARTY_DECIMAL)
+    #include "marty_decimal/marty_decimal.h"
+    #if !defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
+        #define UMBA_TOKENOZER_MARTY_DECIMAL_USED
+    #endif
+#endif
+
 
 // umba::tokenizer::
 namespace umba {
@@ -433,6 +440,70 @@ int getNumberBaseFromExplicitAndDefault(int explicitBase, int defaultBase)
 {
     return (explicitBase<=0) ? defaultBase : explicitBase;
 }
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+std::uint64_t mulAndCheckOverflow(std::uint64_t op1, std::uint64_t op2, bool &bOverflow)
+{
+    std::uint64_t newVal = op1 * op2;
+    if (op2!=0)
+    {
+        if ((newVal/op2)!=op1)
+            bOverflow = true;
+    }
+
+    return newVal;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::uint64_t addAndCheckOverflow(std::uint64_t op1, std::uint64_t op2, bool &bOverflow)
+{
+    std::uint64_t newVal = op1 + op2;
+    if (newVal<op1 || newVal<op2)
+        bOverflow = true;
+
+    return newVal;
+}
+
+//----------------------------------------------------------------------------
+inline
+marty::Decimal mulAndCheckOverflow(marty::Decimal op1, std::uint64_t op2, bool &bOverflow)
+{
+    UMBA_USED(bOverflow);
+    return op1 * (marty::Decimal)op2; // переполнения никогда не будет
+}
+
+//----------------------------------------------------------------------------
+inline
+marty::Decimal addAndCheckOverflow(marty::Decimal op1, std::uint64_t op2, bool &bOverflow)
+{
+    UMBA_USED(bOverflow);
+    return op1 + (marty::Decimal)op2; // переполнения никогда не будет
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename PowerValueType>
+PowerValueType makePowerOf(PowerValueType base, PowerValueType pwr, bool &bOverflow)
+{
+    PowerValueType res = 1;
+    while(pwr>0)
+    {
+        res = mulAndCheckOverflow(res, base, bOverflow);
+        pwr -= 1;
+    }
+
+    return res;
+}
+
 
 //----------------------------------------------------------------------------
 
