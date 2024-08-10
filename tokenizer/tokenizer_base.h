@@ -11,7 +11,9 @@
 
 #if !defined(UMBA_TOKENOZER_DONT_USE_MARTY_DECIMAL)
     #include "marty_decimal/marty_decimal.h"
-    #define UMBA_TOKENOZER_MARTY_DECIMAL_USED
+    #if !defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
+        #define UMBA_TOKENOZER_MARTY_DECIMAL_USED
+    #endif
 #endif
 
 //
@@ -190,19 +192,32 @@ public: // depending types
 
     struct IntegerNumericLiteralData
     {
+#if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
+        marty::Decimal       data;
+#else
         std::uint64_t        data;
+#endif
+        bool                 fOverflow; // число не влезло в используемый тип (std::uint64_t). Для marty::Decimal такой ситуации не происходит.
+
         bool                 hasSuffix = false;
-        iterator_type        suffixPos;
+        iterator_type        suffixStartPos;
 
     }; // struct NumericLiteralData
 
 
+
     struct FloatNumericLiteralData
     {
-        std::uint64_t        data;  // Тут только целая часть, потом подумаем, как плавающие числа представлять
-                                    // Возможно, будем использовать marty::Decimal
+#if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
+        marty::Decimal       data;
+#else
+        double               data;
+#endif
+        bool                 fIntegerOverflow   ; // при разборе целая часть не влезла в std::uint64_t. Для marty::Decimal такой ситуации не происходит.
+        bool                 fFractionalOverflow; // при разборе дробная часть не влезла в std::uint64_t. Для marty::Decimal такой ситуации не происходит.
+
         bool                 hasSuffix = false;
-        iterator_type        suffixPos;
+        iterator_type        suffixStartPos;
 
     }; // struct NumericLiteralData
 
@@ -252,6 +267,8 @@ protected: // fileds
 //------------------------------
 protected: // fileds - состояние токенизатора
 
+    // Наверное, что-то можно упростить, но лень пока разбираться, когда-нибудь потом займусь
+
     mutable TokenizerInternalState st            = TokenizerInternalState::stInitial;
     mutable TokenizerInternalState stEscapeSaved = TokenizerInternalState::stInitial;
 
@@ -267,14 +284,23 @@ protected: // fileds - состояние токенизатора
     // https://learn.microsoft.com/ru-ru/cpp/cpp/numeric-boolean-and-pointer-literals-cpp?view=msvc-170
     // https://en.cppreference.com/w/cpp/language/integer_literal
     // https://en.cppreference.com/w/cpp/language/floating_literal
-    mutable payload_type           numberTokenId         = 0;
-    mutable int                    numberExplicitBase    = 0;
-    mutable trie_index_type        numberPrefixIdx       = trie_index_invalid;
-    mutable payload_type           numberReadedDigits    = 0;
-    mutable CharClass              allowedDigitCharClass = CharClass::none;
-    mutable int                    numbersBase           = 0;
-    mutable std::uint64_t          numberCurrentIntValue = 0;
-    // UMBA_TOKENOZER_MARTY_DECIMAL_USED
+    mutable payload_type           numberTokenId                = 0;
+    mutable int                    numberExplicitBase           = 0;
+    mutable trie_index_type        numberPrefixIdx              = trie_index_invalid;
+    mutable payload_type           numberReadedDigits           = 0;
+    mutable CharClass              allowedDigitCharClass        = CharClass::none;
+    mutable int                    numbersBase                  = 0;
+
+#if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
+    mutable marty::Decimal         numberCurrentIntValue        = 0;
+    mutable marty::Decimal         numberCurrentFractionalValue = 0;
+#else
+    mutable std::uint64_t          numberCurrentIntValue        = 0;
+    mutable std::uint64_t          numberCurrentFractionalValue = 0;
+#endif
+    mutable bool                   numberIntegerOverflow        = false; // При использовании marty::Decimal всегда false
+    mutable bool                   numberFractionalOverflow     = false; //
+    mutable std::uint64_t          numberCurrentFractionalPower = 0;
 
     // Коментарии
     mutable InputIteratorType      commentStartIt;
@@ -381,16 +407,110 @@ public: // methods
 //------------------------------
 protected: // methods - helpers - из "грязного" проекта, где я наговнякал первую версию, выносим лямбды.
 
+        // numberCurrentIntValue        = 0;
+        // numberCurrentFractionalValue = 0;
+        // numberCurrentFractionalPower = 0;
+
+    void resetNumberStateVals() const
+    {
+        numberPrefixIdx              = trie_index_invalid;
+        numberExplicitBase           = 0;
+        numberReadedDigits           = 0;
+        allowedDigitCharClass        = CharClass::none;
+        numbersBase                  = 0;
+    
+        numberCurrentIntValue        = 0;
+        numberCurrentFractionalValue = 0;
+
+        numberIntegerOverflow        = false;
+        numberFractionalOverflow     = false;
+        numberCurrentFractionalPower = 0;
+    }
+
+
+    void addNumberIntPartDigit(CharType ch, InputIteratorType it)
+    {
+        int d = utils::charToDigit(CharType ch);
+        //UMBA_ASSER(d>=0);
+        if (d<0)
+            return; // просто игнорим
+
+        numberCurrentIntValue = utils::mulAndCheckOverflow(numberCurrentIntValue, (std::uint64_t)numbersBase, numberIntegerOverflow);
+        numberCurrentIntValue = utils::addAndCheckOverflow(numberCurrentIntValue, (std::uint64_t)d          , numberIntegerOverflow);
+    }
+
+    void addNumberFloatPartDigit(CharType ch, InputIteratorType it)
+    {
+        int d = utils::charToDigit(CharType ch);
+        //UMBA_ASSER(d>=0);
+        if (d<0)
+            return; // просто игнорим
+
+        numberCurrentFractionalValue = utils::mulAndCheckOverflow(numberCurrentFractionalValue, (std::uint64_t)numbersBase, numberFractionalOverflow);
+        numberCurrentFractionalValue = utils::addAndCheckOverflow(numberCurrentFractionalValue, (std::uint64_t)d          , numberFractionalOverflow);
+        ++numberCurrentFractionalPower;
+    }
+
+    IntegerNumericLiteralData makeIntegerLiteralData(iterator_type itEnd)
+    {
+        IntegerNumericLiteralData res;
+        res.hasSuffix      = false;
+        res.suffixStartPos = itEnd;
+
+        res.data      = numberCurrentIntValue;
+        res.fOverflow = numberIntegerOverflow;
+
+        return res;
+    }
+
+    FloatNumericLiteralData makeFloatLiteralData(iterator_type itEnd)
+    {
+        FloatNumericLiteralData res;
+        res.hasSuffix      = false;
+        res.suffixStartPos = itEnd;
+
+#if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
+        using PowerValueType = marty::Decimal;
+        using DataValueType  = marty::Decimal;
+#else
+        using PowerValueType = std::uint64_t ;
+        using DataValueType  = double;
+#endif
+
+        auto powerDivider = (DataValueType)utils::makePowerOf((PowerValueType)numbersBase, (PowerValueType)numberCurrentFractionalPower, numberFractionalOverflow);
+
+        DataValueType fractionalPart = 0;
+        if (powerDivider>0)
+        {
+            fractionalPart = (DataValueType)numberCurrentFractionalValue / powerDivider;
+        }
+
+        res.data = (DataValueType)numberCurrentIntValue;
+        res.data += fractionalPart;
+
+        res.fIntegerOverflow    = numberIntegerOverflow;
+        res.fFractionalOverflow = numberFractionalOverflow;
+
+        return res;
+    }
+
+
     //NOTE: !!! Надо ли semialpha проверять, не является ли она началом числового префикса? Наверное, не помешает
 
     void performStartReadingNumberLambda(CharType ch, InputIteratorType it) const
     {
-        tokenStartIt = it;
-        numberPrefixIdx = tokenTrieFindNext(numbersTrie, trie_index_invalid, (token_type)ch);
-        numberTokenId         = 0;
-        numberReadedDigits    = 0;
-        numberExplicitBase    = 0;
-        numberCurrentIntValue = 0;
+        resetNumberStateVals();
+        tokenStartIt                 = it;
+        numberPrefixIdx              = tokenTrieFindNext(numbersTrie, trie_index_invalid, (token_type)ch);
+        // numberTokenId                = 0;
+        // numberReadedDigits           = 0;
+        // numberExplicitBase           = 0;
+        // numberCurrentIntValue        = 0;
+        // numberCurrentFractionalValue = 0;
+        // numberCurrentFractionalPower = 0;
+        // numberIntegerOverflow        = false;
+        // numberFractionalOverflow     = false;
+
         if (numberPrefixIdx!=trie_index_invalid) // Найдено начало префикса числа
         {
             st = TokenizerInternalState::stReadNumberPrefix;
@@ -746,16 +866,45 @@ public: // methods - методы собственно разбора
 
                 if (ch==(std::decay_t<decltype(ch)>)'.')
                 {
+                    //numberPrefixIdx = trie_index_invalid;
+                    performStartReadingNumberLambda(ch, it);
+                    // void performStartReadingNumberLambda(CharType ch, InputIteratorType it) const
+                    // {
+                    //     tokenStartIt = it;
+                    //     numberPrefixIdx = tokenTrieFindNext(numbersTrie, trie_index_invalid, (token_type)ch);
+                    //     numberTokenId                = 0;
+                    //     numberReadedDigits           = 0;
+                    //     numberExplicitBase           = 0;
+                    //     numberCurrentIntValue        = 0;
+                    //     numberCurrentFractionalValue = 0;
+                    //     numberCurrentFractionalPower = 0;
+                    //  
+                    //     if (numberPrefixIdx!=trie_index_invalid) // Найдено начало префикса числа
+                    //     {
+                    //         st = TokenizerInternalState::stReadNumberPrefix;
+                    //         allowedDigitCharClass = CharClass::digit; // Потом всё равно зададим, после определения префикса
+                    //         numbersBase = 0;
+                    //     }
+                    //     else
+                    //     {
+                    //         st = TokenizerInternalState::stReadNumber;
+                    //         numbersBase = options.numberDefaultBase;
+                    //         allowedDigitCharClass = CharClass::digit;
+                    //         if (utils::isNumberHexDigitsAllowed(numbersBase))
+                    //             allowedDigitCharClass |= CharClass::xdigit;
+                    //     }
+
                     st = TokenizerInternalState::stReadNumberMayBeFloat;
-                    tokenStartIt = it;
-                    numberPrefixIdx = trie_index_invalid;
-                    numberTokenId = 0;
-                    numberReadedDigits = 0;
-                    numberExplicitBase = 0;
-                    numbersBase = options.numberDefaultBase;
-                    allowedDigitCharClass = CharClass::digit;
-                    if (utils::isNumberHexDigitsAllowed(numbersBase))
-                        allowedDigitCharClass |= CharClass::xdigit;
+
+                    // tokenStartIt = it;
+                    // numberPrefixIdx = trie_index_invalid;
+                    // numberTokenId = 0;
+                    // numberReadedDigits = 0;
+                    // numberExplicitBase = 0;
+                    // numbersBase = options.numberDefaultBase;
+                    // allowedDigitCharClass = CharClass::digit;
+                    // if (utils::isNumberHexDigitsAllowed(numbersBase))
+                    //     allowedDigitCharClass |= CharClass::xdigit;
                     break;
                 }
 
@@ -1027,18 +1176,22 @@ public: // methods - методы собственно разбора
                     }
 
                     // Префикс нашелся
-
-                    requiresDigits   = utils::isNumberPrefixRequiresDigits(curPayload);
+                    resetNumberStateVals();
+                    requiresDigits        = utils::isNumberPrefixRequiresDigits(curPayload);
                     numberPrefixIdx       = trie_index_invalid; // сбрасываем индекс префикса, чтобы потом не париться
 
                     numberTokenId         = curPayload;
                     numberExplicitBase    = utils::numberPrefixGetBase(numberTokenId);
-                    numberReadedDigits    = 0;
+                    //numberReadedDigits    = 0;
                     numbersBase           = numberExplicitBase;
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
                         allowedDigitCharClass |= CharClass::xdigit;
-                    numberCurrentIntValue = 0;
+                    // numberCurrentIntValue = 0;
+                    // numberCurrentFractionalValue = 0;
+                    // numberCurrentFractionalPower = 0;
+                    // numberIntegerOverflow        = false;
+                    // numberFractionalOverflow     = false;
 
                     // Теперь тут у нас либо цифра, либо что-то другое
                     if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
@@ -1567,6 +1720,11 @@ protected: // methods - хандлеры из "грязного" проекта,
     void reportPossibleUnknownOperatorLambda(InputIteratorType b, InputIteratorType e) const
     {
         static_cast<const TBase*>(this)->reportPossibleUnknownOperator(b, e);
+    }
+
+    void reportPossibleUnknownOperatorIntegerOverflowLambda(InputIteratorType b, InputIteratorType e) const
+    {
+        //static_cast<const TBase*>(this)->reportPossibleUnknownOperator(b, e);
     }
 
     // Либо предупреждение, либо сообщение об ошибке от парсера литералов
