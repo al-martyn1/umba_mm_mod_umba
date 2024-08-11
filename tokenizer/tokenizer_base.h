@@ -18,7 +18,8 @@
 
 //
 #include <variant>
-
+#include <array>
+#include <algorithm>
 
 //----------------------------------------------------------------------------
 // umba::tokenizer::
@@ -209,10 +210,12 @@ public: // depending types
     struct FloatNumericLiteralData
     {
 #if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
-        marty::Decimal       data;
+        using DataValueType  = marty::Decimal;
 #else
-        double               data;
+        using DataValueType  = double;
 #endif
+
+        DataValueType        data;
         bool                 fIntegerOverflow   ; // при разборе целая часть не влезла в std::uint64_t. Для marty::Decimal такой ситуации не происходит.
         bool                 fFractionalOverflow; // при разборе дробная часть не влезла в std::uint64_t. Для marty::Decimal такой ситуации не происходит.
 
@@ -294,13 +297,14 @@ protected: // fileds - состояние токенизатора
 #if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
     mutable marty::Decimal         numberCurrentIntValue        = 0;
     mutable marty::Decimal         numberCurrentFractionalValue = 0;
+    mutable marty::Decimal         numberCurrentFractionalPower = 1;
 #else
     mutable std::uint64_t          numberCurrentIntValue        = 0;
     mutable std::uint64_t          numberCurrentFractionalValue = 0;
+    mutable std::uint64_t          numberCurrentFractionalPower = 1;
 #endif
     mutable bool                   numberIntegerOverflow        = false; // При использовании marty::Decimal всегда false
     mutable bool                   numberFractionalOverflow     = false; //
-    mutable std::uint64_t          numberCurrentFractionalPower = 0;
 
     // Коментарии
     mutable InputIteratorType      commentStartIt;
@@ -421,6 +425,7 @@ protected: // methods - helpers - из "грязного" проекта, где
     
         numberCurrentIntValue        = 0;
         numberCurrentFractionalValue = 0;
+        numberCurrentFractionalPower = 1;
 
         numberIntegerOverflow        = false;
         numberFractionalOverflow     = false;
@@ -428,9 +433,9 @@ protected: // methods - helpers - из "грязного" проекта, где
     }
 
 
-    void addNumberIntPartDigit(CharType ch, InputIteratorType it)
+    void addNumberIntPartDigit(CharType ch) const
     {
-        int d = utils::charToDigit(CharType ch);
+        int d = utils::charToDigit(ch);
         //UMBA_ASSER(d>=0);
         if (d<0)
             return; // просто игнорим
@@ -439,19 +444,19 @@ protected: // methods - helpers - из "грязного" проекта, где
         numberCurrentIntValue = utils::addAndCheckOverflow(numberCurrentIntValue, (std::uint64_t)d          , numberIntegerOverflow);
     }
 
-    void addNumberFloatPartDigit(CharType ch, InputIteratorType it)
+    void addNumberFloatPartDigit(CharType ch) const
     {
-        int d = utils::charToDigit(CharType ch);
+        int d = utils::charToDigit(ch);
         //UMBA_ASSER(d>=0);
         if (d<0)
             return; // просто игнорим
 
         numberCurrentFractionalValue = utils::mulAndCheckOverflow(numberCurrentFractionalValue, (std::uint64_t)numbersBase, numberFractionalOverflow);
         numberCurrentFractionalValue = utils::addAndCheckOverflow(numberCurrentFractionalValue, (std::uint64_t)d          , numberFractionalOverflow);
-        ++numberCurrentFractionalPower;
+        numberCurrentFractionalPower = utils::mulAndCheckOverflow(numberCurrentFractionalPower, (std::uint64_t)numbersBase, numberFractionalOverflow);
     }
 
-    IntegerNumericLiteralData makeIntegerLiteralData(iterator_type itEnd)
+    IntegerNumericLiteralData makeIntegerLiteralData(iterator_type itEnd) const
     {
         IntegerNumericLiteralData res;
         res.hasSuffix      = false;
@@ -463,29 +468,21 @@ protected: // methods - helpers - из "грязного" проекта, где
         return res;
     }
 
-    FloatNumericLiteralData makeFloatLiteralData(iterator_type itEnd)
+    FloatNumericLiteralData makeFloatLiteralData(iterator_type itEnd) const
     {
         FloatNumericLiteralData res;
         res.hasSuffix      = false;
         res.suffixStartPos = itEnd;
 
-#if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
-        using PowerValueType = marty::Decimal;
-        using DataValueType  = marty::Decimal;
-#else
-        using PowerValueType = std::uint64_t ;
-        using DataValueType  = double;
-#endif
-
-        auto powerDivider = (DataValueType)utils::makePowerOf((PowerValueType)numbersBase, (PowerValueType)numberCurrentFractionalPower, numberFractionalOverflow);
-
-        DataValueType fractionalPart = 0;
-        if (powerDivider>0)
+        // auto powerDivider = (typename FloatNumericLiteralData::DataValueType)utils::makePowerOf((typename FloatNumericLiteralData::DataValueType)numbersBase, numberCurrentFractionalPower, numberFractionalOverflow);
+        //  
+        typename FloatNumericLiteralData::DataValueType fractionalPart = 0;
+        if (numberCurrentFractionalPower>0)
         {
-            fractionalPart = (DataValueType)numberCurrentFractionalValue / powerDivider;
+            fractionalPart = (typename FloatNumericLiteralData::DataValueType)numberCurrentFractionalValue / (typename FloatNumericLiteralData::DataValueType)numberCurrentFractionalPower;
         }
 
-        res.data = (DataValueType)numberCurrentIntValue;
+        res.data = (typename FloatNumericLiteralData::DataValueType)numberCurrentIntValue;
         res.data += fractionalPart;
 
         res.fIntegerOverflow    = numberIntegerOverflow;
@@ -731,6 +728,11 @@ public: // methods - методы собственно разбора
                  {
                      // Надо проверить, является ли то, что уже есть, чисто числом
                      // int charToDigit(CharType ch)
+
+                     CharType prefixDigits[64];
+                     std::size_t idx = 0;
+                     const std::size_t idxEnd = std::size(prefixDigits)-1;
+
                      bool prefixIsNumber     = true ;
                      tokenTrieBackTrace( numbersTrie
                                        , numberPrefixIdx
@@ -738,14 +740,29 @@ public: // methods - методы собственно разбора
                                          {
                                              if (!utils::isDigitAllowed(ch, numbersBase))
                                                  prefixIsNumber = false;
+                                             if (prefixIsNumber && idx!=idxEnd)
+                                             {
+                                                 prefixDigits[idx] = ch;
+                                                 ++idx;
+                                                 prefixDigits[idx] = 0;
+                                             }
                                          }
                                        );
+
+                     if (!idx)
+                        prefixIsNumber = false; // Нет цифр в префиксе
 
                      if (!prefixIsNumber)
                          return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
 
                      // !!! Тут надо преобразовать префикс в число, и поместить его в numberCurrentIntValue
-                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                     std::reverse(&prefixDigits[0], &prefixDigits[idx]);
+                     for(std::size_t idx2=0; idx2!=idx; ++idx2)
+                     {
+                         addNumberIntPartDigit(prefixDigits[idx2]);
+                     }
+
+                     if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                          return false;
 
                      if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
@@ -758,12 +775,12 @@ public: // methods - методы собственно разбора
                  // !!! Не забыть передать numberCurrentIntValue
                  if (numberTokenId==0 || numberTokenId==payload_invalid)
                  {
-                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                     if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                          return false;
                  }
                  else
                  {
-                     if (!parsingHandlerLambda(numberTokenId, tokenStartIt, itEnd)) // выплёвываем накопленное число с явно указанной системой счисления
+                     if (!parsingNumberHandlerLambda(numberTokenId, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число с явно указанной системой счисления
                          return false;
                  }
 
@@ -775,12 +792,12 @@ public: // methods - методы собственно разбора
             case TokenizerInternalState::stReadNumberFloat:
                  if (numberTokenId==0 || numberTokenId==payload_invalid)
                  {
-                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
+                     if (!parsingFloatNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
                          return false;
                  }
                  else
                  {
-                     if (!parsingHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd)) // выплёвываем накопленное число с явно указанной системой счисления
+                     if (!parsingFloatNumberHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число с явно указанной системой счисления
                          return false;
                  }
 
@@ -1136,6 +1153,10 @@ public: // methods - методы собственно разбора
                 payload_type curPayload = payload_invalid;
                 bool prefixIsNumber     = true ;
                 bool requiresDigits     = false;
+                CharType prefixDigits[64];
+                std::size_t idx = 0;
+                const std::size_t idxEnd = std::size(prefixDigits)-1;
+
 
                 auto nextNumberPrefixIdx = tokenTrieFindNext(numbersTrie, numberPrefixIdx, (token_type)ch);
                 if (nextNumberPrefixIdx!=trie_index_invalid)
@@ -1162,14 +1183,27 @@ public: // methods - методы собственно разбора
                                             {
                                                 if (!utils::isDigitAllowed(ch, numbersBase))
                                                     prefixIsNumber = false;
+                                                if (prefixIsNumber && idx!=idxEnd)
+                                                {
+                                                    prefixDigits[idx] = ch;
+                                                    ++idx;
+                                                    prefixDigits[idx] = 0;
+                                                }
                                             }
                                           );
 
+                        if (!idx)
+                           prefixIsNumber = false; // Нет цифр в префиксе
+
                         if (!prefixIsNumber)
                             return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
-                        //parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
-                        //st = stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
-                        //goto explicit_initial;
+
+                        // std::reverse(&prefixDigits[0], &prefixDigits[idx]);
+                        // for(std::size_t idx2=0; idx2!=idx; ++idx2)
+                        // {
+                        //     addNumberIntPartDigit(prefixDigits[idx2]);
+                        // }
+                        // parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
 
                         st = TokenizerInternalState::stReadNumber;
                         goto explicit_readnumber; // надо обработать текущий символ
@@ -1217,7 +1251,14 @@ public: // methods - методы собственно разбора
                     if (requiresDigits)
                         return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__); // нужна хоть одна цифра, а её нет
 
-                    if (!parsingHandlerLambda(numberTokenId, tokenStartIt, it)) // выплёвываем префикс (он является годным числом и без доп цифр)
+                    std::reverse(&prefixDigits[0], &prefixDigits[idx]);
+                    for(std::size_t idx2=0; idx2!=idx; ++idx2)
+                    {
+                        addNumberIntPartDigit(prefixDigits[idx2]);
+                    }
+                    //parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+
+                    if (!parsingNumberHandlerLambda(numberTokenId, tokenStartIt, it, itEnd)) // выплёвываем префикс (он является годным числом и без доп цифр)
                         return false;
 
                     // у тут понеслась вся та же тема, как и в состоянии stInitial, только без обработки цифр
@@ -1254,12 +1295,12 @@ public: // methods - методы собственно разбора
 
                 if (numberTokenId==0 || numberTokenId==payload_invalid)
                 {
-                    if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                    if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                         return false;
                 }
                 else
                 {
-                    if (!parsingHandlerLambda(numberTokenId, tokenStartIt, it)) // выплёвываем накопленное число с явно указанной системой счисления
+                    if (!parsingNumberHandlerLambda(numberTokenId, tokenStartIt, it, itEnd)) // выплёвываем накопленное число с явно указанной системой счисления
                         return false;
                 }
 
@@ -1294,6 +1335,7 @@ public: // methods - методы собственно разбора
                     break; // Тут у нас годная цифра
                 }
 
+                // Тут мы проверяем вторую точку (по первой мы попали в данное состояние)
                 CharClass dotCharClass = charClassTable[charToCharClassTableIndex((std::decay_t<decltype(ch)>)'.')];
 
                 if (umba::TheFlags(dotCharClass).oneOf(CharClass::opchar)) // Точка - операторный символ?
@@ -1327,17 +1369,18 @@ public: // methods - методы собственно разбора
 
                 if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
                 {
+                    addNumberFloatPartDigit(ch);
                     break; // Тут у нас годная цифра
                 }
 
                 if (numberTokenId==0 || numberTokenId==payload_invalid)
                 {
-                    if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it)) // выплёвываем накопленное число с системой счисления по умолчанию
+                    if (!parsingFloatNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
                         return false;
                 }
                 else
                 {
-                    if (!parsingHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it)) // выплёвываем накопленное число с явно указанной системой счисления
+                    if (!parsingFloatNumberHandlerLambda(numberTokenId|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it, itEnd)) // выплёвываем накопленное число с явно указанной системой счисления
                         return false;
                 }
 
@@ -1670,6 +1713,34 @@ protected: // methods - хандлеры из "грязного" проекта,
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
                                                                , EmptyData() // std::basic_string_view<value_type>()
+                                                               , msg
+                                                               );
+        checkLineStart(tokenType);
+        return bRes;
+    }
+
+    [[nodiscard]]
+    bool parsingNumberHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType itEnd) const
+    {
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+            return true;
+        MessagesStringType msg;
+        bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
+                                                               , makeIntegerLiteralData(itEnd)
+                                                               , msg
+                                                               );
+        checkLineStart(tokenType);
+        return bRes;
+    }
+
+    [[nodiscard]]
+    bool parsingFloatNumberHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType itEnd) const
+    {
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+            return true;
+        MessagesStringType msg;
+        bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
+                                                               , makeFloatLiteralData(itEnd)
                                                                , msg
                                                                );
         checkLineStart(tokenType);
