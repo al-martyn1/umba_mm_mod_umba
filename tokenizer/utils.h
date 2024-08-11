@@ -492,7 +492,7 @@ marty::Decimal addAndCheckOverflow(marty::Decimal op1, std::uint64_t op2, bool &
 
 //----------------------------------------------------------------------------
 template<typename PowerValueType>
-PowerValueType makePowerOf(PowerValueType base, PowerValueType pwr, bool &bOverflow)
+PowerValueType makePowerOf(PowerValueType base, std::uint64_t pwr, bool &bOverflow)
 {
     PowerValueType res = 1;
     while(pwr>0)
