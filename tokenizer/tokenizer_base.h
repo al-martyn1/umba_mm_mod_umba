@@ -521,6 +521,7 @@ protected: // methods - helpers - из "грязного" проекта, где
             allowedDigitCharClass = CharClass::digit;
             if (utils::isNumberHexDigitsAllowed(numbersBase))
                 allowedDigitCharClass |= CharClass::xdigit;
+            addNumberIntPartDigit(ch);
         }
     }
 
@@ -674,12 +675,7 @@ public: // methods - методы собственно разбора
         operatorIdx = trie_index_invalid;
 
         // Числовые литералы
-        numberTokenId         = 0;
-        numberExplicitBase    = 0;
-        numberPrefixIdx       = trie_index_invalid;
-        numberReadedDigits    = 0;
-        allowedDigitCharClass = CharClass::none;
-        numbersBase           = 0;
+        resetNumberStateVals();
 
         // Коментарии
         //commentStartIt;
@@ -721,7 +717,8 @@ public: // methods - методы собственно разбора
             case TokenizerInternalState::stReadNumberPrefix:
             {
                  if (numberPrefixIdx==trie_index_invalid)
-                     return false;
+                     return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
+                     //return false;
 
                  // payload_type curPayload = numbersTrie[numberPrefixIdx].payload;
                  // if (curPayload==payload_invalid)
@@ -962,6 +959,8 @@ public: // methods - методы собственно разбора
                     //if (!performStartReadingNumberLambda(ch, it))
                     //    return false;
                     performStartReadingNumberLambda(ch, it);
+                    //addNumberIntPartDigit(ch);
+                    //goto explicit_readnumber;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::open, CharClass::close)) // Открывающая или закрывающая скобка
                 {
@@ -996,10 +995,11 @@ public: // methods - методы собственно разбора
                         return false;
                     st = TokenizerInternalState::stReadNumberMayBeFloat;
                     tokenStartIt = it;
-                    numberPrefixIdx = trie_index_invalid;
-                    numberTokenId = 0;
-                    numberReadedDigits = 0;
-                    numberExplicitBase = 0;
+                    resetNumberStateVals();
+                    // numberPrefixIdx = trie_index_invalid;
+                    // numberTokenId = 0;
+                    // numberReadedDigits = 0;
+                    // numberExplicitBase = 0;
                     numbersBase = options.numberDefaultBase;
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
@@ -1060,6 +1060,8 @@ public: // methods - методы собственно разбора
                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it)) // выплюнули
                         return false;
                     performStartReadingNumberLambda(ch, it);
+                    //addNumberIntPartDigit(ch);
+                    //goto explicit_readnumber;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::open, CharClass::close)) // Открывающая или закрывающая скобка
                 {
@@ -1198,11 +1200,15 @@ public: // methods - методы собственно разбора
                         if (!prefixIsNumber)
                             return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
 
-                        // std::reverse(&prefixDigits[0], &prefixDigits[idx]);
-                        // for(std::size_t idx2=0; idx2!=idx; ++idx2)
-                        // {
-                        //     addNumberIntPartDigit(prefixDigits[idx2]);
-                        // }
+                        // В том, что считалось префиксом, только цифры
+                        // Их надо всунуть в число
+                        std::reverse(&prefixDigits[0], &prefixDigits[idx]);
+                        for(std::size_t idx2=0; idx2!=idx; ++idx2)
+                        {
+                            addNumberIntPartDigit(prefixDigits[idx2]);
+                        }
+
+                        // А вот обработчик не вызываем
                         // parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
 
                         st = TokenizerInternalState::stReadNumber;
@@ -1233,6 +1239,7 @@ public: // methods - методы собственно разбора
                         //NOTE: !!! Да, сразу после префикса у нас не может быть разделителя разрядов
                         st = TokenizerInternalState::stReadNumber; // Тут у нас годная цифра, продолжаем
                         numberReadedDigits = 1;
+                        addNumberIntPartDigit(ch);
                         // !!! тут надо уже начинать подсчитывать std::uint64_t numberCurrentIntValue
                         break;
                     }
@@ -1285,6 +1292,7 @@ public: // methods - методы собственно разбора
                 {
                     // numberCurrentIntValue *= 
                     // !!! std::uint64_t numberCurrentIntValue надо вычислять число
+                    addNumberIntPartDigit(ch);
                     break; // Тут у нас годная цифра
                 }
 

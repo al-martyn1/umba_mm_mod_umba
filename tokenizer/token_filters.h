@@ -55,6 +55,19 @@ TokenFilter должен
 
 
 
+//----------------------------------------------------------------------------
+#define UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(className)              \
+            using token_handler_type       = typename className ::token_handler_type   ;   \
+                                                                                           \
+            using char_type                = typename className ::char_type            ;   \
+            using value_type               = typename className ::value_type           ;   \
+            using char_class_table_type    = typename className ::char_class_table_type;   \
+            using trie_vector_type         = typename className ::trie_vector_type     ;   \
+            using string_type              = typename className ::string_type          ;   \
+            using iterator_type            = typename className ::iterator_type        ;   \
+            using messages_string_type     = typename className ::messages_string_type ;   \
+            using token_parsed_data        = typename className ::token_parsed_data
+
 
 //----------------------------------------------------------------------------
 // umba::tokenizer::filters::
@@ -72,18 +85,8 @@ template<typename TokenizerType>
 struct SimplePassTroughFilter
 {
 
-    using token_handler_type       = typename TokenizerType::token_handler_type;
-
-    using char_type                = typename TokenizerType::char_type            ;
-    using value_type               = typename TokenizerType::value_type           ;
-    using char_class_table_type    = typename TokenizerType::char_class_table_type;
-    using trie_vector_type         = typename TokenizerType::trie_vector_type     ;
-    using string_type              = typename TokenizerType::string_type          ;
-    using iterator_type            = typename TokenizerType::iterator_type        ;
-    using messages_string_type     = typename TokenizerType::messages_string_type ;
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TokenizerType);
     using payload_type             = umba::tokenizer::payload_type                ;
-    using token_parsed_data        = typename TokenizerType::token_parsed_data     ;
-
 
 protected:
 
@@ -122,17 +125,9 @@ public:
 template<typename TokenizerType>
 struct TokenInfo
 {
-    using token_handler_type       = typename TokenizerType::token_handler_type;
-
-    using char_type                = typename TokenizerType::char_type            ;
-    using value_type               = typename TokenizerType::value_type           ;
-    using char_class_table_type    = typename TokenizerType::char_class_table_type;
-    using trie_vector_type         = typename TokenizerType::trie_vector_type     ;
-    using string_type              = typename TokenizerType::string_type          ;
-    using iterator_type            = typename TokenizerType::iterator_type        ;
-    //using messages_string_type     = typename TokenizerType::messages_string_type ;
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TokenizerType);
     using payload_type             = umba::tokenizer::payload_type                ;
-    using token_parsed_data        = typename TokenizerType::token_parsed_data    ;
+
 
     bool                                 lineStartFlag;
     payload_type                         payloadToken;
@@ -172,19 +167,8 @@ struct TokenInfo
 template<typename TokenizerType, typename VectorType=std::vector<TokenInfo<TokenizerType> > >
 struct FilterBase
 {
-
-    using token_handler_type       = typename TokenizerType::token_handler_type;
-
-    using char_type                = typename TokenizerType::char_type            ;
-    using value_type               = typename TokenizerType::value_type           ;
-    using char_class_table_type    = typename TokenizerType::char_class_table_type;
-    using trie_vector_type         = typename TokenizerType::trie_vector_type     ;
-    using string_type              = typename TokenizerType::string_type          ;
-    using iterator_type            = typename TokenizerType::iterator_type        ;
-    using messages_string_type     = typename TokenizerType::messages_string_type ;
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TokenizerType);
     using payload_type             = umba::tokenizer::payload_type                ;
-    using token_parsed_data        = typename TokenizerType::token_parsed_data     ;
-
 
 protected:
 
@@ -243,18 +227,8 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
 {
     using TBase = FilterBase<TokenizerType, VectorType>;
 
-    using token_handler_type       = typename TBase::token_handler_type;
-
-    using char_type                = typename TBase::char_type            ;
-    using value_type               = typename TBase::value_type           ;
-    using char_class_table_type    = typename TBase::char_class_table_type;
-    using trie_vector_type         = typename TBase::trie_vector_type     ;
-    using string_type              = typename TBase::string_type          ;
-    using iterator_type            = typename TBase::iterator_type        ;
-    using messages_string_type     = typename TBase::messages_string_type ;
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TBase);
     using payload_type             = umba::tokenizer::payload_type        ;
-    using token_parsed_data        = typename TBase::token_parsed_data    ;
-
 
     UMBA_RULE_OF_FIVE(SimpleNumberSuffixGluing, default, default, default, default, default);
 
