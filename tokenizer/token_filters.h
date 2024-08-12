@@ -276,7 +276,58 @@ struct SimpleNumberSuffixGluing : FilterBase<TokenizerType, VectorType>
             if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER) // Если после числового токена идёт идентификатор - это число с суффиксом
             {
                 UMBA_ASSERT(!this->tokenBuffer.empty());
-                bool res = this->nextTokenHandler(this->tokenBuffer[0].lineStartFlag, this->tokenBuffer[0].payloadToken, this->tokenBuffer[0].b, e, parsedData /* strValue */ , msg);
+
+                //auto passParsedData = this->tokenBuffer[0].parsedData;
+
+                ///////////
+                // TokenInfo
+                // struct TokenInfo
+                // {
+                //     using payload_type             = umba::tokenizer::payload_type                ;
+                //  
+                //     bool                                 lineStartFlag;
+                //     payload_type                         payloadToken;
+                //     iterator_type                        b;
+                //     iterator_type                        e;
+                //     // std::basic_string_view<value_type>   strValue;
+                //     token_parsed_data                    parsedData;
+
+                TokenInfo passTokenInfo = this->tokenBuffer[0]; // инфа по числовому литералу
+                UMBA_ASSERT(passTokenInfo.e==b); // Начало текущего токена должно совпадать с концом предыдущего
+
+                auto literalStartIter = passTokenInfo.b;
+                auto suffixStartIter  = passTokenInfo.e; // началом суффикса является конец числового литерала
+                auto literalEndIter   = e;
+
+                bool res = true;
+
+                if (passTokenInfo.payloadToken&UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+                {
+                    auto numericLiteralData = std::get<typename TokenizerType::FloatNumericLiteralData>(passTokenInfo.parsedData);
+                    numericLiteralData.hasSuffix = true;
+                    numericLiteralData.suffixStartPos = suffixStartIter;
+                    res = this->nextTokenHandler( passTokenInfo.lineStartFlag
+                                                , passTokenInfo.payloadToken
+                                                , literalStartIter
+                                                , literalEndIter
+                                                , numericLiteralData
+                                                , msg
+                                                );
+                }
+                else
+                {
+                    auto numericLiteralData = std::get<typename TokenizerType::IntegerNumericLiteralData>(passTokenInfo.parsedData);
+                    numericLiteralData.hasSuffix = true;
+                    numericLiteralData.suffixStartPos = suffixStartIter;
+                    res = this->nextTokenHandler( passTokenInfo.lineStartFlag
+                                                , passTokenInfo.payloadToken
+                                                , literalStartIter
+                                                , literalEndIter
+                                                , numericLiteralData
+                                                , msg
+                                                );
+                }
+
                 this->clearTokenBuffer();
                 return res;
                 //tokenBuffer[0]

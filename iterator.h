@@ -106,6 +106,11 @@ protected:
         return m_pData==0;
     }
 
+    bool isBothEndIterators(const ThisClass &other) const
+    {
+        return (isEndIterator() && isEndIterator()==other.isEndIterator());
+    }
+
 
     bool equalImpl(const ThisClass &other) const
     {
@@ -204,6 +209,29 @@ public:
     TextPositionCountingIterator& operator=(const TextPositionCountingIterator&) = default;
     TextPositionCountingIterator(TextPositionCountingIterator&&) = default;
     TextPositionCountingIterator& operator=(TextPositionCountingIterator&&) = default;
+
+    difference_type distanceTo(const ThisClass &other) const
+    {
+        if (isEndIterator() && isEndIterator()==other.isEndIterator())
+            return 0;
+
+        UMBA_ASSERT(!isEndIterator());
+
+        if (other.isEndIterator())
+        {
+            //return std::distance(*this, other);
+            return m_dataSize-m_dataIndex;
+        }
+
+        return std::distance(getRawValueTypePointer(), other.getRawValueTypePointer());
+    }
+
+    // auto pb   = b.getRawValueTypePointer();
+    // auto pe   = e.getRawValueTypePointer();
+    // auto dist = (std::size_t)std::distance(pb, pe);
+    // return std::basic_string_view<CharT, Traits>(pb, dist);
+
+
 
     CharType operator*() const
     {
@@ -312,19 +340,19 @@ TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator
 template<typename CharT, typename Traits /* =std::char_traits<CharT> */ >
 std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e)
 {
-    auto pb   = b.getRawValueTypePointer();
-    auto pe   = e.getRawValueTypePointer();
-    auto dist = (std::size_t)std::distance(pb, pe);
-    return std::basic_string_view<CharT, Traits>(pb, dist);
+    if (b.isBothEndIterators(e))
+        return std::basic_string_view<CharT, Traits>();
+
+    return std::basic_string_view<CharT, Traits>(b.getRawValueTypePointer(), b.distanceTo(e));
 }
 
 template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */ >
 std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e)
 {
-    auto pb   = b.getRawValueTypePointer();
-    auto pe   = e.getRawValueTypePointer();
-    auto dist = (std::size_t)std::distance(pb, pe);
-    return std::basic_string<CharT, Traits, Allocator>(pb, dist);
+    if (b.isBothEndIterators(e))
+        return std::basic_string<CharT, Traits, Allocator>();
+
+    return std::basic_string<CharT, Traits, Allocator>(b.getRawValueTypePointer(), b.distanceTo(e));
 }
 
 
