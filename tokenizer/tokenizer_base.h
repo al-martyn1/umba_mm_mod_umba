@@ -1667,6 +1667,8 @@ protected:
     }
 
 
+public:
+
     static
     std::basic_string_view<value_type> makeStringView( const umba::iterator::TextPositionCountingIterator<CharType> b, const umba::iterator::TextPositionCountingIterator<CharType> &e)
     {
