@@ -179,10 +179,11 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_FIN                                                      0x0001u /* empty token, finalizes processing current text */
 #define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0002u
 #define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0003u
-#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0004u
-#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0005u
-#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0006u
-#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x0007u
+#define UMBA_TOKENIZER_TOKEN_TAB                                                      0x0004u
+#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0005u
+#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0006u
+#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0007u
+#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x0008u
 
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                       0x0011u
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                                      0x0012u
