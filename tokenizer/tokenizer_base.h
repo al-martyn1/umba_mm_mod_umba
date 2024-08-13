@@ -718,10 +718,6 @@ public: // methods - методы собственно разбора
             {
                  if (numberPrefixIdx==trie_index_invalid)
                      return unexpectedHandlerLambda(itEnd, itEnd, __FILE__, __LINE__);
-                     //return false;
-
-                 // payload_type curPayload = numbersTrie[numberPrefixIdx].payload;
-                 // if (curPayload==payload_invalid)
                  {
                      // Надо проверить, является ли то, что уже есть, чисто числом
                      // int charToDigit(CharType ch)
@@ -872,53 +868,10 @@ public: // methods - методы собственно разбора
             case TokenizerInternalState::stInitial:
             {
 
-                // st = stReadNumber;
-                // numbersBase = numberDefaultBase;
-                // allowedDigitCharClass = CharClass::digit;
-                // if (utils::isNumberHexDigitsAllowed(numbersBase))
-                //     allowedDigitCharClass |= CharClass::xdigit;
-
                 if (ch==(std::decay_t<decltype(ch)>)'.')
                 {
-                    //numberPrefixIdx = trie_index_invalid;
                     performStartReadingNumberLambda(ch, it);
-                    // void performStartReadingNumberLambda(CharType ch, InputIteratorType it) const
-                    // {
-                    //     tokenStartIt = it;
-                    //     numberPrefixIdx = tokenTrieFindNext(numbersTrie, trie_index_invalid, (token_type)ch);
-                    //     numberTokenId                = 0;
-                    //     numberReadedDigits           = 0;
-                    //     numberExplicitBase           = 0;
-                    //     numberCurrentIntValue        = 0;
-                    //     numberCurrentFractionalValue = 0;
-                    //     numberCurrentFractionalPower = 0;
-                    //  
-                    //     if (numberPrefixIdx!=trie_index_invalid) // Найдено начало префикса числа
-                    //     {
-                    //         st = TokenizerInternalState::stReadNumberPrefix;
-                    //         allowedDigitCharClass = CharClass::digit; // Потом всё равно зададим, после определения префикса
-                    //         numbersBase = 0;
-                    //     }
-                    //     else
-                    //     {
-                    //         st = TokenizerInternalState::stReadNumber;
-                    //         numbersBase = options.numberDefaultBase;
-                    //         allowedDigitCharClass = CharClass::digit;
-                    //         if (utils::isNumberHexDigitsAllowed(numbersBase))
-                    //             allowedDigitCharClass |= CharClass::xdigit;
-                    //     }
-
                     st = TokenizerInternalState::stReadNumberMayBeFloat;
-
-                    // tokenStartIt = it;
-                    // numberPrefixIdx = trie_index_invalid;
-                    // numberTokenId = 0;
-                    // numberReadedDigits = 0;
-                    // numberExplicitBase = 0;
-                    // numbersBase = options.numberDefaultBase;
-                    // allowedDigitCharClass = CharClass::digit;
-                    // if (utils::isNumberHexDigitsAllowed(numbersBase))
-                    //     allowedDigitCharClass |= CharClass::xdigit;
                     break;
                 }
 
@@ -996,10 +949,6 @@ public: // methods - методы собственно разбора
                     st = TokenizerInternalState::stReadNumberMayBeFloat;
                     tokenStartIt = it;
                     resetNumberStateVals();
-                    // numberPrefixIdx = trie_index_invalid;
-                    // numberTokenId = 0;
-                    // numberReadedDigits = 0;
-                    // numberExplicitBase = 0;
                     numbersBase = options.numberDefaultBase;
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
@@ -1060,8 +1009,6 @@ public: // methods - методы собственно разбора
                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it)) // выплюнули
                         return false;
                     performStartReadingNumberLambda(ch, it);
-                    //addNumberIntPartDigit(ch);
-                    //goto explicit_readnumber;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::open, CharClass::close)) // Открывающая или закрывающая скобка
                 {
@@ -1172,7 +1119,6 @@ public: // methods - методы собственно разбора
                     if (curPayload==payload_invalid) // текущий префикс нифига не префикс
                     {
                         // Надо проверить, является ли то, что уже есть, чисто числом
-                        // int charToDigit(CharType ch)
 
                         numbersBase = options.numberDefaultBase;
                         allowedDigitCharClass = CharClass::digit;
@@ -1227,11 +1173,6 @@ public: // methods - методы собственно разбора
                     allowedDigitCharClass = CharClass::digit;
                     if (utils::isNumberHexDigitsAllowed(numbersBase))
                         allowedDigitCharClass |= CharClass::xdigit;
-                    // numberCurrentIntValue = 0;
-                    // numberCurrentFractionalValue = 0;
-                    // numberCurrentFractionalPower = 0;
-                    // numberIntegerOverflow        = false;
-                    // numberFractionalOverflow     = false;
 
                     // Теперь тут у нас либо цифра, либо что-то другое
                     if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
@@ -1263,7 +1204,6 @@ public: // methods - методы собственно разбора
                     {
                         addNumberIntPartDigit(prefixDigits[idx2]);
                     }
-                    //parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
 
                     if (!parsingNumberHandlerLambda(numberTokenId, tokenStartIt, it, itEnd)) // выплёвываем префикс (он является годным числом и без доп цифр)
                         return false;
@@ -1290,8 +1230,6 @@ public: // methods - методы собственно разбора
 
                 if (umba::TheFlags(charClass).oneOf(allowedDigitCharClass) && utils::isDigitAllowed(ch, numbersBase))
                 {
-                    // numberCurrentIntValue *= 
-                    // !!! std::uint64_t numberCurrentIntValue надо вычислять число
                     addNumberIntPartDigit(ch);
                     break; // Тут у нас годная цифра
                 }
@@ -1320,7 +1258,7 @@ public: // methods - методы собственно разбора
                 }
 
                 numberTokenId = 0;
-                //return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+
                 // Далее у нас всё как начальном состоянии
                 st = TokenizerInternalState::stInitial; // на всякий случай, если в stInitial обрабтчике состояние не переустанавливается, а подразумевается, что уже такое и есть
                 goto explicit_initial;
@@ -1586,29 +1524,6 @@ public: // methods - методы собственно разбора
                     commentEndMatchIndex = 0;
                 }
 
-                #if 0
-                if (multiLineCommentEndStr[0]!=*it) // текущий входной символ не является первым символом маркера конца коментария
-                    break;
-
-                auto it2 = it;
-                //auto savedIt2 = it2;
-                auto strIt    = multiLineCommentEndStr.begin();
-                auto strItEnd = multiLineCommentEndStr.end();
-
-                for(; it2!=itEnd && strIt!=strItEnd && *it2==*strIt; ++/*Проверка многострочника*/it2, ++strIt)
-                {
-                    //savedIt2 = it2; // Сохраняем предыдущее (до инкремента) значение it2
-                }
-
-                if (strIt==strItEnd) // дошли до конца строки окончания коментария, не прервались на общий конец и не прервались по несовпадению символа - значит, целиком совпало
-                {
-                    if (!parsingHandlerLambda(commentTokenId, tokenStartIt, it2, commentStartIt, it)) // выплюнули текст коментария
-                        return false;
-                    it = it2; // savedIt2; // переместили it на позицию последнего символа конца многострочника, инкремент в основном цикле переместит его на следующий символ за многострочником, как надо
-                    st = TokenizerInternalState::stInitial;
-                }
-                #endif
-
             } break;
 
 
@@ -1813,12 +1728,6 @@ protected: // methods - хандлеры из "грязного" проекта,
     {
         static_cast<const TBase*>(this)->reportStringLiteralMessage(bErr, it, msg);
     }
-
-
-
-// trie_index_type tokenTrieFindFirst(const ContainerType &tokenTrie, token_type tk)
-// trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_type curIndex, token_type tk)
-// trie_index_type tokenTrieTraverse(const ContainerType &tokenTrie, TokenSequenceIteratorType b, TokenSequenceIteratorType e)
 
 
 }; // class TokenizerBaseImpl
