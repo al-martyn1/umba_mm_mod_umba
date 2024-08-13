@@ -353,7 +353,7 @@ public: // methods
     umba::tokenizer::CharClass setResetCharClassFlags(CharType ch, umba::tokenizer::CharClass setFlags, umba::tokenizer::CharClass clrFlags)
     {
         std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch); // clamp 127
-        UMBA_ASSERT(idx<charClassTable);
+        UMBA_ASSERT(idx<charClassTable.size());
 
         auto res = charClassTable[idx];
         charClassTable[idx] |=  setFlags;
