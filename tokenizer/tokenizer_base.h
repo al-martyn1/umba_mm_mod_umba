@@ -36,7 +36,14 @@ struct TokenizerOptions
     bool  singleLineCommentOnlyAtBeginning = false;
     bool  processLineContinuation          = true ;  // '\' before line feed marks next line to be continuation of current line
     bool  numbersAllowDigitsSeparator      = true ;  // apos ' (39/0x27) only can be used
-    int   numberDefaultBase                = 10;     // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
+    int   numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
+    bool  tabsAsSpace                      = true ;
+
+    payload_type getTabToken() const
+    {
+        return tabsAsSpace ? UMBA_TOKENIZER_TOKEN_SPACE : UMBA_TOKENIZER_TOKEN_TAB;
+    }
+
 
 };
 #include "umba/warnings/pop.h"
@@ -99,6 +106,7 @@ StringType getTokenizerTokenStr(payload_type p)
         case UMBA_TOKENIZER_TOKEN_UNEXPECTED                       : return umba::string_plus::make_string<StringType>("<UNEXPECTED>");
         case UMBA_TOKENIZER_TOKEN_LINEFEED                         : return umba::string_plus::make_string<StringType>("LINEFEED");
         case UMBA_TOKENIZER_TOKEN_SPACE                            : return umba::string_plus::make_string<StringType>("SPACE");
+        case UMBA_TOKENIZER_TOKEN_TAB                              : return umba::string_plus::make_string<StringType>("TAB");
         case UMBA_TOKENIZER_TOKEN_IDENTIFIER                       : return umba::string_plus::make_string<StringType>("IDENTIFIER");
         case UMBA_TOKENIZER_TOKEN_SEMIALPHA                        : return umba::string_plus::make_string<StringType>("SEMIALPHA");
         case UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN               : return umba::string_plus::make_string<StringType>("KIND_OF_BRACKET");
@@ -893,6 +901,14 @@ public: // methods - методы собственно разбора
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::space))
                 {
+                    if (ch==(std::decay_t<decltype(ch)>)'\t') // Новый символ - табуляция?
+                    {
+                        if (!parsingHandlerLambda(options.getTabToken(), it, it+1)) // табуляцию выплёвываем по одному символу
+                            return false;
+                        st = TokenizerInternalState::stInitial;
+                        return true;
+                    }
+
                     tokenStartIt = it;
                     st = TokenizerInternalState::stReadSpace;
                 }
@@ -903,17 +919,12 @@ public: // methods - методы собственно разбора
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::identifier_first))
                 {
-                    //parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it); // выплюнули
                     tokenStartIt = it;
                     st = TokenizerInternalState::stReadIdentifier;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::digit))
                 {
-                    //if (!performStartReadingNumberLambda(ch, it))
-                    //    return false;
                     performStartReadingNumberLambda(ch, it);
-                    //addNumberIntPartDigit(ch);
-                    //goto explicit_readnumber;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::open, CharClass::close)) // Открывающая или закрывающая скобка
                 {
@@ -979,13 +990,24 @@ public: // methods - методы собственно разбора
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::space))
                 {
-                    if (*tokenStartIt!=*it) // пробелы бывают разные, одинаковые мы коллекционируем, разные - выплевываем разными пачками
+                    if (*tokenStartIt!=*it) // пробелы бывают разные, одинаковые мы стараемся коллекционировать, разные - выплевываем разными пачками
                     {
                         if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it)) // выплюнули
                             return false;
+
+                        if (ch==(std::decay_t<decltype(ch)>)'\t') // Новый символ - табуляция?
+                        {
+                            if (!parsingHandlerLambda(options.getTabToken(), it, it+1)) // табуляцию выплёвываем по одному символу
+                                return false;
+                            st = TokenizerInternalState::stInitial;
+                            return true;
+                        }
+
+                        // Новый символ - какая-то другая разновидность пробелов, но не 
+
                         tokenStartIt = it; // Сохранили начало нового токена
                     }
-                    else
+                    else // пробел - такой же
                     {
                         break; // коллекционируем
                     }
@@ -1071,6 +1093,15 @@ public: // methods - методы собственно разбора
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::space))
                 {
+                    if (ch==(std::decay_t<decltype(ch)>)'\t') // Новый символ - табуляция?
+                    {
+                        if (!parsingHandlerLambda(options.getTabToken(), it, it+1)) // табуляцию выплёвываем по одному символу
+                            return false;
+                        st = TokenizerInternalState::stInitial;
+                        return true;
+                    }
+
+                    tokenStartIt = it;
                     st = TokenizerInternalState::stReadSpace;
                 }
                 else if (umba::TheFlags(charClass).oneOf(CharClass::opchar))
