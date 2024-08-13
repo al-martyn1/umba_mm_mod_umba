@@ -40,6 +40,14 @@ public: // depending types
                                    , InputIteratorType
                                    >;
 
+    using TSelf = TokenizerFunctionHandlers< CharType
+                                           , CharClassTableType
+                                           , TrieVectorType
+                                           , StringType
+                                           , MessagesStringType
+                                           , InputIteratorType
+                                           >;
+
     friend TBase;
 
     // friend class TokenizerBaseImpl< TokenizerFunctionHandlers
@@ -77,7 +85,8 @@ public: // ctors and op=
 //------------------------------
 public: // handler types
 
-    using token_handler_type                         = std::function<bool( bool
+    using token_handler_type                         = std::function<bool( TSelf &tokenizer
+                                                                         , bool
                                                                          , payload_type
                                                                          , InputIteratorType
                                                                          , InputIteratorType
@@ -85,9 +94,9 @@ public: // handler types
                                                                          , messages_string_type&
                                                                          )
                                                                     >;
-    using unexpected_handler_type                    = std::function<bool(InputIteratorType, InputIteratorType, const char*, int)>;
-    using report_unknown_operator_handler_type       = std::function<void(InputIteratorType,InputIteratorType)>;
-    using report_string_literal_message_handler_type = std::function<void(bool, InputIteratorType, const MessagesStringType &)>;
+    using unexpected_handler_type                    = std::function<bool(TSelf &tokenizer, InputIteratorType, InputIteratorType, const char*, int)>;
+    using report_unknown_operator_handler_type       = std::function<void(TSelf &tokenizer, InputIteratorType,InputIteratorType)>;
+    using report_string_literal_message_handler_type = std::function<void(TSelf &tokenizer, bool, InputIteratorType, const MessagesStringType &)>;
 
 
 //------------------------------
@@ -121,14 +130,14 @@ protected: // handler methods, called from base
                    ) const
     {
         if (tokenHandler)
-           return tokenHandler(bLineStart, tokenType, inputDataBegin, inputDataEnd, parsedData, msg);
+           return tokenHandler(const_cast<TSelf&>(*this), bLineStart, tokenType, inputDataBegin, inputDataEnd, parsedData, msg);
         return true;
     }
 
     bool hadleUnexpected(InputIteratorType it, InputIteratorType itEnd, const char* srcFile, int srcLine) const
     {
         if (unexpectedHandler)
-            return unexpectedHandler(it, itEnd, srcFile, srcLine);
+            return unexpectedHandler(const_cast<TSelf&>(*this), it, itEnd, srcFile, srcLine);
         return false;
     }
 
@@ -136,14 +145,14 @@ protected: // handler methods, called from base
     void reportPossibleUnknownOperator(InputIteratorType b, InputIteratorType e) const
     {
         if (reportUnknownOperatorHandler)
-            reportUnknownOperatorHandler(b, e);
+            reportUnknownOperatorHandler(const_cast<TSelf&>(*this), b, e);
     }
 
     // Либо предупреждение, либо сообщение об ошибке от парсера литералов
     void reportStringLiteralMessage(bool bErr, InputIteratorType it, const MessagesStringType &msg) const
     {
         if (reportStringLiteralMessageHandler)
-            reportStringLiteralMessageHandler(bErr, it, msg);
+            reportStringLiteralMessageHandler(const_cast<TSelf&>(*this), bErr, it, msg);
     }
 
 }; // class TokenizerFunctionHandlers
