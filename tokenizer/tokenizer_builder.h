@@ -232,7 +232,7 @@ public:
         return *this;
     }
 
-    TokenizerBuilder& addStringLiteralParser(const StringType &seq, ITokenizerLiteralParser *pParser)
+    TokenizerBuilder& addStringLiteralParser(const StringType &seq, ITokenizerLiteralParser *pParser, payload_type tokenId=payload_invalid)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
@@ -240,7 +240,14 @@ public:
             throw std::runtime_error("string literal prefix sequence can't be empty");
 
         generation::setCharClassFlags(charClassTable, seq[0], CharClass::string_literal_prefix);
-        literalsTrieBuilder.addTokenSequence(seq, UMBA_TOKENIZER_TOKEN_CHAR_LITERAL).payloadExtra = reinterpret_cast<payload_type>(pParser);
+        if (tokenId==payload_invalid)
+        {
+            literalsTrieBuilder.addTokenSequence(seq, UMBA_TOKENIZER_TOKEN_STRING_LITERAL).payloadExtra = reinterpret_cast<payload_type>(pParser);
+        }
+        else
+        {
+            literalsTrieBuilder.addTokenSequence(seq, tokenId).payloadExtra = reinterpret_cast<payload_type>(pParser);
+        }
 
         return *this;
     }
