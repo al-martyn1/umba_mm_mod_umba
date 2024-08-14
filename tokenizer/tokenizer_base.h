@@ -220,6 +220,9 @@ public: // depending types
     {
         std::basic_string_view<value_type>  data;
 
+        bool                 hasSuffix = false;
+        iterator_type        suffixStartPos;
+
     }; // struct StringLiteralData
 
     //------------------------------
@@ -406,7 +409,7 @@ public: // methods
     umba::tokenizer::CharClass invertCharClassFlags(CharType ch, umba::tokenizer::CharClass invertFlags)
     {
         std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch); // clamp 127
-        UMBA_ASSERT(idx<charClassTable);
+        UMBA_ASSERT(idx<charClassTable.size());
 
         auto res = charClassTable[idx];
         charClassTable[idx] ^=  invertFlags;
@@ -416,14 +419,14 @@ public: // methods
     umba::tokenizer::CharClass getCharClass(CharType ch) const
     {
         std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch); // clamp 127
-        UMBA_ASSERT(idx<charClassTable);
+        UMBA_ASSERT(idx<charClassTable.size());
         return charClassTable[idx];
     }
 
     umba::tokenizer::CharClass setCharClass(CharType ch, umba::tokenizer::CharClass cls)
     {
         std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch); // clamp 127
-        UMBA_ASSERT(idx<charClassTable);
+        UMBA_ASSERT(idx<charClassTable.size());
         std::swap(cls, charClassTable[idx]);
         return cls;
     }
