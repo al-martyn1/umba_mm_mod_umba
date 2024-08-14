@@ -763,7 +763,7 @@ public: // methods - методы собственно разбора
                          addNumberIntPartDigit(prefixDigits[idx2]);
                      }
 
-                     if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                     if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                          return false;
 
                      if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
@@ -776,7 +776,7 @@ public: // methods - методы собственно разбора
                  // !!! Не забыть передать numberCurrentIntValue
                  if (numberTokenId==0 || numberTokenId==payload_invalid)
                  {
-                     if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                     if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                          return false;
                  }
                  else
@@ -793,7 +793,7 @@ public: // methods - методы собственно разбора
             case TokenizerInternalState::stReadNumberFloat:
                  if (numberTokenId==0 || numberTokenId==payload_invalid)
                  {
-                     if (!parsingFloatNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
+                     if (!parsingFloatNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
                          return false;
                  }
                  else
@@ -1186,7 +1186,7 @@ public: // methods - методы собственно разбора
                         }
 
                         // А вот обработчик не вызываем
-                        // parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                        // parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER, tokenStartIt, it); // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
 
                         st = TokenizerInternalState::stReadNumber;
                         goto explicit_readnumber; // надо обработать текущий символ
@@ -1272,7 +1272,7 @@ public: // methods - методы собственно разбора
 
                 if (numberTokenId==0 || numberTokenId==payload_invalid)
                 {
-                    if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER, tokenStartIt, it, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
+                    if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER, tokenStartIt, it, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                         return false;
                 }
                 else
@@ -1352,7 +1352,7 @@ public: // methods - методы собственно разбора
 
                 if (numberTokenId==0 || numberTokenId==payload_invalid)
                 {
-                    if (!parsingFloatNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
+                    if (!parsingFloatNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG, tokenStartIt, it, itEnd)) // выплёвываем накопленное число с системой счисления по умолчанию
                         return false;
                 }
                 else

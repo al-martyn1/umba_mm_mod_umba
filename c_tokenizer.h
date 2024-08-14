@@ -211,9 +211,9 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 #define UMBA_TOKENIZER_TOKEN_FLOAT_FLAG                                               0x0080u
 
-#define UMBA_TOKENIZER_TOKEN_NUMBER                                                   0x1000u
-#define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                             (UMBA_TOKENIZER_TOKEN_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST                                     UMBA_TOKENIZER_TOKEN_NUMBER
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER                                          0x1000u
+#define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                             (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST                                     UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER
 #define UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_LAST                                      0x1FFFu
 
 #define UMBA_TOKENIZER_TOKEN_NUMBER_USER_LITERAL_FIRST                                (UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST+1)
