@@ -382,6 +382,35 @@ protected:
 
     token_handler_type     nextTokenHandler;
 
+
+    static
+    auto makePreprocessorKeywords()
+    {
+        std::unordered_map<string_type, payload_type> m;
+        m[string_plus::make_string<string_type>("define")]  = UMBA_TOKENIZER_TOKEN_PP_DEFINE;
+        m[string_plus::make_string<string_type>("include")] = UMBA_TOKENIZER_TOKEN_PP_INCLUDE;
+        return m;
+    }
+
+    static
+    const auto& getPreprocessorKeywords()
+    {
+        static auto m = makePreprocessorKeywords();
+        return m;
+    }
+    
+    static
+    payload_type getPreprocessorKeywordToken(const string_type &ident)
+    {
+        const auto& m = getPreprocessorKeywords();
+        auto it = m.find(ident);
+        if (it==m.end())
+            return payload_invalid;
+        return it->second;
+    }
+
+    //
+
 public:
 
     UMBA_RULE_OF_FIVE(CcPreprocessorFilter, default, default, default, default, default);
@@ -423,15 +452,20 @@ public:
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER)
                 {
                     st = stPreprocessor;
+
                     if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg)) // Сначала пробрасываем токен
                         return false;
 
-                    auto idStrView = tokenizer.makeStringView(b,e);
-                    if (idStrView==string_plus::make_string<string_type>("define"))
+                    payload_type ppKewordId = getPreprocessorKeywordToken(string_type(tokenizer.makeStringView(b,e)));
+                    if (ppKewordId!=payload_invalid)
                     {
-                        if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_PP_DEFINE, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg)) // Сигналим про дефайн
+                        if (!nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg)) // Сигналим про дефайн
                             return false;
                     }
+
+                    //  
+                    // auto idStrView = tokenizer.makeStringView(b,e);
+                    // if (idStrView==string_plus::make_string<string_type>("define"))
 
                     return true;
                 }
