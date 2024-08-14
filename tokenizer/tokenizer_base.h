@@ -182,23 +182,32 @@ public: // depending types
 
     using ITokenizerLiteralParser  = umba::tokenizer::ITokenizerLiteralParser<CharType, MessagesStringType, InputIteratorType>;
 
+    //------------------------------
     struct EmptyData
     {};
 
+    //------------------------------
+    struct CommentData // Текст комента без обрамляющих символов
+    {
+        std::basic_string_view<value_type>  data;
+
+    }; // struct CommentData
+
+    //------------------------------
     struct StringLiteralData
     {
         std::basic_string_view<value_type>  data;
 
     }; // struct StringLiteralData
 
-
-    struct CommentData // Текст комента без обрамляющих символов
+    //------------------------------
+    struct IdentifierData
     {
         std::basic_string_view<value_type>  data;
 
-    }; // struct StringLiteralData
+    }; // struct IdentifierData
 
-
+    //------------------------------
     struct IntegerNumericLiteralData
     {
 #if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
@@ -213,8 +222,7 @@ public: // depending types
 
     }; // struct NumericLiteralData
 
-
-
+    //------------------------------
     struct FloatNumericLiteralData
     {
 #if defined(UMBA_TOKENOZER_MARTY_DECIMAL_USED)
@@ -232,13 +240,14 @@ public: // depending types
 
     }; // struct NumericLiteralData
 
+    //------------------------------
     
     // https://en.cppreference.com/w/cpp/utility/variant
     // https://en.cppreference.com/w/cpp/utility/variant/get_if
     // https://en.cppreference.com/w/cpp/utility/variant/get
     // https://en.cppreference.com/w/cpp/utility/variant/holds_alternative
     // https://en.cppreference.com/w/cpp/utility/variant/visit
-    using TokenParsedData = std::variant<EmptyData, CommentData, StringLiteralData, IntegerNumericLiteralData, FloatNumericLiteralData>;
+    using TokenParsedData = std::variant<EmptyData, CommentData, IdentifierData, StringLiteralData, IntegerNumericLiteralData, FloatNumericLiteralData>;
 
     using token_parsed_data = TokenParsedData;
 
@@ -716,7 +725,7 @@ public: // methods - методы собственно разбора
                  return true;
 
             case TokenizerInternalState::stReadIdentifier:
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_IDENTIFIER, tokenStartIt, itEnd)) // выплюнули
+                 if (!parsingIdentifierHandlerLambda(tokenStartIt, itEnd)) // выплюнули
                      return false;
                  if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
                      return false;
@@ -1069,7 +1078,7 @@ public: // methods - методы собственно разбора
                     break; // коллекционируем
                 }
 
-                if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_IDENTIFIER, tokenStartIt, it)) // выплюнули
+                if (!parsingIdentifierHandlerLambda(tokenStartIt, it)) // выплюнули
                     return false;
                 charClass = charClassTable[charToCharClassTableIndex(ch)]; // Перечитали значение класса символа - оно могло измениться
                 tokenStartIt = it; // Сохранили начало нового токена
@@ -1734,6 +1743,23 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                );
         // TokenParsedData StringLiteralData
         checkLineStart(tokenType);
+        return bRes;
+    }
+
+    [[nodiscard]] // !!! Пока IdentifierData задаем как вьюшку от итераторов, но вообще идентификатор надо бы сохранять в буфере, чтобы корректно обрабатывать linefeed escap'ы
+    bool parsingIdentifierHandlerLambda( InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+                                       ) const
+    {
+        if (inputDataBegin==inputDataEnd)
+            return true;
+        MessagesStringType msg;
+        bool bRes = static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, UMBA_TOKENIZER_TOKEN_IDENTIFIER
+                                                               , inputDataBegin, inputDataEnd
+                                                               , IdentifierData{makeStringView(inputDataBegin, inputDataEnd)}
+                                                               , msg
+                                                               );
+        // TokenParsedData StringLiteralData
+        checkLineStart(UMBA_TOKENIZER_TOKEN_IDENTIFIER);
         return bRes;
     }
 
