@@ -202,7 +202,8 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 /* From 0x100 to 0x200 - dummy tokens without any payload and iterators, they signals that processing was entered in some alter mode */
 #define UMBA_TOKENIZER_TOKEN_PP_START                                                 0x0100u /* empty token, signals that C/C++ preprocessor mode starts */
 #define UMBA_TOKENIZER_TOKEN_PP_END                                                   0x0101u /* empty token, signals that C/C++ preprocessor mode ends */
-#define UMBA_TOKENIZER_TOKEN_PP_DEFINE                                                0x0102u /* empty token, that define PP directive detected. Non-paired token */
+#define UMBA_TOKENIZER_TOKEN_PP_DEFINE                                                0x0102u /* empty token, that "define" PP directive detected. Non-paired token */
+#define UMBA_TOKENIZER_TOKEN_PP_INCLUDE                                               0x0103u /* empty token, that "include" PP directive detected. Non-paired token */
 
 
 

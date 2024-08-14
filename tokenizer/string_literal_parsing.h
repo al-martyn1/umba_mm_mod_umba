@@ -193,16 +193,34 @@ protected:
         stRead
     };
 
-    CharType quotType = 0;
-    State    st       = stInitial;
+    CharType     quotStart  = 0;
+    CharType     quotEnd    = 0;
+    bool         quotPaired = false;
+    std::size_t  quotLevel  = 0;
+    State        st         = stInitial;
 
+    static
+    CharType getQuotEnd(CharType qs)
+    {
+        switch(qs)
+        {
+            case (CharType)'<': return '>';
+            case (CharType)'{': return '}';
+            case (CharType)'[': return ']';
+            case (CharType)'(': return ')';
+            default: return qs;
+        }
+    }
 
 public:
 
     void reset()
     {
-        quotType = 0;
-        st       = stInitial;
+        quotStart  = 0;        
+        quotEnd    = 0;        
+        quotPaired = false;    
+        quotLevel  = 0;        
+        st         = stInitial;
     }
 
     virtual StringLiteralParsingResult parseChar(InputIteratorType it, InputIteratorType itEnd, ITokenizerLiteralCharInserter<CharType> *pInserter, MessageStringType *pMsg) override
@@ -210,19 +228,45 @@ public:
         UMBA_USED(itEnd);
         if (st==stInitial)
         {
-            quotType = *it;
-            st = stRead;
+            quotStart  = *it;
+            quotEnd    = getQuotEnd(quotStart);
+            quotPaired = quotStart!=quotEnd;
+            quotLevel  = 1u;
+            st         = stRead;
         }
         else
         {
-            if (*it==quotType)
+            if (!quotPaired)
             {
-                return StringLiteralParsingResult::okStop;
+                if (*it==quotEnd)
+                {
+                    return StringLiteralParsingResult::okStop;
+                }
+                else
+                {
+                    this->insertChar(pInserter, *it);
+                }
             }
             else
             {
-                insertChar(pInserter, *it);
+                if (*it==quotStart)
+                {
+                    ++quotLevel;
+                }
+                else if (*it==quotEnd)
+                {
+                    --quotLevel;
+                    if (quotLevel==0)
+                    {
+                        return StringLiteralParsingResult::okStop;
+                    }
+                    else
+                    {
+                        this->insertChar(pInserter, *it);
+                    }
+                }
             }
+
         }
 
         return StringLiteralParsingResult::okContinue;
