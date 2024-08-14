@@ -28,20 +28,42 @@ namespace tokenizer {
 
 
 
+enum class FloatingPointSeparatorType
+{
+    dot,
+    comma,
+    both
+
+};
 
 //----------------------------------------------------------------------------
 #include "umba/warnings/push_disable_padding_added.h"
 struct TokenizerOptions
 {
-    bool  singleLineCommentOnlyAtBeginning = false;
-    bool  processLineContinuation          = true ;  // '\' before line feed marks next line to be continuation of current line
-    bool  numbersAllowDigitsSeparator      = true ;  // apos ' (39/0x27) only can be used
-    int   numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
-    bool  tabsAsSpace                      = true ;
+    bool                        singleLineCommentOnlyAtBeginning = false;
+    bool                        processLineContinuation          = true ;  // '\' before line feed marks next line to be continuation of current line
+    bool                        numbersAllowDigitsSeparator      = true ;  // apos ' (39/0x27) only can be used
+    int                         numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
+    bool                        tabsAsSpace                      = true ;
+    FloatingPointSeparatorType  floatingPointSeparatorType       = FloatingPointSeparatorType::dot;
 
     payload_type getTabToken() const
     {
         return tabsAsSpace ? UMBA_TOKENIZER_TOKEN_SPACE : UMBA_TOKENIZER_TOKEN_TAB;
+    }
+
+    template<typename CharType>
+    //constexpr
+    bool isFloatingPointSeparator(CharType ch) const
+    {
+        if (floatingPointSeparatorType==FloatingPointSeparatorType::dot   && ch==(CharType)'.')
+            return true;
+        if (floatingPointSeparatorType==FloatingPointSeparatorType::comma && ch==(CharType)',')
+            return true;
+        if (floatingPointSeparatorType==FloatingPointSeparatorType::both  && (ch==(CharType)'.' || ch==(CharType)','))
+            return true;
+
+        return false;
     }
 
 
@@ -345,6 +367,16 @@ protected: // methods
 
 //------------------------------
 public: // methods
+
+    void setOptions(const TokenizerOptions &opts)
+    {
+        options = opts;
+    }
+
+    const TokenizerOptions& setOptions() const
+    {
+        return options;
+    }
 
     void setCharClassTable( const CharClassTableType &cht)
     {
@@ -884,8 +916,7 @@ public: // methods - методы собственно разбора
             explicit_initial:
             case TokenizerInternalState::stInitial:
             {
-
-                if (ch==(std::decay_t<decltype(ch)>)'.')
+                if (options.isFloatingPointSeparator<value_type>(ch))
                 {
                     performStartReadingNumberLambda(ch, it);
                     st = TokenizerInternalState::stReadNumberMayBeFloat;
@@ -962,7 +993,7 @@ public: // methods - методы собственно разбора
             //------------------------------
             case TokenizerInternalState::stReadSpace:
             {
-                if (ch==(std::decay_t<decltype(ch)>)'.')
+                if (options.isFloatingPointSeparator<value_type>(ch))
                 {
                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, it))
                         return false;
@@ -1262,7 +1293,7 @@ public: // methods - методы собственно разбора
             explicit_readnumber:
             case TokenizerInternalState::stReadNumber:
             {
-                if (ch==(std::decay_t<decltype(ch)>)'.')
+                if (options.isFloatingPointSeparator<value_type>(ch))
                 {
                     st = TokenizerInternalState::stReadNumberFloat;
                     break;
