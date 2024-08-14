@@ -351,11 +351,9 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_EQUAL                             (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A2u)   /*  ===   */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_NOT_EQUAL                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A3u)   /*  !==   */
 
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_STRICT_NOT_EQUAL                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A4u)   /*  !==   */
-
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_AT                                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A5u)   /*  @     */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_HASH                                     (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A6u)   /*  @     */
-#define UMBA_TOKENIZER_TOKEN_OPERATOR_USD                                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A7u)   /*  @     */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_HASH                                     (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A6u)   /*  #     */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_USD                                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A7u)   /*  $     */
 
 
 
