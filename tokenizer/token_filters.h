@@ -107,7 +107,7 @@ public:
                    , payload_type          payloadToken
                    , iterator_type         b
                    , iterator_type         e
-                   , token_parsed_data     parsedData // std::basic_string_view<value_type>   strValue
+                   , token_parsed_data     parsedData // std::variant<...>
                    , messages_string_type  &msg
                    )
     {
@@ -144,7 +144,7 @@ struct TokenInfo
              , payload_type       payloadToken_
              , iterator_type      b_
              , iterator_type      e_
-             , token_parsed_data  parsedData_ // std::basic_string_view<value_type>   strValue_
+             , token_parsed_data  parsedData_ // std::variant<...>
              )
     : lineStartFlag(lineStartFlag_)
     , payloadToken(payloadToken_)
@@ -225,18 +225,32 @@ public:
 
 //----------------------------------------------------------------------------
 template<typename TokenizerType, typename VectorType=std::vector<TokenInfo<TokenizerType> > >
-struct SimpleNumberSuffixGluingFilter : FilterBase<TokenizerType, VectorType>
+struct SimpleSuffixGluingFilter : FilterBase<TokenizerType, VectorType>
 {
     using TBase = FilterBase<TokenizerType, VectorType>;
 
     UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TBase);
     using payload_type             = umba::tokenizer::payload_type        ;
 
-    UMBA_RULE_OF_FIVE(SimpleNumberSuffixGluingFilter, default, default, default, default, default);
+    UMBA_RULE_OF_FIVE(SimpleSuffixGluingFilter, default, default, default, default, default);
 
-    SimpleNumberSuffixGluingFilter(token_handler_type curTokenHandler)
-    : TBase(curTokenHandler)
+
+    enum class GluingOption
+    {
+        glueAll,
+        glueNumbers,
+        glueStrings
+    };
+
+    GluingOption gluingOption = GluingOption::glueAll;
+
+
+    SimpleSuffixGluingFilter(token_handler_type curTokenHandler, GluingOption gOpt=GluingOption::glueAll)
+    : TBase(curTokenHandler), gluingOption(gOpt)
     {}
+
+
+protected:
 
     static
     bool isNumberLiteral(payload_type payloadToken)
@@ -244,12 +258,33 @@ struct SimpleNumberSuffixGluingFilter : FilterBase<TokenizerType, VectorType>
         return payloadToken>=UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_FIRST && payloadToken<=UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_LAST;
     }
 
+    static
+    bool isStringLiteral(payload_type payloadToken)
+    {
+        return payloadToken>=UMBA_TOKENIZER_TOKEN_STRING_LITERAL_FIRST && payloadToken<=UMBA_TOKENIZER_TOKEN_STRING_LITERAL_LAST;
+    }
+
+    const
+    bool glueNumbers() const
+    {
+        return gluingOption==GluingOption::glueAll || gluingOption==GluingOption::glueNumbers;
+    }
+
+    const
+    bool glueStrings() const
+    {
+        return gluingOption==GluingOption::glueAll || gluingOption==GluingOption::glueStrings;
+    }
+
+
+public:
+
     bool operator()( TokenizerType         &tokenizer
                    , bool                  lineStartFlag
                    , payload_type          payloadToken
                    , iterator_type         b
                    , iterator_type         e
-                   , token_parsed_data     parsedData // std::basic_string_view<value_type>   strValue
+                   , token_parsed_data     parsedData // std::variant<...>
                    , messages_string_type  &msg
                    )
     {
@@ -264,7 +299,12 @@ struct SimpleNumberSuffixGluingFilter : FilterBase<TokenizerType, VectorType>
 
         if (this->tokenBuffer.empty())
         {
-            if (isNumberLiteral(payloadToken))
+            if (isNumberLiteral(payloadToken) && glueNumbers()) // Если числовой литерал и разрешено приклеивать к ним суффиксы
+            {
+                this->tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, parsedData /* strValue */ );
+                return true;
+            }
+            else if (isStringLiteral(payloadToken) && glueStrings()) // Если строковый литерал и разрешено приклеивать к ним суффиксы
             {
                 this->tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, parsedData /* strValue */ );
                 return true;
@@ -274,84 +314,68 @@ struct SimpleNumberSuffixGluingFilter : FilterBase<TokenizerType, VectorType>
                 return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
             }
         }
-        else // в буфере лежит токен числового литерала
+
+        // В буфере что-то есть
+
+        if (payloadToken!=UMBA_TOKENIZER_TOKEN_IDENTIFIER) // Что у нас пришло?
         {
-            if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER) // Если после числового токена идёт идентификатор - это число с суффиксом
+            // У нас пришел не идентификатор, значит, склейка не состоится
+            if (!this->flushTokenBuffer(tokenizer, msg)) // сбрасываем буферизированное (с очисткой буфера)
+                 return false;
+
+            // Пробрасываем пришедшее на текущем шаге
+            return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
+        }
+
+
+        // в буфере лежит токен числового литерала
+        
+        UMBA_ASSERT(!this->tokenBuffer.empty()); // точно ли ы буфере что-то есть?
+        TokenInfo prevTokenInfo = this->tokenBuffer[0]; // инфа по числовому или строковому литералу
+        UMBA_ASSERT(prevTokenInfo.e==b); // Начало текущего токена должно совпадать с концом предыдущего
+
+        auto literalStartIter = prevTokenInfo.b;
+        auto suffixStartIter  = prevTokenInfo.e; // началом суффикса является конец числового литерала
+        auto literalEndIter   = e;
+
+        auto updatePayloadDataAndCallNextHandler = [&](auto payloadData) -> bool
+        {
+            payloadData.hasSuffix      = true;
+            payloadData.suffixStartPos = suffixStartIter;
+            return this->nextTokenHandler( tokenizer, prevTokenInfo.lineStartFlag, prevTokenInfo.payloadToken
+                                         , literalStartIter, literalEndIter, payloadData, msg
+                                         );
+        };
+        
+
+        bool res = true;
+
+        if (isNumberLiteral(prevTokenInfo.payloadToken))
+        {
+            if (prevTokenInfo.payloadToken&UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
             {
-                UMBA_ASSERT(!this->tokenBuffer.empty());
-
-                //auto passParsedData = this->tokenBuffer[0].parsedData;
-
-                ///////////
-                // TokenInfo
-                // struct TokenInfo
-                // {
-                //     using payload_type             = umba::tokenizer::payload_type                ;
-                //  
-                //     bool                                 lineStartFlag;
-                //     payload_type                         payloadToken;
-                //     iterator_type                        b;
-                //     iterator_type                        e;
-                //     // std::basic_string_view<value_type>   strValue;
-                //     token_parsed_data                    parsedData;
-
-                TokenInfo passTokenInfo = this->tokenBuffer[0]; // инфа по числовому литералу
-                UMBA_ASSERT(passTokenInfo.e==b); // Начало текущего токена должно совпадать с концом предыдущего
-
-                auto literalStartIter = passTokenInfo.b;
-                auto suffixStartIter  = passTokenInfo.e; // началом суффикса является конец числового литерала
-                auto literalEndIter   = e;
-
-                bool res = true;
-
-                if (passTokenInfo.payloadToken&UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-                {
-                    auto numericLiteralData = std::get<typename TokenizerType::FloatNumericLiteralData>(passTokenInfo.parsedData);
-                    numericLiteralData.hasSuffix = true;
-                    numericLiteralData.suffixStartPos = suffixStartIter;
-                    res = this->nextTokenHandler( tokenizer
-                                                , passTokenInfo.lineStartFlag
-                                                , passTokenInfo.payloadToken
-                                                , literalStartIter
-                                                , literalEndIter
-                                                , numericLiteralData
-                                                , msg
-                                                );
-                }
-                else
-                {
-                    auto numericLiteralData = std::get<typename TokenizerType::IntegerNumericLiteralData>(passTokenInfo.parsedData);
-                    numericLiteralData.hasSuffix = true;
-                    numericLiteralData.suffixStartPos = suffixStartIter;
-                    res = this->nextTokenHandler( tokenizer
-                                                , passTokenInfo.lineStartFlag
-                                                , passTokenInfo.payloadToken
-                                                , literalStartIter
-                                                , literalEndIter
-                                                , numericLiteralData
-                                                , msg
-                                                );
-                }
-
-                this->clearTokenBuffer();
-                return res;
-                //tokenBuffer[0]
+                res = updatePayloadDataAndCallNextHandler(std::get<typename TokenizerType::FloatNumericLiteralData>(prevTokenInfo.parsedData));
             }
-            else // после числового токена идёт хз что
+            else
             {
-                if (!this->flushTokenBuffer(tokenizer, msg)) // сбрасываем буферизированное (с очисткой буфера)
-                {
-                     return false;
-                }
-
-                // прокидываем текущий токен
-                return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
+                res = updatePayloadDataAndCallNextHandler(std::get<typename TokenizerType::IntegerNumericLiteralData>(prevTokenInfo.parsedData));
             }
         }
+        else if (isStringLiteral(prevTokenInfo.payloadToken))
+        {
+            res = updatePayloadDataAndCallNextHandler(std::get<typename TokenizerType::StringLiteralData>(prevTokenInfo.parsedData));
+        }
+        else
+        {
+            UMBA_ASSERT(0);
+        }
+
+        this->clearTokenBuffer();
+        return res;
 
     }
 
-}; // struct SimpleNumberSuffixGluingFilter
+}; // struct SimpleSuffixGluingFilter
 
 //----------------------------------------------------------------------------
 
@@ -424,7 +448,7 @@ public:
                    , payload_type          payloadToken
                    , iterator_type         b
                    , iterator_type         e
-                   , token_parsed_data     parsedData // std::basic_string_view<value_type>   strValue
+                   , token_parsed_data     parsedData // std::variant<...>
                    , messages_string_type  &msg
                    )
     {
