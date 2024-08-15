@@ -249,7 +249,7 @@ char* formatAnsiTermMoveToAbsPos( char* pBuf, int x, int y) // H
 
     pBuf = utils::formatUnsignedDec( pBuf, (unsigned)y+1);
     *pBuf++ = ';';
-    pBuf = utils::formatUnsignedDec( pBuf, (unsigned)y+1);
+    pBuf = utils::formatUnsignedDec( pBuf, (unsigned)x+1);
 
     *pBuf++ = 'H';
     #if defined(UMBA_TERM_DEBUG_TERM_ESC_CSI)
