@@ -173,18 +173,18 @@ public:
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
         if (seq.empty())
-            throw std::runtime_error("single line comment start sequence can't be empty");
+            throw std::runtime_error("single line comment sequence can't be empty");
 
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
         addTokenToKnownSet(tokenId);
         if (operatorsTrieBuilder.addTokenSequence(seq, tokenId).payload!=tokenId)
-            throw std::runtime_error("single line comment start sequence already used");
+            throw std::runtime_error("single line comment sequence already used");
 
         return *this;
     }
 
-    TokenizerBuilder& setMultiLineComment(const StringType &seqStart, const StringType &seqEnd)
+    TokenizerBuilder& setMultiLineComment(const StringType &seqStart, const StringType &seqEnd, payload_type tokenId=payload_invalid)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
@@ -194,9 +194,12 @@ public:
         if (seqEnd.empty())
             throw std::runtime_error("multi line comment end sequence can't be empty");
 
-        addTokenToKnownSet(UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START);
-        if (operatorsTrieBuilder.addTokenSequence(seqStart, UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START).payload!=UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START)
-            throw std::runtime_error("single line comment start sequence already used");
+        if (tokenId==payload_invalid)
+            tokenId = UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START;
+
+        addTokenToKnownSet(tokenId);
+        if (operatorsTrieBuilder.addTokenSequence(seqStart, tokenId).payload!=tokenId)
+            throw std::runtime_error("multiline comment start sequence already used");
 
         multiLineCommentEndStr = seqEnd;
 
@@ -241,13 +244,9 @@ public:
 
         generation::setCharClassFlags(charClassTable, seq[0], CharClass::string_literal_prefix);
         if (tokenId==payload_invalid)
-        {
-            literalsTrieBuilder.addTokenSequence(seq, UMBA_TOKENIZER_TOKEN_STRING_LITERAL).payloadExtra = reinterpret_cast<payload_type>(pParser);
-        }
-        else
-        {
-            literalsTrieBuilder.addTokenSequence(seq, tokenId).payloadExtra = reinterpret_cast<payload_type>(pParser);
-        }
+            tokenId = UMBA_TOKENIZER_TOKEN_STRING_LITERAL;
+
+        literalsTrieBuilder.addTokenSequence(seq, tokenId).payloadExtra = reinterpret_cast<payload_type>(pParser);
 
         return *this;
     }
