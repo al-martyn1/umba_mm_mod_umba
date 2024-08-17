@@ -39,11 +39,7 @@ public:
             trieNodeInitMakeUninitialized(trieNode);
         }
 
-        TrieBuilderMapNode(const TrieBuilderMapNode &) = default;
-        TrieBuilderMapNode& operator=(const TrieBuilderMapNode &) = default;
-        TrieBuilderMapNode(TrieBuilderMapNode &&) = default;
-        TrieBuilderMapNode& operator=(TrieBuilderMapNode &&) = default;
-
+        UMBA_RULE_OF_FIVE_MOVE_NO_DEF(TrieBuilderMapNode, default, default, default, default);
     };
 
     typedef std::map<token_type, TrieBuilderMapNode> TrieNodesMap;
