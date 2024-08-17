@@ -42,9 +42,11 @@ struct TokenizerOptions
 {
     bool                        singleLineCommentOnlyAtBeginning = false;
     bool                        processLineContinuation          = true ;  // '\' before line feed marks next line to be continuation of current line
-    bool                        numbersAllowDigitsSeparator      = true ;  // apos ' (39/0x27) only can be used
+    bool                        numbersAllowRankSeparator        = true ;
+    char                        numbersRankSeparator             = '\'' ;  // apos ' (39/0x27) or backtick are good for this
     int                         numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
     bool                        tabsAsSpace                      = true ;
+    bool                        disableFloatingPointNumbers      = false;
     FloatingPointSeparatorType  floatingPointSeparatorType       = FloatingPointSeparatorType::dot;
 
     payload_type getTabToken() const
@@ -53,9 +55,21 @@ struct TokenizerOptions
     }
 
     template<typename CharType>
+    bool isNumberRankSeparator(CharType ch) const
+    {
+        if (!numbersAllowRankSeparator)
+            return false;
+
+        return ch==(CharType)numbersRankSeparator;
+    }
+
+    template<typename CharType>
     //constexpr
     bool isFloatingPointSeparator(CharType ch) const
     {
+        if (disableFloatingPointNumbers)
+            return false;
+
         if (floatingPointSeparatorType==FloatingPointSeparatorType::dot   && ch==(CharType)'.')
             return true;
         if (floatingPointSeparatorType==FloatingPointSeparatorType::comma && ch==(CharType)',')
@@ -1308,7 +1322,7 @@ public: // methods - методы собственно разбора
                     break; // Тут у нас годная цифра
                 }
 
-                if (options.numbersAllowDigitsSeparator && ch==(std::decay_t<decltype(ch)>)'\'')
+                if (options.isNumberRankSeparator(ch) && ch==(std::decay_t<decltype(ch)>)'\'')
                 {
                     break; // Тут у нас разделитель разрядов
                 }
