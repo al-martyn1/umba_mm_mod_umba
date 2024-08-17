@@ -34,6 +34,13 @@
 
 
 
+//! Часть правила пяти для конструктора и оператора копирования и конструктора и оператора перемещения, без конструктора по умолчанию
+#define  UMBA_RULE_OF_FIVE_MOVE_NO_DEF(className, ctorCopy, opCopy, ctorMove, opMove) \
+         UMBA_RULE_OF_FIVE_COPY(className, ctorCopy, opCopy);                         \
+         UMBA_RULE_OF_FIVE_MOVE(className, ctorMove, opMove)
+
+
+
 //! Макрос для полного правила пяти
 /*!
     UMBA_RULE_OF_FIVE(className, default|delete, default|delete, default|delete, default|delete, default|delete);
