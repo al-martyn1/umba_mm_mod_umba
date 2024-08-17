@@ -20,6 +20,8 @@
 #include <variant>
 #include <array>
 #include <algorithm>
+#include <memory>
+
 
 //----------------------------------------------------------------------------
 // umba::tokenizer::
@@ -320,6 +322,8 @@ protected: // fileds
 
     StringType            multiLineCommentEndStr;
 
+    std::vector<std::shared_ptr<ITokenizerLiteralParser> >  literalParsersStorage;
+
     TokenizerOptions      options; // Не являются состоянием, обычно задаются в начале, и никогда не меняются
 
 
@@ -384,6 +388,12 @@ protected: // methods
 
 //------------------------------
 public: // methods
+
+
+    void addOwnershipForLiteralParsers(const std::vector<std::shared_ptr<ITokenizerLiteralParser> > &literalParsers)
+    {
+        literalParsersStorage.insert(literalParsersStorage.end(), literalParsers.begin(), literalParsers.end());
+    }
 
     void setOptions(const TokenizerOptions &opts)
     {

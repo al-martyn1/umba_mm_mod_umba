@@ -7,7 +7,9 @@
 #include <unordered_set>
 #include <exception>
 #include <stdexcept>
-
+#include <memory>
+#include <initializer_list>
+		
 
 // umba::tokenizer::
 namespace umba {
@@ -51,8 +53,10 @@ protected: // fileds
 
     std::string              multiLineCommentEndStr; // Конец многострочного коментария ищем как строку, с забеганием вперёд
 
-
     std::unordered_set<payload_type>  addedTokens;
+
+    std::vector<std::shared_ptr<ITokenizerLiteralParser> >   literalParsersStorage;
+    //ITokenizerLiteralParser
 
 
 //------------------------------
@@ -265,6 +269,46 @@ public:
         return *this;
     }
 
+    template<typename LiteralParserType, typename... FilterCtorArgs >
+    TokenizerBuilder& addStringLiteralParser(const StringType &seq, payload_type tokenId, FilterCtorArgs... args)
+    {
+        std::shared_ptr<LiteralParserType>        tmpParser          = std::make_shared<LiteralParserType>(std::forward<FilterCtorArgs>(args)...);
+        std::shared_ptr<ITokenizerLiteralParser>  tmpParserInterface = std::static_pointer_cast<ITokenizerLiteralParser>(tmpParser);
+        addStringLiteralParser(seq, tmpParserInterface.get(), tokenId);
+        literalParsersStorage.emplace_back(tmpParserInterface);
+        return *this;
+    }
+
+    template<typename LiteralParserType>
+    TokenizerBuilder& addStringLiteralParser(const StringType &seq, payload_type tokenId=payload_invalid)
+    {
+        std::shared_ptr<LiteralParserType>        tmpParser          = std::make_shared<LiteralParserType>();
+        std::shared_ptr<ITokenizerLiteralParser>  tmpParserInterface = std::static_pointer_cast<ITokenizerLiteralParser>(tmpParser);
+        addStringLiteralParser(seq, tmpParserInterface.get(), tokenId);
+        literalParsersStorage.emplace_back(tmpParserInterface);
+        return *this;
+    }
+
+    template<typename LiteralParserType>
+    TokenizerBuilder& addStringLiteralParser(payload_type tokenId, std::initializer_list<StringType> prefixList)
+    {
+        UMBA_ASSERT(tokenId!=payload_invalid);
+        std::shared_ptr<LiteralParserType>        tmpParser          = std::make_shared<LiteralParserType>();
+        std::shared_ptr<ITokenizerLiteralParser>  tmpParserInterface = std::static_pointer_cast<ITokenizerLiteralParser>(tmpParser);
+        literalParsersStorage.emplace_back(tmpParserInterface);
+
+        auto b = std::begin(prefixList);
+        auto e = std::end(prefixList);
+        for(auto it=b; it!=e; ++it, ++tokenId)
+        {
+            addStringLiteralParser(*it, tmpParserInterface.get(), tokenId);
+        }
+        
+        return *this;
+    }
+
+    //std::vector<std::shared_ptr<ITokenizerLiteralParser> >   literalParsersStorage;
+
     tokenizer_type makeTokenizer() const
     {
         tokenizer_type tokenizer;
@@ -287,6 +331,8 @@ public:
         tokenizer.setLiteralsTrie (literalsTrie );
 
         tokenizer.setMultiLineCommentEndString(multiLineCommentEndStr);
+
+        tokenizer.addOwnershipForLiteralParsers(literalParsersStorage);
 
         return tokenizer;
     }
