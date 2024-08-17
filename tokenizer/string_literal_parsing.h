@@ -4,6 +4,12 @@
     #error "Do not include this file directly, include 'umba/tokenizer.h header instead'"
 #endif
 
+#include "umba/warnings/push_disable_rel_inc_contains_dbldot.h"
+#include "../rule_of_five.h"
+#include "../string_plus.h"
+#include "umba/warnings/pop.h"
+
+
 
 // umba::tokenizer::
 namespace umba {
@@ -24,6 +30,7 @@ enum class StringLiteralParsingResult : unsigned
 //----------------------------------------------------------------------------
 
 
+
 //----------------------------------------------------------------------------
 template<typename CharType>
 struct ITokenizerLiteralCharInserter
@@ -38,6 +45,10 @@ struct ITokenizerLiteralCharInserter
 };
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 template<typename CharType>
 struct TokenizerLiteralCharNulInserterImpl : public ITokenizerLiteralCharInserter<CharType>
 {
@@ -48,6 +59,10 @@ struct TokenizerLiteralCharNulInserterImpl : public ITokenizerLiteralCharInserte
 };
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 template< typename CharType
         , typename StringType = std::basic_string<CharType>
         >
@@ -56,17 +71,13 @@ struct TokenizerLiteralCharStringRefInserter : public ITokenizerLiteralCharInser
 
 protected:
     StringType  &strAppendTo;
-    bool         insertionDisabled = false;
+    bool        insertionDisabled = false;
 
 public:
+
     TokenizerLiteralCharStringRefInserter(StringType &str) : strAppendTo(str) {}
 
-    TokenizerLiteralCharStringRefInserter() = delete;
-    TokenizerLiteralCharStringRefInserter(const TokenizerLiteralCharStringRefInserter &) = default;
-    TokenizerLiteralCharStringRefInserter& operator=(const TokenizerLiteralCharStringRefInserter &) = default;
-    TokenizerLiteralCharStringRefInserter(TokenizerLiteralCharStringRefInserter &&) = default;
-    TokenizerLiteralCharStringRefInserter& operator=(TokenizerLiteralCharStringRefInserter &&) = default;
-
+    UMBA_RULE_OF_FIVE(TokenizerLiteralCharStringRefInserter, delete, default, default, default, default);
 
     void  clear() { strAppendTo.clear(); }
     const StringType& str() const { return strAppendTo; }
@@ -80,6 +91,10 @@ public:
 };
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 template< typename CharType
         , typename StringType = std::basic_string<CharType>
         >
@@ -87,15 +102,11 @@ struct TokenizerLiteralCharStringInserter : public ITokenizerLiteralCharInserter
 {
 protected:
     StringType  strAppendTo;
-    bool         insertionDisabled = false;
+    bool        insertionDisabled = false;
 
 public:
 
-    TokenizerLiteralCharStringInserter() = default;
-    TokenizerLiteralCharStringInserter(const TokenizerLiteralCharStringInserter &) = default;
-    TokenizerLiteralCharStringInserter& operator=(const TokenizerLiteralCharStringInserter &) = default;
-    TokenizerLiteralCharStringInserter(TokenizerLiteralCharStringInserter &&) = default;
-    TokenizerLiteralCharStringInserter& operator=(TokenizerLiteralCharStringInserter &&) = default;
+    UMBA_RULE_OF_FIVE(TokenizerLiteralCharStringInserter, default, default, default, default, default);
 
     void  clear() { strAppendTo.clear(); }
     const StringType& str() const { return strAppendTo; }
@@ -213,6 +224,8 @@ protected:
     }
 
 public:
+
+    UMBA_RULE_OF_FIVE(SimpleQuotedStringLiteralParser, default, default, default, default, default);
 
     void reset()
     {
@@ -420,6 +433,8 @@ protected:
 
 
 public:
+
+    UMBA_RULE_OF_FIVE(CppEscapedSimpleQuotedStringLiteralParser, default, default, default, default, default);
 
     CppEscapedSimpleQuotedStringLiteralParser& setContinuationMode(bool allowEscapedLfContinuation_=true)
     {
