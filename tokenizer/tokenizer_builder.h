@@ -88,10 +88,14 @@ protected: // methods - helpers
         return false;
     }
 
-    void addTokenToKnownSet(payload_type tk)
+    void addTokenToKnownSet(payload_type tk, bool allowExisting=false)
     {
         if (addedTokens.find(tk)!=addedTokens.end())
-            throw std::runtime_error("token already used");
+        {
+            if (!allowExisting)
+                throw std::runtime_error("token already used");
+            return;
+        }
         addedTokens.insert(tk);
     }
 
@@ -121,8 +125,12 @@ public:
         return *this;
     }
 
-
-
+    TokenizerBuilder& setCharClassFlags(CharType ch, CharClass clsFlags)
+    {
+        generation::setCharClassFlags(charClassTable, ch, clsFlags);
+        return *this;
+    }
+    
     TokenizerBuilder& addBrackets(const StringType &bracketsPair, payload_type pairBaseToken)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
@@ -147,7 +155,7 @@ public:
         return *this;
     }
 
-    TokenizerBuilder& addNumbersPrefix(const StringType &prefix, payload_type tokenId)
+    TokenizerBuilder& addNumbersPrefix(const StringType &prefix, payload_type tokenId, bool allowUseExistingToken=false) // 
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
@@ -160,15 +168,15 @@ public:
         //TODO: !!! Подумать, как сделать, чтобы числа можно было начинать с символов @ # $
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
-        addTokenToKnownSet(tokenId);
-        numbersTrieBuilder.addTokenSequence(prefix, tokenId);
+        addTokenToKnownSet(tokenId, allowUseExistingToken);
+        // numbersTrieBuilder.addTokenSequence(prefix, tokenId); // Не понятно, с чего я продублировал тут и на следующей строке в if'е - переглючило, наверное. Но может, был какой-то скрытый смысл
         if (numbersTrieBuilder.addTokenSequence(prefix, tokenId).payload!=tokenId)
             throw std::runtime_error("number literal prefix already used");
 
         return *this;
     }
 
-    TokenizerBuilder& addSingleLineComment(const StringType &seq, payload_type tokenId)
+    TokenizerBuilder& addSingleLineComment(const StringType &seq, payload_type tokenId, bool allowUseExistingToken=false)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
@@ -177,9 +185,11 @@ public:
 
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
-        addTokenToKnownSet(tokenId);
+        addTokenToKnownSet(tokenId, allowUseExistingToken);
         if (operatorsTrieBuilder.addTokenSequence(seq, tokenId).payload!=tokenId)
             throw std::runtime_error("single line comment sequence already used");
+
+        generation::setCharClassFlags(charClassTable, seq, CharClass::opchar);
 
         return *this;
     }
@@ -201,12 +211,16 @@ public:
         if (operatorsTrieBuilder.addTokenSequence(seqStart, tokenId).payload!=tokenId)
             throw std::runtime_error("multiline comment start sequence already used");
 
+        // for(auto it=seqStart; it!=seqEnd; ++it)
+        //     generation::setCharClassFlags(charClassTable, seq, CharClass::opchar);
+        generation::setCharClassFlags(charClassTable, seqStart, CharClass::opchar);
+
         multiLineCommentEndStr = seqEnd;
 
         return *this;
     }
 
-    TokenizerBuilder& addOperator(const StringType &seq, payload_type tokenId)
+    TokenizerBuilder& addOperator(const StringType &seq, payload_type tokenId, bool allowUseExistingToken=false)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
@@ -215,7 +229,7 @@ public:
 
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
-        addTokenToKnownSet(tokenId);
+        addTokenToKnownSet(tokenId, allowUseExistingToken);
         if (operatorsTrieBuilder.addTokenSequence(seq, tokenId).payload!=tokenId)
             throw std::runtime_error("operator sequence already used");
 
