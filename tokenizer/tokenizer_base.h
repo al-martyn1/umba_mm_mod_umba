@@ -145,6 +145,8 @@ StringType getTokenizerTokenStr(payload_type p)
         case UMBA_TOKENIZER_TOKEN_LINEFEED                         : return umba::string_plus::make_string<StringType>("LINEFEED");
         case UMBA_TOKENIZER_TOKEN_SPACE                            : return umba::string_plus::make_string<StringType>("SPACE");
         case UMBA_TOKENIZER_TOKEN_TAB                              : return umba::string_plus::make_string<StringType>("TAB");
+        case UMBA_TOKENIZER_TOKEN_FORM_FEED                        : return umba::string_plus::make_string<StringType>("FF");
+        case UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                : return umba::string_plus::make_string<StringType>("CONTINUATION");
         case UMBA_TOKENIZER_TOKEN_IDENTIFIER                       : return umba::string_plus::make_string<StringType>("IDENTIFIER");
         case UMBA_TOKENIZER_TOKEN_SEMIALPHA                        : return umba::string_plus::make_string<StringType>("SEMIALPHA");
         case UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN               : return umba::string_plus::make_string<StringType>("KIND_OF_BRACKET");
