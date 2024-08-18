@@ -220,6 +220,14 @@ public: // depending types
 
     using ITokenizerLiteralParser  = umba::tokenizer::ITokenizerLiteralParser<CharType, MessagesStringType, InputIteratorType>;
 
+
+    //------------------------------
+    // EmptyData
+    // CommentData
+    // StringLiteralData
+    // IdentifierData
+    // IntegerNumericLiteralData
+    // FloatNumericLiteralData
     //------------------------------
     struct EmptyData
     {};
@@ -1739,6 +1747,12 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                , msg
                                                                );
         checkLineStart(tokenType);
+
+        if (!bRes)
+        {
+            reportHandleTokenErrorLambda(tokenType, inputDataBegin, inputDataEnd, msg);
+        }
+
         return bRes;
     }
 
@@ -1753,6 +1767,12 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                , msg
                                                                );
         checkLineStart(tokenType);
+
+        if (!bRes)
+        {
+            reportHandleTokenErrorLambda(tokenType, inputDataBegin, inputDataEnd, msg);
+        }
+
         return bRes;
     }
 
@@ -1767,6 +1787,12 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                , msg
                                                                );
         checkLineStart(tokenType);
+
+        if (!bRes)
+        {
+            reportHandleTokenErrorLambda(tokenType, inputDataBegin, inputDataEnd, msg);
+        }
+
         return bRes;
     }
 
@@ -1783,6 +1809,12 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                , msg
                                                                );
         checkLineStart(tokenType);
+
+        if (!bRes)
+        {
+            reportHandleTokenErrorLambda(tokenType, inputDataBegin, inputDataEnd, msg);
+        }
+
         return bRes;
     }
 
@@ -1801,6 +1833,12 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                );
         // TokenParsedData StringLiteralData
         checkLineStart(tokenType);
+
+        if (!bRes)
+        {
+            reportHandleTokenErrorLambda(tokenType, inputDataBegin, inputDataEnd, msg);
+        }
+
         return bRes;
     }
 
@@ -1818,6 +1856,12 @@ protected: // methods - хандлеры из "грязного" проекта,
                                                                );
         // TokenParsedData StringLiteralData
         checkLineStart(UMBA_TOKENIZER_TOKEN_IDENTIFIER);
+
+        if (!bRes)
+        {
+            reportHandleTokenErrorLambda(UMBA_TOKENIZER_TOKEN_IDENTIFIER, inputDataBegin, inputDataEnd, msg);
+        }
+
         return bRes;
     }
 
@@ -1842,6 +1886,11 @@ protected: // methods - хандлеры из "грязного" проекта,
     void reportStringLiteralMessageLambda(bool bErr, InputIteratorType it, const MessagesStringType &msg) const
     {
         static_cast<const TBase*>(this)->reportStringLiteralMessage(bErr, it, msg);
+    }
+
+    void reportHandleTokenErrorLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, const MessagesStringType &msg) const
+    {
+        static_cast<const TBase*>(this)->reportHandleTokenError(tokenType, inputDataBegin, inputDataEnd, msg);
     }
 
 
