@@ -94,9 +94,18 @@ public: // handler types
                                                                          , messages_string_type&
                                                                          )
                                                                     >;
-    using unexpected_handler_type                    = std::function<bool(TSelf &tokenizer, InputIteratorType, InputIteratorType, const char*, int)>;
-    using report_unknown_operator_handler_type       = std::function<void(TSelf &tokenizer, InputIteratorType,InputIteratorType)>;
-    using report_string_literal_message_handler_type = std::function<void(TSelf &tokenizer, bool, InputIteratorType, const MessagesStringType &)>;
+    using unexpected_handler_type                    = std::function<bool(TBase &tokenizer, InputIteratorType, InputIteratorType, const char*, int)>;
+    using report_unknown_operator_handler_type       = std::function<void(TBase &tokenizer, InputIteratorType,InputIteratorType)>;
+    using report_string_literal_message_handler_type = std::function<void(TBase &tokenizer, bool, InputIteratorType, const MessagesStringType &)>;
+    using report_handle_token_error                  = std::function<void(TBase &tokenizer, payload_type, InputIteratorType, InputIteratorType, const MessagesStringType &)>;
+
+    // void reportHandleTokenErrorLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, const MessagesStringType &msg) const
+    // {
+    //     static_cast<const TBase*>(this)->reportHandleTokenError(tokenType, inputDataBegin, inputDataEnd, msg);
+    // }
+
+
+// void parsingFailedMessageLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, const MessagesStringType &msg) const
 
 
 //------------------------------
@@ -106,6 +115,9 @@ public: // handlers
     unexpected_handler_type                     unexpectedHandler                ;
     report_unknown_operator_handler_type        reportUnknownOperatorHandler     ;
     report_string_literal_message_handler_type  reportStringLiteralMessageHandler;
+    report_handle_token_error                   reportHandleTokenErrorHandler    ;
+
+
 
     template<typename FilterType, typename... FilterCtorArgs >
     void installTokenFilter( FilterCtorArgs... args)
@@ -154,6 +166,14 @@ protected: // handler methods, called from base
         if (reportStringLiteralMessageHandler)
             reportStringLiteralMessageHandler(const_cast<TSelf&>(*this), bErr, it, msg);
     }
+
+    void reportHandleTokenError(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, const MessagesStringType &msg) const
+    {
+        if (reportHandleTokenErrorHandler)
+            reportHandleTokenErrorHandler(const_cast<TSelf&>(*this), tokenType, inputDataBegin, inputDataEnd, msg);
+    }
+
+
 
 }; // class TokenizerFunctionHandlers
 
