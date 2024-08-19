@@ -129,6 +129,58 @@ public:
         return *this;
     }
 
+
+protected:
+
+    umba::tokenizer::CharClass setResetCharClassFlagsByIndex(std::size_t idx, umba::tokenizer::CharClass setFlags, umba::tokenizer::CharClass clrFlags)
+    {
+        UMBA_ASSERT(idx<charClassTable.size());
+
+        auto res = charClassTable[idx];
+        charClassTable[idx] |=  setFlags;
+        charClassTable[idx] &= ~clrFlags;
+        return res;
+    }
+
+public:
+
+    //! Возвращает предыдущее состояние флагов
+    umba::tokenizer::CharClass setResetCharClassFlags(CharType ch, umba::tokenizer::CharClass setFlags, umba::tokenizer::CharClass clrFlags)
+    {
+        return setResetCharClassFlagsByIndex(umba::tokenizer::charToCharClassTableIndex(ch), setFlags, clrFlags);
+    }
+
+    //! Меняет (set/reset) флаги для тех символов, текущее состояние флагов которых содержит все флаги из condFlags
+    void conditionalFlagsAndSetResetCharClassFlags(umba::tokenizer::CharClass condFlags, umba::tokenizer::CharClass setFlags, umba::tokenizer::CharClass clrFlags)
+    {
+        for(std::size_t idx=0; idx!=charClassTable.size(); ++idx)
+        {
+            if ((charClassTable[idx]&condFlags)==condFlags)
+            {
+                setResetCharClassFlagsByIndex(idx, setFlags, clrFlags);
+            }
+        }
+    }
+
+    //! Меняет (set/reset) флаги для тех символов, текущее состояние флагов которых содержит хотя бы один флаг из condFlags
+    void conditionalFlagsOrSetResetCharClassFlags(umba::tokenizer::CharClass condFlags, umba::tokenizer::CharClass setFlags, umba::tokenizer::CharClass clrFlags)
+    {
+        for(std::size_t idx=0; idx!=charClassTable.size(); ++idx)
+        {
+            if ((charClassTable[idx]&condFlags)!=0)
+            {
+                setResetCharClassFlagsByIndex(idx, setFlags, clrFlags);
+            }
+        }
+    }
+
+    umba::tokenizer::CharClass getCharClass(CharType ch) const
+    {
+        std::size_t idx = umba::tokenizer::charToCharClassTableIndex(ch); // clamp 127
+        UMBA_ASSERT(idx<charClassTable.size());
+        return charClassTable[idx];
+    }
+
     TokenizerBuilder& setCharClassFlags(CharType ch, CharClass clsFlags)
     {
         generation::setCharClassFlags(charClassTable, ch, clsFlags);
@@ -307,9 +359,18 @@ public:
         return *this;
     }
 
-    //std::vector<std::shared_ptr<ITokenizerLiteralParser> >   literalParsersStorage;
+    // Признак строкового литерала вторичен по отношению к признаку оператора, и когда они пересекаются, то признак стр. литерала должен включаться руками в необходимых случаях
+    // Пример: C++ #include<bla-bla> - символы '<' и '>' - операторы, но в директиве препроцессора include они выступают маркерами строкового литерала специального типа
+    TokenizerBuilder& clearStringLiteralFlagForOpChars()
+    {
+        conditionalFlagsAndSetResetCharClassFlags(CharClass::opchar, CharClass::none /* setFlags */ , CharClass::string_literal_prefix /* clrFlags */ );
+        return *this;
+    }
 
-    tokenizer_type makeTokenizer() const
+
+protected:
+
+    tokenizer_type makeTokenizerImpl() const
     {
         tokenizer_type tokenizer;
 
@@ -337,6 +398,13 @@ public:
         return tokenizer;
     }
 
+public:
+
+    tokenizer_type makeTokenizer() const
+    {
+        auto copyOfThis = *this;
+        return copyOfThis.clearStringLiteralFlagForOpChars().makeTokenizerImpl();
+    }
 
 
 }; // class TokenizerBuilder

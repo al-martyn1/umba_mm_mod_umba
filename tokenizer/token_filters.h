@@ -470,6 +470,20 @@ protected:
         return res;
     }
 
+    void restoreAngleBracketsState(TokenizerType &tokenizer)
+    {
+        if (isStartAngleBracketOperator)
+        {
+            // Устанавливаем признак оператора обратно
+            tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::opchar, umba::tokenizer::CharClass::none); 
+        }
+
+        // Ничего не устанавливаем, сбрасываем string_literal_prefix
+        tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::string_literal_prefix); 
+    
+    }
+
+
 
 public:
 
@@ -495,6 +509,8 @@ public:
             {
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
                 {
+                    restoreAngleBracketsState(tokenizer);
+
                     if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg))
                         return false;
                     return reset(true);
@@ -520,6 +536,7 @@ public:
             {
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
                 {
+                    restoreAngleBracketsState(tokenizer);
                     // if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg))
                     //     return false;
                     // return reset(true);
@@ -529,9 +546,6 @@ public:
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER)
                 {
                     st = stPreprocessor;
-
-                    if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg)) // Сначала пробрасываем токен
-                        return false;
 
                     payload_type ppKewordId = getPreprocessorKeywordToken(string_type(tokenizer.makeStringView(b,e)));
 
@@ -569,6 +583,11 @@ public:
                         if (!nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg)) // Сигналим про дефайн
                             return false;
                     }
+                    else
+                    {
+                        if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg)) // пробрасываем токен какой получили
+                            return false;
+                    }
 
                     //  
                     // auto idStrView = tokenizer.makeStringView(b,e);
@@ -578,14 +597,7 @@ public:
                 }
                 else if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN || payloadToken==UMBA_TOKENIZER_TOKEN_LINEFEED)
                 {
-                    if (isStartAngleBracketOperator)
-                    {
-                        // Устанавливаем признак оператора обратно
-                        tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::opchar, umba::tokenizer::CharClass::none); 
-                    }
-
-                    // Ничего не устанавливаем, сбрасываем string_literal_prefix
-                    tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::string_literal_prefix); 
+                    restoreAngleBracketsState(tokenizer);
 
                     tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::opchar); // Ничего не устанавливаем, сбрасываем opchar
 
@@ -607,6 +619,8 @@ public:
             {
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN || payloadToken==UMBA_TOKENIZER_TOKEN_LINEFEED)
                 {
+                    restoreAngleBracketsState(tokenizer);
+
                     if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_END, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
                         return false;
 
