@@ -782,21 +782,21 @@ public: // methods - методы собственно разбора
         switch(st)
         {
             case TokenizerInternalState::stInitial  :
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                      return false;
                  return true;
 
             case TokenizerInternalState::stReadSpace:
                  if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_SPACE, tokenStartIt, itEnd))
                      return false;
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                      return false;
                  return true;
 
             case TokenizerInternalState::stReadIdentifier:
                  if (!parsingIdentifierHandlerLambda(tokenStartIt, itEnd)) // выплюнули
                      return false;
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                      return false;
                  return true;
 
@@ -844,7 +844,7 @@ public: // methods - методы собственно разбора
                      if (!parsingNumberHandlerLambda(UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER, tokenStartIt, itEnd, itEnd)) // выплёвываем накопленное число как число без префикса, с системой счисления по умолчанию
                          return false;
 
-                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                          return false;
                      return true;
                  }
@@ -863,7 +863,7 @@ public: // methods - методы собственно разбора
                          return false;
                  }
 
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                      return false;
 
                  return true;
@@ -880,7 +880,7 @@ public: // methods - методы собственно разбора
                          return false;
                  }
 
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                      return false;
 
                  return true;
@@ -903,14 +903,14 @@ public: // methods - методы собственно разбора
                      if (utils::isCommentToken(curPayload)) // на каждом операторе в обрабатываемом тексте у нас это срабатывает. Жирно или нет?
                      {
                          //TODO: !!! Надо уточнить, что за комент
-                         if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                         if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                              return false;
                          return true; // Пока считаем, что всё нормально
                      }
 
                      if (!parsingHandlerLambda(curPayload, tokenStartIt, itEnd)) // выплюнули текущий оператор
                          return false;
-                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                     if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                          return false;
                      return true;
                  }
@@ -918,7 +918,7 @@ public: // methods - методы собственно разбора
             case TokenizerInternalState::stReadSingleLineComment:
                  if (!parsingCommentHandlerLambda(commentTokenId, tokenStartIt, itEnd, commentStartIt, itEnd))
                      return false;
-                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_FIN, itEnd, itEnd))
+                 if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
                      return false;
                  return true;
 
@@ -1741,7 +1741,7 @@ protected: // methods - хандлеры из "грязного" проекта,
     [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат
     bool parsingHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd) const
     {
-        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_CTRL_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
@@ -1761,7 +1761,7 @@ protected: // methods - хандлеры из "грязного" проекта,
     [[nodiscard]]
     bool parsingNumberHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType itEnd) const
     {
-        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_CTRL_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
@@ -1781,7 +1781,7 @@ protected: // methods - хандлеры из "грязного" проекта,
     [[nodiscard]]
     bool parsingFloatNumberHandlerLambda(payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd, InputIteratorType itEnd) const
     {
-        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_CTRL_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
@@ -1803,7 +1803,7 @@ protected: // methods - хандлеры из "грязного" проекта,
                                     , InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd
                                     ) const
     {
-        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_CTRL_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
@@ -1825,7 +1825,7 @@ protected: // methods - хандлеры из "грязного" проекта,
                              , std::basic_string_view<value_type> parsedData
                              ) const
     {
-        if (tokenType!=UMBA_TOKENIZER_TOKEN_FIN && inputDataBegin==inputDataEnd)
+        if (tokenType!=UMBA_TOKENIZER_TOKEN_CTRL_FIN && inputDataBegin==inputDataEnd)
             return true;
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken(curPosAtLineBeginning, tokenType
