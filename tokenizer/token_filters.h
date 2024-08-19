@@ -580,7 +580,7 @@ public:
                         }
 
                         // Пуляем найденным токеном
-                        if (!nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg)) // Сигналим про дефайн
+                        if (!nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, b, e, typename TokenizerType::EmptyData() /* strValue */ , msg)) // Сигналим про дефайн
                             return false;
                     }
                     else
