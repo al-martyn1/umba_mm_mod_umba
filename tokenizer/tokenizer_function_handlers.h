@@ -88,8 +88,8 @@ public: // handler types
     using token_handler_type                         = std::function<bool( TSelf &tokenizer
                                                                          , bool
                                                                          , payload_type
-                                                                         , InputIteratorType
-                                                                         , InputIteratorType
+                                                                         , InputIteratorType&
+                                                                         , InputIteratorType&
                                                                          , token_parsed_data // std::basic_string_view<value_type>
                                                                          , messages_string_type&
                                                                          )
@@ -136,7 +136,7 @@ protected: // handler methods, called from base
 
 
     bool hadleToken( bool bLineStart, payload_type tokenType
-                   , InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
+                   , InputIteratorType &inputDataBegin, InputIteratorType &inputDataEnd
                    , token_parsed_data parsedData // std::basic_string_view<value_type> parsedData
                    , MessagesStringType &msg
                    ) const

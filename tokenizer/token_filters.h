@@ -105,8 +105,8 @@ public:
     bool operator()( TokenizerType         &tokenizer
                    , bool                  lineStartFlag
                    , payload_type          payloadToken
-                   , iterator_type         b
-                   , iterator_type         e
+                   , iterator_type         &b
+                   , iterator_type         &e
                    , token_parsed_data     parsedData // std::variant<...>
                    , messages_string_type  &msg
                    )
@@ -182,17 +182,21 @@ protected:
         tokenBuffer.clear();
     }
 
-    bool flushTokenBuffer(TokenizerType &tokenizer, messages_string_type &msg, bool bClear=true)
+    bool flushTokenBuffer(TokenizerType &tokenizer, messages_string_type &msg, iterator_type &b, iterator_type &e, bool bClear=true)
     {
         if (!nextTokenHandler)
             return true;
 
         for(const auto &tki : tokenBuffer)
         {
-            if (!nextTokenHandler(tokenizer, tki.lineStartFlag, tki.payloadToken, tki.b, tki.e, tki.parsedData /*strValue*/, msg))
+            auto tmpB = tki.b;
+            auto tmpE = tki.e;
+            if (!nextTokenHandler(tokenizer, tki.lineStartFlag, tki.payloadToken, tmpB, tmpE, tki.parsedData /*strValue*/, msg))
             {
                 if (bClear)
                    clearTokenBuffer();
+                b = tmpB;
+                e = tmpE;
                 return false;
             }
         }
@@ -282,15 +286,15 @@ public:
     bool operator()( TokenizerType         &tokenizer
                    , bool                  lineStartFlag
                    , payload_type          payloadToken
-                   , iterator_type         b
-                   , iterator_type         e
+                   , iterator_type         &b
+                   , iterator_type         &e
                    , token_parsed_data     parsedData // std::variant<...>
                    , messages_string_type  &msg
                    )
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
-            bool res = this->flushTokenBuffer(tokenizer, msg);
+            bool res = this->flushTokenBuffer(tokenizer, msg, b, e);
             // https://stackoverflow.com/questions/9941987/there-are-no-arguments-that-depend-on-a-template-parameter
             // https://web.archive.org/web/20130423054841/http://www.agapow.net/programming/cpp/no-arguments-that-depend-on-a-template-parameter
             this->reset();
@@ -320,7 +324,7 @@ public:
         if (payloadToken!=UMBA_TOKENIZER_TOKEN_IDENTIFIER) // Что у нас пришло?
         {
             // У нас пришел не идентификатор, значит, склейка не состоится
-            if (!this->flushTokenBuffer(tokenizer, msg)) // сбрасываем буферизированное (с очисткой буфера)
+            if (!this->flushTokenBuffer(tokenizer, msg, b, e)) // сбрасываем буферизированное (с очисткой буфера)
                  return false;
 
             // Пробрасываем пришедшее на текущем шаге
@@ -496,8 +500,8 @@ public:
     bool operator()( TokenizerType         &tokenizer
                    , bool                  lineStartFlag
                    , payload_type          payloadToken
-                   , iterator_type         b
-                   , iterator_type         e
+                   , iterator_type         &b
+                   , iterator_type         &e
                    , token_parsed_data     parsedData // std::variant<...>
                    , messages_string_type  &msg
                    )
