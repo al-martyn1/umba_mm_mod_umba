@@ -288,7 +288,7 @@ public:
                    , messages_string_type  &msg
                    )
     {
-        if (payloadToken==UMBA_TOKENIZER_TOKEN_FIN)
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
             bool res = this->flushTokenBuffer(tokenizer, msg);
             // https://stackoverflow.com/questions/9941987/there-are-no-arguments-that-depend-on-a-template-parameter
@@ -402,7 +402,9 @@ protected:
         stPreprocessor
     };
 
-    State st = stNormal;
+    State st                          = stNormal;
+    bool  isStartAngleBracketOperator = false;
+    bool  inDefine                    = false; //TODO: !!! Вообще, по уму, надо бы сделать энум со значениями inDefine, inPragma, inError, inWarning, inCondition
 
     token_handler_type     nextTokenHandler;
 
@@ -411,8 +413,34 @@ protected:
     auto makePreprocessorKeywords()
     {
         std::unordered_map<string_type, payload_type> m;
-        m[string_plus::make_string<string_type>("define")]  = UMBA_TOKENIZER_TOKEN_PP_DEFINE;
-        m[string_plus::make_string<string_type>("include")] = UMBA_TOKENIZER_TOKEN_PP_INCLUDE;
+        m[string_plus::make_string<string_type>("include")]             = UMBA_TOKENIZER_TOKEN_CC_PP_INCLUDE | UMBA_TOKENIZER_TOKEN_CTRL_FLAG;
+        m[string_plus::make_string<string_type>("define")]              = UMBA_TOKENIZER_TOKEN_CC_PP_DEFINE  | UMBA_TOKENIZER_TOKEN_CTRL_FLAG;
+        m[string_plus::make_string<string_type>("undef")]               = UMBA_TOKENIZER_TOKEN_CC_PP_UNDEF;
+
+        m[string_plus::make_string<string_type>("line")]                = UMBA_TOKENIZER_TOKEN_CC_PP_LINE;
+
+        m[string_plus::make_string<string_type>("error")]               = UMBA_TOKENIZER_TOKEN_CC_PP_ERROR  ;
+        m[string_plus::make_string<string_type>("warning")]             = UMBA_TOKENIZER_TOKEN_CC_PP_WARNING;
+
+        m[string_plus::make_string<string_type>("pragma")]              = UMBA_TOKENIZER_TOKEN_CC_PP_PRAGMA;
+
+        m[string_plus::make_string<string_type>("if")]                  = UMBA_TOKENIZER_TOKEN_CC_PP_IF;
+        m[string_plus::make_string<string_type>("elif")]                = UMBA_TOKENIZER_TOKEN_CC_PP_ELIF;
+        m[string_plus::make_string<string_type>("else")]                = UMBA_TOKENIZER_TOKEN_CC_PP_ELSE;
+        m[string_plus::make_string<string_type>("endif")]               = UMBA_TOKENIZER_TOKEN_CC_PP_ENDIF;
+        m[string_plus::make_string<string_type>("ifdef")]               = UMBA_TOKENIZER_TOKEN_CC_PP_IFDEF;
+        m[string_plus::make_string<string_type>("ifndef")]              = UMBA_TOKENIZER_TOKEN_CC_PP_IFNDEF;
+        m[string_plus::make_string<string_type>("elifdef")]             = UMBA_TOKENIZER_TOKEN_CC_PP_ELIFDEF;
+        m[string_plus::make_string<string_type>("elifndef")]            = UMBA_TOKENIZER_TOKEN_CC_PP_ELIFNDEF;
+
+        m[string_plus::make_string<string_type>("defined")]             = UMBA_TOKENIZER_TOKEN_CC_PP_DEFINED;
+        m[string_plus::make_string<string_type>("__has_include")]       = UMBA_TOKENIZER_TOKEN_CC_PP_HAS_INCLUE;
+        m[string_plus::make_string<string_type>("__has_cpp_attribute")] = UMBA_TOKENIZER_TOKEN_CC_PP_HAS_CPP_ATTRIBUTE;
+
+        m[string_plus::make_string<string_type>("export")]              = UMBA_TOKENIZER_TOKEN_CC_PP_EXPORT;
+        m[string_plus::make_string<string_type>("import")]              = UMBA_TOKENIZER_TOKEN_CC_PP_IMPORT;
+        m[string_plus::make_string<string_type>("module")]              = UMBA_TOKENIZER_TOKEN_CC_PP_MODULE;
+
         return m;
     }
 
@@ -433,7 +461,15 @@ protected:
         return it->second;
     }
 
-    //
+    bool reset(bool res=true)
+    {
+        st                          = stNormal;
+        isStartAngleBracketOperator = false;
+        inDefine                    = false;
+
+        return res;
+    }
+
 
 public:
 
@@ -453,18 +489,27 @@ public:
                    )
     {
 
-
         switch(st)
         {
             case stNormal:
             {
+                if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
+                {
+                    if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg))
+                        return false;
+                    return reset(true);
+                }
+
                 if (lineStartFlag && b!=e && *b==(value_type)'#')
                 {
-                    if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_PP_START, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
+                    reset();
+
+                    if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_START, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
                         return false;
                     if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg))
                         return false;
                     st = stWaitPreprocessorKeyword;
+
                     return true;
                 }
 
@@ -473,6 +518,14 @@ public:
 
             case stWaitPreprocessorKeyword:
             {
+                if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
+                {
+                    // if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg))
+                    //     return false;
+                    // return reset(true);
+                    return reset(false);
+                }
+
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER)
                 {
                     st = stPreprocessor;
@@ -481,8 +534,38 @@ public:
                         return false;
 
                     payload_type ppKewordId = getPreprocessorKeywordToken(string_type(tokenizer.makeStringView(b,e)));
+
                     if (ppKewordId!=payload_invalid)
                     {
+                        if (ppKewordId&UMBA_TOKENIZER_TOKEN_CTRL_FLAG)
+                        {
+                            // Сигналим контрольным
+                            if (!nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, e, e, typename TokenizerType::EmptyData(), msg))
+                                return false;
+                        }
+
+                        if (ppKewordId==UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_INCLUDE)
+                        {
+                            // Запоминаем предыдущее состояние символа '<' - opchar или нет
+                            isStartAngleBracketOperator = (tokenizer.getCharClass('<') & umba::tokenizer::CharClass::opchar) != 0; 
+
+                            // устанавливаем string_literal_prefix, сбрасываем opchar
+                            tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::string_literal_prefix, umba::tokenizer::CharClass::opchar); 
+                        }
+                        else if (ppKewordId==UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_DEFINE)
+                        {
+                            // устанавливаем opchar, ничего не сбрасываем - # и ## - годные операторы внутри define'а
+                            tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::opchar, umba::tokenizer::CharClass::none);
+                            inDefine = true;
+                        }
+
+                        if (ppKewordId&UMBA_TOKENIZER_TOKEN_CTRL_FLAG)
+                        {
+                            // Сбрасываем флаг контрольного токена
+                            ppKewordId &= ~UMBA_TOKENIZER_TOKEN_CTRL_FLAG;
+                        }
+
+                        // Пуляем найденным токеном
                         if (!nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg)) // Сигналим про дефайн
                             return false;
                     }
@@ -493,9 +576,20 @@ public:
 
                     return true;
                 }
-                else if (payloadToken==UMBA_TOKENIZER_TOKEN_FIN || payloadToken==UMBA_TOKENIZER_TOKEN_LINEFEED)
+                else if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN || payloadToken==UMBA_TOKENIZER_TOKEN_LINEFEED)
                 {
-                    if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_PP_END, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
+                    if (isStartAngleBracketOperator)
+                    {
+                        // Устанавливаем признак оператора обратно
+                        tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::opchar, umba::tokenizer::CharClass::none); 
+                    }
+
+                    // Ничего не устанавливаем, сбрасываем string_literal_prefix
+                    tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::string_literal_prefix); 
+
+                    tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::opchar); // Ничего не устанавливаем, сбрасываем opchar
+
+                    if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_END, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
                         return false;
 
                     if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg)) // пробрасываем токен
@@ -511,9 +605,9 @@ public:
 
             case stPreprocessor:
             {
-                if (payloadToken==UMBA_TOKENIZER_TOKEN_FIN || payloadToken==UMBA_TOKENIZER_TOKEN_LINEFEED)
+                if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN || payloadToken==UMBA_TOKENIZER_TOKEN_LINEFEED)
                 {
-                    if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_PP_END, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
+                    if (!nextTokenHandler(tokenizer, lineStartFlag, UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_END, e, e, typename TokenizerType::EmptyData() /* strValue */ , msg))
                         return false;
 
                     if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg)) // пробрасываем токен
@@ -524,12 +618,41 @@ public:
                     return true;
                 }
 
+                // Внутри дефайнов нет никаких ключевых слов
+                if (inDefine)
+                {
+                    break;
+                }
+
+                // У нас что-то кроме дефайна
+
+                // И у нас пришел идентификатор
+                // Мы либо в условных операторах, либо всякие прагмы и прочий трэш. В трэше ключевые слова вроде не используются, поэтому пока по-простому
+
+                if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER)
+                {
+                    payload_type ppKewordId = getPreprocessorKeywordToken(string_type(tokenizer.makeStringView(b,e)));
+    
+                    if ( TheValue(ppKewordId).oneOf( UMBA_TOKENIZER_TOKEN_CC_PP_DEFINED
+                                                   , UMBA_TOKENIZER_TOKEN_CC_PP_HAS_INCLUE
+                                                   , UMBA_TOKENIZER_TOKEN_CC_PP_HAS_CPP_ATTRIBUTE
+                                                   )
+                       )
+                    {
+                        return nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, b, e, parsedData /* strValue */ , msg);
+                    }
+                    else 
+                    {
+                        return nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
+                    }
+                }
+
                 break;
             }
 
         } // switch(st)
 
-        if (payloadToken==UMBA_TOKENIZER_TOKEN_FIN)
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
             st = stNormal;
         }

@@ -174,17 +174,26 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 }
 
 
+/* Dummy/control tokens without any payload and iterators, only signals for something special */
+
+// Control tokens flag
+#define UMBA_TOKENIZER_TOKEN_CTRL_FLAG                                                0x8000u
+
+
+// Control token, which finalizes input
+#define UMBA_TOKENIZER_TOKEN_CTRL_FIN                                                 (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0000u) /* empty token, finalizes processing current text */
+
+
 
 #define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               0x0000u
-#define UMBA_TOKENIZER_TOKEN_FIN                                                      0x0001u /* empty token, finalizes processing current text */
-#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0002u
-#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0003u
-#define UMBA_TOKENIZER_TOKEN_TAB                                                      0x0004u
-#define UMBA_TOKENIZER_TOKEN_FORM_FEED                                                0x0005u /* Надо добавить поддержку FF */
-#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0006u
-#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0007u
-#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0008u
-#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x0009u
+#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0001u
+#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0002u
+#define UMBA_TOKENIZER_TOKEN_TAB                                                      0x0003u
+#define UMBA_TOKENIZER_TOKEN_FORM_FEED                                                0x0004u /* Надо добавить поддержку FF */
+#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0005u
+#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0006u
+#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0007u
+#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x0008u
 
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                       0x0011u
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                                      0x0012u
@@ -200,16 +209,6 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_SQUARE_BRACKETS                                          UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN
 
 
-/* From 0x100 to 0x200 - dummy tokens without any payload and iterators, they signals that processing was entered in some alter mode */
-#define UMBA_TOKENIZER_TOKEN_PP_START                                                 0x0100u /* empty token, signals that C/C++ preprocessor mode starts */
-#define UMBA_TOKENIZER_TOKEN_PP_END                                                   0x0101u /* empty token, signals that C/C++ preprocessor mode ends */
-#define UMBA_TOKENIZER_TOKEN_PP_DEFINE                                                0x0102u /* empty token, that "define" PP directive detected. Non-paired token */
-#define UMBA_TOKENIZER_TOKEN_PP_INCLUDE                                               0x0103u /* empty token, that "include" PP directive detected. Non-paired token */
-
-
-
-// #define UMBA_TOKENIZER_CHARCLASS_OPEN             0x0010u /* Флаг для парных символов */
-// #define UMBA_TOKENIZER_CHARCLASS_CLOSE            0x0020u /* Флаг для парных символов */
 
 #define UMBA_TOKENIZER_TOKEN_FLOAT_FLAG                                               0x0080u
 
@@ -234,20 +233,20 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 
 // #define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER                                          0x1000u
-#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DEC                                       (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC )
-#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_BIN                                       (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_BIN )
-#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_QUAT                                      (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_QUAT)
-#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_OCT                                       (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT )
-#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DUOD                                      (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DUOD)
-#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_HEX                                       (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_HEX )
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DEC                                      (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC )
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_BIN                                      (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_BIN )
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_QUAT                                     (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_QUAT)
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_OCT                                      (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT )
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DUOD                                     (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DUOD)
+#define UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_HEX                                      (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_HEX )
 
 // #define UMBA_TOKENIZER_TOKEN_FLOAT_NUMBER                                             (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_DEC                                 (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DEC |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_BIN                                 (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_BIN |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_QUAT                                (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_QUAT|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_OCT                                 (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_OCT |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_DUOD                                (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DUOD|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
-#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_HEX                                 (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_HEX |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_DEC                                (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DEC |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_BIN                                (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_BIN |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_QUAT                               (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_QUAT|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_OCT                                (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_OCT |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_DUOD                               (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_DUOD|UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
+#define UMBA_TOKENIZER_TOKEN_FLOAT_INTEGRAL_NUMBER_HEX                                (UMBA_TOKENIZER_TOKEN_INTEGRAL_NUMBER_HEX |UMBA_TOKENIZER_TOKEN_FLOAT_FLAG)
 
 
 
@@ -269,17 +268,36 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_STRING_USER_LITERAL_FIRST                                0x3010u
 #define UMBA_TOKENIZER_TOKEN_STRING_USER_LITERAL_LAST                                 UMBA_TOKENIZER_TOKEN_LITERAL_LAST
 
+
+// На каждый сет встроенных кейвордов - по 1024 значений хватит?
+
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET1_FIRST                                       0x4000u
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET1_LAST                                        0x4FFFu
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET1_LAST                                        0x43FFu
 
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_FIRST                                       0x5000u
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_LAST                                        0x5FFFu
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_FIRST                                       0x4400u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_LAST                                        0x47FFu
 
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_FIRST                                       0x6000u
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_LAST                                        0x6FFFu
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_FIRST                                       0x4800u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_LAST                                        0x4BFFu
 
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_FIRST                                       0x7000u
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_LAST                                        0x7FFFu
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_FIRST                                       0x4C00u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_LAST                                        0x4CFFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET5_FIRST                                       0x5000u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET5_LAST                                        0x53FFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET6_FIRST                                       0x5400u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET6_LAST                                        0x57FFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET7_FIRST                                       0x5800u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET7_LAST                                        0x5BFFu
+
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_FIRST                                       0x5C00u
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_LAST                                        0x5CFFu
+
+
+// #define UMBA_TOKENIZER_TOKEN_CTRL_PP_DEFINE                                           (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0003u) /* empty token, that "define" PP directive detected. Non-paired token */
+// #define UMBA_TOKENIZER_TOKEN_CTRL_PP_INCLUDE                                          (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0004u) /* empty token, that "include" PP directive detected. Non-paired token */
 
 
 
@@ -386,6 +404,49 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_AT                                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A4u)   /*  @     */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_HASH                                     (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A5u)   /*  #     */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_USD                                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A6u)   /*  $     */
+
+
+
+
+
+// C/C++ препроцессор относится ко второму набору ключевых слов
+#define UMBA_TOKENIZER_TOKEN_CC_PP_BASE                                        UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_FIRST
+
+#define UMBA_TOKENIZER_TOKEN_CC_PP_INCLUDE                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0008u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_DEFINE                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0009u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_UNDEF                                       (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x000Au)
+                                                                              
+#define UMBA_TOKENIZER_TOKEN_CC_PP_LINE                                        (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0010u)
+                                                                              
+#define UMBA_TOKENIZER_TOKEN_CC_PP_ERROR                                       (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0020u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_WARNING                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0021u)
+                                                                              
+#define UMBA_TOKENIZER_TOKEN_CC_PP_PRAGMA                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0030u)
+                                                                              
+#define UMBA_TOKENIZER_TOKEN_CC_PP_IF                                          (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0040u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_ELIF                                        (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0041u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_ELSE                                        (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0042u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_ENDIF                                       (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0043u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_IFDEF                                       (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0044u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_IFNDEF                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0045u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_ELIFDEF                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0046u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_ELIFNDEF                                    (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0047u)
+                                                                              
+#define UMBA_TOKENIZER_TOKEN_CC_PP_DEFINED                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0050u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_HAS_INCLUE                                  (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0051u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_HAS_CPP_ATTRIBUTE                           (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0052u)
+                                                                              
+#define UMBA_TOKENIZER_TOKEN_CC_PP_EXPORT                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0060u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_IMPORT                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0061u)
+#define UMBA_TOKENIZER_TOKEN_CC_PP_MODULE                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0062u)
+
+
+// #define UMBA_TOKENIZER_TOKEN_CTRL_FLAG                                                0x8000u
+
+#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_START                                  (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)                            /* empty token, signals that C/C++ preprocessor mode starts */
+#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_END                                    (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0002u)                            /* empty token, signals that C/C++ preprocessor mode ends */
+#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_DEFINE                                 (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|UMBA_TOKENIZER_TOKEN_CC_PP_DEFINE)  /* empty token, that "define" PP directive detected. Non-paired token */
+#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_INCLUDE                                (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|UMBA_TOKENIZER_TOKEN_CC_PP_INCLUDE) /* empty token, that "include" PP directive detected. Non-paired token */
 
 
 
