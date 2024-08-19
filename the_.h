@@ -16,6 +16,8 @@
 
 // Поэтому либо используем шаблон из NS umba, либо вместо алиасов подключаем в нужном NS этот файлик ("the_.h")
 
+// https://en.cppreference.com/w/cpp/language/class_template_argument_deduction#Deduction_for_alias_templates
+
 
 template<typename TVal>
 class TheValue
