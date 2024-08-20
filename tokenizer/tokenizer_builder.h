@@ -405,8 +405,8 @@ public:
 
     tokenizer_type makeTokenizer() const
     {
-        //auto copyOfThis = *this; // !!!
-        auto &copyOfThis = const_cast<TokenizerBuilder&>(*this);
+        auto copyOfThis = *this;
+        // auto &copyOfThis = const_cast<TokenizerBuilder&>(*this); // !!! Вроде порешал проблему - был забыт return в одном месте
         return copyOfThis.clearStringLiteralFlagForOpChars().makeTokenizerImpl();
     }
 
