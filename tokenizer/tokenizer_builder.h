@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <memory>
 #include <initializer_list>
-		
+
 
 // umba::tokenizer::
 namespace umba {
@@ -189,7 +189,7 @@ public:
         generation::setCharClassFlags(charClassTable, ch, clsFlags);
         return *this;
     }
-    
+
     TokenizerBuilder& addBrackets(const StringType &bracketsPair, payload_type pairBaseToken)
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
@@ -214,7 +214,7 @@ public:
         return *this;
     }
 
-    TokenizerBuilder& addNumbersPrefix(const StringType &prefix, payload_type tokenId, bool allowUseExistingToken=false) // 
+    TokenizerBuilder& addNumbersPrefix(const StringType &prefix, payload_type tokenId, bool allowUseExistingToken=false) //
     {
         UMBA_ASSERT(isCharTableValidSizeAndNonZero()); // need call generateStandardCharClassTable/generateCustomCharClassTable first
 
@@ -358,7 +358,7 @@ public:
         {
             addStringLiteralParser(*it, tmpParserInterface.get(), tokenId);
         }
-        
+
         return *this;
     }
 

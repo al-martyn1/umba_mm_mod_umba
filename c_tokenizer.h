@@ -420,14 +420,14 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_CC_PP_INCLUDE                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0008u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_DEFINE                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0009u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_UNDEF                                       (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x000Au)
-                                                                              
+
 #define UMBA_TOKENIZER_TOKEN_CC_PP_LINE                                        (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0010u)
-                                                                              
+
 #define UMBA_TOKENIZER_TOKEN_CC_PP_ERROR                                       (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0020u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_WARNING                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0021u)
-                                                                              
+
 #define UMBA_TOKENIZER_TOKEN_CC_PP_PRAGMA                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0030u)
-                                                                              
+
 #define UMBA_TOKENIZER_TOKEN_CC_PP_IF                                          (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0040u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_ELIF                                        (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0041u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_ELSE                                        (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0042u)
@@ -436,11 +436,11 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_CC_PP_IFNDEF                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0045u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_ELIFDEF                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0046u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_ELIFNDEF                                    (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0047u)
-                                                                              
+
 #define UMBA_TOKENIZER_TOKEN_CC_PP_DEFINED                                     (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0050u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_HAS_INCLUE                                  (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0051u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_HAS_CPP_ATTRIBUTE                           (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0052u)
-                                                                              
+
 #define UMBA_TOKENIZER_TOKEN_CC_PP_EXPORT                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0060u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_IMPORT                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0061u)
 #define UMBA_TOKENIZER_TOKEN_CC_PP_MODULE                                      (UMBA_TOKENIZER_TOKEN_CC_PP_BASE|0x0062u)

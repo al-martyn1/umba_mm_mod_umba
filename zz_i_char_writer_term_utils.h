@@ -39,5 +39,5 @@ char* formatUnsignedDec( char *pBuf, unsigned u)
 }
 
 
-}; // namespace utils
+} // namespace utils
 

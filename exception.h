@@ -528,5 +528,5 @@ void printUnknownException(Stream &stream)
 
 
 
-}; // namespace umba
+} // namespace umba
 

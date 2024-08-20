@@ -229,10 +229,10 @@ public:
 
     void reset()
     {
-        quotStart  = 0;        
-        quotEnd    = 0;        
-        quotPaired = false;    
-        quotLevel  = 0;        
+        quotStart  = 0;
+        quotEnd    = 0;
+        quotPaired = false;
+        quotLevel  = 0;
         st         = stInitial;
     }
 

@@ -355,88 +355,88 @@ struct ICharWriter
 
     //! Перейти в абсолютный 0.
     virtual void terminalMoveToAbs0()
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     {}
 #endif
 
     //! Перейти относительно текущей позиции на n шагов в направлении direction: 0 - up, 1 - down, 2 - forward, 3 - backward (A/B/C/D commands)
     virtual void terminalMoveRelative(int direction, int n)
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     { UMBA_USED(direction); UMBA_USED(n); }
 #endif
 
     //! Перейти на n строк ниже и установить курсор в нулевую позицию (E)
     virtual void terminalMoveToNextLine(int n)
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     { UMBA_USED(n); }
 #endif
 
     //! Перейти на n строк выше и установить курсор в нулевую позицию (F)
     virtual void terminalMoveToPrevLine(int n)
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     { UMBA_USED(n); }
 #endif
 
     //! Перейти в абсолютную позицию в текущей строке (G)
     virtual void terminalMoveToAbsCol(int n)
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     { UMBA_USED(n); }
 #endif
 
     //! Перейти в нулевую позицию в текущей строке (см. выше)
     virtual void terminalMoveToLineStart()
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     {}
 #endif
 
     //! Переход в абсолютную позицию (H)
     virtual void terminalMoveToAbsPos( int x, int y )
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     { UMBA_USED(x); UMBA_USED(y); }
 #endif
 
     //! Очистить от текущего положения до конца экрана (0J)
     virtual void terminalClearScreenEnd()
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     {}
 #endif
 
     //! Очистить экран (2J)
     virtual void terminalClearScreen()
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     {}
 #endif
 
     //! Очистить текущую строку (2K)
     virtual void terminalClearLine()
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     {}
 #endif
 
     //! Очистить от текущего положения до конца строки (0K)
     virtual void terminalClearLineEnd()
-#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)    
-    = 0;    
+#if defined(UMBA_I_CHAR_WRITTER_DISABLE_TERMINAL_METHODS_DEFAULT_IMPLEMENTATION)
+    = 0;
 #else
     {}
 #endif
@@ -464,7 +464,7 @@ struct ICharWriter
     //     // int i = 0;
     //     for( auto j = 0; j<y; ++j)
     //         terminalMove2Down();
-    //  
+    //
     //     terminalMove2LinePos(x);
     // }
 
@@ -476,6 +476,6 @@ struct ICharWriter
 
 
 
-}; // namespace umba
+} // namespace umba
 
 

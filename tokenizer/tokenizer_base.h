@@ -292,7 +292,7 @@ public: // depending types
     }; // struct NumericLiteralData
 
     //------------------------------
-    
+
     // https://en.cppreference.com/w/cpp/utility/variant
     // https://en.cppreference.com/w/cpp/utility/variant/get_if
     // https://en.cppreference.com/w/cpp/utility/variant/get
@@ -491,6 +491,8 @@ public: // methods
         UMBA_ASSERT(umba::TheFlags(getCharClass(strLiteralPrefix[0])).oneOf(CharClass::string_literal_prefix));
 
         literalsTrie[tokenIdx].payloadExtra = reinterpret_cast<umba::tokenizer::payload_type>(pParser);
+
+        return true; // !!! return'а не было, был забыт, а что и в каких случаях возращать - я уже не помню
     }
 
 
@@ -508,7 +510,7 @@ protected: // methods - helpers - из "грязного" проекта, где
         numberReadedDigits           = 0;
         allowedDigitCharClass        = CharClass::none;
         numbersBase                  = 0;
-    
+
         numberCurrentIntValue        = 0;
         numberCurrentFractionalValue = 0;
         numberCurrentFractionalPower = 1;
@@ -561,7 +563,7 @@ protected: // methods - helpers - из "грязного" проекта, где
         res.suffixStartPos = itEnd;
 
         // auto powerDivider = (typename FloatNumericLiteralData::DataValueType)utils::makePowerOf((typename FloatNumericLiteralData::DataValueType)numbersBase, numberCurrentFractionalPower, numberFractionalOverflow);
-        //  
+        //
         typename FloatNumericLiteralData::DataValueType fractionalPart = 0;
         if (numberCurrentFractionalPower>0)
         {
@@ -1080,7 +1082,7 @@ public: // methods - методы собственно разбора
                             return true;
                         }
 
-                        // Новый символ - какая-то другая разновидность пробелов, но не 
+                        // Новый символ - какая-то другая разновидность пробелов, но не
 
                         tokenStartIt = it; // Сохранили начало нового токена
                     }
@@ -1809,7 +1811,7 @@ protected: // methods - хандлеры из "грязного" проекта,
         return bRes;
     }
 
-    [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат 
+    [[nodiscard]] // Сменили void на bool, и теперь надо заставить везде проверять результат
     bool parsingCommentHandlerLambda( payload_type tokenType, InputIteratorType inputDataBegin, InputIteratorType inputDataEnd
                                     , InputIteratorType parsedDataBegin, InputIteratorType parsedDataEnd
                                     ) const

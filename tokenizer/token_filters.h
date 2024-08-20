@@ -335,7 +335,7 @@ public:
 
 
         // в буфере лежит токен числового литерала
-        
+
         UMBA_ASSERT(!this->tokenBuffer.empty()); // точно ли ы буфере что-то есть?
         TokenInfo prevTokenInfo = this->tokenBuffer[0]; // инфа по числовому или строковому литералу
         UMBA_ASSERT(prevTokenInfo.e==b); // Начало текущего токена должно совпадать с концом предыдущего
@@ -352,7 +352,7 @@ public:
                                          , literalStartIter, literalEndIter, payloadData, msg
                                          );
         };
-        
+
 
         bool res = true;
 
@@ -456,7 +456,7 @@ protected:
         static auto m = makePreprocessorKeywords();
         return m;
     }
-    
+
     static
     payload_type getPreprocessorKeywordToken(const string_type &ident)
     {
@@ -483,11 +483,11 @@ protected:
         if (isStartAngleBracketOperator)
         {
             // Устанавливаем признак оператора обратно
-            tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::opchar, umba::tokenizer::CharClass::none); 
+            tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::opchar, umba::tokenizer::CharClass::none);
         }
 
         // Ничего не устанавливаем, сбрасываем string_literal_prefix
-        tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::string_literal_prefix); 
+        tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::string_literal_prefix);
 
         tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::opchar); // Ничего не устанавливаем, сбрасываем opchar
     }
@@ -566,10 +566,10 @@ public:
                         if (ppKewordId==UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_INCLUDE)
                         {
                             // Запоминаем предыдущее состояние символа '<' - opchar или нет
-                            isStartAngleBracketOperator = (tokenizer.getCharClass('<') & umba::tokenizer::CharClass::opchar) != 0; 
+                            isStartAngleBracketOperator = (tokenizer.getCharClass('<') & umba::tokenizer::CharClass::opchar) != 0;
 
                             // устанавливаем string_literal_prefix, сбрасываем opchar
-                            tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::string_literal_prefix, umba::tokenizer::CharClass::opchar); 
+                            tokenizer.setResetCharClassFlags('<', umba::tokenizer::CharClass::string_literal_prefix, umba::tokenizer::CharClass::opchar);
                         }
                         else if (ppKewordId==UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_DEFINE)
                         {
@@ -641,7 +641,7 @@ public:
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_IDENTIFIER)
                 {
                     payload_type ppKewordId = getPreprocessorKeywordToken(string_type(tokenizer.makeStringView(b,e)));
-    
+
                     if ( TheValue(ppKewordId).oneOf( UMBA_TOKENIZER_TOKEN_CC_PP_DEFINED
                                                    , UMBA_TOKENIZER_TOKEN_CC_PP_HAS_INCLUE
                                                    , UMBA_TOKENIZER_TOKEN_CC_PP_HAS_CPP_ATTRIBUTE
@@ -650,7 +650,7 @@ public:
                     {
                         return nextTokenHandler(tokenizer, lineStartFlag, ppKewordId, b, e, parsedData /* strValue */ , msg);
                     }
-                    else 
+                    else
                     {
                         return nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
                     }
@@ -666,10 +666,10 @@ public:
             reset(tokenizer);
             //st = stNormal;
         }
-        
+
         // прокидываем текущий токен
         return nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
-    
+
     }
 
 

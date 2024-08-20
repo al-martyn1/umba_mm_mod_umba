@@ -292,7 +292,7 @@ struct IUnknown
 }; // UMBA_INTERFACE IUnknown
 
 
-}; // namespace umba
+} // namespace umba
 
 //-----------------------------------------------------------------------------
 
