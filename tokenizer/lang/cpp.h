@@ -72,6 +72,8 @@ makeTokenizerBuilderCpp()
 
                           ;
 
+    return tokenizerBuilder;
+
 }
 
 template<typename TokenizerBuilder, typename TokenHandler>

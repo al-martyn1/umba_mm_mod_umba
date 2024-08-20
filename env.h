@@ -244,6 +244,6 @@ bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
 #include "warnings/pop.h"
 
 
-}; // namespace env
-}; // namespace umba
+} // namespace env
+} // namespace umba
 

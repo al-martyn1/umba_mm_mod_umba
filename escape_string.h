@@ -17,7 +17,7 @@ OutputIterator appendToOutputEscapeHelper(OutputIterator outIt, const char* ccSt
     for(; *ccStr; ++ccStr)
         *outIt++ = (CharType)*ccStr;
     return outIt;
-};
+}
 
 //----------------------------------------------------------------------------
 template<typename CharType, typename OutputIterator> inline

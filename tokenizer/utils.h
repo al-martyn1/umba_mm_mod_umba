@@ -333,7 +333,7 @@ bool isCommentToken(payload_type tokenType)
          ? true
          : false
          ;
-};
+}
 
 // Тут надо, чтобы это уже был коммент - вызывать только после вызова isCommentToken
 constexpr
