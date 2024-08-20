@@ -1476,7 +1476,11 @@ public: // methods - методы собственно разбора
                         {
                             if (!processCommentStartFromNonCommentedLambda(curPayload, it))
                                 return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
-                            break;
+                            if (utils::isMultiLineCommentStartToken(curPayload))
+                                goto explicit_readmultilinecomment;
+                            else
+                                goto explicit_readsinglelinecomment;
+                            //break;
                         }
 
                         if (!parsingHandlerLambda(curPayload, tokenStartIt, it)) // выплюнули текущий оператор
@@ -1511,7 +1515,12 @@ public: // methods - методы собственно разбора
                 {
                     if (!processCommentStartFromNonCommentedLambda(curPayload, it))
                         return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
-                    break;
+                    //break;
+                    //goto explicit_readsinglelinecomment;
+                    if (utils::isMultiLineCommentStartToken(curPayload))
+                        goto explicit_readmultilinecomment;
+                    else
+                        goto explicit_readsinglelinecomment;
                 }
 
                 if (!parsingHandlerLambda(curPayload, tokenStartIt, it)) // выплюнули
@@ -1555,6 +1564,7 @@ public: // methods - методы собственно разбора
 
 
             //------------------------------
+            explicit_readsinglelinecomment:
             case TokenizerInternalState::stReadSingleLineComment:
             {
 
@@ -1601,6 +1611,7 @@ public: // methods - методы собственно разбора
 
 
             //------------------------------
+            explicit_readmultilinecomment:
             case TokenizerInternalState::stReadMultilineLineComment:
             {
                 // auto nextOperatorIdx = tokenTrieFindNext(operatorsTrie, operatorIdx, (token_type)ch);
