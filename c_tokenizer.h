@@ -386,6 +386,7 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_EXPRESSION_END                           UMBA_TOKENIZER_TOKEN_OPERATOR_SEMICOLON
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_SCOPE_RESOLUTION                         (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x190u)   /*  ::   */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_VA_ARGS                                  (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x191u)   /*  ...  */
 
 
 //  "new slot" operator '<-' - http://squirrel-lang.org/doc/squirrel3.html#tableconstructor
@@ -404,6 +405,10 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_AT                                       (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A4u)   /*  @     */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_HASH                                     (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A5u)   /*  #     */
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_USD                                      (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1A6u)   /*  $     */
+
+
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_CC_PP_CONCAT                             (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1E0u)   /*  ##  */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_CC_PP_STRINGIFY                          (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x1E1u)   /*  #  */
 
 
 
