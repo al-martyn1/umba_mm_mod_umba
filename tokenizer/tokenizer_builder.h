@@ -53,8 +53,11 @@ protected: // fileds
 
     std::string              multiLineCommentEndStr; // Конец многострочного коментария ищем как строку, с забеганием вперёд
 
-    std::unordered_set<payload_type>  addedTokens;
-
+#if defined(NDEBUG)
+    std::unordered_map<payload_type, string_type>  addedTokens;
+#else
+    std::map<payload_type, string_type>            addedTokens;
+#endif
     std::vector<std::shared_ptr<ITokenizerLiteralParser> >   literalParsersStorage;
     //ITokenizerLiteralParser
 
@@ -92,7 +95,7 @@ protected: // methods - helpers
         return false;
     }
 
-    void addTokenToKnownSet(payload_type tk, bool allowExisting=false)
+    void addTokenToKnownSet(payload_type tk, const string_type &tkStr, bool allowExisting=false)
     {
         if (addedTokens.find(tk)!=addedTokens.end())
         {
@@ -100,7 +103,7 @@ protected: // methods - helpers
                 throw std::runtime_error("token already used");
             return;
         }
-        addedTokens.insert(tk);
+        addedTokens[tk] = tkStr;
     }
 
 public:
@@ -201,8 +204,8 @@ public:
         // UMBA_TOKENIZER_TOKEN_SQUARE_BRACKETS
         // или 0, для автоопределения, и сделать автоопределение
 
-        addTokenToKnownSet(pairBaseToken  );
-        addTokenToKnownSet(pairBaseToken+1);
+        addTokenToKnownSet(pairBaseToken  , string_type(bracketsPair[0], pairBaseToken  ));
+        addTokenToKnownSet(pairBaseToken+1, string_type(bracketsPair[1], pairBaseToken+1));
 
         generation::setCharClassFlagsForBracePair(charClassTable, bracketsPair);
         bracketsTrieBuilder.addTokenSequence(bracketsPair[0], pairBaseToken  );
@@ -224,7 +227,7 @@ public:
         //TODO: !!! Подумать, как сделать, чтобы числа можно было начинать с символов @ # $
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
-        addTokenToKnownSet(tokenId, allowUseExistingToken);
+        addTokenToKnownSet(tokenId, prefix, allowUseExistingToken);
         // numbersTrieBuilder.addTokenSequence(prefix, tokenId); // Не понятно, с чего я продублировал тут и на следующей строке в if'е - переглючило, наверное. Но может, был какой-то скрытый смысл
         if (numbersTrieBuilder.addTokenSequence(prefix, tokenId).payload!=tokenId)
             throw std::runtime_error("number literal prefix already used");
@@ -241,7 +244,7 @@ public:
 
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
-        addTokenToKnownSet(tokenId, allowUseExistingToken);
+        addTokenToKnownSet(tokenId, seq, allowUseExistingToken);
         if (operatorsTrieBuilder.addTokenSequence(seq, tokenId).payload!=tokenId)
             throw std::runtime_error("single line comment sequence already used");
 
@@ -263,7 +266,7 @@ public:
         if (tokenId==payload_invalid)
             tokenId = UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START;
 
-        addTokenToKnownSet(tokenId);
+        addTokenToKnownSet(tokenId, seqStart);
         if (operatorsTrieBuilder.addTokenSequence(seqStart, tokenId).payload!=tokenId)
             throw std::runtime_error("multiline comment start sequence already used");
 
@@ -285,7 +288,7 @@ public:
 
         //TODO: !!! Проверить tokenId на вхождение в диапазон, или сделать автоопределение
 
-        addTokenToKnownSet(tokenId, allowUseExistingToken);
+        addTokenToKnownSet(tokenId, seq, allowUseExistingToken);
         if (operatorsTrieBuilder.addTokenSequence(seq, tokenId).payload!=tokenId)
             throw std::runtime_error("operator sequence already used");
 
@@ -402,7 +405,8 @@ public:
 
     tokenizer_type makeTokenizer() const
     {
-        auto copyOfThis = *this;
+        //auto copyOfThis = *this; // !!!
+        auto &copyOfThis = const_cast<TokenizerBuilder&>(*this);
         return copyOfThis.clearStringLiteralFlagForOpChars().makeTokenizerImpl();
     }
 
