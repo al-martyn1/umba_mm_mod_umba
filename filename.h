@@ -188,7 +188,7 @@ std::vector< StringType > splitPathList( const StringType &pl, typename StringTy
     {
         if (pos!=startPos)
         {
-            auto p = umba::string_plus::trim_copy(StringType(pl, startPos, pos-startPos-1));
+            auto p = umba::string_plus::trim_copy(StringType(pl, startPos, pos-startPos));
             if (!p.empty())
                 resVec.emplace_back(p);
         }
@@ -199,7 +199,7 @@ std::vector< StringType > splitPathList( const StringType &pl, typename StringTy
 
     if (startPos!=pl.npos && startPos!=pl.size())
     {
-        auto p = umba::string_plus::trim_copy(StringType(pl, startPos, pl.size()-startPos-1));
+        auto p = umba::string_plus::trim_copy(StringType(pl, startPos, pl.size()-startPos));
         if (!p.empty())
             resVec.emplace_back(p);
     }
