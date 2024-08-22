@@ -548,6 +548,16 @@ bool isPathFile(const StringType &path)
 }
 
 //----------------------------------------------------------------------------
+template<typename StringType>
+bool isFileExist(const StringType &path)
+{
+    FileStat fileStat;
+    if (!getPathStat(path, fileStat))
+        return false;
+    return fileStat.isFile();
+}
+
+//----------------------------------------------------------------------------
 
 
 

@@ -167,7 +167,46 @@ template<typename StringType> inline StringType stripFirstExtSepCopy( const Stri
 template<typename StringType> inline
 std::vector< StringType > splitPathList( const StringType &pl, typename StringType::value_type pathListSep = getNativePathListSep<typename StringType::value_type>() )
 {
-    return umba::string_plus::split( pl, pathListSep, true /* skipEmpty */ );
+    // Всегда используем ';' - для того, чтобы наши утилиты работали одинаково с данными, например, конфигов, одинаково - потому что конфиги пишутся под виндовую версию софта, 
+    // и менять там что-то для релиза под другую ось в части списков путей - отдельные символы - нафиг не нужно
+    // Но под *nix принят разделитель ':'
+    // И *nix будут добавлять свои настройки с таким разделителем
+    // Хотя ';' может быть под *nix валидным символом имени файла, обычно это используется для каких-то сугубо технических файлов
+    // Так-то и в винде ';' - тоже нормальный символ для имени файла/каталога
+
+    StringType sepList = StringType(1, (typename StringType::value_type)';');
+    if (pathListSep!=0 && sepList[0]!=pathListSep)
+    {
+        sepList.append(1, pathListSep);
+    }
+
+    std::vector< StringType > resVec;
+
+    typename StringType::size_type startPos = 0;
+    typename StringType::size_type pos = pl.find_first_of( sepList, startPos );
+    while(pos!=pl.npos)
+    {
+        if (pos!=startPos)
+        {
+            auto p = umba::string_plus::trim_copy(StringType(pl, startPos, pos-startPos-1));
+            if (!p.empty())
+                resVec.emplace_back(p);
+        }
+
+        startPos = pos+1;
+        pos = pl.find_first_of( sepList, startPos );
+    }
+
+    if (startPos!=pl.npos && startPos!=pl.size())
+    {
+        auto p = umba::string_plus::trim_copy(StringType(pl, startPos, pl.size()-startPos-1));
+        if (!p.empty())
+            resVec.emplace_back(p);
+    }
+
+    return resVec;
+
+    //return umba::string_plus::split( pl, pathListSep, true /* skipEmpty */ );
 }
 
 /*
