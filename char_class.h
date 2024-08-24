@@ -731,6 +731,13 @@ void printCharClassArray( umba::tokenizer::CharClass (&charClasses)[N], CommentT
 
 
 //----------------------------------------------------------------------------
+#if !defined(UMBA_TOKENIZER_ENABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
+    #if !defined(UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
+        #define UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION
+    #endif
+#endif
+
+
 // Using pregenerated char class table
 #if !defined(UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
 inline

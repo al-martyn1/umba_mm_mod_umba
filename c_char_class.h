@@ -66,6 +66,11 @@
 // https://www.geeksforgeeks.org/inline-function-in-c/
 // https://stackoverflow.com/questions/31108159/what-is-the-use-of-the-inline-keyword-in-c
 
+#if !defined(UMBA_TOKENIZER_ENABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
+    #if !defined(UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
+        #define UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION
+    #endif
+#endif
 
 #if !defined(UMBA_TOKENIZER_DISABLE_UMBA_TOKENIZER_GET_CHAR_CLASS_FUNCTION)
 static inline

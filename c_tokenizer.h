@@ -308,6 +308,7 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
 
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START                        (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x021u)  /*        */
+#define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT                              UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_END                          (UMBA_TOKENIZER_TOKEN_OPERATOR_FIRST+0x022u)  /*        */
 
 #define UMBA_TOKENIZER_TOKEN_OPERATOR_SINGLE_LINE_COMMENT_FLAG_AS_REGULAR_OPERATOR                                         0x040u   /*        */
