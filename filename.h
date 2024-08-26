@@ -723,8 +723,8 @@ StringType makeAbsPath( const StringType &path
 //-----------------------------------------------------------------------------
 //! Удаляет префикс пути - делает имя относительным
 template<typename StringType> inline
-bool isSubPathName( StringType                      commonPath
-                  , StringType                      fullName
+bool isSubPathName( const StringType                commonPath_
+                  , const StringType                fullName_
                   , StringType                      *pResName          = 0
                   , typename StringType::value_type pathSep            = getNativePathSep<typename StringType::value_type>()
                   , const StringType                &currentDirAlias   = umba::filename::getNativeCurrentDirAlias<StringType>()
@@ -732,14 +732,18 @@ bool isSubPathName( StringType                      commonPath
                   , bool                            keepLeadingParents = false
                   )
 {
-    commonPath = makeCanonicalForCompare(commonPath, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
-    fullName   = makeCanonicalForCompare(fullName  , pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
+    auto commonPath = makeCanonicalForCompare(commonPath_, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
+    auto fullName   = makeCanonicalForCompare(fullName_  , pathSep, currentDirAlias, parentDirAlias, keepLeadingParents);
 
     appendPathSepInline(commonPath, pathSep);
-    if (umba::string_plus::starts_with_and_strip(fullName, commonPath))
+    //if (umba::string_plus::starts_with_and_strip(fullName, commonPath))
+    if (umba::string_plus::starts_with(fullName, commonPath))
     {
+        auto orgFullName = makeCanonical(fullName_, pathSep, currentDirAlias, parentDirAlias, keepLeadingParents); // Отличие в том, что регистр не меняется
+        orgFullName.erase(0, commonPath.size());
+
         if (pResName)
-           *pResName = fullName;
+           *pResName = orgFullName;
 
         return true;
     }
