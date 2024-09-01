@@ -666,17 +666,18 @@ StringType prepareForNativeUsage( const StringType &fileName )
 
         if constexpr (sizeof(typename StringType::value_type)==sizeof(char))
         {
-            return fileName;
+            return makeCanonical(fileName);
         }
         else
         {
             if (!isAbsPath(fileName))
             {
-                return fileName;
+                return makeCanonical(fileName);
             }
 
             // А надо ли вообще тут делать makeCanonical?
-            StringType canoname = fileName; //makeCanonical(fileName);
+            // StringType canoname = fileName; //makeCanonical(fileName);
+            StringType canoname = makeCanonical(fileName);
 
             namespace ustrp = umba::string_plus;
 
