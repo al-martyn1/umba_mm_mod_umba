@@ -11,6 +11,7 @@
 #include "string_plus.h"
 #include "text_utils.h"
 #include "utf8.h"
+#include "filesys.h"
 //
 #include <algorithm>
 #include <fstream>
@@ -21,9 +22,14 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <sstream>
 
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#if !defined(UMBA_DISABLE_AUTO_ENCODING)
+    #include "encoding/encoding.h"
+#endif
 
 // #include "trims.h"
 // #include "splits.h"
@@ -312,7 +318,7 @@ enum class PrintHelpStyle
 
 
 inline
-bool readOptionsFile( std::ifstream &optFile, std::vector<std::string> &resVec )
+bool readOptionsFile( std::istream &optFile, std::vector<std::string> &resVec )
 {
     std::string optLine;
     while( std::getline( optFile, optLine) )
@@ -333,7 +339,7 @@ bool readOptionsFile( std::ifstream &optFile, std::vector<std::string> &resVec )
 }
 
 inline
-bool readOptionsFile( std::ifstream &optFile, std::vector<std::wstring> &resVec )
+bool readOptionsFile( std::istream &optFile, std::vector<std::wstring> &resVec )
 {
     std::string optLine;
     while( std::getline( optFile, optLine) )
@@ -356,21 +362,59 @@ bool readOptionsFile( std::ifstream &optFile, std::vector<std::wstring> &resVec 
 inline
 bool readOptionsFile( const std::string &fileName, std::vector<std::string> &resVec )
 {
-    std::ifstream optFile(fileName.c_str());
-    if (!optFile)
-        return false; // resVec;
+    std::string fileDataStr;
 
-    return readOptionsFile( optFile, resVec );
+    // Предполагается, что fileName в формате UTF8
+
+#if defined(WIN32) || defined(_WIN32)
+
+    if (!filesys::readFile(encoding::fromUtf8(fileName), fileDataStr))
+        return false;
+
+#else
+
+    if (!filesys::readFile(fileName, fileDataStr))
+        return false;
+
+#endif
+
+#if !defined(UMBA_DISABLE_AUTO_ENCODING)
+
+    fileDataStr = encoding::toUnicodeAuto(fileDataStr);
+
+#endif
+  
+    // std::ifstream optFile(fileName.c_str());
+    // if (!optFile)
+    //     return false; // resVec;
+
+    std::istringstream iss(fileDataStr);
+    return readOptionsFile( iss, resVec );
 }
 
 inline
 bool readOptionsFile( const std::wstring &fileName, std::vector<std::wstring> &resVec )
 {
-    std::ifstream optFile(toUtf8(fileName).c_str());
-    if (!optFile)
-        return false; // resVec;
+    std::string fileDataStr;
 
-    return readOptionsFile( optFile, resVec );
+#if defined(WIN32) || defined(_WIN32)
+
+    if (!filesys::readFile(fileName, fileDataStr))
+        return false;
+
+#else
+
+    if (!filesys::readFile(encoding::toUtf8(fileName), fileDataStr))
+        return false;
+
+#endif
+
+    // std::ifstream optFile(toUtf8(fileName).c_str());
+    // if (!optFile)
+    //     return false; // resVec;
+
+    std::istringstream iss(fileDataStr);
+    return readOptionsFile( iss, resVec );
 }
 
 inline
@@ -415,6 +459,10 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
     for( int i = 1; i<argc; ++i)
     {
         std::string argStr = argv[i];
+
+        #if !defined(UMBA_DISABLE_AUTO_ENCODING)
+            argStr = encoding::toUnicodeFromConsole(argStr);
+        #endif
 
         if (argStr.empty())
            continue;
@@ -2834,8 +2882,7 @@ makeArgsParserImpl( const ArgParser                                            &
     argsParser.programLocationInfo = programLocationInfo;
 
     if (argsParser.programLocationInfo.exeFullName.empty())
-       argsParser.programLocationInfo = umba::program_location::getProgramLocation(argc, argv);
-
+       argsParser.programLocationInfo = umba::program_location::getProgramLocation(argc, argv); //!!! Надо ProgramLocation проверить на юникод
 
     argsParser.args = prepareArgs( argc, argv );
 
