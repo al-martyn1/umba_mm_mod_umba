@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <stack>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -2655,6 +2656,36 @@ struct ArgsParser
 
     ArgParser                             argParser;
     OptionsCollector                      optionsCollector;
+    std::stack<StringType>                optFiles;
+
+
+    StringType getBasePath() const
+    {
+        StringType basePath;
+        if (optFiles.empty())
+            basePath = umba::filesys::getCurrentDirectory<StringType>();
+        else
+            basePath = umba::filename::getPath(optFiles.top());
+    
+        return basePath;
+    }
+    
+    StringType makeAbsPath( StringType p )
+    {
+        //return umba::filename::makeCanonical(umba::filename::makeAbsPath( p, getBasePath() ));
+        return umba::filename::makeAbsPath( p, getBasePath() );
+    }
+
+    void pushOptionsFileName(const StringType &fname)
+    {
+        optFiles.push(fname);    
+    }
+
+    void popOptionsFileName()
+    {
+        if (!optFiles.empty())
+            optFiles.pop();
+    }
 
 
     std::string getBuiltinsOptFileName(unsigned flag) const { return programLocationInfo.getBuiltinOptionsFilename(flag); }
