@@ -21,9 +21,12 @@
 #endif
 
 //----------------------------------------------------------------------------
-#include "c_tokenizer.h"
-//
 #include "char_class.h"
+//
+#include "c_tokenizer.h"
+
+//
+#include "c_tokenizer_constants.h"
 //
 #include "iterator.h"
 #include "escape_string.h"
