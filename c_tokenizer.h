@@ -189,9 +189,33 @@ typedef struct tag_umba_tokenizer_trie_node
 // Compact mode    : Trie size : 32 items, 448 bytes
 // Compact no flags: Trie size : 32 items, 384 bytes
 
+
+#if defined(UMBA_TOKENIZER_TRIE_NODE_PAYLOAD_EXTRA_FIELD_DISABLE)
+    #define UMBA_TOKENIZER_TRIE_NODE_PAYLOAD_EXTRA_FIELD_INITIALIZER_LIST_INIT(p)
+#else
+    #define UMBA_TOKENIZER_TRIE_NODE_PAYLOAD_EXTRA_FIELD_INITIALIZER_LIST_INIT(p)  , (p)
+#endif
+
+#if defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
+    #define UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_INITIALIZER_LIST_INIT(l)
+#else
+    #define UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_INITIALIZER_LIST_INIT(l)  , (l)
+#endif
+
 static inline
 void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *pNode)
 {
+    *pNode = umba_tokenizer_trie_node{ UMBA_TOKENIZER_TRIE_INDEX_INVALID
+                                     , UMBA_TOKENIZER_TRIE_INDEX_INVALID
+                                     , 0
+                                     , UMBA_TOKENIZER_TRIE_INDEX_INVALID
+                                     , UMBA_TOKENIZER_PAYLOAD_INVALID
+                                     /*,*/ UMBA_TOKENIZER_TRIE_NODE_PAYLOAD_EXTRA_FIELD_INITIALIZER_LIST_INIT(0)
+                                     , UMBA_TOKENIZER_TOKEN_INVALID
+                                     /*,*/ UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_INITIALIZER_LIST_INIT(0)
+                                     };
+
+#if 0
     pNode->parentNodeIndex       = UMBA_TOKENIZER_TRIE_INDEX_INVALID;
     pNode->lookupChunkStartIndex = UMBA_TOKENIZER_TRIE_INDEX_INVALID;
     pNode->lookupChunkSize       = 0;
@@ -203,6 +227,8 @@ void umba_tokenizer_trie_node_init_make_uninitialized(umba_tokenizer_trie_node *
     pNode->token                 = UMBA_TOKENIZER_TOKEN_INVALID;
 #if !defined(UMBA_TOKENIZER_TRIE_NODE_LEVEL_FIELD_DISABLE)
     pNode->level                 = 0;
+#endif
+
 #endif
 }
 
