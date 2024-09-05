@@ -92,6 +92,12 @@ public:
         return addTokenSequence(seqStr.begin(), seqStr.end(), payload);
     }
 
+    TrieNode& addTokenSequence(const char* seqStr, payload_type payload)
+    {
+        UMBA_ASSERT(seqStr!=0);
+        return addTokenSequence(std::string(seqStr), payload);
+    }
+
     TrieNode& addTokenSequence(char ch, payload_type payload)
     {
         const char *pCh = &ch;
