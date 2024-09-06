@@ -16,9 +16,14 @@
     #endif
 #endif
 
-#if !defined(UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT)
-    #define UMBA_TOKEN_TRIE_FIND_NEXT_BINARY_SEARCH_CHUNK_SIZE_LIMIT  4u
+#if !defined(__cplusplus)
+    #include <stddef.h>
+    #include <stdint.h>
+#else
+    #include <cstddef>
+    #include <cstdint>
 #endif
+
 
 //----------------------------------------------------------------------------
 #include "char_class.h"
