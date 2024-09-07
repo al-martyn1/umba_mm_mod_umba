@@ -180,7 +180,9 @@ namespace time_service{
 
         void init()
         {
-            if( SysTick_Config(SystemCoreClock / 1000) )
+            /* !!! Сделать как надо */
+            // if( SysTick_Config(SystemCoreClock / 1000) )
+            if (0)
             {
                 UMBA_ASSERT_FAIL();
             }
@@ -190,7 +192,8 @@ namespace time_service{
 
         void start(void)
         {
-            SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+            /* !!! Сделать как надо */
+            // SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
             #ifndef UMBA_TIMESERVICE_NO_TACTIC_DELAY
             delayMs( 250 );
             #endif
@@ -198,7 +201,8 @@ namespace time_service{
 
         void stop(void)
         {
-            SysTick->CTRL &= ~(SysTick_CTRL_ENABLE_Msk);
+            /* !!! Сделать как надо */
+            // SysTick->CTRL &= ~(SysTick_CTRL_ENABLE_Msk);
         }
 
         TimeTick ticksToMs(TimeTick ticks)
@@ -224,9 +228,10 @@ namespace time_service{
 
             {
                 UMBA_CRITICAL_SECTION_EX(umba::CriticalSection, umba::globalCriticalSection);
-                tickVal = SysTick->VAL;
-                hrMsecModule = SysTick->LOAD + 1;
-                msTick = systemTime;
+                /* !!! Сделать как надо */
+                //tickVal = SysTick->VAL;
+                //hrMsecModule = SysTick->LOAD + 1;
+                //msTick = systemTime;
             }
 
             if (pModule)
@@ -248,9 +253,12 @@ namespace time_service{
         HiresTimeTick getCurTimeHires()
         {
             TimeTick tickHi, tickLo, tickMod;
-            getCurTimeHiresRaw( &tickHi, &tickLo, &tickMod );
-            if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
-                getCurTimeHiresRaw( &tickHi, &tickLo, &tickMod );
+
+            /* !!! Сделать как надо */
+            //getCurTimeHiresRaw( &tickHi, &tickLo, &tickMod );
+            //if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
+            //    getCurTimeHiresRaw( &tickHi, &tickLo, &tickMod );
+
             //HiresTimeTick tmp = umba::time_service::calcCurTimeHires( tickHi, tickLo, tickMod );
             //HiresTimeTick res = tmp > systemTimeHires ? tmp : systemTimeHires;
             //systemTimeHires = tmp;
