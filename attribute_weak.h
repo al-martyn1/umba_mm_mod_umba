@@ -25,7 +25,7 @@
 
 #if defined(UMBA_MSVC_COMPILER_USED)
 
-    #define UMBA_ATTRIBUTE_WEAK    __declspec(selectany)
+    #define UMBA_ATTRIBUTE_WEAK    /* __declspec(selectany) */
 
 #elif defined(UMBA_GCC_COMPILER_USED)
 
