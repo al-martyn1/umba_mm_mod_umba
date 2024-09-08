@@ -6,15 +6,21 @@
 #pragma once
 
 //-----------------------------------------------------------------------------
-#include "boost/container/options.hpp"
-//
-#include "boost/container/small_vector.hpp"
-#include "boost/container/static_vector.hpp"
 
+
+#if defined(UMBA_USE_BOOST)
+
+    #include "boost/container/options.hpp"
+    //
+    #include "boost/container/small_vector.hpp"
+    #include "boost/container/static_vector.hpp"
+
+#endif // UMBA_USE_BOOST
 
 namespace umba {
 namespace container {
 
+#if defined(UMBA_USE_BOOST)
 
 #if defined(BOOST_CONTAINER_DOXYGEN_INVOKED) || defined(BOOST_CONTAINER_VARIADIC_TEMPLATES)
 template<class ...Options>
@@ -105,6 +111,7 @@ using small_vector = boost::container::small_vector<T, N, Allocator, Options>;
 //
 //
 
+#endif // UMBA_USE_BOOST
 
 } // namespace container
 } // namespace umba
