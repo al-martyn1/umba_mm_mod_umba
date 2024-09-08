@@ -20,8 +20,15 @@
     и заставляет его перечитать инструкции из мамяти (или кэша).
     Аппаратная оптимизация может переупорядочивать исполнение иструкций, и в случае,
     когда необходимо гарантировать порядок их выполнения, следует вставлять данный барьер.
+
+    https://developer.arm.com/documentation/dui0375/g/Compiler-specific-Features/--isb-intrinsic
 */
-#define UMBA_INSTRUCTION_BARRIER()               __ISB()
+#if defined(UMBA_ARMCC_COMPILER_USED)
+    // #define UMBA_INSTRUCTION_BARRIER()                   __ISB()
+    #define UMBA_INSTRUCTION_BARRIER()                   __isb()
+#else
+    #define UMBA_INSTRUCTION_BARRIER()                   do{}while(false) /* !!! Сделать как надо */
+#endif
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy версия UMBA_INSTRUCTION_BARRIER()
     #ifndef INSTRUCTION_SYNCHRONIZATION_BARRIER
@@ -36,8 +43,16 @@
     Данный барьер не влияет на порядок и выполнение инструкций, не производящих доступ к памяти.
     Данный барьер не ожидает окончания выполнения инструкций.
     Тут неясно - в коде CMSIS указано, что без гарантий окончания, в даташите на Cortex вроде как с гарантиями.
+
+    https://developer.arm.com/documentation/dui0375/g/Compiler-specific-Features/--dmb-intrinsic
+
 */
-#define UMBA_DATA_MEMORY_BARRIER()               __DMB()
+#if defined(UMBA_ARMCC_COMPILER_USED)
+    // #define UMBA_DATA_MEMORY_BARRIER()                   __DMB()
+    #define UMBA_DATA_MEMORY_BARRIER()                   __dmb(0)
+#else
+    #define UMBA_DATA_MEMORY_BARRIER()                   do{}while(false) /* !!! Сделать как надо */
+#endif
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy версия UMBA_DATA_MEMORY_BARRIER
     #ifndef DATA_MEMORY_BARRIER
@@ -48,8 +63,15 @@
 
 //---------------------------------------------------------
 /*! Data Synchronization Barrier аналогичен UMBA_DATA_MEMORY_BARRIER(), но дает гарантии окончания выполнения иструкций
+    https://developer.arm.com/documentation/dui0375/g/Compiler-specific-Features/--dsb-intrinsic
 */
-#define UMBA_DATA_SYNCHRONIZATION_BARRIER()      __DSB()
+#if defined(UMBA_ARMCC_COMPILER_USED)
+    // #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          __DSB()
+    #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          __dsb(0)
+#else
+    #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          do{}while(false) /* !!! Сделать как надо */
+#endif
+
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy версия DATA_SYNCHRONIZATION_BARRIER
     #ifndef DATA_SYNCHRONIZATION_BARRIER
@@ -77,7 +99,11 @@
 //
 //---------------------------------------------------------
 //! Проверка нахождения кода в обработчике прерывания
-#define UMBA_IS_IN_ISR()                         (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk)
+#if defined(__CMSIS_ARMCC_H)
+    #define UMBA_IS_IN_ISR()                         (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk)
+#else
+    #define UMBA_IS_IN_ISR()                         0
+#endif
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy версия UMBA_IS_IN_ISR
     #ifndef IS_IN_ISR
@@ -87,8 +113,16 @@
 
 
 //---------------------------------------------------------
+// https://github.com/ARM-software/CMSIS_4/blob/master/CMSIS/Include/cmsis_armcc.h
 //! Проверка, разрешены прерывания или нет.
-#define UMBA_INTERRUPTS_DISABLED()               __get_PRIMASK()
+
+// UMBA_ARMCC_COMPILER_USED
+#if defined(__CMSIS_ARMCC_H)
+    #define UMBA_INTERRUPTS_DISABLED()               __get_PRIMASK()
+#else
+    #define UMBA_INTERRUPTS_DISABLED()               0  /* !!! Сделать как надо */
+#endif
+
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy определение
     #ifndef ARE_INTERRUPTS_DISABLED
@@ -99,13 +133,20 @@
 
 //---------------------------------------------------------
 //! Запрет прерываний, в legacy API нет аналога
-#define UMBA_DISABLE_IRQ()                       __disable_irq()
+#if defined(UMBA_ARMCC_COMPILER_USED)
+    #define UMBA_DISABLE_IRQ()                       __disable_irq()
+#else
+    #define UMBA_DISABLE_IRQ()                       do{}while(false) /* !!! Сделать как надо */
+#endif
 
 
 //---------------------------------------------------------
 //! Разрешение прерываний, в legacy API нет аналога
-#define UMBA_ENABLE_IRQ()                       __enable_irq()
-
+#if defined(UMBA_ARMCC_COMPILER_USED)
+    #define UMBA_ENABLE_IRQ()                        __enable_irq()
+#else
+    #define UMBA_ENABLE_IRQ()                        do{}while(false) /* !!! Сделать как надо */
+#endif
 
 //---------------------------------------------------------
 //! Объявление функции-обработчика прерывания. Можно использовать как для собственно

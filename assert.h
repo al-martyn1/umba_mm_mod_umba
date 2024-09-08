@@ -36,6 +36,15 @@
 #endif
 
 
+// https://gcc.gnu.org/onlinedocs/cpp/_005f_005fhas_005finclude.html
+
+#if defined __has_include
+    #if __has_include(<assert.h>)
+        #include <assert.h>
+        #define UMBA_HAS_CRT_ASSERT
+    #endif
+#endif
+
 
 
 //---------------------------------------------------------
@@ -56,11 +65,32 @@
 
     #define UMBA_ASSERT( statement )         _ASSERTE(statement)
 
-#else /* Подразумевается UMBA_MCU_USED */
+#elif defined(UMBA_MCU_USED)
 
-    #define UMBA_ASSERT( statement )         do { if(! (statement) ) { __disable_irq(); while(1){ __BKPT(0xAB); if(0) break;} }  } while(0)
+    #if defined(UMBA_ARMCC_COMPILER_USED)
+
+        // __disable_irq - armcc intrinsic
+        #define UMBA_ASSERT( statement )         do { if(! (statement) ) { __disable_irq(); while(1){ __BKPT(0xAB); if(0) break;} }  } while(0)
+
+    #else 
+
+        // GCC/Clang - пока оставим без ассерта
+        /* !!! Сделать как надо */
+        #define UMBA_ASSERT( statement )
+
+    #endif
+
+#elif defined(UMBA_HAS_CRT_ASSERT) 
+
+    #define UMBA_ASSERT( statement )         assert(statement)
+
+#else
+
+    #define UMBA_ASSERT( statement )
 
 #endif
+
+// UMBA_HAS_CRT_ASSERT
 
 //---------------------------------------------------------
 //! UMBA_ASSERT_FAIL срабатывает всегда, и ставится туда, куда по идее, никогда попадать не должны
