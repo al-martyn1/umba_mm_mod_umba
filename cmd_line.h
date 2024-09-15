@@ -312,6 +312,7 @@ enum class PrintHelpStyle
 {
     normal,
     wiki,
+    md,
     bash_complete,
     clink_complete
 };
@@ -752,7 +753,12 @@ struct CommandLineOptionInfo
     }
 
 
-    std::string getAllEnumNames( const std::string &sep, const std::string &sepLast, const std::string &alter, const std::string &before = std::string(), const std::string &after = std::string() ) const
+    std::string getAllEnumNames( const std::string &sep
+                               , const std::string &sepLast
+                               , const std::string &alter
+                               , const std::string &before = std::string()
+                               , const std::string &after = std::string()
+                               ) const
     {
         std::string res;
 
@@ -840,7 +846,7 @@ struct CommandLineOptionInfo
         return std::string();
     }
 
-    std::string getDefValString() const
+    std::string getDefValString(char quotChar) const
     {
         if (!hasDefVal)
             return std::string();
@@ -848,12 +854,14 @@ struct CommandLineOptionInfo
         if (!paramOptional)
             return std::string();
 
+        std::string quotString = std::string(1, quotChar);
+
         switch(optType)
         {
-            case OptionType::optFlag  : return boolDefVal ? "TRUE" : "FALSE";
-            case OptionType::optInt   : return formatNumberHelper(intDefVal);
+            case OptionType::optFlag  : return quotString + (boolDefVal ? "TRUE" : "FALSE") + quotString;
+            case OptionType::optInt   : return quotString + formatNumberHelper(intDefVal) + quotString;
                                         //return cppHelpersFormatInt( intDefVal );
-            case OptionType::optString: return std::string("'") + stringDefVal + std::string("'");
+            case OptionType::optString: return quotString + stringDefVal + quotString;
             case OptionType::optEnum  :
             {
                 /*
@@ -867,8 +875,8 @@ struct CommandLineOptionInfo
 
                 auto res = getEnumValNameByValue(intDefVal);
                 if (res.empty())
-                    return "<AUTO>";
-                return std::string("'") + res + std::string("'");
+                    return quotString + "<AUTO>" + quotString;
+                return quotString + res + quotString;
             }
 
             case OptionType::optUnknown:
@@ -883,17 +891,20 @@ struct CommandLineOptionInfo
         return std::string();
     }
 
-    std::string getInitialValString() const
+    std::string getInitialValString(char quotChar) const
     {
         if (!hasInitVal)
             return std::string();
 
+        std::string quotStr = std::string(1, quotChar);
+
+
         switch(optType)
         {
-            case OptionType::optFlag  : return boolInitVal ? "TRUE" : "FALSE";
-            case OptionType::optInt   : return formatNumberHelper(intDefVal);
+            case OptionType::optFlag  : return quotStr + (boolInitVal ? "TRUE" : "FALSE") + quotStr;
+            case OptionType::optInt   : return quotStr + formatNumberHelper(intDefVal) + quotStr;
                                         //return cppHelpersFormatInt( intInitVal );
-            case OptionType::optString: return std::string("'") + stringInitVal + std::string("'");
+            case OptionType::optString: return quotStr + stringInitVal + quotStr;
             case OptionType::optEnum  :
             {
                 /*
@@ -909,8 +920,8 @@ struct CommandLineOptionInfo
 
                 auto res = getEnumValNameByValue(intInitVal);
                 if (res.empty())
-                    return "<AUTO>";
-                return std::string("'") + res + std::string("'");
+                    return quotStr + "<AUTO>" + quotStr;
+                return quotStr + res + quotStr;
             }
 
             case OptionType::optUnknown:
@@ -982,9 +993,9 @@ struct ICommandLineOptionCollector
     virtual void addOptionDescription( const std::string &d ) = 0;
     virtual void resetCurCollectedOption( ) = 0;
 
-    virtual bool isNormalPrintHelpStyle() = 0;
+    virtual bool isNormalPrintHelpStyle() const = 0;
     virtual void setPrintHelpStyle( PrintHelpStyle printHelpStyle ) = 0;
-    virtual PrintHelpStyle getPrintHelpStyle() = 0;
+    virtual PrintHelpStyle getPrintHelpStyle() const = 0;
 
     virtual std::string makeText( std::string::size_type width, PrintHelpStyle printHelpStyle, const std::set<std::string> *pHelpOnlyThats ) = 0;
     virtual std::string makeText( std::string::size_type width, PrintHelpStyle printHelpStyle, std::string *pPrefix, std::string *pSuffix, bool useExt ) = 0;
@@ -1130,8 +1141,10 @@ struct CommandLineOption
 
         PrintHelpStyle phs = PrintHelpStyle::normal;
 
-        if (name=="wiki" || name=="md")
+        if (name=="wiki")
             phs = PrintHelpStyle::wiki;
+        else if (name=="md")
+            phs = PrintHelpStyle::md;
         else if (name=="bash")
             phs = PrintHelpStyle::bash_complete;
         else if (name=="clink")
@@ -1484,12 +1497,12 @@ struct CommandLineOption
         // need parsing
         std::string optArgLower = umba::string_plus::tolower_copy(optArg);
 
-        if (optArgLower=="-" || optArgLower=="0" || optArgLower=="false" || optArgLower=="no" || optArgLower == "n")
+        if (optArgLower=="-" || optArgLower=="0" || optArgLower=="false" || optArgLower=="f" || optArgLower=="no" || optArgLower == "n")
         {
             val = false;
             return true;
         }
-        else if (optArgLower=="+" || optArgLower=="1" || optArgLower=="true" || optArgLower=="yes" || optArgLower == "y")
+        else if (optArgLower=="+" || optArgLower=="1" || optArgLower=="true" || optArgLower=="t" || optArgLower=="yes" || optArgLower == "y")
         {
             val = true;
             return true;
@@ -1633,7 +1646,8 @@ struct CommandLineOption
         int enumIntVal = optInfo.getEnumValueByName( optArg );
         if (enumIntVal<0)
         {
-            errMsg = std::string("Invalid option value taken. Option value can be one of: ") + optInfo.getAllEnumNames(", ", " or ", "/") + std::string(" (") + optInfo.getAllOptionNames("/") + std::string(")");
+            errMsg = std::string("Invalid option value taken. Option value can be one of: ")
+                   + optInfo.getAllEnumNames(", ", " or ", "/") + std::string(" (") + optInfo.getAllOptionNames("/") + std::string(")");
             return false;
         }
 
@@ -1726,7 +1740,7 @@ protected:
 
 public:
 
-    virtual bool isNormalPrintHelpStyle() override
+    virtual bool isNormalPrintHelpStyle() const override
     {
         return m_printHelpStyle == PrintHelpStyle::normal;
     }
@@ -1736,7 +1750,7 @@ public:
         m_printHelpStyle = phs;
     }
 
-    virtual PrintHelpStyle getPrintHelpStyle() override
+    virtual PrintHelpStyle getPrintHelpStyle() const override
     {
         return m_printHelpStyle;
     }
@@ -2000,6 +2014,16 @@ struct CommandLineOptionInfo
         return makeText( width, m_printHelpStyle, pPrefix, pSuffix, useExt, pHelpOnlyThats );
     }
 
+    char getHelpQuotChar() const
+    {
+        return (getPrintHelpStyle()==PrintHelpStyle::md || getPrintHelpStyle()==PrintHelpStyle::wiki) ? '`' : '\'';
+    }
+
+    std::string getHelpQuotString() const
+    {
+        return std::string(1, getHelpQuotChar());
+    }
+
     virtual std::string makeText( std::string::size_type width, PrintHelpStyle style, std::string *pPrefix, std::string *pSuffix, bool useExt, const std::set<std::string> *pHelpOnlyThats ) override
     {
         std::stringstream oss;
@@ -2125,7 +2149,7 @@ struct CommandLineOptionInfo
                 }
                 else
                 {
-                    if (style==PrintHelpStyle::wiki)
+                    if (style==PrintHelpStyle::wiki || style==PrintHelpStyle::md)
                         oss<<",\n";
                     else
                         oss<<"\n";
@@ -2133,6 +2157,8 @@ struct CommandLineOptionInfo
 
                 if (style==PrintHelpStyle::wiki)
                     oss<<"**%%";
+                else if (style==PrintHelpStyle::md)
+                    oss<<"**";
 
                 if (optName.size()<=1)
                     oss<<"-";
@@ -2149,6 +2175,8 @@ struct CommandLineOptionInfo
 
                 if (style==PrintHelpStyle::wiki)
                     oss<<"%%**";
+                else if (style==PrintHelpStyle::md)
+                    oss<<"**";
 
                 //oss<<"\n";
             }
@@ -2157,19 +2185,41 @@ struct CommandLineOptionInfo
 
             if (optInfo.optType==OptionType::optFlag)
             {
-                descExtraOss<<"Flag option, allowed values: '+'/'1'/'Y(es)'/'True' or '-'/'0'/'N(o)'/'False'";
+                descExtraOss << "Flag option, allowed values: " 
+                             <<        getHelpQuotChar() << "+"       << getHelpQuotChar() 
+                             << "/" << getHelpQuotChar() << "1"       << getHelpQuotChar() 
+                             << "/" << getHelpQuotChar() << "Y(es)"   << getHelpQuotChar() 
+                             << "/" << getHelpQuotChar() << "T(rue)"  << getHelpQuotChar() 
+                             << " or "
+                             << "/" << getHelpQuotChar() << "-"       << getHelpQuotChar() 
+                             << "/" << getHelpQuotChar() << "0"       << getHelpQuotChar() 
+                             << "/" << getHelpQuotChar() << "N(o)"    << getHelpQuotChar() 
+                             << "/" << getHelpQuotChar() << "F(alse)" << getHelpQuotChar() 
+                             ;
             }
 
             if (optInfo.hasMinMax)
             {
-                descExtraOss<<"Min value: "<<optInfo.minVal<<", "
-                            <<"max value: "<<optInfo.maxVal;
+                descExtraOss<<"Min value: "<<getHelpQuotChar()<<optInfo.minVal<<getHelpQuotChar()<<", "
+                            <<"max value: "<<getHelpQuotChar()<<optInfo.maxVal<<getHelpQuotChar();
             }
 
             if (optInfo.optType==OptionType::optEnum)
             {
                 //std::string enumNames = optInfo.getAllEnumNames( ", ", " or ", " / ", "'", "'" );
-                std::string enumNames = optInfo.getAllEnumNames( ", ", " or ", "/", "'", "'" );
+    // std::string getAllEnumNames( const std::string &sep
+    //                            , const std::string &sepLast
+    //                            , const std::string &alter
+    //                            , const std::string &before = std::string()
+    //                            , const std::string &after = std::string()
+    //                            ) const
+
+                std::string enumNames = optInfo.getAllEnumNames( ", "    // sep
+                                                               , " or "  // sepLast
+                                                               , "/"     // alter
+                                                               , getHelpQuotString() // "'"     // before (quot)
+                                                               , getHelpQuotString() // "'"     // after (quot)
+                                                               );
                 if (!enumNames.empty())
                    descExtraOss<<"Allowed values: "<<enumNames;
                    //descExtraOss<<"Enumeration: "<<enumNames;
@@ -2183,7 +2233,7 @@ struct CommandLineOptionInfo
             return std::string();
 */
 
-            std::string initVal = optInfo.getInitialValString();
+            std::string initVal = optInfo.getInitialValString(getHelpQuotChar());
             if (!initVal.empty())
             {
                 if (descExtraOss.str().empty())
@@ -2199,7 +2249,7 @@ struct CommandLineOptionInfo
 
             if (optInfo.hasDefVal && optInfo.paramOptional)
             {
-                std::string defVal = optInfo.getDefValString();
+                std::string defVal = optInfo.getDefValString(getHelpQuotChar());
                 if (!defVal.empty())
                 {
                     if (descExtraOss.str().empty())
@@ -2222,7 +2272,7 @@ struct CommandLineOptionInfo
             descr.append(descExtra);
             descr = umba::text_utils::textAppendDot(descr);
 
-            if (style==PrintHelpStyle::wiki)
+            if (style==PrintHelpStyle::wiki || style==PrintHelpStyle::md)
             {
                 std::string tmp = descr;
                 umba::string_plus::trim(tmp);
@@ -2554,7 +2604,7 @@ int autocompletionInstaller ( ICommandLineOptionCollector *pCol, CommandLineOpti
     else
     {
         //LOG_ERR_OPT
-        streamGetter(true)<<"Invalid subkey; --wiki used? ("<<opt.getOptionNames()<<")\n";
+        streamGetter(true)<<"Invalid subkey; --wiki/--md used? ("<<opt.getOptionNames()<<")\n";
         return -1;
     }
 
@@ -2759,6 +2809,62 @@ struct ArgsParser
         //     s << "\n";
 
         return s;
+    }
+
+    template< typename StreamType >
+    StreamType& printHelpPage( StreamType &os, const std::string &usageString, std::string usageComment, const std::string &helpText ) const
+    {
+        bool mdMode = getPrintHelpStyle()==umba::command_line::PrintHelpStyle::md;
+
+        umba::string_plus::trim(usageComment);
+        if (!usageComment.empty() && usageComment.back()!='.')
+            usageComment.append(1, '.');
+
+        if (mdMode)
+        {
+            os << "---\n"
+               << "Title: " << appFullName << " command line options\n"
+               << "App-version: " << appVersion << "\n"
+               << "---\n\n";
+            os << "# Usage\n\n```\n";
+        }
+        else
+        {
+            os << "Usage: ";
+        }
+
+        os << umba::toUtf8(programLocationInfo.exeName) << " " << usageString << "\n";
+           // << " [OPTIONS] input_file [output_file]\n"
+           //  << "  If output_file not taken, STDOUT used\n";
+
+        if (mdMode)
+        {
+            os  << "```\n\n";
+        }
+
+        if (!usageComment.empty())
+        {
+
+            os << usageComment << "\n\n";
+        }
+
+        if (mdMode)
+        {
+            os << "\n# Options\n\n";
+        }
+        else
+        {
+            os << "\nOptions:\n\n";
+        }
+
+        os << helpText << "\n";
+
+        return os;
+    }
+
+    PrintHelpStyle getPrintHelpStyle() const
+    {
+        return optionsCollector.getPrintHelpStyle();
     }
 
 
