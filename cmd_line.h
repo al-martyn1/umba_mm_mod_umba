@@ -38,6 +38,14 @@
 // #include "cpp.h"
 
 
+
+extern std::string appFullName  ;
+extern std::string appVersion   ;
+extern std::string appCommitHash;  //UNDONE
+extern std::string appBuildDate ;
+extern std::string appBuildTime ;
+
+
 /*
 
  Использование
