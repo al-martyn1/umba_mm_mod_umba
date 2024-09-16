@@ -31,3 +31,6 @@
 *.out
 *.app
 *.html
+
+doc.doxygen
+doxygen.log

@@ -1,2 +1,2 @@
-rd /S /Q doc
+rd /S /Q doc.doxygen
 del doxygen.log

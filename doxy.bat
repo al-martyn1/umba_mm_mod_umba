@@ -1,1 +1,1 @@
-doxygen doxygen.cfg > doxygen.log
+doxygen doxygen.cfg > doxygen.log 2>&1
