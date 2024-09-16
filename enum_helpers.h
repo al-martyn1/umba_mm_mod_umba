@@ -126,7 +126,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
 //----------------------------------------------------------------------------
 #define UMBA_ENUM_CLASS_IMPLEMENT_ENUM_UNARY_OPERATOR_IMPL(EnumType, operatorSign)                              \
             inline                                                                                              \
-            EnumType operator##operatorSign( EnumType e )                                                       \
+            EnumType operator operatorSign( EnumType e )                                                       \
             {                                                                                                   \
                 return umba::enum_helpers::fromUnderlyingType<EnumType>(                                        \
                                            operatorSign                                                         \
@@ -137,7 +137,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
 //------------------------------
 #define UMBA_ENUM_CLASS_IMPLEMENT_ENUM_BINARY_OPERATOR_IMPL(EnumType, operatorSign)                             \
             inline                                                                                              \
-            EnumType operator##operatorSign( EnumType e1, EnumType e2)                                          \
+            EnumType operator operatorSign( EnumType e1, EnumType e2)                                          \
             {                                                                                                   \
                 return umba::enum_helpers::fromUnderlyingType<EnumType>(                                        \
                                            umba::enum_helpers::toUnderlyingType<EnumType>(e1)                   \
@@ -146,7 +146,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
                 );                                                                                              \
             }                                                                                                   \
             inline                                                                                              \
-            EnumType& operator##operatorSign##=( EnumType &e1, EnumType e2)                                     \
+            EnumType& operator operatorSign##=( EnumType &e1, EnumType e2)                                     \
             {                                                                                                   \
                 e1 = e1 operatorSign e2;                                                                        \
                 return e1;                                                                                      \
@@ -155,7 +155,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
 //------------------------------
 #define UMBA_ENUM_CLASS_IMPLEMENT_ENUM_UNDERLYING_TYPE_BINARY_OPERATOR_IMPL(EnumType, operatorSign)             \
             inline                                                                                              \
-            EnumType operator##operatorSign( EnumType e1, typename std::underlying_type< EnumType >::type e2)   \
+            EnumType operator operatorSign( EnumType e1, typename std::underlying_type< EnumType >::type e2)   \
             {                                                                                                   \
                 return umba::enum_helpers::fromUnderlyingType<EnumType>(                                        \
                                            umba::enum_helpers::toUnderlyingType<EnumType>(e1)                   \
@@ -164,7 +164,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
                 );                                                                                              \
             }                                                                                                   \
             inline                                                                                              \
-            EnumType operator##operatorSign( typename std::underlying_type< EnumType >::type e1, EnumType e2)   \
+            EnumType operator operatorSign( typename std::underlying_type< EnumType >::type e1, EnumType e2)   \
             {                                                                                                   \
                 return umba::enum_helpers::fromUnderlyingType<EnumType>(                                        \
                                            e1                                                                   \
@@ -173,7 +173,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
                 );                                                                                              \
             }                                                                                                   \
             inline                                                                                              \
-            EnumType& operator##operatorSign##=( EnumType &e1, typename std::underlying_type< EnumType >::type e2) \
+            EnumType& operator operatorSign##=( EnumType &e1, typename std::underlying_type< EnumType >::type e2) \
             {                                                                                                   \
                 e1 = e1 operatorSign e2;                                                                        \
                 return e1;                                                                                      \
@@ -182,7 +182,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
 //------------------------------
 #define UMBA_ENUM_CLASS_IMPLEMENT_ENUM_SHIFT_OPERATOR_IMPL(EnumType, operatorSign)                              \
             inline                                                                                              \
-            EnumType operator##operatorSign( EnumType e, unsigned sh )                                          \
+            EnumType operator operatorSign( EnumType e, unsigned sh )                                          \
             {                                                                                                   \
                 return umba::enum_helpers::fromUnderlyingType<EnumType>(                                        \
                                            umba::enum_helpers::toUnderlyingType<EnumType>(e)                    \
@@ -191,7 +191,7 @@ bool enumGreaterEqualImpl(EnumType e1, EnumType e2)
                 );                                                                                              \
             }                                                                                                   \
             inline                                                                                              \
-            EnumType& operator##operatorSign##=( EnumType &e, unsigned sh )                                     \
+            EnumType& operator operatorSign##=( EnumType &e, unsigned sh )                                     \
             {                                                                                                   \
                 e = e operatorSign sh;                                                                          \
                 return e;                                                                                       \
