@@ -817,7 +817,7 @@ public: // methods - методы собственно разбора
                      bool prefixIsNumber     = true ;
                      tokenTrieBackTrace( numbersTrie
                                        , numberPrefixIdx
-                                       , [&](token_type ch, const auto& /*trieNode*/)
+                                       , [&](token_type ch, const TrieNode& /*trieNode*/)
                                          {
                                              if (!utils::isDigitAllowed(ch, numbersBase))
                                                  prefixIsNumber = false;
@@ -1237,11 +1237,12 @@ public: // methods - методы собственно разбора
 
                         tokenTrieBackTrace( numbersTrie
                                           , numberPrefixIdx
-                                          , [&](token_type ch, const auto& /*trieNode*/)
+                                          , [&](token_type ch, const TrieNode& /*trieNode*/)
                                             {
                                                 if (!utils::isDigitAllowed(ch, numbersBase))
                                                     prefixIsNumber = false;
-                                                if (prefixIsNumber && idx!=idxEnd)
+
+                                                if (prefixIsNumber && (idx!=idxEnd))
                                                 {
                                                     prefixDigits[idx] = ch;
                                                     ++idx;
