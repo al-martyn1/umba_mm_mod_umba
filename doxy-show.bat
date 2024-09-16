@@ -1,1 +1,1 @@
-start doc/html/index.html
+start doc.doxygen/html/index.html
