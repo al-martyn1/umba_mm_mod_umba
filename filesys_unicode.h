@@ -53,6 +53,17 @@ namespace filesys_unicode{
 // Aliasing for current implementation
 namespace fsysapi = ::umba::filesys;
 
+#if defined(UMBA_FILESYS_HAS_NATIVE_WIDE_API)
+
+    using native_fs_string_t = std::wstring;
+
+#else // !UMBA_FILESYS_HAS_NATIVE_WIDE_API
+
+    using native_fs_string_t = std::string;
+
+#endif // UMBA_FILESYS_HAS_NATIVE_WIDE_API
+
+
 //-----------------------------------------------------------------------------
 
 
@@ -76,86 +87,20 @@ namespace impl_helpers {
 
 
 //-----------------------------------------------------------------------------
-// encodeToWide
+inline std::wstring encodeToWide(const std::wstring &name)    { return name; }
+inline std::wstring encodeToWide(const wchar_t* name)         { return name ? std::wstring(name) : std::wstring(); }
+inline std::wstring encodeToWide(wchar_t nameChar)            { return std::wstring(1, nameChar); }
+inline std::wstring encodeToWide(const std::string &name)     { return fromUtf8(name); }
+inline std::wstring encodeToWide(const char* name)            { return name ? fromUtf8(name) : std::wstring(); }
+inline std::wstring encodeToWide(char nameChar)               { return fromUtf8(std::string(1, nameChar)); }
 
 //-----------------------------------------------------------------------------
-inline std::wstring encodeToWide(const std::wstring &name)
-{
-    return name;
-}
-
-//------------------------------
-inline std::wstring encodeToWide(const wchar_t* name)
-{
-    return name ? std::wstring(name) : std::wstring();
-}
-
-//------------------------------
-inline std::wstring encodeToWide(wchar_t nameChar)
-{
-    return std::wstring(1, nameChar);
-}
-
-//------------------------------
-inline std::wstring encodeToWide(const std::string &name)
-{
-    return fromUtf8(name);
-}
-
-//------------------------------
-inline std::wstring encodeToWide(const char* name)
-{
-    return name ? fromUtf8(name) : std::wstring();
-}
-
-//------------------------------
-inline std::wstring encodeToWide(char nameChar)
-{
-    return fromUtf8(std::string(1, nameChar));
-}
-
-//-----------------------------------------------------------------------------
-
-
-
-//-----------------------------------------------------------------------------
-// encodeToChar
-
-//-----------------------------------------------------------------------------
-inline std::string encodeToChar(const std::wstring &name)
-{
-    return toUtf8(name);
-}
-
-//------------------------------
-inline std::string encodeToChar(const wchar_t* name)
-{
-    return name ? toUtf8(name) : std::string();
-}
-
-//------------------------------
-inline std::string encodeToChar(wchar_t nameChar)
-{
-    return toUtf8(std::wstring(1, nameChar));
-}
-
-//------------------------------
-inline std::string encodeToChar(const std::string &name)
-{
-    return name;
-}
-
-//------------------------------
-inline std::string encodeToChar(const char* name)
-{
-    return name ? std::string(name) : std::string();
-}
-
-//------------------------------
-inline std::string encodeToChar(char nameChar)
-{
-    return std::string(1, nameChar);
-}
+inline std::string encodeToChar(const std::wstring &name)     { return toUtf8(name); }
+inline std::string encodeToChar(const wchar_t* name)          { return name ? toUtf8(name) : std::string(); }
+inline std::string encodeToChar(wchar_t nameChar)             { return toUtf8(std::wstring(1, nameChar)); }
+inline std::string encodeToChar(const std::string &name)      { return name; }
+inline std::string encodeToChar(const char* name)             { return name ? std::string(name) : std::string(); }
+inline std::string encodeToChar(char nameChar)                { return std::string(1, nameChar); }
 
 //-----------------------------------------------------------------------------
 
@@ -165,152 +110,41 @@ inline std::string encodeToChar(char nameChar)
 #if defined(UMBA_FILESYS_HAS_NATIVE_WIDE_API)
 
 //-----------------------------------------------------------------------------
-inline std::wstring encodeToNative(const std::wstring &name)
-{
-    return encodeToWide(name);
-}
-
-//------------------------------
-inline std::wstring encodeToNative(const wchar_t* name)
-{
-    return encodeToWide(name);
-}
-
-//------------------------------
-inline std::wstring encodeToNative(wchar_t nameChar)
-{
-    return encodeToWide(nameChar);
-}
-
-//------------------------------
-inline std::wstring encodeToNative(const std::string &name)
-{
-    return encodeToWide(name);
-}
-
-//------------------------------
-inline std::wstring encodeToNative(const char* name)
-{
-    return encodeToWide(name);
-}
-
-//------------------------------
-inline std::wstring encodeToNative(char nameChar)
-{
-    return encodeToWide(nameChar);
-}
+inline std::wstring encodeToNative(const std::wstring &name)  { return encodeToWide(name); }
+inline std::wstring encodeToNative(const wchar_t* name)       { return encodeToWide(name); }
+inline std::wstring encodeToNative(wchar_t nameChar)          { return encodeToWide(nameChar); }
+inline std::wstring encodeToNative(const std::string &name)   { return encodeToWide(name); }
+inline std::wstring encodeToNative(const char* name)          { return encodeToWide(name); }
+inline std::wstring encodeToNative(char nameChar)             { return encodeToWide(nameChar); }
 
 //-----------------------------------------------------------------------------
-inline std::string encodeFromNative(const std::wstring &name)
-{
-    return encodeToChar(name);
-}
 
-//------------------------------
-inline std::string encodeFromNative(const wchar_t* name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(wchar_t nameChar)
-{
-    return encodeToChar(nameChar);
-}
-
-//------------------------------
-inline std::string encodeFromNative(const std::string &name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(const char* name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(char nameChar)
-{
-    return encodeToChar(nameChar);
-}
+inline std::string encodeFromNative(const std::wstring &name) { return encodeToChar(name); }
+inline std::string encodeFromNative(const wchar_t* name)      { return encodeToChar(name); }
+inline std::string encodeFromNative(wchar_t nameChar)         { return encodeToChar(nameChar); }
+inline std::string encodeFromNative(const std::string &name)  { return encodeToChar(name); }
+inline std::string encodeFromNative(const char* name)         { return encodeToChar(name); }
+inline std::string encodeFromNative(char nameChar)            { return encodeToChar(nameChar); }
 
 //-----------------------------------------------------------------------------
 
 #else // !UMBA_FILESYS_HAS_NATIVE_WIDE_API
 
 //-----------------------------------------------------------------------------
-inline std::string encodeToNative(const std::wstring &name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeToNative(const wchar_t* name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeToNative(wchar_t nameChar)
-{
-    return encodeToChar(nameChar);
-}
-
-//------------------------------
-inline std::string encodeToNative(const std::string &name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeToNative(const char* name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeToNative(char nameChar)
-{
-    return encodeToChar(nameChar);
-}
+inline std::string encodeToNative(const std::wstring &name)   { return encodeToChar(name); }
+inline std::string encodeToNative(const wchar_t* name)        { return encodeToChar(name); }
+inline std::string encodeToNative(wchar_t nameChar)           { return encodeToChar(nameChar); }
+inline std::string encodeToNative(const std::string &name)    { return encodeToChar(name); }
+inline std::string encodeToNative(const char* name)           { return encodeToChar(name); }
+inline std::string encodeToNative(char nameChar)              { return encodeToChar(nameChar); }
 
 //-----------------------------------------------------------------------------
-inline std::string encodeFromNative(const std::wstring &name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(const wchar_t* name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(wchar_t nameChar)
-{
-    return encodeToChar(nameChar);
-}
-
-//------------------------------
-inline std::string encodeFromNative(const std::string &name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(const char* name)
-{
-    return encodeToChar(name);
-}
-
-//------------------------------
-inline std::string encodeFromNative(char nameChar)
-{
-    return encodeToChar(nameChar);
-}
+inline std::string encodeFromNative(const std::wstring &name) { return encodeToChar(name); }
+inline std::string encodeFromNative(const wchar_t* name)      { return encodeToChar(name); }
+inline std::string encodeFromNative(wchar_t nameChar)         { return encodeToChar(nameChar); }
+inline std::string encodeFromNative(const std::string &name)  { return encodeToChar(name); }
+inline std::string encodeFromNative(const char* name)         { return encodeToChar(name); }
+inline std::string encodeFromNative(char nameChar)            { return encodeToChar(nameChar); }
 
 //-----------------------------------------------------------------------------
 
@@ -399,25 +233,25 @@ using filesize_t = fsysapi::filesize_t;
 //-----------------------------------------------------------------------------
 inline std::string formatFiletime(filetime_t t, const std::wstring &fmt)
 {
-    return fsysapi::formatFiletime(t, impl_helpers::encodeToChar(fmt));
+    return encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
 inline std::string formatFiletime(filetime_t t, const std::string &fmt)
 {
-    return fsysapi::formatFiletime(t, impl_helpers::encodeToChar(fmt));
+    return encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
 inline std::string formatFiletime(filetime_t t, const wchar_t *fmt)
 {
-    return fsysapi::formatFiletime(t, impl_helpers::encodeToChar(fmt));
+    return encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
 inline std::string formatFiletime(filetime_t t, const char *fmt)
 {
-    return fsysapi::formatFiletime(t, impl_helpers::encodeToChar(fmt));
+    return encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
@@ -433,59 +267,509 @@ using FileStat = fsysapi::FileStat;
 
 //----------------------------------------------------------------------------
 //! Возвращает FileStat по пути (файл или каталог, не важно)
-inline bool getPathStat()
-
-
-
-
-
-
-
-
-template<typename StringType>
-bool getPathStat(const StringType &path, FileStat &fileStat)
-
-
-template<typename StringType>
-bool isPathExist(const StringType &path)
+inline bool getPathStat(const std::wstring &path, FileStat &fileStat)
 {
-    FileStat fileStat;
-    return getPathStat(path, fileStat);
+    return fsysapi::getPathStat(impl_helpers::encodeToNative(path), fileStat);
+}
+
+//------------------------------
+//! Возвращает FileStat по пути (файл или каталог, не важно)
+inline bool getPathStat(const std::string &path, FileStat &fileStat)
+{
+    return fsysapi::getPathStat(impl_helpers::encodeToNative(path), fileStat);
+}
+
+//------------------------------
+//! Возвращает FileStat по пути (файл или каталог, не важно)
+inline bool getPathStat(const wchar_t *path, FileStat &fileStat)
+{
+    return fsysapi::getPathStat(impl_helpers::encodeToNative(path), fileStat);
+}
+
+//------------------------------
+//! Возвращает FileStat по пути (файл или каталог, не важно)
+inline bool getPathStat(const char *path, FileStat &fileStat)
+{
+    return fsysapi::getPathStat(impl_helpers::encodeToNative(path), fileStat);
 }
 
 //----------------------------------------------------------------------------
-template<typename StringType>
-bool isPathDirectory(const StringType &path)
-{
-    FileStat fileStat;
-    if (!getPathStat(path, fileStat))
-        return false;
 
-    return fileStat.isDir();
+
+
+//----------------------------------------------------------------------------
+inline bool isPathExist(const std::wstring &path)
+{
+    return fsysapi::isPathExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+
+inline bool isPathExist(const std::string &path)
+{
+    return fsysapi::isPathExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+
+inline bool isPathExist(const wchar_t *path)
+{
+    return fsysapi::isPathExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+
+inline bool isPathExist(const char *path)
+{
+    return fsysapi::isPathExist(impl_helpers::encodeToNative(path));
 }
 
 //----------------------------------------------------------------------------
-template<typename StringType>
-bool isPathFile(const StringType &path)
-{
-    FileStat fileStat;
-    if (!getPathStat(path, fileStat))
-        return false;
 
-    return fileStat.isFile();
+
+
+//----------------------------------------------------------------------------
+inline bool isPathDirectory(const std::wstring &path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathDirectory(const std::string &path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathDirectory(const wchar_t *path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathDirectory(const char *path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
 }
 
 //----------------------------------------------------------------------------
-template<typename StringType>
-bool isFileExist(const StringType &path)
+
+
+
+//----------------------------------------------------------------------------
+inline bool isPathFile(const std::wstring &path)
 {
-    FileStat fileStat;
-    if (!getPathStat(path, fileStat))
-        return false;
-    return fileStat.isFile();
+    return fsysapi::isPathFile(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathFile(const std::string &path)
+{
+    return fsysapi::isPathFile(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathFile(const wchar_t *path)
+{
+    return fsysapi::isPathFile(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathFile(const char *path)
+{
+    return fsysapi::isPathFile(impl_helpers::encodeToNative(path));
 }
 
 //----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline bool isFileExist(const std::wstring &path)
+{
+    return fsysapi::isFileExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isFileExist(const std::string &path)
+{
+    return fsysapi::isFileExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isFileExist(const wchar_t *path)
+{
+    return fsysapi::isFileExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isFileExist(const char *path)
+{
+    return fsysapi::isFileExist(impl_helpers::encodeToNative(path));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline bool isFileReadonly( const std::wstring &fname )
+{
+    return fsysapi::isFileReadonly(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileReadonly( const std::string &fname )
+{
+    return fsysapi::isFileReadonly(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileReadonly( const wchar_t *fname )
+{
+    return fsysapi::isFileReadonly(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileReadonly( const char *fname )
+{
+    return fsysapi::isFileReadonly(impl_helpers::encodeToNative(fname));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline filetime_t getFileTimeNow()
+{
+    fsysapi::getFileTimeNow();
+}
+
+//----------------------------------------------------------------------------
+inline bool isLastErrorAlreadyExists()
+{
+    return fsysapi::isLastErrorAlreadyExists();
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+//! Получение текущего рабочего каталога
+inline std::string getCurrentDirectory()
+{
+    return encodeFromNative(fsysapi::getCurrentDirectory<native_fs_string_t>());
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDirectory(const std::wstring &newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDirectory(const std::string &newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDirectory(const wchar_t *newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDirectory(const char *newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Удаление файла
+inline bool deleteFile( const std::wstring &filename )
+{
+    return fsysapi::deleteFile(impl_helpers::encodeToNative(filename));
+}
+
+//------------------------------
+//! Удаление файла
+inline bool deleteFile( const std::string &filename )
+{
+    return fsysapi::deleteFile(impl_helpers::encodeToNative(filename));
+}
+
+//------------------------------
+//! Удаление файла
+inline bool deleteFile( const wchar_t *filename )
+{
+    return fsysapi::deleteFile(impl_helpers::encodeToNative(filename));
+}
+
+//------------------------------
+//! Удаление файла
+inline bool deleteFile( const char *filename )
+{
+    return fsysapi::deleteFile(impl_helpers::encodeToNative(filename));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Удаление каталога
+inline bool deleteDirectory( const std::wstring &dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Удаление каталога
+inline bool deleteDirectory( const std::string &dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Удаление каталога
+inline bool deleteDirectory( const wchar_t *dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Удаление каталога
+inline bool deleteDirectory( const char *dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Создание каталога
+inline bool createDirectory( const std::wstring &dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Создание каталога
+inline bool createDirectory( const std::string &dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Создание каталога
+inline bool createDirectory( const wchar_t *dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Создание каталога
+inline bool createDirectory( const char *dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirectoryEx( const std::wstring &dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirectoryEx( const std::string &dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirectoryEx( const wchar_t *dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirectoryEx( const char *dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename DataType> inline
+bool readFile( const std::wstring &filename, std::vector<DataType> &filedata
+             , FileStat *pFileStat      = 0, bool ignoreSizeErrors = true
+             )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool readFile( const std::string &filename, std::vector<DataType> &filedata
+             , FileStat *pFileStat     = 0, bool ignoreSizeErrors = true
+             )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool readFile( const wchar_t *filename, std::vector<DataType> &filedata
+             , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
+             )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool readFile( const char *filename   , std::vector<DataType> &filedata
+             , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
+             )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline bool readFile( const std::wstring &filename, std::string &filedata
+                    , FileStat *pFileStat      = 0, bool ignoreSizeErrors = true
+                    )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//------------------------------
+inline bool readFile( const std::string &filename, std::string &filedata
+                    , FileStat *pFileStat     = 0, bool ignoreSizeErrors = true
+                    )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//------------------------------
+inline bool readFile( const wchar_t *filename, std::string &filedata
+                    , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
+                    )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//------------------------------
+inline bool readFile( const char *filename   , std::string &filedata
+                    , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
+                    )
+{
+    return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename DataType> inline
+bool writeFile( const std::wstring &filename, const DataType *pData
+              , size_t             dataSize , bool           bOverwrite = false
+              )
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool writeFile( const std::string &filename, const DataType *pData
+              , size_t            dataSize , bool           bOverwrite = false
+              )
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool writeFile( const wchar_t *filename, const DataType *pData
+              , size_t        dataSize , bool           bOverwrite = false
+              )
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool writeFile( const char *filename, const DataType *pData
+              , size_t      dataSize, bool           bOverwrite = false
+              )
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
+}
+
+//------------------------------
+
+
+
+
+template<typename StringType, typename DataType> inline
+bool writeFile( const StringType &filename       //!< Имя файла
+              , const DataType   *pData          //!< Данные
+              , size_t            dataSize
+              , bool bOverwrite
+              )
+
+template<typename StringType, typename DataType> inline
+bool writeFile( const StringType            &filename    //!< Имя файла
+              , const std::vector<DataType> &filedata    //!< Вектор для данных
+              , bool                        bOverwrite
+              )
+
+template<typename StringType> inline
+bool writeFile( const StringType            &filename    //!< Имя файла
+              , const std::string           &filedata    //!< Вектор для данных
+              , bool                        bOverwrite
+              )
+{
+    return writeFile(filename, filedata.data(), filedata.size(), bOverwrite);
+}
+
+
+//----------------------------------------------------------------------------
+
+//------------------------------
+
+
+
 
 
 
@@ -497,6 +781,7 @@ bool isFileExist(const StringType &path)
 
 // Use fsysapi::, Luke
 // Use impl_helpers::encodeToNative and impl_helpers::encodeFromNative, Luke
+// native_fs_string_t
 
 //-----------------------------------------------------------------------------
 
