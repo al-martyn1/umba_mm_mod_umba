@@ -193,8 +193,8 @@ inline std::string encodeFromNative(char nameChar)            { return encodeToC
 
 //-----------------------------------------------------------------------------
 using impl_helpers::nameConvert;
-
-
+using impl_helpers::encodeToNative;
+using impl_helpers::encodeFromNative;
 
 //-----------------------------------------------------------------------------
 
@@ -878,28 +878,28 @@ inline bool writeFile( const char *filename, const std::string &filedata, bool b
 template<typename EnumDirectoryHandler> inline
 bool enumerateDirectory(const std::wstring &path, EnumDirectoryHandler handler)
 {
-    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+    return fsysapi::enumerateDirectory(impl_helpers::encodeToNative(path), handler);
 }
 
 //------------------------------
 template<typename EnumDirectoryHandler> inline
 bool enumerateDirectory(const std::string &path, EnumDirectoryHandler handler)
 {
-    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+    return fsysapi::enumerateDirectory(impl_helpers::encodeToNative(path), handler);
 }
 
 //------------------------------
 template<typename EnumDirectoryHandler> inline
 bool enumerateDirectory(const wchar_t *path, EnumDirectoryHandler handler)
 {
-    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+    return fsysapi::enumerateDirectory(impl_helpers::encodeToNative(path), handler);
 }
 
 //------------------------------
 template<typename EnumDirectoryHandler> inline
 bool enumerateDirectory(const char *path, EnumDirectoryHandler handler)
 {
-    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+    return fsysapi::enumerateDirectory(impl_helpers::encodeToNative(path), handler);
 }
 
 //----------------------------------------------------------------------------
@@ -907,21 +907,6 @@ bool enumerateDirectory(const char *path, EnumDirectoryHandler handler)
 
 
 //----------------------------------------------------------------------------
-
-
-
-//------------------------------
-
-
-
-
-
-
-
-
-
-
-
 
 // Use fsysapi::, Luke
 // Use impl_helpers::encodeToNative and impl_helpers::encodeFromNative, Luke

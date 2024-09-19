@@ -233,7 +233,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                                                             return true; // continue
                                                         }
 
-                                                        if (fileStat.fileType!=umba::filesys:: /* FileType:: */ FileTypeFile)
+                                                        if (fileStat.fileType!=umba::filesys:: /* FileType:: */ FileType::FileTypeFile)
                                                         {
                                                             return true; // continue
                                                         }
