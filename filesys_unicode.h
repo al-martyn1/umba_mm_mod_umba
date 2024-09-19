@@ -458,6 +458,24 @@ inline bool isLastErrorAlreadyExists()
 
 
 //----------------------------------------------------------------------------
+inline std::string getTempFolderPath()
+{
+    return encodeFromNative(fsysapi::getTempFolderPath<native_fs_string_t>());
+}
+
+//----------------------------------------------------------------------------
+inline std::string getCurrentUserHomeDirectory()
+{
+    return encodeFromNative(fsysapi::getCurrentUserHomeDirectory<native_fs_string_t>());
+}
+
+//----------------------------------------------------------------------------
+inline std::string getCurrentDrive()
+{
+    return encodeFromNative(fsysapi::getCurrentDrive<native_fs_string_t>());
+}
+
+//----------------------------------------------------------------------------
 //! Получение текущего рабочего каталога
 inline std::string getCurrentDirectory()
 {
@@ -626,36 +644,28 @@ inline bool createDirectoryEx( const char *dirname, bool forceCreatePath )
 
 //----------------------------------------------------------------------------
 template<typename DataType> inline
-bool readFile( const std::wstring &filename, std::vector<DataType> &filedata
-             , FileStat *pFileStat      = 0, bool ignoreSizeErrors = true
-             )
+bool readFile( const std::wstring &filename, std::vector<DataType> &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
 
 //------------------------------
 template<typename DataType> inline
-bool readFile( const std::string &filename, std::vector<DataType> &filedata
-             , FileStat *pFileStat     = 0, bool ignoreSizeErrors = true
-             )
+bool readFile( const std::string &filename, std::vector<DataType> &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
 
 //------------------------------
 template<typename DataType> inline
-bool readFile( const wchar_t *filename, std::vector<DataType> &filedata
-             , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
-             )
+bool readFile( const wchar_t *filename, std::vector<DataType> &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
 
 //------------------------------
 template<typename DataType> inline
-bool readFile( const char *filename   , std::vector<DataType> &filedata
-             , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
-             )
+bool readFile( const char *filename   , std::vector<DataType> &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
@@ -665,33 +675,25 @@ bool readFile( const char *filename   , std::vector<DataType> &filedata
 
 
 //----------------------------------------------------------------------------
-inline bool readFile( const std::wstring &filename, std::string &filedata
-                    , FileStat *pFileStat      = 0, bool ignoreSizeErrors = true
-                    )
+inline bool readFile( const std::wstring &filename, std::string &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
 
 //------------------------------
-inline bool readFile( const std::string &filename, std::string &filedata
-                    , FileStat *pFileStat     = 0, bool ignoreSizeErrors = true
-                    )
+inline bool readFile( const std::string &filename, std::string &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
 
 //------------------------------
-inline bool readFile( const wchar_t *filename, std::string &filedata
-                    , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
-                    )
+inline bool readFile( const wchar_t *filename, std::string &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
 
 //------------------------------
-inline bool readFile( const char *filename   , std::string &filedata
-                    , FileStat *pFileStat = 0, bool ignoreSizeErrors = true
-                    )
+inline bool readFile( const char *filename   , std::string &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true)
 {
     return fsysapi::readFile(impl_helpers::encodeToNative(filename), filedata, pFileStat, ignoreSizeErrors);
 }
@@ -702,69 +704,131 @@ inline bool readFile( const char *filename   , std::string &filedata
 
 //----------------------------------------------------------------------------
 template<typename DataType> inline
-bool writeFile( const std::wstring &filename, const DataType *pData
-              , size_t             dataSize , bool           bOverwrite = false
-              )
+bool writeFile( const std::wstring &filename, const DataType *pData, size_t dataSize, bool bOverwrite = false)
 {
     return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
 }
 
 //------------------------------
 template<typename DataType> inline
-bool writeFile( const std::string &filename, const DataType *pData
-              , size_t            dataSize , bool           bOverwrite = false
-              )
+bool writeFile( const std::string &filename, const DataType *pData, size_t dataSize, bool bOverwrite = false)
 {
     return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
 }
 
 //------------------------------
 template<typename DataType> inline
-bool writeFile( const wchar_t *filename, const DataType *pData
-              , size_t        dataSize , bool           bOverwrite = false
-              )
+bool writeFile( const wchar_t *filename, const DataType *pData, size_t dataSize, bool bOverwrite = false)
 {
     return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
 }
 
 //------------------------------
 template<typename DataType> inline
-bool writeFile( const char *filename, const DataType *pData
-              , size_t      dataSize, bool           bOverwrite = false
-              )
+bool writeFile( const char *filename, const DataType *pData, size_t dataSize, bool bOverwrite = false)
 {
     return fsysapi::writeFile(impl_helpers::encodeToNative(filename), pData, dataSize, bOverwrite);
 }
 
-//------------------------------
+//----------------------------------------------------------------------------
 
-
-
-
-template<typename StringType, typename DataType> inline
-bool writeFile( const StringType &filename       //!< Имя файла
-              , const DataType   *pData          //!< Данные
-              , size_t            dataSize
-              , bool bOverwrite
-              )
-
-template<typename StringType, typename DataType> inline
-bool writeFile( const StringType            &filename    //!< Имя файла
-              , const std::vector<DataType> &filedata    //!< Вектор для данных
-              , bool                        bOverwrite
-              )
-
-template<typename StringType> inline
-bool writeFile( const StringType            &filename    //!< Имя файла
-              , const std::string           &filedata    //!< Вектор для данных
-              , bool                        bOverwrite
-              )
-{
-    return writeFile(filename, filedata.data(), filedata.size(), bOverwrite);
-}
 
 
 //----------------------------------------------------------------------------
+template<typename DataType> inline
+bool writeFile( const std::wstring &filename, const std::vector<DataType> &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool writeFile( const std::string &filename, const std::vector<DataType> &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool writeFile( const wchar_t *filename, const std::vector<DataType> &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//------------------------------
+template<typename DataType> inline
+bool writeFile( const char *filename, const std::vector<DataType> &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline bool writeFile( const std::wstring &filename, const std::string &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//------------------------------
+inline bool writeFile( const std::string &filename, const std::string &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//------------------------------
+inline bool writeFile( const wchar_t *filename, const std::string &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//------------------------------
+inline bool writeFile( const char *filename, const std::string &filedata, bool bOverwrite)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(filename), filedata, bOverwrite);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename EnumDirectoryHandler> inline
+bool enumerateDirectory(const std::wstring &path, EnumDirectoryHandler handler)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+}
+
+//------------------------------
+template<typename EnumDirectoryHandler> inline
+bool enumerateDirectory(const std::string &path, EnumDirectoryHandler handler)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+}
+
+//------------------------------
+template<typename EnumDirectoryHandler> inline
+bool enumerateDirectory(const wchar_t *path, EnumDirectoryHandler handler)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+}
+
+//------------------------------
+template<typename EnumDirectoryHandler> inline
+bool enumerateDirectory(const char *path, EnumDirectoryHandler handler)
+{
+    return fsysapi::writeFile(impl_helpers::encodeToNative(path), handler);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+
+
 
 //------------------------------
 
