@@ -2477,12 +2477,12 @@ inline
 bool updateAutocompletionBashRc( ICommandLineOptionCollector *pCol, bool simpleRemoveLine )
 {
     std::string pref, suf, text = pCol->makeText( 0, PrintHelpStyle::bash_complete, &pref, &suf, false );
-    if (!updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory<std::string>(), umba::string_plus::make_string<std::string>(".bashrc") ), text, pref, suf, simpleRemoveLine ))
+    if (!updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory(), umba::string_plus::make_string<std::string>(".bashrc") ), text, pref, suf, simpleRemoveLine ))
         return false;
     #if defined(WIN32) || defined(_WIN32)
         text = pCol->makeText( 0, PrintHelpStyle::bash_complete, &pref, &suf, true );
         //if (!updateRcScriptFile( appendPath( getUserFolderPath(), ".bashrc" ), text, pref, suf, simpleRemoveLine ))
-        if (!updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory<std::string>(), umba::string_plus::make_string<std::string>(".bashrc") ), text, pref, suf, simpleRemoveLine))
+        if (!updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory(), umba::string_plus::make_string<std::string>(".bashrc") ), text, pref, suf, simpleRemoveLine))
 
             return false;
     #endif
@@ -2495,7 +2495,7 @@ bool updateAutocompletionBashProfile( ICommandLineOptionCollector *pCol, bool si
 {
     UMBA_USED(pCol);
     //std::string pref, suf, text = pCol->makeText( 0, PrintHelpStyle::bash_complete, &pref, &suf );
-    return updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory<std::string>(), umba::string_plus::make_string<std::string>(".bash_profile") ), "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi", std::string(), std::string(), simpleRemoveLine );
+    return updateRcScriptFile(umba::filename::appendPath(umba::filesys::getCurrentUserHomeDirectory(), umba::string_plus::make_string<std::string>(".bash_profile") ), "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi", std::string(), std::string(), simpleRemoveLine );
 }
 
 inline

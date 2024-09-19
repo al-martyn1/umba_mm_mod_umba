@@ -246,7 +246,7 @@ struct ProgramLocation
         m[umba::string_plus::make_string<StringType>("AppRootPath"  )] = rootPath;
         m[umba::string_plus::make_string<StringType>("AppConfPath"  )] = confPath;
 
-        m[umba::string_plus::make_string<StringType>("UserHomePath" )] = umba::filesys::getCurrentUserHomeDirectory<StringType>();
+        m[umba::string_plus::make_string<StringType>("UserHomePath" )] = umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentUserHomeDirectory());
 
         // stripLastPathSep
         m[umba::string_plus::make_string<StringType>("AppBin"       )] = m[umba::string_plus::make_string<StringType>("AppBinPath"   )];
@@ -256,7 +256,7 @@ struct ProgramLocation
         m[umba::string_plus::make_string<StringType>("AppUserHome"     )] = m[umba::string_plus::make_string<StringType>("UserHomePath" )];
 
 
-        m[umba::string_plus::make_string<StringType>("AppTempPath"     )] = umba::filesys::getTempFolderPath<StringType>();
+        m[umba::string_plus::make_string<StringType>("AppTempPath"     )] = umba::filesys::nameConvert<StringType>(umba::filesys::getTempFolderPath());
         m[umba::string_plus::make_string<StringType>("AppTemp"         )] = m[umba::string_plus::make_string<StringType>("TempPath"     )];
 
 
@@ -553,9 +553,9 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
 
     loc.exeName     = exeName;
 
-    loc.userConf    = umba::filename::appendPath( umba::filesys::getCurrentUserHomeDirectory<StringType>() , umba::filename::appendExt(StringType(), exeName) );
+    loc.userConf    = umba::filename::appendPath( umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentUserHomeDirectory()) , umba::filename::appendExt(StringType(), exeName) );
 
-    loc.cwd         = umba::filesys::getCurrentDirectory<StringType>();
+    loc.cwd         = umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentDirectory());
 
     loc.useUserFolder = useUserFolder;
 
