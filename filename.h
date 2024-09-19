@@ -546,7 +546,7 @@ StringType makeCanonical( StringType fileName
     StringType nativeHomeDirAlias = getNativeHomeDirAlias<StringType>();
     if (!npfi.hasAnyPrefix() /* !hasNetPrefix && !hasNetworkUncPrefix && !hasUncPrefix */ && pit!=parts.end() && !nativeHomeDirAlias.empty() && *pit==nativeHomeDirAlias)
     {
-        StringType homePath = filesys::getCurrentUserHomeDirectory<StringType>();
+        StringType homePath = filesys::internal::getCurrentUserHomeDirectory<StringType>();
         if (!homePath.empty())
         {
             std::replace_if( homePath.begin(), homePath.end(), isPathSep<typename StringType::value_type>, pathSep );
@@ -711,7 +711,7 @@ StringType prepareForNativeUsage( const StringType &fileName )
 //! Делает абсолютный путь под CWD, если задан относительный path
 template<typename StringType> inline
 StringType makeAbsPath( const StringType &path
-                      , const StringType &cwd  = umba::filesys::getCurrentDirectory<StringType>()
+                      , const StringType &cwd  = umba::filesys::internal::getCurrentDirectory<StringType>()
                       , typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>()
                       )
 {
@@ -1099,7 +1099,7 @@ StringType getDrive( StringType n )
 //-----------------------------------------------------------------------------
 //! Проверяет путь на присутствие имени диска, и если отсутствует, то обновляет его, извлекая имя диска из другого пути
 template<typename StringType> inline
-StringType checkPathPrependDrive( const StringType &n, const StringType &curDir = filesys::getCurrentDirectory<StringType>())
+StringType checkPathPrependDrive( const StringType &n, const StringType &curDir = filesys::internal::getCurrentDirectory<StringType>())
 {
     #if defined(WIN32) || defined(_WIN32)
     namespace ustrp = umba::string_plus;
