@@ -1468,7 +1468,7 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
     if (!isSpecialAlias(fndData.cFileName))
     {
         fileStat = fileStatFromFindData(fndData);
-        if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+        if (!handler(umba::filesys::encodeFromNative(fndData.cFileName), fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
         {
             return true;
         }
@@ -1480,7 +1480,7 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
         if (!isSpecialAlias(fndData.cFileName))
         {
             fileStat = fileStatFromFindData(fndData);
-            if (!handler(fndData.cFileName, fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+            if (!handler(umba::filesys::encodeFromNative(fndData.cFileName), fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
             {
                 return true;
             }

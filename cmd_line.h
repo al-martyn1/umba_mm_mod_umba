@@ -2769,7 +2769,7 @@ struct ArgsParser
     {
         StringType basePath;
         if (optFiles.empty())
-            basePath = umba::filesys::getCurrentDirectory<StringType>();
+            basePath = umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentDirectory());
         else
             basePath = umba::filename::getPath(optFiles.top());
     
