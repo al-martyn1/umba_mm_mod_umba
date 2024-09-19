@@ -122,7 +122,7 @@ namespace internal{
 
 //----------------------------------------------------------------------------
 //! Тип файла
-enum FileType
+enum class FileType
 {
     FileTypeInvalid, //!< Файл не найден, или ещё какая-то проблема
     FileTypeUnknown, //!< Тип файла не известен
@@ -379,13 +379,13 @@ struct FileStat
     filetime_t   timeLastAccess  ; //!< Время последнего доступа
 
     //! Возвращает true, если тип файла валидный
-    bool isValid() const { return fileType!=FileTypeInvalid; }
+    bool isValid() const { return fileType!=FileType::FileTypeInvalid; }
 
     //! Возвращает true, если статистика - по каталогу
-    bool isDir()   const { return fileType==FileTypeDir    ; }
+    bool isDir()   const { return fileType==FileType::FileTypeDir    ; }
 
     //! Возвращает true, если статистика - по файлу
-    bool isFile()  const { return fileType==FileTypeFile   ; }
+    bool isFile()  const { return fileType==FileType::FileTypeFile   ; }
 };
 #include "../warnings/pop.h"
 //----------------------------------------------------------------------------
@@ -495,13 +495,13 @@ void parseStatToFileStat( const struct_file_stat &statBuf, FileStat &fileStat )
     fileStat.timeLastModified =             statBuf.st_mtime;
     fileStat.timeLastAccess   =             statBuf.st_atime;
 
-    fileStat.fileType = FileTypeUnknown;
+    fileStat.fileType = FileType::FileTypeUnknown;
 
     #if defined(WIN32) || defined(_WIN32)
     if (statBuf.st_mode&_S_IFDIR)
-        fileStat.fileType = FileTypeDir;
+        fileStat.fileType = FileType::FileTypeDir;
     else if (statBuf.st_mode&_S_IFREG)
-        fileStat.fileType = FileTypeFile;
+        fileStat.fileType = FileType::FileTypeFile;
     #else
     if (statBuf.st_mode&S_IFDIR)
         fileStat.fileType = FileTypeDir;
@@ -682,7 +682,7 @@ FileStat getFileStat( const StringType &fileName )
     // https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time
 
     FileStat fileStat;
-    fileStat.fileType = FileTypeInvalid;
+    fileStat.fileType = FileType::FileTypeInvalid;
 
 
     HANDLE hFile = openFileForReadingWin32( fileName.c_str() );
@@ -713,7 +713,7 @@ FileStat getFileStat( const StringType &fileName )
     fileStat.fileSize = (filesize_t)liFileSize.QuadPart;
 
 
-    fileStat.fileType = FileTypeFile; // Need to check is dir
+    fileStat.fileType = FileType::FileTypeFile; // Need to check is dir
     // enum FileType { FileTypeInvalid, FileTypeUnknown, FileTypeDir, FileTypeFile, FileTypeRam };
 
     fileStat.timeCreation     = convertWindowsFiletime(creationTime);
@@ -1172,7 +1172,7 @@ bool readFile( const StringType &filename       //!< Имя файла
     filedata.clear();
 
     FileStat fileStat = getFileStat( filename );
-    if (fileStat.fileType!=FileTypeFile)
+    if (fileStat.fileType!=FileType::FileTypeFile)
         return false;
 
     if (pFileStat)
@@ -1244,7 +1244,7 @@ bool readFile( const StringType &filename       //!< Имя файла
         filedata.clear();
 
         FileStat fileStat = getFileStat( filename );
-        if (fileStat.fileType!=FileTypeFile)
+        if (fileStat.fileType!=FileType::FileTypeFile)
             return false;
 
         if (pFileStat)

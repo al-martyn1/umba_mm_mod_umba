@@ -209,7 +209,17 @@ using impl_helpers::nameConvert;
 
 
 //-----------------------------------------------------------------------------
-using FileType = fsysapi::FileType;
+using FileType = fsysapi::FileType; // пофиг, что проросло, надо переделывать
+
+// enum FileType // Надо бы переделать в enum class, но уж больно много где проросло
+// {
+//     FileTypeInvalid = fsysapi::FileTypeInvalid, //!< Файл не найден, или ещё какая-то проблема
+//     FileTypeUnknown = fsysapi::FileTypeUnknown, //!< Тип файла не известен
+//     FileTypeDir     = fsysapi::FileTypeDir    , //!< Каталог, не файл
+//     FileTypeFile    = fsysapi::FileTypeFile   , //!< Файл
+//     FileTypeRam     = fsysapi::FileTypeRam      //!< Что-то просто лежит в памяти
+// };
+
 
 
 
@@ -476,6 +486,34 @@ inline bool isFileReadonly( const wchar_t *fname )
 inline bool isFileReadonly( const char *fname )
 {
     return fsysapi::isFileReadonly(impl_helpers::encodeToNative(fname));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline bool isFileReadable( const std::wstring &fname )
+{
+    return fsysapi::isFileReadable(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileReadable( const std::string &fname )
+{
+    return fsysapi::isFileReadable(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileReadable( const wchar_t *fname )
+{
+    return fsysapi::isFileReadable(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileReadable( const char *fname )
+{
+    return fsysapi::isFileReadable(impl_helpers::encodeToNative(fname));
 }
 
 //----------------------------------------------------------------------------

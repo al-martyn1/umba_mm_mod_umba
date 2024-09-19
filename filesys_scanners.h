@@ -215,7 +215,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                                                         auto entryNameOnly = entryName;
                                                         entryName = umba::filename::appendPath(scanPath, entryName);
 
-                                                        if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileTypeDir)
+                                                        if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileType::FileTypeDir)
                                                         {
                                                             if (scanRecurse)
                                                             {
