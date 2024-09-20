@@ -15,6 +15,10 @@
 #include "../env.h"
 #include "../stl.h"
 
+//
+#include "filesys_impl_helpers.h"
+
+//
 #include <cstddef>
 #include <ctime>
 #include <exception>
@@ -1468,7 +1472,7 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
     if (!isSpecialAlias(fndData.cFileName))
     {
         fileStat = fileStatFromFindData(fndData);
-        if (!handler(umba::filesys::encodeFromNative(fndData.cFileName), fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+        if (!handler(umba::filesys::impl_helpers::encodeFromNative(fndData.cFileName), fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
         {
             return true;
         }
@@ -1480,7 +1484,7 @@ bool enumerateDirectoryImpl(std::wstring path, EnumDirectoryHandler handler)
         if (!isSpecialAlias(fndData.cFileName))
         {
             fileStat = fileStatFromFindData(fndData);
-            if (!handler(umba::filesys::encodeFromNative(fndData.cFileName), fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
+            if (!handler(umba::filesys::impl_helpers::encodeFromNative(fndData.cFileName), fileStat)) // (fndData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) ? true : false
             {
                 return true;
             }

@@ -47,5 +47,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Headers" FILES ${headers})
 add_library(${PROJECT_NAME} ${sources} ${headers})
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_ROOT}/..)
-
+# target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_ROOT}/..)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE "Shell32")
+endif()

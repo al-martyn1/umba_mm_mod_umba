@@ -7,9 +7,16 @@
 
 #if defined(WIN32) || defined(_WIN32)
     #include <shellapi.h>
-    //
+    #if defined(_MSC_VER)
+        #pragma comment( lib, "Shell32" )
+        // https://ru.stackoverflow.com/questions/15077/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-pragma-comment
+    #endif
     #include "win32_utils.h"
 #endif
+
+#include <process.h>
+#include <cerrno>
+
 
 //----------------------------------------------------------------------------
 // umba::shellapi::
@@ -43,6 +50,143 @@ bool deleteDirectory(const std::string &path)
     return false;
 
 #endif
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Открывает заданный URL в браузере по умолчанию
+inline
+bool openUrl(const std::string &url)
+{
+#if defined(WIN32) || defined(_WIN32)
+
+    // https://learn.microsoft.com/ru-ru/windows/win32/shell/launch
+    // https://learn.microsoft.com/en-us/windows/win32/shell/launch
+    // https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecutea
+    auto res = (INT_PTR)ShellExecuteW( 0, L"open", fromUtf8(url).c_str(), 0, 0, SW_SHOW );
+    return res>32; // If the function succeeds, it returns a value greater than 32
+
+#else
+
+    return false;
+
+#endif
+}
+
+//----------------------------------------------------------------------------
+//! Производит экраинрование одиночного аргумента для вызова в командной строке.
+inline
+std::string escapeCommandLineArgument(const std::string &str)
+{
+
+#if defined(WIN32) || defined(_WIN32)
+
+    // http://learn.microsoft.com/en-us/cpp/c-language/parsing-c-command-line-arguments?view=msvc-170
+
+    bool needEscape = false;
+    if (str.find_first_of(" \"")!=str.npos)
+       needEscape = true;
+
+    if (!needEscape)
+        return str;
+
+    //using CharType = typename StringType::value_type;
+
+    std::string res; res.reserve(str.size());
+    res.append(1, '\"');
+    for(auto ch : str)
+    {
+        if (ch=='\"')
+            res.append(2, '\"');
+        else
+            res.append(1, ch);
+    }
+    res.append(1, '\"');
+
+    return res;
+
+#else
+
+    return str; // Для *nix - пока ничего не делаем, надо разбираться
+
+#endif
+
+}
+
+//----------------------------------------------------------------------------
+//! Делает единственную строук из имени команды и аргументов, экранирует, и прочее
+inline
+std::string makeSystemFunctionCommandString(const std::string &cmd, std::vector<std::string> cmdArgs)
+{
+    cmdArgs.insert(cmdArgs.begin(), cmd);
+    for(auto &cmdArg : cmdArgs)
+    {
+        cmdArg = escapeCommandLineArgument(cmdArg);
+    }
+
+    //using CharType = typename StringType::value_type;
+
+    return umba::string_plus::merge<std::string, typename std::vector<std::string>::const_iterator>( cmdArgs.begin(), cmdArgs.end(), ' '/*, [](auto s) { return s; }*/ );
+}
+
+//----------------------------------------------------------------------------
+//! Производит вызов функции "system". Командная строка должна быть соответственно подготовлена (экранирование и тп)
+inline
+int callSystem(const std::string &cmd, std::string *pErrMsg=0, bool allocateConsole=true)
+{
+    // system returns the value that is returned by the command interpreter.
+    // It returns the value 0 only if the command interpreter returns the value 0.
+    // A return value of -1 indicates an error, and errno is set
+
+    // https://lastpixel.tv/win32-application-as-both-gui-and-console/
+    // https://stackoverflow.com/questions/48444176/win32-gui-application-compiled-as-gui-need-to-use-a-console-in-c
+    // https://learn.microsoft.com/ru-ru/windows/console/attachconsole
+    // BOOL WINAPI AttachConsole( _In_ DWORD dwProcessId);
+
+    // Нет разницы, использовать ли AttachConsole, и при ошибке AllocConsole, или сразу использовать AllocConsole
+    // Если используем AllocConsole, то она не откроет новое консольное окно, если мы уже прикреплены к консоли
+    // AllocConsole нужно использовать, потому, что если мы используем функцию system без этого, то она на каждый запуск
+    // создаёт консоль, и потом закрывает. Это плохо, и антивири могут ругаться, когда из одного приложения много таких
+    // окон выскакивает.
+    // Это годно для GUI программ, которые не долго работают, но часто вызывают 'system'.
+    // Для GUI программ, которые делают это редко, а работают долго - ситуация наоборот - не надо постоянно держать открытую консоль
+    // Так что, пожалуй, сделаем это опцией
+
+#if defined(WIN32) && defined(_WIN32)
+
+    if (allocateConsole)
+        AllocConsole();
+
+    int resVal = _wsystem(fromUtf8(cmd).c_str());
+
+#else
+
+    int resVal = system(cmd.c_str());
+
+#endif
+
+    if (resVal!=0)
+    {
+        if (pErrMsg)
+        {
+            if (resVal==-1)
+               *pErrMsg = std::string("Launch command failed: ") + std::strerror(errno);
+            else
+               *pErrMsg = "Command result code: " + std::to_string(resVal);
+        }
+    }
+
+    return resVal;
+}
+
+//----------------------------------------------------------------------------
+inline
+int callSystem(const std::string &cmd, const std::vector<std::string> &cmdArgs, std::string *pErrMsg=0, bool allocateConsole=true)
+{
+    return callSystem(makeSystemFunctionCommandString(cmd, cmdArgs), pErrMsg, allocateConsole);
 }
 
 //----------------------------------------------------------------------------
@@ -142,6 +286,7 @@ void showMessageBox(const std::string &msg, std::string title=std::string(), Mes
 namespace win32 {
 
 
+//----------------------------------------------------------------------------
 inline HKEY getRegShellExtentionsRootHkey(bool bSystemRoot = false)
 {
     if (!bSystemRoot)
@@ -150,6 +295,7 @@ inline HKEY getRegShellExtentionsRootHkey(bool bSystemRoot = false)
        return HKEY_CLASSES_ROOT;
 }
 
+//----------------------------------------------------------------------------
 inline std::wstring getRegShellExtentionHandlersRootPath(bool bSystemRoot = false)
 {
     std::wstring regPath;
@@ -163,13 +309,14 @@ inline std::wstring getRegShellExtentionHandlersRootPath(bool bSystemRoot = fals
     return regPath;
 }
 
+//----------------------------------------------------------------------------
 inline bool regSetValue(HKEY hKey, const std::wstring &varName, const std::wstring &value)
 {
     LSTATUS status = RegSetValueW(hKey, varName.c_str(), REG_SZ, (LPCWSTR)value.c_str(), (DWORD)(value.size()+1)*sizeof(wchar_t));
     return status==ERROR_SUCCESS;
 }
 
-
+//----------------------------------------------------------------------------
 inline bool registerShellExtentionHandlerApplication(bool bSystemRoot, const std::wstring &appNameId, const std::wstring &shellVerb, const std::wstring &appCommand)
 {
 
@@ -210,6 +357,14 @@ inline bool registerShellExtentionHandlerApplication(bool bSystemRoot, const std
     return res;
 }
 
+//----------------------------------------------------------------------------
+inline bool registerShellExtentionHandlerApplication(bool bSystemRoot, const std::string &appNameId, const std::string &shellVerb, const std::string &appCommand)
+{
+    return registerShellExtentionHandlerApplication(bSystemRoot, fromUtf8(appNameId), fromUtf8(shellVerb), fromUtf8(appCommand));
+
+}
+
+//----------------------------------------------------------------------------
 inline bool registerShellExtentionHandlerForExtention(bool bSystemRoot, const std::wstring &appNameId, std::wstring ext)
 {
 
@@ -245,6 +400,13 @@ inline bool registerShellExtentionHandlerForExtention(bool bSystemRoot, const st
     return res;
 }
 
+//----------------------------------------------------------------------------
+inline bool registerShellExtentionHandlerForExtention(bool bSystemRoot, const std::string &appNameId, const std::string &ext)
+{
+    return registerShellExtentionHandlerForExtention(bSystemRoot, fromUtf8(appNameId), fromUtf8(ext));
+}
+
+//----------------------------------------------------------------------------
 inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, const std::wstring &appNameId, const std::vector<std::wstring> &extList)
 {
     bool res = true;
@@ -258,6 +420,19 @@ inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, cons
     return res;
 }
 
+//----------------------------------------------------------------------------
+inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, const std::string &appNameId, const std::vector<std::string> &extList)
+{
+    std::vector<std::wstring> extListW;
+    for(const auto &ext: extList)
+    {
+        extListW.emplace_back(fromUtf8(ext));
+    }
+
+    return registerShellExtentionHandlerForExtentionList(bSystemRoot, fromUtf8(appNameId), extListW);
+}
+
+//----------------------------------------------------------------------------
 inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, const std::wstring &appNameId, const std::wstring &extCommaList)
 {
     //auto extList = marty_cpp::splitToLinesSimple(extCommaList, false, ',');
@@ -270,6 +445,11 @@ inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, cons
     return registerShellExtentionHandlerForExtentionList(bSystemRoot, appNameId, extList);
 }
 
+//----------------------------------------------------------------------------
+inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, const std::string &appNameId, const std::string &extCommaList)
+{
+    return registerShellExtentionHandlerForExtentionList(bSystemRoot, fromUtf8(appNameId), fromUtf8(extCommaList));
+}
 
 } // namespace win32
 
