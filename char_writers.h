@@ -8,6 +8,12 @@
 
 #include "i_char_writer.h"
 
+
+#if ( (defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING) )
+    #include "encoding/encoding.h"
+    #include "utf8.h"
+#endif
+
 //-----------------------------------------------------------------------------
 
 // umba::term::colors::
@@ -474,9 +480,7 @@ public:
     }
 
     //! Запись одного символа
-    virtual
-    void writeChar( char ch  //!< Символ для записи
-                  ) override
+    void writeCharFinalImpl(char ch)
     {
         //if (ch=='\n' && !isAttachedToConsole())
         //    m_stream.put('\r'); // expand single \n to \r\n sequence when stream is regular file
@@ -508,6 +512,92 @@ public:
         afterWriteChar( ch );
     }
 
+    #if (!((defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING)))
+    constexpr
+    #endif
+    bool needUtfCollect() const
+    {
+        // Для систем не Win32 ничего перекодировать не надо - там всё и так на UTF работает
+        #if ( (defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING) )
+            return isTerminal(); // если у нас консоль - надо перекодировать в кодировку консоли. Иначе - у нас файл, пишем UTF, как есть
+        #else
+            return false;
+        #endif
+    }
+
+    bool waitForFirstUtfChar() const
+    {
+        #if ( (defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING) )
+            return m_utfCollectCount==0 && m_utfSeqLen==0;
+        #else
+            return false;
+        #endif
+    }
+
+    // #if !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING)
+    // std::size_t        m_utfCollectCount = 0;
+    // std::size_t        m_utfSeqLen       = 0;
+    // char               m_utfCollectBuf[32];
+    // #endif
+
+    // std::size_t getNumberOfBytesUtf8(utf8_char_t ch)
+    // typedef std::uint8_t     utf8_char_t   ;
+
+    //!!!!!!
+
+
+    virtual
+    void writeChar( char ch  //!< Символ для записи
+                  ) override
+    {
+        if (!needUtfCollect()) // Не надо ничего перекодировать
+        {
+            writeCharFinalImpl(ch);
+            return;
+        }
+        else
+        {
+            if (waitForFirstUtfChar()) // ждём первый символ UTF8 последовательности
+            {
+                std::size_t uSeqLen = umba::getNumberOfBytesUtf8((umba::utf8_char_t)ch);
+                if (uSeqLen<2)
+                {
+                    writeCharFinalImpl(ch); // у нас нет UTF8 последовательности, только один символ
+                    return;
+                }
+    
+                uSeqLen = std::min(uSeqLen, (std::size_t)31);
+    
+                // Сохраняем длину и первый символ последовательности
+                m_utfSeqLen = uSeqLen;
+                m_utfCollectBuf[m_utfCollectCount++] = ch;
+                return;
+            }
+    
+            // Тут у нас ещё точно есть место под один символ
+            m_utfCollectBuf[m_utfCollectCount++] = ch;
+            if (m_utfCollectCount<m_utfSeqLen)
+                return;
+    
+            // Последовательность UTF8 забуферизирована целиком
+            // Место под завершающий ноль тоже есть
+            m_utfCollectBuf[m_utfCollectCount] = 0;
+
+            auto wstr = fromUtf8(&m_utfCollectBuf[0]);
+
+            auto conStr = encoding::toConsoleMultibyte(wstr);
+
+            for(auto conCh : conStr)
+            {
+                writeCharFinalImpl(conCh);
+            }
+
+            m_utfCollectCount = 0;
+            m_utfSeqLen       = 0;
+        }
+    }
+
+
 /*
     // Используется дефолтная реализация
     void writeBuf( const uint8_t* pBuf, size_t len ) override
@@ -520,6 +610,11 @@ public:
     virtual
     void flush() override
     {
+        #if ( (defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING) )
+        // Сбрасываем то, что недоколлекционировали
+        m_utfCollectCount = 0;
+        m_utfSeqLen       = 0;
+        #endif
         m_stream.flush();
     }
 
@@ -546,7 +641,7 @@ public:
 
     //! Возвращает true, если консоль является терминалом
     virtual
-    bool isTerminal() override
+    bool isTerminal() const override
     {
         return m_consoleType != term::UMBA_CONSOLETYPE_FILE;
 
@@ -557,7 +652,7 @@ public:
 
     //! Возвращает true, если консоль является ANSI-терминалом с поддержкой Escape-последовательностей
     virtual
-    bool isAnsiTerminal() override
+    bool isAnsiTerminal() const override
     {
         return m_consoleType != term::UMBA_CONSOLETYPE_FILE;
         //return false; //UNDONE: detect parent process is ansi terminal compatible
@@ -959,6 +1054,13 @@ protected:
     WORD               m_defColor;            //!< Цвет последовательностейумолчанию
     #endif
 
+    #if !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING)
+    std::size_t        m_utfCollectCount = 0;
+    std::size_t        m_utfSeqLen       = 0;
+    char               m_utfCollectBuf[32];
+    #endif
+
+
 }; // class StdStreamCharWriter
 #include "warnings/pop.h"
 
@@ -1280,7 +1382,7 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
 
     //! Возвращает true, если данный CharWriter - терминал
     virtual
-    bool isTerminal() override
+    bool isTerminal() const override
     {
         //if (!isTextMode())
         //    return false;
@@ -1290,7 +1392,7 @@ struct LegacyUartCharWriter : UMBA_IMPLEMENTS ICharWriter
 
     //! Возвращает true, если данный CharWriter - Ansi-терминал с поддержкой ESC-последовательностей
     virtual
-    bool isAnsiTerminal() override
+    bool isAnsiTerminal() const override
     {
         if (!isTerminal())
             return false;
