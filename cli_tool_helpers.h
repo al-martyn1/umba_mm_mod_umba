@@ -19,8 +19,10 @@
 
 #if defined(WIN32) || defined(_WIN32)
 
-    #define HAS_CLIPBOARD_SUPPORT 1
-    #include "clipboard_win32.h"
+    #if !defined(NO_CLIPBOARD_SUPPORT)
+        #define HAS_CLIPBOARD_SUPPORT 1
+        #include "clipboard_win32.h"
+    #endif
 
 #endif
 
