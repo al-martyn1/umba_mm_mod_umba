@@ -12,6 +12,7 @@
         // https://ru.stackoverflow.com/questions/15077/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-pragma-comment
     #endif
     #include "win32_utils.h"
+    #include "winconhelpers.h"
 #endif
 
 #include <process.h>
@@ -146,8 +147,8 @@ int callSystem(const std::string &cmd, std::string *pErrMsg=0, bool allocateCons
     // https://learn.microsoft.com/ru-ru/windows/console/attachconsole
     // BOOL WINAPI AttachConsole( _In_ DWORD dwProcessId);
 
-    // Нет разницы, использовать ли AttachConsole, и при ошибке AllocConsole, или сразу использовать AllocConsole
-    // Если используем AllocConsole, то она не откроет новое консольное окно, если мы уже прикреплены к консоли
+    // Нет разницы, использовать ли AttachConsole, и при ошибке - AllocConsole, или сразу использовать AllocConsole.
+    // Если используем AllocConsole, то она не откроет новое консольное окно, если мы уже прикреплены к консоли.
     // AllocConsole нужно использовать, потому, что если мы используем функцию system без этого, то она на каждый запуск
     // создаёт консоль, и потом закрывает. Это плохо, и антивири могут ругаться, когда из одного приложения много таких
     // окон выскакивает.
@@ -281,10 +282,96 @@ void showMessageBox(const std::string &msg, std::string title=std::string(), Mes
 
 
 //----------------------------------------------------------------------------
+enum class ProcessParentKind
+{
+    unknown      = -1,
+    msDevenv     = 1, // MS Visual Studio
+    vsCode       = 2, // VSCode
+    bash         = 3, // bash/git-bash
+    cmd          = 4, // cmd/git-cmd
+    conEmu       = 5,
+    farManager   = 6,
+    explorer     = 7,
+
+    conHost      = 127
+};
+
+//------------------------------
+inline ProcessParentKind getProcessParentKind()
+{
+#if !(defined(WIN32) || defined(_WIN32))
+
+    return ProcessParentKind::unknown;
+
+#else
+
+    if (winhelpers::isProcessHasParentOneOf({"devenv"}))
+        return ProcessParentKind::msDevenv;
+    else if (winhelpers::isProcessHasParentOneOf({"code"}))
+        return ProcessParentKind::vsCode;
+    else if (winhelpers::isProcessHasParentOneOf({"bash","git-bash"}))
+        return ProcessParentKind::bash;
+    else if (winhelpers::isProcessHasParentOneOf({"cmd","git-cmd"}))
+        return ProcessParentKind::cmd;
+    else if (winhelpers::isProcessHasParentOneOf({"ConEmuC64","ConEmu64","ConEmuC","ConEmu"}))
+        return ProcessParentKind::conEmu;
+    else if (winhelpers::isProcessHasParentOneOf({"far"}))
+        return ProcessParentKind::farManager;
+    else if (winhelpers::isProcessHasParentOneOf({"explorer"}))
+        return ProcessParentKind::explorer;
+    else if (winhelpers::isProcessHasParentOneOf({"conhost"}))
+        return ProcessParentKind::conHost;
+
+    return ProcessParentKind::unknown;
+
+#endif
+
+}
+
+//----------------------------------------------------------------------------
+inline std::string getDebugAppRootFolder( std::string *pCwd )
+{
+    std::string cwd = umba::filesys::getCurrentDirectory();
+
+    std::string rootPath;
+    umba::shellapi::ProcessParentKind processParentKind = umba::shellapi::getProcessParentKind();
+
+    if (processParentKind==umba::shellapi::ProcessParentKind::msDevenv)
+    {
+        // По умолчанию студия задаёт текущим каталогом на уровень выше от того, где лежит бинарник
+        // Задаём c учетом принятого формата выходного каталога ".out/toolchain/platform/config"
+        rootPath = umba::filename::makeCanonical(umba::filename::appendPath(cwd, std::string("..\\..\\..\\")));
+    }
+    else if (processParentKind==umba::shellapi::ProcessParentKind::vsCode)
+    {
+        // По умолчанию VSCode задаёт текущим каталогом тот, где лежит бинарник
+        // Задаём c учетом принятого формата выходного каталога ".out/toolchain/platform/config"
+        rootPath = umba::filename::makeCanonical(umba::filename::appendPath(cwd, std::string("..\\..\\..\\..\\")));
+    }
+
+    if (!rootPath.empty())
+    {
+        rootPath = umba::filename::appendPathSepCopy(rootPath);
+    }
+
+    if (pCwd)
+    {
+        *pCwd = cwd;
+    }
+
+    return rootPath;
+
+}
+
+
+//----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
 
 namespace win32 {
 
+// https://superuser.com/questions/266268/where-in-the-registry-does-windows-store-with-which-program-to-open-certain-file
+// https://learn.microsoft.com/en-us/windows/win32/shell/how-to-register-a-file-type-for-a-new-application
+// https://stackoverflow.com/questions/1387769/create-registry-entry-to-associate-file-extension-with-application-in-c
 
 //----------------------------------------------------------------------------
 inline HKEY getRegShellExtentionsRootHkey(bool bSystemRoot = false)
