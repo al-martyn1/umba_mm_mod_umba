@@ -32,11 +32,20 @@
 
 //-----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
+
     #if !defined(UMBA_FILESYS_HAS_NATIVE_WIDE_API)
         #define UMBA_FILESYS_HAS_NATIVE_WIDE_API
     #endif
+
+    //! Used as: const char *appExe    = "project" UMBA_FILESYS_EXE_EXT;
+    #define UMBA_FILESYS_EXE_EXT  ".exe"
+
 #else
     // #define UMBA_FILESYS_HAS_NATIVE_CHAR_API
+
+    //! Used as: const char *appExe    = "project" UMBA_FILESYS_EXE_EXT;
+    #define UMBA_FILESYS_EXE_EXT  ""
+
 #endif
 
 //-----------------------------------------------------------------------------
