@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-//#include "encoding/encoding.h"
 #include "filename.h"
 #include "filesys.h"
 
@@ -431,6 +430,7 @@ std::string readInput( const std::string &inputFilename , umba::cli_tool_helpers
 }
 
 //----------------------------------------------------------------------------
+#if 0
 template<typename BomStripper>
 std::string stripTheBom(std::string &text, bool checkForBom, const BomStripper &bomStripper)
 {
@@ -450,7 +450,7 @@ std::string stripTheBom(std::string &text, bool checkForBom, const BomStripper &
 
     return bomData;
 }
-
+#endif
 //----------------------------------------------------------------------------
 // template<typename FromUtfConverter> inline
 // bool clipboardTextSet(const std::string &text, const FromUtfConverter &fromUtfConverter, bool utf, HWND hWndNewOwner=0)
