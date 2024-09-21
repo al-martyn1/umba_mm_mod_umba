@@ -128,7 +128,7 @@ struct ICharWriter
 
     //! Возвращает true, если данный CharWriter - терминал
     virtual
-    bool isTerminal()
+    bool isTerminal() const
     {
         return false;
     }
@@ -136,7 +136,7 @@ struct ICharWriter
     //----------------------------------------------------------------------------
     //! Возвращает true, если данный CharWriter - Ansi-терминал с поддержкой ESC-последовательностей
     virtual
-    bool isAnsiTerminal()
+    bool isAnsiTerminal() const
     {
         return false;
     }
