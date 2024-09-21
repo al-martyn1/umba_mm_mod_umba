@@ -29,6 +29,9 @@
 
     //#include <>
 
+#elif defined(UMBA_LINUX_USED)
+
+
 #else
 
     #error "None of UMBA_*_USED macro defined, target not detected"
