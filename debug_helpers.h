@@ -91,10 +91,10 @@ namespace umba
 
 
 //! Ассерция, под отладчиком останавливается до самого ассерта
-#define UMBA_DEBUG_SESSION_ASSERT( expr )    if (umba::isDebuggerPresent()) do { umba::debugBreak(); UMBA_ASSERT( expr ); } while(0)
+#define UMBA_DEBUG_SESSION_ASSERT( expr )    if (umba::isDebuggerPresent()) do { if (!(expr)) umba::debugBreak(); UMBA_ASSERT( expr ); } while(0)
 
-//! Безусловная ассерция только при работе под отладчиком
-#define UMBA_DEBUG_SESSION_ASSERT_FAIL()     if (umba::isDebuggerPresent()) do { umba::debugBreak(); UMBA_ASSERT_FAIL( ); } while(0)
+//! Безусловный фейл только при работе под отладчиком
+#define UMBA_DEBUG_SESSION_ASSERT_FAIL()     if (umba::isDebuggerPresent()) do { if (!(expr)) umba::debugBreak(); UMBA_ASSERT_FAIL( ); } while(0)
 
 
 

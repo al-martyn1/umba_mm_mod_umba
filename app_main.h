@@ -17,13 +17,22 @@
 #endif
 
 #include "string_plus.h"
-
+#include "debug_helpers.h"
+#include "filename.h"
+#include "filesys.h"
+#include "shellapi.h"
 //
 #include <string>
 #include <vector>
 
+#if defined(UMBA_EVENTS_LOG_ENABLE)
+    #include <sstream>
+#endif
 
+//
 #if defined(WIN32) || defined(_WIN32)
+    #include <processenv.h>
+    #include <debugapi.h>
     #include <shellapi.h>
 #endif
 
@@ -98,18 +107,44 @@ inline std::vector<std::string> makeArgsVecForConsoleApp(int argc, wchar_t *argv
 
 inline std::vector<std::string> makeArgsVecForWindowedApp()
 {
+    // debugBreak();
+
+
+    LPWSTR pArgcWide = GetCommandLineW();
+    std::wstring argcWideStr = pArgcWide ? std::wstring(pArgcWide) : std::wstring();
+
+    #if defined(UMBA_EVENTS_LOG_ENABLE)
+    std::ostringstream oss;
+    oss << "ArgsStr: " << toUtf8(argcWideStr) << "\n";
+    #endif
+
+    // if (isDebuggerPresent())
+    // {
+    //     argcWideStr = std::wstring(L"ArgsStr: ") + argcWideStr + std::wstring(L"\n");
+    //     OutputDebugStringW(argcWideStr.c_str());
+    // }
+
     int nArgs = 0;
-    wchar_t ** wargv = CommandLineToArgvW( GetCommandLineW(), &nArgs );
+    wchar_t ** wargv = CommandLineToArgvW( pArgcWide, &nArgs );
     if (!wargv)
     {
         return std::vector<std::string>();
     }
 
+    std::size_t idx = 0;
+
     std::vector<std::string> resVec; resVec.reserve((std::size_t)nArgs);
     for(int i=0; i<nArgs; ++i)
     {
+        #if defined(UMBA_EVENTS_LOG_ENABLE)
+        oss << "arg["<< (idx++) << "]: " << toUtf8(wargv[i]) << "\n";
+        #endif
         resVec.emplace_back(reencodeArgv(wargv[i]));
     }
+
+    #if defined(UMBA_EVENTS_LOG_ENABLE)
+    shellapi::writeUmbaEventLogNow("startup-main-prepare", oss.str());
+    #endif
 
     return resVec;
 }
@@ -117,8 +152,18 @@ inline std::vector<std::string> makeArgsVecForWindowedApp()
 inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &strArgs)
 {
     std::vector<char*> charPtrArgv; charPtrArgv.reserve(strArgs.size());
+
+    std::size_t idx = 0;
+
     for(const auto &a: strArgs)
     {
+        if (isDebuggerPresent())
+        {
+            std::string argStrWithTitle = std::string("arg[") + std::to_string(idx++) + std::string("]: ") + a + std::string("\n");
+            auto wArgStr = fromUtf8(argStrWithTitle);
+            OutputDebugStringW(wArgStr.c_str());
+        }
+        
         charPtrArgv.emplace_back((char*)a.c_str());
     }
 
