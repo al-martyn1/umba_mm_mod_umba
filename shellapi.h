@@ -3,9 +3,13 @@
 #include "umba.h"
 #include "filesys.h"
 #include "utf8.h"
-#include "umba/string_plus.h"
+#include "string_plus.h"
+#include "filename.h"
+#include "filesys.h"
+#include "enum_helpers.h"
 
 #if defined(WIN32) || defined(_WIN32)
+
     #include <shellapi.h>
     #if defined(_MSC_VER)
         #pragma comment( lib, "Shell32" )
@@ -13,6 +17,14 @@
     #endif
     #include "win32_utils.h"
     #include "winconhelpers.h"
+    //
+    #include "internal/winstrerrorname.h"
+
+#else
+
+    #include <errno.h>
+    #include <string.h>
+
 #endif
 
 #include <process.h>
@@ -29,13 +41,139 @@ namespace shellapi {
 
 
 //----------------------------------------------------------------------------
+int getLastError()
+{
+#if defined(WIN32) || defined(_WIN32)
+    return (int)GetLastError();
+#else
+    return errno;
+#endif
+}
+
+//------------------------------
+//! Возвращает строку с сообщением об ошибке, если задано addCodeValue, то также добавляется числовое значение ошибки
+inline
+std::string getErrorMessage(int errCode = getLastError(), bool addCodeValue=true)
+{
+#if defined(WIN32) || defined(_WIN32)
+
+    WCHAR wszMsgBuff[256];
+    DWORD dwChars = FormatMessageW( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS
+                                  , NULL
+                                  , (DWORD)errCode
+                                  , 0
+                                  , wszMsgBuff
+                                  , 256
+                                  , NULL
+                                  );
+    std::size_t msgLen = std::min((std::size_t)255, (std::size_t)dwChars);
+    wszMsgBuff[msgLen] = 0;
+
+    std::string msgOnlyStr = toUtf8(wszMsgBuff);
+
+    std::string codeStr;
+    {
+        //const std::unordered_map<unsigned, const char*>& 
+        const auto &m = win32::getStrErrorNameMap();
+        auto it = m.find((unsigned)errCode);
+        if (it!=m.end())
+        {
+            const char *pStr = it->second;
+            if (pStr)
+                codeStr = pStr;
+        }
+    }
+
+#else
+    
+    // https://man7.org/linux/man-pages/man3/strerror.3.html
+    // https://man7.org/linux/man-pages/man7/feature_test_macros.7.html
+
+    std::string codeStr;
+    #if defined(_GNU_SOURCE)
+    {
+        auto pStr = strerrorname_np(errCode);
+        if (pStr)
+            codeStr = pStr;
+    }
+    #endif
+
+    std::string msgOnlyStr;
+
+    #if defined(_REENTRANT) || defined(_THREAD_SAFE)
+        char buf[256] = {0};
+        strerror_r(errCode, &buf[0], 256);
+        buf[255] = 0;
+        msgOnlyStr = buf;
+    #else
+        auto pStr = strerror(errCode);
+        if (pStr)
+            msgOnlyStr = pStr;
+    #endif
+
+#endif
+
+    std::string msgStr;
+    if (!codeStr.empty() && msgOnlyStr.empty())
+    {
+        msgStr = codeStr + " - " + msgOnlyStr;
+    }
+    else if (!codeStr.empty())
+    {
+        msgStr = codeStr;
+    }
+    else
+    {
+        msgStr = msgOnlyStr;
+    }
+
+    if (addCodeValue)
+    {
+        #if defined(WIN32) || defined(_WIN32)
+            std::string errCodeValueStr = std::to_string((unsigned)errCode);
+        #else
+            std::string errCodeValueStr = std::to_string(errCode);
+        #endif
+
+         if (msgStr.empty())
+             msgStr = errCodeValueStr;
+         else
+             msgStr += " (" + errCodeValueStr + ")";
+    }
+
+    return msgStr;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+
+ // WCHAR   wszMsgBuff[512];  // Buffer for text.
+ //  
+ //    DWORD   dwChars;  // Number of chars returned.
+ //  
+ //    // Try to get the message from the system errors.
+ //    dwChars = FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM |
+ //                             FORMAT_MESSAGE_IGNORE_INSERTS,
+ //                             NULL,
+ //                             dwErr,
+ //                             0,
+ //                             wszMsgBuff,
+ //                             512,
+ //                             NULL );
+
+
+
+//----------------------------------------------------------------------------
 //! Удаляет каталог со всем содержимым. path - в UTF-8
 inline
 bool deleteDirectory(const std::string &path)
 {
 #if defined(WIN32) || defined(_WIN32)
 
-    std::wstring wp = filesys::encodeToNative(path);
+    std::wstring wp = filename::makeCanonical(filesys::encodeToNative(path));
 
     SHFILEOPSTRUCTW  shFileOpStruct = { 0 };
     wp.append(1, (wchar_t)0); // Надо два нуля в конце, потому что функция принимает разделяемый нулём список строк, и двойной ноль - окончание списка
@@ -58,17 +196,78 @@ bool deleteDirectory(const std::string &path)
 
 
 //----------------------------------------------------------------------------
-//! Открывает заданный URL в браузере по умолчанию
-inline
-bool openUrl(const std::string &url)
-{
 #if defined(WIN32) || defined(_WIN32)
+inline
+bool shellExecuteImpl(const std::wstring &verb, const std::string &documentFileName, bool showMaximized=false)
+{
 
     // https://learn.microsoft.com/ru-ru/windows/win32/shell/launch
     // https://learn.microsoft.com/en-us/windows/win32/shell/launch
     // https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecutea
-    auto res = (INT_PTR)ShellExecuteW( 0, L"open", fromUtf8(url).c_str(), 0, 0, SW_SHOW );
+    auto res = (INT_PTR)ShellExecuteW( 0, verb.c_str(), fromUtf8(documentFileName).c_str(), 0, 0, showMaximized ? SW_SHOWMAXIMIZED : SW_SHOW );
     return res>32; // If the function succeeds, it returns a value greater than 32
+}
+#endif
+
+//----------------------------------------------------------------------------
+inline
+bool executeOpen(const std::string &documentFileName, bool showMaximized=false)
+{
+#if defined(WIN32) || defined(_WIN32)
+    return shellExecuteImpl(L"open", documentFileName, showMaximized);
+#else
+    return false;
+#endif
+}
+
+//----------------------------------------------------------------------------
+//! Открывает заданный URL в браузере по умолчанию
+inline
+bool openUrl(const std::string &url, bool showMaximized=false)
+{
+#if defined(WIN32) || defined(_WIN32)
+    return shellExecuteImpl(L"open", url, showMaximized);
+#else
+    return false;
+#endif
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+enum class MoveFileFlags
+{
+    copyAllowed     = 1, //!< If the file is to be moved to a different volume, the function simulates the move by using the CopyFile and DeleteFile functions.
+    replaceExisting = 2, //!< If a file named lpNewFileName exists, the function replaces its contents with the contents of the lpExistingFileName file
+    overwrite       = 2, //!< Same as replaceExisting
+    writeThrough    = 4  //!< The function does not return until the file is actually moved on the disk. Setting this value guarantees that a move performed as a copy and delete operation is flushed to disk before the function returns. The flush occurs at the end of the copy operation.
+};
+
+UMBA_ENUM_CLASS_IMPLEMENT_BIT_OPERATORS(MoveFileFlags)
+UMBA_ENUM_CLASS_IMPLEMENT_UNDERLYING_TYPE_BIT_OPERATORS(MoveFileFlags)
+UMBA_ENUM_CLASS_IMPLEMENT_UNDERLYING_TYPE_EQUAL_OPERATORS(MoveFileFlags)
+
+//------------------------------
+inline bool moveFile(const std::string &existingFileName, const std::string &newFileName, MoveFileFlags flags)
+{
+#if defined(WIN32) || defined(_WIN32)
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexa
+    std::wstring existingFileNameW = filename::makeCanonical(filesys::encodeToNative(existingFileName));
+    std::wstring newFileNameW      = filename::makeCanonical(filesys::encodeToNative(newFileName));
+
+    DWORD dwFlags = 0;
+
+    if ((flags&MoveFileFlags::copyAllowed    )!=0)
+        dwFlags |= MOVEFILE_COPY_ALLOWED;
+    if ((flags&MoveFileFlags::replaceExisting)!=0)
+        dwFlags |= MOVEFILE_REPLACE_EXISTING;
+    if ((flags&MoveFileFlags::writeThrough   )!=0)
+        dwFlags |= MOVEFILE_WRITE_THROUGH;
+
+    return MoveFileExW(existingFileNameW.c_str(), newFileNameW.c_str(), dwFlags)!=0;
 
 #else
 
@@ -78,7 +277,110 @@ bool openUrl(const std::string &url)
 }
 
 //----------------------------------------------------------------------------
-//! Производит экраинрование одиночного аргумента для вызова в командной строке.
+
+
+
+//----------------------------------------------------------------------------
+//! Возвращает имя текущего исполняемого файла с полным путём
+inline
+std::string getCurrentProcessExecutableFileName()
+{
+#if defined(WIN32) || defined(_WIN32)
+
+    wchar_t nameBuf[4096]; // в неупоротой системе не может быть таких путей
+    DWORD dwRes = GetModuleFileNameW( 0 // for preocess itself
+                                    , &nameBuf[0]
+                                    , 4095
+                                    );
+    nameBuf[4095] = 0; // кладём ноль в последний элемент массива, чтобы не париться
+
+    return toUtf8(nameBuf);
+
+#else
+
+    return "qqq"; // !!! тут нужен замут через dl*, но пока лень и не особо нужно
+
+#endif
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+std::string getUmbaTempLogRoot()
+{
+    std::string tmpRoot        = filesys::getTempFolderPath();
+    std::string tmpRootUmba    = filename::appendPath(tmpRoot, std::string(".umba"));
+    std::string tmpRootUmbaLog = filename::appendPath(tmpRootUmba, std::string("log"));
+    return tmpRootUmbaLog;
+}
+
+//------------------------------
+inline
+std::string getUmbaTempLogAppPath()
+{
+    auto exeName = getCurrentProcessExecutableFileName();
+    auto appName = filename::getName(exeName);
+    return filename::appendPath(getUmbaTempLogRoot(), appName);
+}
+
+//------------------------------
+//! Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
+inline
+std::string getUmbaTempLogNowFileName( const std::string &suffix, std::string fileNameFormat=std::string())
+{
+    if (fileNameFormat.empty())
+        fileNameFormat = "%Y-%m-%d_%H-%M-%S"; // safe name for file system
+//        fileNameFormat = "%Y %m %d %H:%M:%S";
+
+    static std::string ftLastStr;
+    static std::size_t eventCounter = 0;
+
+    auto logPath  = getUmbaTempLogAppPath();
+    auto ftNow    = filesys::getFileTimeNow();
+    auto ftNowStr = filesys::formatFiletime(ftNow, fileNameFormat);
+    if (ftLastStr!=ftNowStr)
+    {
+        ftLastStr = ftNowStr;
+        eventCounter = 0;
+    }
+    std::string eventCounterStr = std::to_string(eventCounter+1); ++eventCounter;
+    if (eventCounterStr.size()<4)
+    {
+        eventCounterStr = std::string(4-eventCounterStr.size(), '0') + eventCounterStr;
+    }
+
+    auto name     = suffix.empty() ? ftNowStr : ftNowStr + "_" + eventCounterStr + "_" + suffix;
+    name          = filename::appendExt(name, std::string("log"));
+    auto res      = filename::appendPath(logPath, name);
+    return res;
+}
+
+//------------------------------
+//! Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
+inline
+void writeUmbaEventLogNow( const std::string &eventName, std::string eventMsg, std::string fileNameFormat=std::string())
+{
+    if (eventMsg.empty())
+        return;
+
+    // !!!
+
+    auto logName = getUmbaTempLogNowFileName(eventName);
+    auto logPath = filename::getPath(logName);
+    filesys::createDirectoryEx(logPath, true /* forceCreatePath */);
+    auto wrRes = filesys::writeFile(logName, eventMsg, true /* bOverwrite */ );
+    UMBA_USED(wrRes);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+//! Производит экранирование одиночного аргумента для вызова в командной строке.
 inline
 std::string escapeCommandLineArgument(const std::string &str)
 {
@@ -221,7 +523,7 @@ void showMessageBox(const std::string &msg, std::string title=std::string(), Mes
 
     #if defined(WIN32) || defined(_WIN32)
 
-        UINT uType = MB_OK|MB_APPLMODAL;
+        UINT uType = MB_OK|MB_SYSTEMMODAL; // MB_APPLMODAL;
 
         switch(mbKind)
         {

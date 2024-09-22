@@ -175,24 +175,28 @@ using filesize_t = fsysapi::filesize_t;
 
 
 //-----------------------------------------------------------------------------
+//! Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
 inline std::string formatFiletime(filetime_t t, const std::wstring &fmt)
 {
     return impl_helpers::encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
+//! Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
 inline std::string formatFiletime(filetime_t t, const std::string &fmt)
 {
     return impl_helpers::encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
+//! Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
 inline std::string formatFiletime(filetime_t t, const wchar_t *fmt)
 {
     return impl_helpers::encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
 }
 
 //-----------------------------------------------------------------------------
+//! Описание форматной строки тут - https://man7.org/linux/man-pages/man3/strftime.3.html
 inline std::string formatFiletime(filetime_t t, const char *fmt)
 {
     return impl_helpers::encodeFromNative(fsysapi::formatFiletime(t, impl_helpers::encodeToNative(fmt)));
