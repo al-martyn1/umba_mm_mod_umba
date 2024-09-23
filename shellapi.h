@@ -71,30 +71,27 @@ std::string getErrorMessage(int errCode = getLastError(), bool addCodeValue=true
 
     std::string msgOnlyStr = toUtf8(wszMsgBuff);
 
-    std::string codeStr;
+    const char *pCodeStr = 0;
     {
         //const std::unordered_map<unsigned, const char*>& 
         const auto &m = win32::getStrErrorNameMap();
         auto it = m.find((unsigned)errCode);
         if (it!=m.end())
         {
-            const char *pStr = it->second;
-            if (pStr)
-                codeStr = pStr;
+            pCodeStr = it->second;
         }
     }
+
 
 #else
     
     // https://man7.org/linux/man-pages/man3/strerror.3.html
     // https://man7.org/linux/man-pages/man7/feature_test_macros.7.html
 
-    std::string codeStr;
+    const char *pCodeStr = 0;
     #if defined(_GNU_SOURCE)
     {
-        auto pStr = strerrorname_np(errCode);
-        if (pStr)
-            codeStr = pStr;
+        pCodeStr = strerrorname_np(errCode);
     }
     #endif
 
@@ -113,19 +110,33 @@ std::string getErrorMessage(int errCode = getLastError(), bool addCodeValue=true
 
 #endif
 
+    // if (pCodeStr)
+    //     codeStr = pCodeStr;
+
+
     std::string msgStr;
-    if (!codeStr.empty() && msgOnlyStr.empty())
+    if (pCodeStr && !msgOnlyStr.empty())
     {
-        msgStr = codeStr + " - " + msgOnlyStr;
+        msgStr = std::string(pCodeStr) + " - " + msgOnlyStr;
     }
-    else if (!codeStr.empty())
+    else if (pCodeStr)
     {
-        msgStr = codeStr;
+        msgStr = pCodeStr;
     }
     else
     {
         msgStr = msgOnlyStr;
     }
+
+    for(auto &ch : msgStr)
+    {
+        //ch = (ch<' ') ? ' ' : ch;
+        if (ch>0 && ch<' ')
+            ch = ' ';
+    }
+
+    msgStr = string_plus::rtrim_copy(msgStr);
+
 
     if (addCodeValue)
     {
