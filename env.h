@@ -8,240 +8,212 @@
 
 //----------------------------------------------------------------------------
 
-#include "string_plus.h"
+
 #include "umba.h"
-
-#if !defined(_INC_STDLIB) && !defined(_STDLIB_H_) && !defined(_STDLIB_H)
-    #include <stdlib.h>
-#endif
-
-#include <utility>
-
-#if defined(WIN32) || defined(_WIN32)
-    #include <processenv.h>
-#endif
-
-#include "warnings/push_disable_fn_or_var_unsafe.h"
+//
+#include "filesys.h"
+//
+#include "internal/env.h"
 
 
+//
+#include <stdexcept>
+#include <exception>
+#include <string>
+
+
+// umba::env::
 namespace umba
 {
-
-//! Окружение и работа с его переменными
 namespace env
 {
 
-//! Получение переменной окружения, возвращает true, если значение получено
-inline
-bool getVar(const ::std::string &varName, ::std::string &val)
-   {
-    if (varName.empty()) return false;
-    char * pval = ::getenv(varName.c_str());
-    if (!pval) return false;
-    val = pval;
-    return true;
-   }
+//----------------------------------------------------------------------------
 
-//! Установка переменной окружения
-inline
-bool putVar(const ::std::string &varName, const ::std::string &val)
-   {
-    ::std::string tmp = varName + ::std::string("=") + val;
-    // Могут быть утечки памяти, но зато везде безопасно.
-    // Некоторые системы не делают копию передаваемого значения,
-    // а запоминают непосредственно переданное значение, поэтому передача
-    // автоматических переменных вызовет крах.
-    char *ptmp = (char*)malloc(tmp.size()+1);
-    if (!ptmp)
-        return false;
-    tmp.copy(ptmp, tmp.size());
-    ptmp[tmp.size()] = 0;
-    #ifdef _MSC_VER
-    if (::_putenv(ptmp)<0) return false;
-    #else
-    if (::putenv(ptmp)<0) return false;
-    #endif
-    return true;
-   }
+namespace envapi       = umba::env::internal;
+namespace impl_helpers = umba::filesys::impl_helpers;
 
 
-#if defined(WIN32) || defined(_WIN32)
+//----------------------------------------------------------------------------
 
-//! Получение переменной окружения, возвращает true, если значение получено
-inline
-bool getVar(const ::std::wstring &varName, ::std::wstring &val)
-   {
-    if (varName.empty()) return false;
-    wchar_t * pval = ::_wgetenv(varName.c_str());
-    if (!pval) return false;
-    val = pval;
-    return true;
-   }
 
-//! Получение переменной окружения, возвращает true, если значение получено
-inline
-bool getVar(const ::std::wstring &varName, ::std::string &val)
-   {
-    if (varName.empty()) return false;
-    wchar_t * pval = ::_wgetenv(varName.c_str());
-    if (!pval) return false;
-    val = string_plus::make_string<std::string>(pval);
-    return true;
-   }
 
-//! Получение переменной окружения, возвращает true, если значение получено
-inline
-bool getVar(const ::std::string &varName, ::std::wstring &val)
-   {
-    if (varName.empty()) return false;
-    char * pval = ::getenv(varName.c_str());
-    if (!pval) return false;
-    val = string_plus::make_string<std::wstring>(pval);
-    return true;
-   }
-
-//------------------------------
-inline
-bool putVar(const ::std::wstring &varName, const ::std::wstring &val)
-   {
-    ::std::wstring tmp = varName + ::std::wstring(L"=") + val;
-    wchar_t *ptmp = (wchar_t*)malloc((tmp.size()+1)*sizeof(wchar_t));
-    if (!ptmp)
-        return false;
-    tmp.copy(ptmp, tmp.size());
-    ptmp[tmp.size()] = 0;
-    if (::_wputenv(ptmp)<0) return false;
-    return true;
-   }
-
-inline
-bool getEnvVarsList( std::vector<std::pair<std::wstring,std::wstring> > &lst)
+//----------------------------------------------------------------------------
+template<typename ValueType>
+bool getVar(const std::string &varName, ValueType &val)
 {
-    auto env = GetEnvironmentStringsW();
-    if (!env)
-    {
+    // static_assert?
+    throw std::runtime_error("umba::env::getVar not implemented for this type")
+}
+
+//----------------------------------------------------------------------------
+template<>
+bool getVar<std::string>(const std::string &varName, std::string &val)
+{
+    filesys::native_fs_string_t strRes;
+
+    if (!envapi::getVar(impl_helpers::encodeToNative(varName), strRes))
         return false;
-    }
 
-    auto envOrg = env;
-
-    while(*env)
-    {
-        std::wstring fullStr = env;
-        std::wstring name, val;
-
-        std::wstring::size_type eqPos = fullStr.find(L'=');
-        if (eqPos==fullStr.npos)
-        {
-            name = fullStr;
-        }
-        else
-        {
-            name.assign(fullStr, 0, eqPos);
-            val .assign(fullStr, eqPos+1, fullStr.npos);
-        }
-
-        if (!name.empty())
-        {
-            lst.emplace_back(std::make_pair(name, val));
-        }
-
-        env += fullStr.size()+1;
-    }
-
-    FreeEnvironmentStringsW(envOrg);
-
+    val = impl_helpers::encodeFromNative(strRes);
     return true;
 }
 
-inline
-bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
-{
-#if defined(GetEnvironmentStrings)
-    #undef GetEnvironmentStrings
-#endif
+//----------------------------------------------------------------------------
+#define UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(type, converterFunc) \
+            template<>                                                     \
+            bool getVar<type>(const std::string &varName, type &val)       \
+            {                                                              \
+                std::string strVal;                                        \
+                if (!getVar<std::string>(varName, strVal))                 \
+                    return false;                                          \
+                try{                                                       \
+                    val = (type)converterFunc(strVal);                     \
+                } catch(...){                                              \
+                    return false;                                          \
+                }                                                          \
+                return true;                                               \
+            }
 
-    auto env = GetEnvironmentStrings();
-    if (!env)
-    {
+UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(int               , std::stoi  )
+UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(long              , std::stol  )
+UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(long long         , std::stoll )
+UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(unsigned          , std::stoul )
+UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(unsigned long     , std::stoul )
+UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(unsigned long long, std::stoull)
+// https://en.cppreference.com/w/cpp/string/basic_string/stof
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename ValueType> // for compatibility
+bool getVar(const std::wstring &varName, ValueType &val)
+{
+    // static_assert?
+    throw std::runtime_error("umba::env::getVar not implemented for this type")
+}
+
+//----------------------------------------------------------------------------
+template<>
+bool getVar<std::wstring>(const std::wstring &varName, std::wstring &val)
+{
+    filesys::native_fs_string_t strRes;
+
+    if (!envapi::getVar(impl_helpers::encodeToNative(varName), strRes))
         return false;
-    }
 
-    auto envOrg = env;
-
-    while(*env)
-    {
-        std::string fullStr = env;
-        std::string name, val;
-
-        std::string::size_type eqPos = fullStr.find('=');
-        if (eqPos==fullStr.npos)
-        {
-            name = fullStr;
-        }
-        else
-        {
-            name.assign(fullStr, 0, eqPos);
-            val .assign(fullStr, eqPos+1, fullStr.npos);
-        }
-
-        if (!name.empty())
-        {
-            lst.emplace_back(std::make_pair(name, val));
-        }
-
-        env += fullStr.size()+1;
-    }
-
-    FreeEnvironmentStringsA(envOrg);
-
+    val = impl_helpers::encodeToWide(strRes);
     return true;
 }
 
+//----------------------------------------------------------------------------
+#define UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(type, converterFunc) \
+            template<>                                                     \
+            bool getVar<type>(const std::wstring &varName, type &val)      \
+            {                                                              \
+                std::string strVal;                                        \
+                if (!getVar<std::string>(impl_helpers::encodeToChar(varName), strVal))\
+                    return false;                                          \
+                try{                                                       \
+                    val = (type)converterFunc(strVal);                     \
+                } catch(...){                                              \
+                    return false;                                          \
+                }                                                          \
+                return true;                                               \
+            }
 
-#else
+UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(int               , std::stoi  )
+UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(long              , std::stol  )
+UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(long long         , std::stoll )
+UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(unsigned          , std::stoul )
+UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(unsigned long     , std::stoul )
+UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(unsigned long long, std::stoull)
+// https://en.cppreference.com/w/cpp/string/basic_string/stof
 
-inline
-bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename ValueType>
+bool setVar(const std::string &varName, const ValueType &val)
 {
-    extern char ** environ;
-    char ** env = environ;
-    for (; *env; ++env)
-    {
-        std::string fullStr = *env;
-        std::string name, val;
-
-        std::string::size_type eqPos = fullStr.find('=');
-        if (eqPos==fullStr.npos)
-        {
-            name = fullStr;
-        }
-        else
-        {
-            name = std::string(fullStr, 0, eqPos);
-            val  = std::string(fullStr, eqPos+1);
-        }
-
-        if (!name.empty())
-        {
-            lst.emplace_back(std::make_pair(name, val));
-        }
-    }
-
-    return true;
+    throw std::runtime_error("umba::env::setVar not implemented for this type")
 }
-//LPTCH WINAPI GetEnvironmentStrings(void);
-// for (char **env = envp; *env != 0; env++)
-//   {
-//     char *thisEnv = *env;
-//     printf("%s\n", thisEnv);
-//   }
+
+//----------------------------------------------------------------------------
+template<>
+bool setVar<std::string>(const std::string &varName, const std::string &val)
+{
+    return envapi::getVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
+}
+
+//----------------------------------------------------------------------------
+#define UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(type)                            \
+            template<> bool setVar<type>(const std::string &varName, const type &val)  \
+            {                                                                          \
+                return setVar<std::string>(varName, std::to_string(val));              \
+            }
+
+UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(int               )
+UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(long              )
+UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(long long         )
+UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(unsigned          )
+UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(unsigned long     )
+UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(unsigned long long)
+
+//----------------------------------------------------------------------------
 
 
-#endif
+
+//----------------------------------------------------------------------------
+template<typename ValueType>
+bool setVar(const std::wstring &varName, const ValueType &val)
+{
+    throw std::runtime_error("umba::env::setVar not implemented for this type")
+}
+
+//----------------------------------------------------------------------------
+template<>
+bool setVar<std::wstring>(const std::wstring &varName, const std::wstring &val)
+{
+    return envapi::getVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
+}
+
+//----------------------------------------------------------------------------
+#define UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(type)                            \
+            template<> bool setVar<type>(const std::wstring &varName, const type &val) \
+            {                                                                          \
+                return setVar<std::wstring>(varName, std::to_wstring(val));            \
+            }
+
+UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(int               )
+UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(long              )
+UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(long long         )
+UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(unsigned          )
+UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(unsigned long     )
+UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(unsigned long long)
+
+//----------------------------------------------------------------------------
 
 
-#include "warnings/pop.h"
+
+// #if defined(WIN32) || defined(_WIN32)
+//  
+// inline
+// bool getEnvVarsList( std::vector<std::pair<std::wstring,std::wstring> > &lst)
+//  
+// inline
+// bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
+//  
+// #else
+//  
+// inline
+// bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
+//  
+// #endif
 
 
 } // namespace env
