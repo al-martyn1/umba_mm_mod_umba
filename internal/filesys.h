@@ -12,9 +12,10 @@
 #include "../umba.h"
 //
 #include "../alloca.h"
-#include "../env.h"
 #include "../stl.h"
 
+//
+#include "env.h"
 //
 #include "filesys_impl_helpers.h"
 
@@ -123,6 +124,8 @@ namespace internal{
  *  \addtogroup UMBA_FILESYSTEM
  *  @{
  */
+
+using namespace umba::env::internal;
 
 //----------------------------------------------------------------------------
 //! Тип файла
@@ -1867,7 +1870,7 @@ StringType getCurrentUserHomeDirectory()
     #if defined(WIN32) || defined(_WIN32)
 
         StringType res;
-        if (umba::env::getVar(umba::string_plus::make_string<StringType>("USERPROFILE"), res))
+        if (getVar(umba::string_plus::make_string<StringType>("USERPROFILE"), res))
         {
             return res;
         }
@@ -1880,7 +1883,7 @@ StringType getCurrentUserHomeDirectory()
         // https://stackoverflow.com/questions/2910377/get-home-directory-in-linux
 
         StringType res;
-        if (umba::env::getVar(make_string<StringType>("HOME"), res))
+        if (getVar(make_string<StringType>("HOME"), res))
         {
             return res;
         }
@@ -1904,11 +1907,11 @@ StringType getTempFolderPath()
 
         // Пытаемся найти юзерский TEMP
         StringType res;
-        if (umba::env::getVar(make_string<StringType>("TMPDIR"), res))
+        if (getVar(make_string<StringType>("TMPDIR"), res))
         {
             return res;
         }
-        if (umba::env::getVar(make_string<StringType>("TMP"), res))
+        if (getVar(make_string<StringType>("TMP"), res))
         {
             return res;
         }

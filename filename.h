@@ -9,7 +9,6 @@
 //-----------------------------------------------------------------------------
 
 #include "critical_section.h"
-#include "env.h"
 #include "filesys.h"
 #include "stl.h"
 #include "string_plus.h"
