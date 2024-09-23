@@ -377,7 +377,7 @@ bool readOptionsFile( const std::string &fileName, std::vector<std::string> &res
 
 #if defined(WIN32) || defined(_WIN32)
 
-    if (!filesys::readFile(encoding::fromUtf8(fileName), fileDataStr))
+    if (!filesys::readFile(fileName, fileDataStr))
         return false;
 
 #else
@@ -413,7 +413,7 @@ bool readOptionsFile( const std::wstring &fileName, std::vector<std::wstring> &r
 
 #else
 
-    if (!filesys::readFile(encoding::toUtf8(fileName), fileDataStr))
+    if (!filesys::readFile(fileName, fileDataStr))
         return false;
 
 #endif
@@ -469,7 +469,7 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
     {
         std::string argStr = argv[i];
 
-        #if !defined(UMBA_DISABLE_AUTO_ENCODING)
+        #if !defined(UMBA_DISABLE_AUTO_ENCODING) && !defined(UMBA_APP_MAIN)
             argStr = encoding::toUnicodeFromConsole(argStr);
         #endif
 
@@ -2841,7 +2841,7 @@ struct ArgsParser
             os << "Usage: ";
         }
 
-        os << umba::toUtf8(programLocationInfo.exeName) << " " << usageString << "\n";
+        os << programLocationInfo.exeName << " " << usageString << "\n";
            // << " [OPTIONS] input_file [output_file]\n"
            //  << "  If output_file not taken, STDOUT used\n";
 
@@ -2891,7 +2891,7 @@ struct ArgsParser
 
         ICommandLineOptionCollector *pCol = &optionsCollector;
 
-        umba::command_line::CommandLineOption opt(toUtf8(a), pCol);
+        umba::command_line::CommandLineOption opt(a, pCol);
 
         pCol->setCollectMode( opt.isHelpOption() );
 
