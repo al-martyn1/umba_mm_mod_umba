@@ -57,15 +57,26 @@ std::string getErrorMessage(int errCode = getLastError(), bool addCodeValue=true
 {
 #if defined(WIN32) || defined(_WIN32)
 
+    // https://learn.microsoft.com/en-us/windows/win32/seccrypto/retrieving-error-messages
+
     WCHAR wszMsgBuff[256];
-    DWORD dwChars = FormatMessageW( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS
-                                  , NULL
-                                  , (DWORD)errCode
-                                  , 0
-                                  , wszMsgBuff
-                                  , 256
-                                  , NULL
-                                  );
+    DWORD dwChars = ::FormatMessageW( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS
+                                    , NULL, (DWORD)errCode, 0
+                                    , wszMsgBuff, 256, NULL
+                                    );
+    if (dwChars==0)
+    {
+        HINSTANCE hInst = ::LoadLibraryW(L"Ntdsbmsg.dll");
+        if (hInst!=0)
+        {
+            dwChars = ::FormatMessageW( FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS
+                                      , hInst, (DWORD)errCode, 0
+                                      , wszMsgBuff, 256,NULL
+                                      );
+            ::FreeLibrary( hInst );
+        }
+    }
+
     std::size_t msgLen = std::min((std::size_t)255, (std::size_t)dwChars);
     wszMsgBuff[msgLen] = 0;
 
@@ -81,7 +92,6 @@ std::string getErrorMessage(int errCode = getLastError(), bool addCodeValue=true
             pCodeStr = it->second;
         }
     }
-
 
 #else
     
