@@ -6,6 +6,7 @@
 
 #include "filename.h"
 #include "filesys.h"
+#include "env.h"
 #include "macros.h"
 #include "string_plus.h"
 #include "zz_inc_windows.h"
