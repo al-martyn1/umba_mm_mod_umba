@@ -8,8 +8,9 @@
 
 //----------------------------------------------------------------------------
 
-#include "string_plus.h"
-#include "umba.h"
+#include "../umba.h"
+//
+#include "../string_plus.h"
 
 #if !defined(_INC_STDLIB) && !defined(_STDLIB_H_) && !defined(_STDLIB_H)
     #include <stdlib.h>
@@ -21,7 +22,7 @@
     #include <processenv.h>
 #endif
 
-#include "warnings/push_disable_fn_or_var_unsafe.h"
+#include "../warnings/push_disable_fn_or_var_unsafe.h"
 
 // umba::env::internal
 namespace umba
@@ -241,7 +242,7 @@ bool getEnvVarsList( std::vector<std::pair<std::string,std::string> > &lst)
 #endif
 
 
-#include "warnings/pop.h"
+#include "../warnings/pop.h"
 
 } // namespace internal
 } // namespace env

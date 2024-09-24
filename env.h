@@ -43,7 +43,7 @@ template<typename ValueType>
 bool getVar(const std::string &varName, ValueType &val)
 {
     // static_assert?
-    throw std::runtime_error("umba::env::getVar not implemented for this type")
+    throw std::runtime_error("umba::env::getVar not implemented for this type");
 }
 
 //----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ template<typename ValueType> // for compatibility
 bool getVar(const std::wstring &varName, ValueType &val)
 {
     // static_assert?
-    throw std::runtime_error("umba::env::getVar not implemented for this type")
+    throw std::runtime_error("umba::env::getVar not implemented for this type");
 }
 
 //----------------------------------------------------------------------------
@@ -140,14 +140,14 @@ UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(unsigned long long, std::stoull)
 template<typename ValueType>
 bool setVar(const std::string &varName, const ValueType &val)
 {
-    throw std::runtime_error("umba::env::setVar not implemented for this type")
+    throw std::runtime_error("umba::env::setVar not implemented for this type");
 }
 
 //----------------------------------------------------------------------------
 template<>
 bool setVar<std::string>(const std::string &varName, const std::string &val)
 {
-    return envapi::getVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
+    return envapi::putVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
 }
 
 //----------------------------------------------------------------------------
@@ -172,14 +172,14 @@ UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(unsigned long long)
 template<typename ValueType>
 bool setVar(const std::wstring &varName, const ValueType &val)
 {
-    throw std::runtime_error("umba::env::setVar not implemented for this type")
+    throw std::runtime_error("umba::env::setVar not implemented for this type");
 }
 
 //----------------------------------------------------------------------------
 template<>
 bool setVar<std::wstring>(const std::wstring &varName, const std::wstring &val)
 {
-    return envapi::getVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
+    return envapi::putVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
 }
 
 //----------------------------------------------------------------------------
