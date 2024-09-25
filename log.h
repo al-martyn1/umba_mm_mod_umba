@@ -57,6 +57,18 @@ enum class LogEntryType
 
 //----------------------------------------------------------------------------
 inline
+std::string makeAllWarnInfoLogOptionsString(const std::set<std::string> &s)
+{
+    auto stringifier = [](const std::string &str)
+    {
+        return "`" + str + "`";
+    };
+
+    return umba::string_plus::merge<std::string, std::set<std::string>::const_iterator, decltype(stringifier)>( s.begin(), s.end(), ", ", stringifier);
+}
+
+//----------------------------------------------------------------------------
+inline
 bool addRemoveLogOptionsImpl( std::unordered_map<std::string, bool>& optDisabledMap
                             , const std::set<std::string> &allOpts
                             , const std::string &optString
