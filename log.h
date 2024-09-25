@@ -31,6 +31,7 @@ extern umba::SimpleFormatter& getLogMsgStream(int level=0);
 // requires std::stringr curFile, unsigned lineNo in log scope
 #define UMBA_LOG_ERR_INPUT                 umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string()/*"err"*/, curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_WARN_INPUT(warnType)      umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts, */  std::string(warnType) , curFile.c_str(), lineNo, __FILE__, __LINE__ )
+#define UMBA_LOG_INFO_INPUT(infoType)      umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts, */  std::string(infoType) , curFile.c_str(), lineNo, __FILE__, __LINE__ )
 
 // options and other errors
 #define UMBA_LOG_ERR                       umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts,  */ std::string()/*"err"*/, (const char*)0 , 0     , __FILE__, __LINE__ )
