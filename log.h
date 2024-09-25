@@ -19,6 +19,9 @@ extern umba::SimpleFormatter  umbaLogStreamErr;
 extern umba::SimpleFormatter  umbaLogStreamMsg;
 extern umba::SimpleFormatter  umbaLogStreamNul;
 
+//! Возвращает umbaLogStreamMsg/umbaLogStreamNul в зависимости от запрошенного уровня (level) verbosity и текущих настроек программы. В простейшем случае просто проверяется флаг quet
+extern umba::SimpleFormatter& getLogMsgStream(int level=0);
+
 // Если надо будет протоколировать в какой-то отдельный поток вывода в каком-то скопе,
 // то там надо будет как-то извращаться. Но пока это обычно для утилит командной строки,
 // и достаточно глобальных переменных
@@ -32,6 +35,7 @@ extern umba::SimpleFormatter  umbaLogStreamNul;
 // options and other errors
 #define UMBA_LOG_ERR                       umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts,  */ std::string()/*"err"*/, (const char*)0 , 0     , __FILE__, __LINE__ )
 #define UMBA_LOG_WARN(warnType)            umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts,  */ std::string(warnType) , (const char*)0 , 0     , __FILE__, __LINE__ )
+#define UMBA_LOG_INFO(infoType)            umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string(infoType) , (const char*)0 , 0     , __FILE__, __LINE__ )
                                                                             /*         */
 #define UMBA_LOG_MSG                       umba::log::startLogError( umbaLogStreamMsg, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string()/*"msg"*/, (const char*)0 , 0     , (const char*)0, 0 )
 
@@ -50,6 +54,62 @@ enum class LogEntryType
 };
 
 
+//----------------------------------------------------------------------------
+inline
+bool addRemoveLogOptionsImpl( std::unordered_map<std::string, bool>& optDisabledMap
+                            , const std::set<std::string> &allOpts
+                            , const std::string &optString
+                            , std::string &unknownOpt
+                            )
+{
+    std::vector<std::string> optsVec = umba::string_plus::split(optString, ',');
+    // marty_cpp::splitToLinesSimple(optString, false, ',');
+
+    for(auto opt: optsVec)
+    {
+        bool bRemove = false; // remove from disabled (add to enabled)
+
+        umba::string_plus::trim(opt, umba::string_plus::is_one_of<char>(" \t"));
+        if (opt.empty())
+            continue;
+
+        if (opt[0]=='+' || opt[0]=='-')
+        {
+            bRemove = opt[0]=='-';
+            opt.erase(0, 1);
+        }
+
+        umba::string_plus::trim(opt, umba::string_plus::is_one_of<char>(" \t"));
+        if (opt.empty())
+            continue;
+
+        if (opt=="all")
+        {
+            for(const auto optFromAll: allOpts)
+            {
+                optDisabledMap[optFromAll] = bRemove;
+            }
+        }
+        else
+        {
+            if (allOpts.find(opt)==allOpts.end())
+            {
+                unknownOpt = opt;
+                return false;
+            }
+
+            optDisabledMap[opt] = bRemove;
+        }
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 inline
 std::unordered_map<std::string, bool>& getWarningDisabledMap()
 {
@@ -78,17 +138,79 @@ void setWarningDisabled(const std::string &warnType, bool bDisabled=true)
     m[warnType] = bDisabled;
 }
 
+//----------------------------------------------------------------------------
+bool addRemoveWarningOptions( const std::set<std::string> &allOpts
+                            , const std::string &optString
+                            , std::string &unknownOpt
+                            )
+{
+    return addRemoveLogOptionsImpl( getWarningDisabledMap(), allOpts, optString, unknownOpt );
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+std::unordered_map<std::string, bool>& getInfoDisabledMap()
+{
+    static std::unordered_map<std::string, bool> m;
+    return m;
+
+    // В многопотоке могут быть проблемы.
+    // С другой стороны, все настройки варнингов делаются обычно до какой-то работы
+    // и в многопотоке будет только поиск
+}
 
 inline
-umba::SimpleFormatter& startLogError( umba::SimpleFormatter   &s
-                                    , LogEntryType             logEntryType
+bool isInfoDisabled(const std::string &warnType)
+{
+    const std::unordered_map<std::string, bool> &m = getInfoDisabledMap();
+    std::unordered_map<std::string, bool>::const_iterator it = m.find(warnType);
+    if (it==m.end())
+        return false; // not explicitly disabled
+    return it->second;
+}
+
+inline
+void setInfoDisabled(const std::string &warnType, bool bDisabled=true)
+{
+    std::unordered_map<std::string, bool> &m = getInfoDisabledMap();
+    m[warnType] = bDisabled;
+}
+
+//----------------------------------------------------------------------------
+bool addRemoveInfoOptions( const std::set<std::string> &allOpts
+                         , const std::string &optString
+                         , std::string &unknownOpt
+                         )
+{
+    return addRemoveLogOptionsImpl( getInfoDisabledMap(), allOpts, optString, unknownOpt );
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------
+inline
+umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
+                                    , LogEntryType              logEntryType
                                     // , const GeneratorOptions &gopts
-                                    , const std::string       &warnType
+                                    , const std::string         &warnType
                                     , const char* inputFile   , unsigned inputLineNo
                                     , const char* srcFile = 0 , unsigned srcLineNo = 0
                                     )
 {
-    if (logEntryType==LogEntryType::warn && isWarningDisabled(warnType))
+    if ( (logEntryType==LogEntryType::warn && isWarningDisabled(warnType))
+      || (logEntryType==LogEntryType::msg  && isWarningDisabled(warnType) && !warnType.empty())
+       )
         return umbaLogStreamNul;
 
 
@@ -133,6 +255,12 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter   &s
             //     s<< "("<<warnType<<"):";
             s<< ":";
         }
+        else if (logEntryType==LogEntryType::msg && !warnType.empty())
+        {
+            s<< "info";
+            s<< "("<<warnType<<")";
+            s<< ":";
+        }
     }
     else
     {
@@ -148,6 +276,12 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter   &s
             }
             // if (logWarnType)
             //     s<< "("<<warnType<<"):";
+            s<< ":";
+        }
+        else if (logEntryType==LogEntryType::msg && !warnType.empty())
+        {
+            s<< "info";
+            s<< "("<<warnType<<")";
             s<< ":";
         }
     }
