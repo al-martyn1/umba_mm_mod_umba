@@ -65,7 +65,7 @@ template<typename CharType>   inline CharType getNativeExtSep( )    { return (Ch
 
 //! Возвращает символ - разделитель имён файлов в пути
 template<typename CharType>
-inline CharType getNativePathSep( )
+inline CharType getNativePathSep()
 {
     #if defined(WIN32) || defined(_WIN32)
     return (CharType)'\\';
@@ -140,6 +140,27 @@ StringType stripNativeUncPrefix( StringType &p )
     return p;
 }
 
+struct NativePrefixFlagsInfo
+{
+    bool networkUncPrefix = false;
+    bool uncPrefix        = false;
+    bool netPrefix        = false;
+
+    bool hasAnyPrefix() const
+    {
+        return networkUncPrefix || uncPrefix || netPrefix;
+    }
+
+}; // struct NativePrefixFlagsInfo
+
+template<typename StringType> inline
+NativePrefixFlagsInfo stripNativePrefixes(StringType &fileName, typename StringType::value_type pathSep);
+
+// Добавляет нативные префиксы
+template<typename StringType> inline
+StringType addNativePrefixes(const StringType &fileName, const NativePrefixFlagsInfo &npfi);
+
+
 //-----------------------------------------------------------------------------
 template<typename CharType> inline bool isExtSep ( CharType ch ) { return ch==(CharType)'.'; }                        //!< Возвращает true, если символ - разделитель расширения
 template<typename CharType> inline bool isPathSep( CharType ch ) { return ch==(CharType)'/' || ch==(CharType)'\\'; }  //!< Возвращает true, если символ - разделитель пути
@@ -159,6 +180,52 @@ template<typename StringType> inline bool hasFirstExtSep( StringType &p )   { re
 template<typename StringType> inline bool stripFirstExtSep(StringType &p)   { if (hasFirstExtSep(p)) { p.erase( 0, 1 ); return true; } return false; }                                       //!< Возвращает true, если первый символ - разделитель расширения, обрезая его
 template<typename StringType> inline StringType stripFirstExtSepCopy( const StringType &p ) { if (!hasFirstExtSep(p)) return p; StringType res = p; stripFirstExtSep(res); return res; }     //!< Возвращает копию аргумента, обрезая разделитель расширения в начале, если он есть
 
+
+
+//-----------------------------------------------------------------------------
+//!
+template<typename StringType> inline
+std::vector< StringType > splitPath(StringType path)
+{
+    stripLastPathSep(path);
+
+    auto pathSep = getNativePathSep<typename StringType::value_type>();
+
+    NativePrefixFlagsInfo npfi = stripNativePrefixes(path, pathSep); // Разделители пути тут нормализуются
+
+    std::vector< StringType > parts;
+    std::string curPart;
+    for(auto ch: path)
+    {
+        if (ch==pathSep)
+        {
+            if (!curPart.empty())
+            {
+                parts.emplace_back(curPart);
+                curPart.clear();
+            }
+        }
+        else
+        {
+            curPart.append(1,ch);
+        }
+    }
+
+    if (!curPart.empty())
+    {
+        parts.emplace_back(curPart);
+    }
+
+    if (!parts.empty())
+    {
+        parts[0] = addNativePrefixes(parts[0], npfi);
+    }
+
+    return parts;
+
+}
+
+//template<typename StringType> inline bool stripLastPathSep( StringType &p ) { if (hasLastPathSep(p)) { p.erase( p.size()-1, 1 ); return true; } return false; }                              //!< Возвращает true, если последний символ - разделитель пути, обрезая его
 
 
 //-----------------------------------------------------------------------------
@@ -274,18 +341,6 @@ StringType hasPathSeparators( const StringType &fileName )
 
 //-----------------------------------------------------------------------------
 // Выделяем код обрезания различных спец префиксов в отдельные функции
-struct NativePrefixFlagsInfo
-{
-    bool networkUncPrefix = false;
-    bool uncPrefix        = false;
-    bool netPrefix        = false;
-
-    bool hasAnyPrefix() const
-    {
-        return networkUncPrefix || uncPrefix || netPrefix;
-    }
-
-}; // struct NativePrefixFlagsInfo
 
 //! Отрезаем спец префиксы, нничего не трогая в имени, даже разделители путей
 template<typename StringType> inline
