@@ -369,12 +369,23 @@ struct ProgramLocation
 
         // Global std options file
         if (flags&BuiltinOptionsLocationFlag::appGlobal)
-            res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ exeName, make_string<StringType>("options") ) ) );
+        {
+            #if !defined(UMBA_PROGRAM_LOCATION_OVERRIDEN_EXECUTABLE_NAME_FOR_CONFIGS)
+                res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ exeName, make_string<StringType>("options") ) ) );
+            #else
+                res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ umba::filesys::nameConvert<StringType>(UMBA_PROGRAM_LOCATION_OVERRIDEN_EXECUTABLE_NAME_FOR_CONFIGS), make_string<StringType>("options") ) ) );
+            #endif
+        }
 
         // Global user options file
         if (flags&BuiltinOptionsLocationFlag::customGlobal)
-            res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ exeName, make_string<StringType>("custom.options") ) ) );
-
+        {
+            #if !defined(UMBA_PROGRAM_LOCATION_OVERRIDEN_EXECUTABLE_NAME_FOR_CONFIGS)
+                res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ exeName, make_string<StringType>("custom.options") ) ) );
+            #else
+                res.push_back( appendPath(  /* programLocationInfo. */ confPath, appendExt(  /* programLocationInfo. */ umba::filesys::nameConvert<StringType>(UMBA_PROGRAM_LOCATION_OVERRIDEN_EXECUTABLE_NAME_FOR_CONFIGS), make_string<StringType>("custom.options") ) ) );
+            #endif
+        }
         // Local user options file
         // $(HOME)\.$(AppExeName).options
         // or
@@ -554,7 +565,13 @@ ProgramLocation<StringType> getProgramLocationImpl( const StringType &argv0
 
     loc.exeName     = exeName;
 
-    loc.userConf    = umba::filename::appendPath( umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentUserHomeDirectory()) , umba::filename::appendExt(StringType(), exeName) );
+    StringType userHomeDir = umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentUserHomeDirectory());
+
+    #if !defined(UMBA_PROGRAM_LOCATION_OVERRIDEN_EXECUTABLE_NAME_FOR_CONFIGS)
+        loc.userConf    = umba::filename::appendPath(userHomeDir, umba::filename::appendExt(StringType(), exeName) );
+    #else
+        loc.userConf    = umba::filename::appendPath(userHomeDir, umba::filename::appendExt(StringType(), umba::filesys::nameConvert<StringType>(UMBA_PROGRAM_LOCATION_OVERRIDEN_EXECUTABLE_NAME_FOR_CONFIGS)) );
+    #endif
 
     loc.cwd         = umba::filesys::nameConvert<StringType>(umba::filesys::getCurrentDirectory());
 
