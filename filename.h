@@ -1169,16 +1169,26 @@ StringType replaceExt( const StringType &fileName, const StringType &newExt)
 //----------------------------------------------------------------------------
 //! Делает путь плоским - заменяет разделители пути и спец-имена каталогов на подчеркивания, символы расширения (точка), кроме последего также заменяются
 template<typename StringType> inline
-StringType flattenPath( StringType fileName
-                      , const StringType &currentDirAlias       = umba::filename::getNativeCurrentDirAlias<StringType>()
-                      , const StringType &parentDirAlias        = umba::filename::getNativeParentDirAlias<StringType>()
+StringType flattenPath( StringType       fileName
+                      , bool             keepLastExtention = false
+                      , const StringType &currentDirAlias  = umba::filename::getNativeCurrentDirAlias<StringType>()
+                      , const StringType &parentDirAlias   = umba::filename::getNativeParentDirAlias<StringType>()
                       )
 {
     constexpr const auto flattenChar = (typename StringType::value_type)'_';
     fileName = normalizePathSeparators(fileName, (typename StringType::value_type)'/');
 
-    StringType pathFile = getPathFile(fileName);
-    StringType ext      = getExt(fileName);
+    StringType pathFile;
+    StringType ext;
+    if (keepLastExtention)
+    {
+        pathFile = getPathFile(fileName);
+        ext = getExt(fileName);
+    }
+    else
+    {
+        pathFile = fileName;
+    }
 
     std::vector< StringType > parts = umba::string_plus::split(pathFile, (typename StringType::value_type)'/', true /* skipEmpty */ );
 
@@ -1206,6 +1216,9 @@ StringType flattenPath( StringType fileName
     //         p = StringType(p.size(), flattenChar);
     //     }
     // }
+
+    if (ext.empty())
+        return umba::string_plus::merge(parts,flattenChar);
 
     return appendExt(umba::string_plus::merge(parts,flattenChar), ext);
 }
