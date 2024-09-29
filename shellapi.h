@@ -441,11 +441,12 @@ std::string escapeCommandLineArgument(const std::string &str)
 }
 
 //----------------------------------------------------------------------------
-//! Делает единственную строук из имени команды и аргументов, экранирует, и прочее
+//! Делает единственную строку из имени команды и аргументов, экранирует, и прочее
 inline
 std::string makeSystemFunctionCommandString(const std::string &cmd, std::vector<std::string> cmdArgs)
 {
     cmdArgs.insert(cmdArgs.begin(), cmd);
+
     for(auto &cmdArg : cmdArgs)
     {
         cmdArg = escapeCommandLineArgument(cmdArg);
@@ -454,6 +455,14 @@ std::string makeSystemFunctionCommandString(const std::string &cmd, std::vector<
     //using CharType = typename StringType::value_type;
 
     return umba::string_plus::merge<std::string, typename std::vector<std::string>::const_iterator>( cmdArgs.begin(), cmdArgs.end(), ' '/*, [](auto s) { return s; }*/ );
+}
+
+//----------------------------------------------------------------------------
+//! Делает единственную строку из имени команды, без аргументов, экранирует, и прочее
+inline
+std::string makeSystemFunctionCommandString(const std::string &cmd)
+{
+    return escapeCommandLineArgument(cmd);
 }
 
 //----------------------------------------------------------------------------
