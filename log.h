@@ -222,7 +222,7 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
                                     )
 {
     if ( (logEntryType==LogEntryType::warn && isWarningDisabled(warnType))
-      || (logEntryType==LogEntryType::msg  && isWarningDisabled(warnType) && !warnType.empty())
+      || (logEntryType==LogEntryType::msg  && isInfoDisabled(warnType) && !warnType.empty())
        )
         return umbaLogStreamNul;
 
