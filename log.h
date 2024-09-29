@@ -306,7 +306,7 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
          <<"["<<srcFile<<":"<<srcLineNo<<"]";
     }
 
-    if (logEntryType==LogEntryType::err || logEntryType==LogEntryType::warn)
+    if (logEntryType==LogEntryType::err || logEntryType==LogEntryType::warn || (logEntryType==LogEntryType::msg && !warnType.empty()))
         s<<normal<<" ";
 
     return s;
