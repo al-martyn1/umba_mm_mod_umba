@@ -126,6 +126,32 @@ optional_shrink_to_fit( C&, std::size_t ) {}
 
 
 
+//----------------------------------------------------------------------------
+template< typename VectorType >
+void vector_push_back(VectorType &vec, typename VectorType::value_type val)
+{
+    vec.push_back(val);
+}
+
+//----------------------------------------------------------------------------
+template< typename VectorType, typename IterType >
+void vector_push_back(VectorType &vec, IterType b, IterType e)
+{
+    vec.insert(vec.end(), b, e);
+}
+
+//----------------------------------------------------------------------------
+template< typename VectorType, typename OtherContainer >
+void vector_push_back(VectorType &vec, const OtherContainer &other)
+{
+    vec.reserve(vec.size() + other.size());
+    vec.insert(vec.end(), other.begin(), other.end());
+}
+
+//----------------------------------------------------------------------------
+
+
+
 
 
 //----------------------------------------------------------------------------
