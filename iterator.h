@@ -2,6 +2,7 @@
 
 #include "text_position_info.h"
 #include "assert.h"
+#include "utf.h"
 
 //
 #include <iterator>
@@ -26,14 +27,14 @@ namespace iterator {
 
 
 //----------------------------------------------------------------------------
-template<typename CharType=char>
+template<typename CharType=char, bool UtfIterator=true>
 class TextPositionCountingIterator;
 
-template<typename CharT, typename Traits=std::char_traits<CharT> >
-std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e);
+template<typename CharT, typename Traits=std::char_traits<CharT>, bool UtfIterator=true >
+std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
 
-template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT> >
-std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e);
+template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
+std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
 
 //----------------------------------------------------------------------------
 
@@ -45,7 +46,9 @@ std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountin
    В последнем варианте инкремент перепрыгнет через \n
  */
 
-template<typename CharType /* =char */ >
+template< typename CharType /* =char */
+        , bool UtfIterator
+        >
 class TextPositionCountingIterator
 {
 
@@ -54,7 +57,11 @@ class TextPositionCountingIterator
 public:
 
     using difference_type = std::ptrdiff_t;
-    using value_type = CharType;
+    using value_type      = CharType;
+    using pointer         = CharType*;
+    using const_pointer   = const CharType*;
+
+    constexpr const static bool utf_iterator = UtfIterator;
 
 
 protected:
@@ -75,17 +82,22 @@ protected:
     TextPositionInfo    m_positionInfo;
 
 
-    template<typename CharT, typename Traits /* =std::char_traits<CharT> */ >
-    friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e);
+    template<typename CharT, typename Traits /* =std::char_traits<CharT> */, bool UtfIteratorT >
+    friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
 
-    template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */ >
-    friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e);
+    template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */, bool UtfIteratorT >
+    friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
 
 
-    const CharType* getRawValueTypePointer() const
+    const_pointer getRawValueTypePointer() const
     {
         UMBA_ASSERT(!isEndIterator());
         return m_pData + m_dataIndex; // Может выходить за пределы m_dataSize, это нормально.
+    }
+
+    operator const_pointer() const
+    {
+        return getRawValueTypePointer();
     }
 
     //!< Допустим, мы что-то парсим, и построчно сохраняем контекст парсинга, для того, чтобы можно был при изменении входных данных парсить только то, что изменилось (после точки/строки изменнения). При этом входной контейнер мог увеличиться и переаллоцироваться, и указатель в итераторе протухает. Надо сделать rebase
@@ -96,9 +108,14 @@ protected:
     }
 
 
+    bool isEndReached(std::size_t idx) const
+    {
+        return idx>=m_dataSize;
+    }
+
     bool isEndReached() const
     {
-        return m_dataIndex>=m_dataSize;
+        return isEndReached(m_dataIndex);
     }
 
     bool isEndIterator() const
@@ -167,7 +184,48 @@ protected:
             return;
         }
 
-        ++m_dataIndex;
+        if constexpr (UtfIterator)
+        {
+            std::size_t numChars = getNumberOfCharsUtf(ch);
+            if (!numChars)
+                 numChars = 1;
+            for(std::size_t i=0; i!=numChars && !isEndReached(); ++i, ++m_dataIndex)
+            {
+                if (!i)
+                    continue;
+
+                if (!isNextCharUtf(ch))
+                    break;
+            }
+        }
+        else
+        {
+            ++m_dataIndex;
+        }
+    }
+
+    // Возвращает длинну символа в CharType'ах
+    std::size_t symbolLength() const
+    {
+        UMBA_ASSERT(!isEndIterator() && !isEndReached());
+
+        char ch = m_pData[m_dataIndex];
+        std::size_t numChars = getNumberOfCharsUtf(ch);
+        if (!numChars)
+             numChars = 1;
+
+        std::size_t i = 0;
+
+        for(; i!=numChars && !isEndReached(m_dataIndex+i); ++i)
+        {
+            if (!i)
+                continue;
+
+            if (!isNextCharUtf(ch))
+                break;
+        }
+
+        return i;
     }
 
     std::size_t findNearestLinefeedIndex() const
@@ -294,9 +352,9 @@ public:
 
 
 //----------------------------------------------------------------------------
-template<typename CharType>
-TextPositionCountingIterator<CharType> operator+( const TextPositionCountingIterator<CharType> &it
-                                                , typename TextPositionCountingIterator<CharType>::difference_type diff
+template<typename CharType, bool UtfIterator>
+TextPositionCountingIterator<CharType> operator+( const TextPositionCountingIterator<CharType,UtfIterator> &it
+                                                , typename TextPositionCountingIterator<CharType,UtfIterator>::difference_type diff
                                                 )
 {
     UMBA_ASSERT(diff>=0);
@@ -307,9 +365,9 @@ TextPositionCountingIterator<CharType> operator+( const TextPositionCountingIter
 }
 
 //----------------------------------------------------------------------------
-template<typename CharType>
-TextPositionCountingIterator<CharType> operator+( typename TextPositionCountingIterator<CharType>::difference_type diff
-                                                , const TextPositionCountingIterator<CharType> &it
+template<typename CharType, bool UtfIterator>
+TextPositionCountingIterator<CharType> operator+( typename TextPositionCountingIterator<CharType,UtfIterator>::difference_type diff
+                                                , const TextPositionCountingIterator<CharType,UtfIterator> &it
                                                 )
 {
     UMBA_ASSERT(diff>=0);
@@ -320,9 +378,9 @@ TextPositionCountingIterator<CharType> operator+( typename TextPositionCountingI
 }
 
 //----------------------------------------------------------------------------
-template<typename CharType>
-TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator<CharType> &it
-                                                  , typename TextPositionCountingIterator<CharType>::difference_type diff
+template<typename CharType, bool UtfIterator>
+TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator<CharType,UtfIterator> &it
+                                                  , typename TextPositionCountingIterator<CharType,UtfIterator>::difference_type diff
                                                   )
 {
     UMBA_ASSERT(diff>=0);
@@ -335,10 +393,9 @@ TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator
 
 
 
-
 //----------------------------------------------------------------------------
-template<typename CharT, typename Traits /* =std::char_traits<CharT> */ >
-std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e)
+template<typename CharT, typename Traits /* =std::char_traits<CharT> */, bool UtfIterator >
+std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e)
 {
     if (b.isBothEndIterators(e))
         return std::basic_string_view<CharT, Traits>();
@@ -346,8 +403,8 @@ std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingI
     return std::basic_string_view<CharT, Traits>(b.getRawValueTypePointer(), b.distanceTo(e));
 }
 
-template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */ >
-std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT> &b, const TextPositionCountingIterator<CharT> &e)
+template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */, bool UtfIterator >
+std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e)
 {
     if (b.isBothEndIterators(e))
         return std::basic_string<CharT, Traits, Allocator>();
@@ -355,6 +412,7 @@ std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountin
     return std::basic_string<CharT, Traits, Allocator>(b.getRawValueTypePointer(), b.distanceTo(e));
 }
 
+//----------------------------------------------------------------------------
 
 
 

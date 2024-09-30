@@ -34,6 +34,9 @@
 #include "c_tokenizer_constants.h"
 //
 #include "iterator.h"
+//
+#include "text_iterator_traits.h"
+//
 #include "escape_string.h"
 
 //
@@ -55,6 +58,8 @@
 #include "tokenizer/trie_builder.h"
 //
 #include "tokenizer/string_literal_parsing.h"
+//
+#include "tokenizer/tokenizer_options.h"
 //
 #include "tokenizer/tokenizer_base.h"
 //

@@ -16,8 +16,9 @@ template< typename CharType            // Input chars type
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
         , typename MessagesStringType  = std::string  // Тип строки, которая используется для сообщений (в том числе и от внешних суб-парсеров)
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits = umba::iterator::TextIteratorTraits<InputIteratorType>
         >
-using Tokenizer = TokenizerFunctionHandlers< CharType, CharClassTable, TrieVector, StringType, MessagesStringType, InputIteratorType >;
+using Tokenizer = TokenizerFunctionHandlers< CharType, CharClassTable, TrieVector, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits >;
 
 
 

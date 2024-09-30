@@ -17,14 +17,16 @@ template< typename CharType            // Input chars type
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
         , typename MessagesStringType  = std::string  // Тип строки, которая используется для сообщений (в том числе и от внешних суб-парсеров)
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits = umba::iterator::TextIteratorTraits<InputIteratorType>
         >
-class TokenizerFunctionHandlers : public TokenizerBaseImpl< TokenizerFunctionHandlers< CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType >
+class TokenizerFunctionHandlers : public TokenizerBaseImpl< TokenizerFunctionHandlers< CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits >
                                                           , CharType
                                                           , CharClassTableType
                                                           , TrieVectorType
                                                           , StringType
                                                           , MessagesStringType
                                                           , InputIteratorType
+                                                          , InputIteratorTraits
                                                           >
 {
 
@@ -38,6 +40,7 @@ public: // depending types
                                    , StringType
                                    , MessagesStringType
                                    , InputIteratorType
+                                   , InputIteratorTraits
                                    >;
 
     using TSelf = TokenizerFunctionHandlers< CharType
@@ -46,6 +49,7 @@ public: // depending types
                                            , StringType
                                            , MessagesStringType
                                            , InputIteratorType
+                                           , InputIteratorTraits
                                            >;
 
     friend TBase;
@@ -65,6 +69,7 @@ public: // depending types
     using trie_vector_type         = typename TBase::trie_vector_type     ;
     using string_type              = typename TBase::string_type          ;
     using iterator_type            = typename TBase::iterator_type        ;
+    using iterator_traits_type     = typename TBase::iterator_traits_type ;
     using messages_string_type     = typename TBase::messages_string_type ;
 
     using ITokenizerLiteralParser  = typename TBase::ITokenizerLiteralParser;

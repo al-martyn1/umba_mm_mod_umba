@@ -28,64 +28,6 @@
 namespace umba {
 namespace tokenizer {
 
-
-
-enum class FloatingPointSeparatorType
-{
-    dot,
-    comma,
-    both
-
-};
-
-//----------------------------------------------------------------------------
-#include "umba/warnings/push_disable_padding_added.h"
-struct TokenizerOptions
-{
-    bool                        singleLineCommentOnlyAtBeginning = false;
-    bool                        processLineContinuation          = true ;  // '\' before line feed marks next line to be continuation of current line
-    bool                        numbersAllowRankSeparator        = true ;
-    char                        numbersRankSeparator             = '\'' ;  // apos ' (39/0x27) or backtick are good for this
-    int                         numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
-    bool                        tabsAsSpace                      = true ;
-    bool                        disableFloatingPointNumbers      = false;
-    FloatingPointSeparatorType  floatingPointSeparatorType       = FloatingPointSeparatorType::dot;
-
-    payload_type getTabToken() const
-    {
-        return tabsAsSpace ? UMBA_TOKENIZER_TOKEN_SPACE : UMBA_TOKENIZER_TOKEN_TAB;
-    }
-
-    template<typename CharType>
-    bool isNumberRankSeparator(CharType ch) const
-    {
-        if (!numbersAllowRankSeparator)
-            return false;
-
-        return ch==(CharType)numbersRankSeparator;
-    }
-
-    template<typename CharType>
-    //constexpr
-    bool isFloatingPointSeparator(CharType ch) const
-    {
-        if (disableFloatingPointNumbers)
-            return false;
-
-        if (floatingPointSeparatorType==FloatingPointSeparatorType::dot   && ch==(CharType)'.')
-            return true;
-        if (floatingPointSeparatorType==FloatingPointSeparatorType::comma && ch==(CharType)',')
-            return true;
-        if (floatingPointSeparatorType==FloatingPointSeparatorType::both  && (ch==(CharType)'.' || ch==(CharType)','))
-            return true;
-
-        return false;
-    }
-
-
-};
-#include "umba/warnings/pop.h"
-
 //----------------------------------------------------------------------------
 
 
@@ -205,6 +147,7 @@ template< typename TBase
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
         , typename MessagesStringType  = std::string  // Тип строки, которая используется для сообщений (в том числе и от внешних суб-парсеров)
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits = umba::iterator::TextIteratorTraits<InputIteratorType>
         >
 class TokenizerBaseImpl
 {
@@ -218,9 +161,10 @@ public: // depending types
     using trie_vector_type         = TrieVectorType;
     using string_type              = StringType;
     using iterator_type            = InputIteratorType;
+    using iterator_traits_type     = InputIteratorTraits;
     using messages_string_type     = MessagesStringType;
 
-    using ITokenizerLiteralParser  = umba::tokenizer::ITokenizerLiteralParser<CharType, MessagesStringType, InputIteratorType>;
+    using ITokenizerLiteralParser  = umba::tokenizer::ITokenizerLiteralParser<CharType, MessagesStringType, InputIteratorType, InputIteratorTraits>;
 
 
     //------------------------------
@@ -321,7 +265,7 @@ protected: // internal types
 
 
 //------------------------------
-protected: // fileds
+protected: // fields
 
     CharClassTableType    charClassTable;
 
@@ -345,7 +289,9 @@ protected: // fileds - состояние токенизатора
     mutable TokenizerInternalState st            = TokenizerInternalState::stInitial;
     mutable TokenizerInternalState stEscapeSaved = TokenizerInternalState::stInitial;
 
-    mutable bool curPosAtLineBeginning = true;
+    mutable int                    rawModeCounter = 0;
+
+    mutable bool                   curPosAtLineBeginning = true;
 
     // Общее
     mutable InputIteratorType      tokenStartIt;
@@ -399,6 +345,20 @@ protected: // methods
 //------------------------------
 public: // methods
 
+    //mutable std::size_t            rawModeCounter = 0;
+
+    bool isInRawMode() const
+    {
+        return rawModeCounter>0;
+    }
+
+    void setRawMode(bool bRawMode)
+    {
+        if (bRawMode)
+            ++rawModeCounter;
+        else
+            ++rawModeCounter;
+    }
 
     void addOwnershipForLiteralParsers(const std::vector<std::shared_ptr<ITokenizerLiteralParser> > &literalParsers)
     {
@@ -410,7 +370,7 @@ public: // methods
         options = opts;
     }
 
-    const TokenizerOptions& setOptions() const
+    const TokenizerOptions& getOptions() const
     {
         return options;
     }
@@ -754,6 +714,8 @@ public: // methods - методы собственно разбора
         st            = TokenizerInternalState::stInitial;
         stEscapeSaved = TokenizerInternalState::stInitial;
 
+        rawModeCounter = 0;
+
         curPosAtLineBeginning = true;
 
         // Общее
@@ -781,6 +743,13 @@ public: // methods - методы собственно разбора
 
     bool tokenizeFinalize(InputIteratorType itEnd) const
     {
+        if (isInRawMode())
+        {
+             if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_CTRL_FIN, itEnd, itEnd))
+                 return false;
+             return true;
+        }
+
         switch(st)
         {
             case TokenizerInternalState::stInitial  :
@@ -945,6 +914,13 @@ public: // methods - методы собственно разбора
     // Is it possible to use goto with switch? - https://stackoverflow.com/questions/8202199/is-it-possible-to-use-goto-with-switch
     bool tokenize(InputIteratorType it, InputIteratorType itEnd) const
     {
+        if (isInRawMode())
+        {
+            if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_RAW_CHAR, it, it+1)) // Сырые символы мы всегда отдельно выплёвываем
+                return false;
+             return true;
+        }
+
         const auto ch = *it;
         UMBA_ASSERT(charClassTable.size()>charToCharClassTableIndex(ch));
         CharClass charClass = charClassTable[charToCharClassTableIndex(ch)];

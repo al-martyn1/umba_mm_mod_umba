@@ -152,6 +152,7 @@ public:
 template< typename CharType
         , typename MessageStringType    = std::string // std::basic_string<CharType>
         , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits  = umba::iterator::TextIteratorTraits<InputIteratorType>
         >
 struct ITokenizerLiteralParser
 {
@@ -192,8 +193,9 @@ protected:
 template< typename CharType
         , typename MessageStringType    = std::string // std::basic_string<CharType>
         , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits  = umba::iterator::TextIteratorTraits<InputIteratorType>
         >
-class SimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>
+class SimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType, InputIteratorTraits>
 {
 
 protected:
@@ -299,9 +301,10 @@ public:
 template< typename CharType
         , typename MessageStringType    = std::string // std::basic_string<CharType>
         , typename InputIteratorType    = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits  = umba::iterator::TextIteratorTraits<InputIteratorType>
         , typename ExtraEscapesMapType  = std::unordered_map<CharType, std::basic_string<CharType> >
         >
-class CppEscapedSimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>
+class CppEscapedSimpleQuotedStringLiteralParser : public ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType, InputIteratorTraits>
 {
 
     using InterfaceParentType = ITokenizerLiteralParser<CharType, MessageStringType, InputIteratorType>;

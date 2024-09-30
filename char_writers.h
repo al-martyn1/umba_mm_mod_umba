@@ -559,7 +559,7 @@ public:
         {
             if (waitForFirstUtfChar()) // ждём первый символ UTF8 последовательности
             {
-                std::size_t uSeqLen = umba::getNumberOfBytesUtf8((umba::utf8_char_t)ch);
+                std::size_t uSeqLen = umba::getNumberOfCharsUtf8((umba::utf8_char_t)ch);
                 if (uSeqLen<2)
                 {
                     writeCharFinalImpl(ch); // у нас нет UTF8 последовательности, только один символ
