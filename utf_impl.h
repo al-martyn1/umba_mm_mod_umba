@@ -316,27 +316,147 @@ std::basic_string<utf16_char_t> utf16_from_utf32( const std::basic_string<utf32_
     return utf16_from_utf32(pBegin, pBegin+str32.size(), swapBytes);
 }
 
+constexpr inline
+bool isFirstCharUtf32(utf32_char_t ch)
+{
+    return true;
+}
+
+constexpr inline
+bool isNextCharUtf32(utf32_char_t ch)
+{
+    return false;
+}
+
+constexpr inline
+std::size_t getNumberOfCharsUtf32(utf32_char_t ch)
+{
+    return 1;
+}
+
+constexpr inline
+bool isFirstCharUtf16(utf16_char_t ch)
+{
+           // Обычный символ             // Первый символ сурогатной пары
+    return (ch<0xD800u || ch>0xDFFFu) || (ch>=0xD800u && ch<=0xDBFFu);
+}
+
+constexpr inline
+bool isNextCharUtf16(utf16_char_t ch)
+{
+    return !isFirstCharUtf16(ch);
+}
+
+constexpr inline
+std::size_t getNumberOfCharsUtf16(utf16_char_t ch)
+{
+    return (ch<0xD800u || ch>0xDFFFu)
+         ? 1u
+         : ( (ch>=0xD800u && ch<=0xDBFFu)
+           ? 2u
+           : 0u
+           )
+         ;
+}
+
 
 // https://datatracker.ietf.org/doc/html/rfc2279
 
-// UCS-4 range (hex.)    UTF-8 octet sequence (binary)
-// 0000 0000-0000 007F   0xxxxxxx
-// 0000 0080-0000 07FF   110xxxxx 10xxxxxx
-// 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx
-// 0001 0000-001F FFFF   11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-// 0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-// 0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx
-inline
-std::size_t getNumberOfBytesUtf8(utf8_char_t ch)
-{
-    if ((ch&0x80)==0)          return 1;
-    else if ((ch&0xE0)==0xC0)  return 2;
-    else if ((ch&0xF0)==0xE0)  return 3;
-    else if ((ch&0xF8)==0xF0)  return 4;
-    else if ((ch&0xFC)==0xF8)  return 5;
-    else if ((ch&0xFE)==0xFC)  return 6;
-    else                       return 0;
+constexpr inline
+std::size_t getNumberOfCharsUtf8(utf8_char_t ch)
+{   
+    return ((ch&0x80)==0)
+         ? 1u
+         : ( ((ch&0xE0)==0xC0)
+           ? 2u
+           : ( ((ch&0xF0)==0xE0)
+             ? 3u
+             : ( ((ch&0xF8)==0xF0)
+               ? 4u
+               : ( ((ch&0xFC)==0xF8)
+                 ? 5u
+                 : ( ((ch&0xFE)==0xFC)
+                   ? 6u
+                   : 0u
+                   )
+                 )
+               )
+             )
+           )
+         ;
+
+    #if 0
+                                      // UCS-4 range (hex.)    UTF-8 octet sequence (binary)
+    if ((ch&0x80)==0)          return 1;  // 0000 0000-0000 007F   0xxxxxxx
+    else if ((ch&0xE0)==0xC0)  return 2;  // 0000 0080-0000 07FF   110xxxxx 10xxxxxx
+    else if ((ch&0xF0)==0xE0)  return 3;  // 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx
+    else if ((ch&0xF8)==0xF0)  return 4;  // 0001 0000-001F FFFF   11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+    else if ((ch&0xFC)==0xF8)  return 5;  // 0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+    else if ((ch&0xFE)==0xFC)  return 6;  // 0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx
+    else                       return 0;  
+    #endif
 }
+
+constexpr inline
+bool isNextCharUtf8(utf8_char_t ch)
+{
+    return (ch&0xC0u)==0x80u; // 0xC0 - 0b1100_0000, 0x80 - 0b1000_0000
+}
+
+constexpr inline
+bool isFirstCharUtf8(utf8_char_t ch)
+{
+    return !isNextCharUtf8(ch);
+}
+
+template<typename CharType> constexpr 
+std::size_t getNumberOfCharsUtf(CharType ch)
+{
+    if constexpr (sizeof(ch)<=1)
+    {
+        return getNumberOfCharsUtf8((utf8_char_t)ch);
+    }
+    else
+    {
+        if constexpr (sizeof(ch)<=2)
+            return getNumberOfCharsUtf16((utf16_char_t)ch);
+        else
+            return getNumberOfCharsUtf32((utf32_char_t)ch);
+    }
+}
+
+template<typename CharType> constexpr 
+bool isFirstCharUtf(CharType ch)
+{
+    if constexpr (sizeof(ch)<=1)
+    {
+        return isFirstCharUtf8((utf8_char_t)ch);
+    }
+    else
+    {
+        if constexpr (sizeof(ch)<=2)
+            return isFirstCharUtf16((utf16_char_t)ch);
+        else
+            return isFirstCharUtf32((utf32_char_t)ch);
+    }
+}
+
+template<typename CharType> constexpr 
+bool isNextCharUtf(CharType ch)
+{
+    if constexpr (sizeof(ch)<=1)
+    {
+        return isNextCharUtf8((utf8_char_t)ch);
+    }
+    else
+    {
+        if constexpr (sizeof(ch)<=2)
+            return isNextCharUtf16((utf16_char_t)ch);
+        else
+            return isNextCharUtf32((utf32_char_t)ch);
+    }
+}
+
 
 inline
 std::size_t getStringLenUtf8(const std::string &str)
@@ -351,7 +471,7 @@ std::size_t getStringLenUtf8(const std::string &str)
     {
         auto uch = (utf8_char_t)str[curPos];
 
-        auto symbolNumBytes = getNumberOfBytesUtf8(uch);
+        auto symbolNumBytes = getNumberOfCharsUtf8(uch);
 
         std::size_t nextPos = curPos + symbolNumBytes;
 
@@ -370,7 +490,7 @@ std::size_t getStringLenUtf8(const std::string &str)
 inline
 const utf8_char_t* utf8_find_first_symbol_byte(const utf8_char_t *pBegin, const utf8_char_t *pEnd)
 {
-    while( (pBegin!=pEnd) && ((*pBegin)&0xC0u)==0x80u ) // 0xC0 - 0b1100_0000, 0x80 - 0b1000_0000
+    while( (pBegin!=pEnd) && isNextCharUtf8(*pBegin)) // 0xC0 - 0b1100_0000, 0x80 - 0b1000_0000
     {
         ++pBegin;
     }
@@ -416,7 +536,7 @@ void utf32_from_utf8_impl( const utf8_char_t *pBegin, const utf8_char_t *pEnd, O
         // 6 - 0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx
 
         utf8_char_t firstByteUtf8 = *pChar++;
-        std::size_t numberOfBytesUtf8 = getNumberOfBytesUtf8(firstByteUtf8);
+        std::size_t numberOfBytesUtf8 = getNumberOfCharsUtf8(firstByteUtf8);
         if (!numberOfBytesUtf8)
         {
             continue;
