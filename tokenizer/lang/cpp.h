@@ -20,17 +20,18 @@ template< typename CharType            // Input chars type
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
         , typename MessagesStringType  = std::string  // Тип строки, которая используется для сообщений (в том числе и от внешних суб-парсеров)
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
+        , typename InputIteratorTraits = umba::iterator::TextIteratorTraits<InputIteratorType>
         , typename TokenizerType       = Tokenizer< CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType >
         >
-TokenizerBuilder<CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, TokenizerType>
+TokenizerBuilder<CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits, TokenizerType>
 makeTokenizerBuilderCpp()
 {
-    using CppStringLiteralParser     = CppEscapedSimpleQuotedStringLiteralParser<CharType, MessagesStringType, InputIteratorType>;
-    using AngleBracketsLiteralParser = SimpleQuotedStringLiteralParser<CharType, MessagesStringType, InputIteratorType>;
+    using CppStringLiteralParser     = CppEscapedSimpleQuotedStringLiteralParser<CharType, MessagesStringType, InputIteratorType, InputIteratorTraits>;
+    using AngleBracketsLiteralParser = SimpleQuotedStringLiteralParser<CharType, MessagesStringType, InputIteratorType, InputIteratorTraits>;
 
     using umba::string_plus::make_string;
 
-    auto tokenizerBuilder = TokenizerBuilder<CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, TokenizerType>()
+    auto tokenizerBuilder = TokenizerBuilder<CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits, TokenizerType>()
 
                           .generateStandardCharClassTable()
 
