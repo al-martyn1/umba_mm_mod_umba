@@ -283,3 +283,5 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
 
 #endif
 
+
+#define UMBA_MAIN() UMBA_APP_MAIN()
