@@ -46,7 +46,7 @@ struct TokenizerOptions
     bool                        processLineContinuation          = true ;  // '\' before line feed marks next line to be continuation of current line
     bool                        numbersAllowRankSeparator        = true ;
     char                        numbersRankSeparator             = '\'' ;  // apos ' (39/0x27) or backtick are good for this
-    int                         numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
+    int                         numberDefaultBase                = 10   ;  // РЎРёСЃС‚РµРјР° СЃС‡РёСЃР»РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ, РїСЂРёРјРµРЅСЏРµС‚СЃСЏ, РєРѕРіРґР° РЅРµ Р±С‹Р» СѓРєР°Р·Р°РЅ РїСЂРµС„РёРєСЃ, СЏРІРЅРѕ Р·Р°РґР°СЋС‰РёР№ СЃРёСЃС‚РµРјСѓ СЃС‡РёСЃР»РµРЅРёСЏ.
     bool                        tabsAsSpaces                     = true ;  // 
     bool                        disableFloatingPointNumbers      = false;
     FloatingPointSeparatorType  floatingPointSeparatorType       = FloatingPointSeparatorType::dot;

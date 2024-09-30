@@ -166,7 +166,7 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
 
     tokenizer.template installTokenFilter<SimpleSequenceComposingFilter>( UMBA_TOKENIZER_TOKEN_PLANTUML_PSEUDO_STATE // заменяем последовательность на UMBA_TOKENIZER_TOKEN_PLANTUML_PSEUDO_STATE
                                                                         , 0u // Нагрузку берём по нулевому индексу
-                                                                        , UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN, UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION, UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE
+                                                                        , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN, UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION, UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE }
                                                                         );
 
 
