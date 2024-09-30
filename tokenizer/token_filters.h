@@ -716,15 +716,22 @@ struct SimpleSequenceComposingFilter : FilterBase<TokenizerType, VectorType>
     SimpleSequenceComposingFilter( token_handler_type                   curTokenHandler
                                  , payload_type                         resultPayloadToken_
                                  , std::size_t                          resultPayloadDataIndex_ /* обычно 0 */
-                                 , auto  /* payload_type */ ...                      payloadsList_
+                                 , const std::vector<payload_type>      &payloadsList_
+                                 // , std::initializer_list<payload_type>    payloadsList_
+                                 // #if defined(_MSC_VER)
+                                 // , payload_type                      ...payloadsList_
+                                 // #elif defined(__GNUC__)
+                                 // , auto                              ...payloadsList_
+                                 // #endif
                                  )
     : TBase(curTokenHandler)
     , resultPayloadToken(resultPayloadToken_)
     , resultPayloadDataIndex(resultPayloadDataIndex_)
-    , payloadsMatchList(std::initializer_list<payload_type>{payloadsList_...})
+    //, payloadsMatchList(std::initializer_list<payload_type>{payloadsList_...})
+    , payloadsMatchList(payloadsList_)
     {
         UMBA_ASSERT(!payloadsMatchList.empty());
-        UMBA_ASSERT(resultPayloadDataIndex<payloadsMatchList.empty());
+        UMBA_ASSERT(resultPayloadDataIndex<payloadsMatchList.size());
     }
 
 
