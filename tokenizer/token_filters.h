@@ -9,6 +9,10 @@
 #include "../string_plus.h"
 #include "umba/warnings/pop.h"
 
+//
+#include <array>
+#include <initializer_list>		
+
 /*
 
 Фильтры инсталлируются в токенизер в начало цепочки.
@@ -182,6 +186,12 @@ protected:
         tokenBuffer.clear();
     }
 
+    bool tokenBufferPushBack(bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, bool res=true)
+    {
+        tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, parsedData);
+        return res;
+    }
+
     bool flushTokenBuffer(TokenizerType &tokenizer, messages_string_type &msg, iterator_type &b, iterator_type &e, bool bClear=true)
     {
         if (!nextTokenHandler)
@@ -214,6 +224,15 @@ protected:
         clearTokenBuffer();
     }
 
+    bool flushTokenBufferAndCallNextHandler(TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg, bool bClear=true)
+    {
+        if (!flushTokenBuffer(tokenizer, msg, b, e, bClear))
+            return false;
+        bool res = nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /*strValue*/, msg);
+        if (bClear)
+           clearTokenBuffer();
+        return res;
+    }
 
 public:
 
@@ -296,11 +315,7 @@ public:
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
-            bool res = this->flushTokenBuffer(tokenizer, msg, b, e);
-            // https://stackoverflow.com/questions/9941987/there-are-no-arguments-that-depend-on-a-template-parameter
-            // https://web.archive.org/web/20130423054841/http://www.agapow.net/programming/cpp/no-arguments-that-depend-on-a-template-parameter
-            this->reset();
-            return res;
+            return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
         }
 
         if (this->tokenBuffer.empty())
@@ -518,8 +533,6 @@ public:
             {
                 if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
                 {
-                    //restoreAngleBracketsAndHashState(tokenizer);
-
                     if (!nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg))
                         return reset(tokenizer, false);
                     return reset(tokenizer, true);
@@ -674,6 +687,99 @@ public:
 
 
 }; // struct CcPreprocessorFilter
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename TokenizerType, typename VectorType=std::vector<TokenInfo<TokenizerType> > >
+struct SimpleSequenceComposingFilter : FilterBase<TokenizerType, VectorType>
+{
+    using TBase = FilterBase<TokenizerType, VectorType>;
+
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TBase);
+    using payload_type             = umba::tokenizer::payload_type        ;
+
+    UMBA_RULE_OF_FIVE(SimpleSequenceComposingFilter, default, default, default, default, default);
+
+
+    payload_type                resultPayloadToken = 0;
+    std::size_t                 resultPayloadDataIndex   = 0;
+    std::vector<payload_type>   payloadsMatchList;
+
+    // https://www.scs.stanford.edu/~dm/blog/param-pack.html
+    // https://selfboot.cn/2024/05/07/variadic_arguments_in_c++/
+    // https://dev.to/pauljlucas/variadic-functions-in-c-2alg
+
+    //template<payload_type ...P>
+    SimpleSequenceComposingFilter( token_handler_type                   curTokenHandler
+                                 , payload_type                         resultPayloadToken_
+                                 , std::size_t                          resultPayloadDataIndex_ /* обычно 0 */
+                                 , auto  /* payload_type */ ...                      payloadsList_
+                                 )
+    : TBase(curTokenHandler)
+    , resultPayloadToken(resultPayloadToken_)
+    , resultPayloadDataIndex(resultPayloadDataIndex_)
+    , payloadsMatchList(std::initializer_list<payload_type>{payloadsList_...})
+    {
+        UMBA_ASSERT(!payloadsMatchList.empty());
+        UMBA_ASSERT(resultPayloadDataIndex<payloadsMatchList.empty());
+    }
+
+
+protected:
+
+
+public:
+
+    bool operator()( TokenizerType         &tokenizer
+                   , bool                  lineStartFlag
+                   , payload_type          payloadToken
+                   , iterator_type         &b
+                   , iterator_type         &e
+                   , token_parsed_data     parsedData // std::variant<...>
+                   , messages_string_type  &msg
+                   )
+    {
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
+        {
+            return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
+        }
+
+        // this->tokenBuffer.size() хранит всегода меньше элементов, чем в образце payloadsList.size()
+        UMBA_ASSERT(this->tokenBuffer.size()<payloadsMatchList.size()); // если payloadsList пустой - тоже выстрелит
+
+        // Тут надо матчер вызывать
+        if (payloadsMatchList[this->tokenBuffer.size()]!=payloadToken)
+        {
+            // пришедшая нагрузка не соответствует паттерну
+            // флушим, прокидываем текущие аргументы и очищаем буфер
+            return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
+        }
+
+        // Иначе - кладём в буфер
+        this->tokenBufferPushBack(lineStartFlag, payloadToken, b, e, parsedData);
+
+        if (this->tokenBuffer.size()<payloadsMatchList.size())
+            return true; // Ещё не набрали полностью паттерн
+
+
+        auto tki = this->tokenBuffer.front();
+        //auto tmpB = this->tokenBuffer.front().b;
+        if (!this->nextTokenHandler(tokenizer, tki.lineStartFlag, resultPayloadToken, tki.b, e, this->tokenBuffer[resultPayloadDataIndex].parsedData /*strValue*/, msg))
+        {
+             b = tki.b;
+             this->reset();
+             return false;
+        }
+
+        this->reset();
+        return true;
+
+    }
+
+}; // struct SimpleSequenceComposingFilter
 
 //----------------------------------------------------------------------------
 

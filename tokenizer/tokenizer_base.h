@@ -99,6 +99,9 @@ StringType getTokenizerTokenStr(payload_type p)
         case UMBA_TOKENIZER_TOKEN_ANGLE_BRACKET_CLOSE              : return umba::string_plus::make_string<StringType>("KIND_OF_BRACKET");
         case UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_OPEN              : return umba::string_plus::make_string<StringType>("KIND_OF_BRACKET");
         case UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE             : return umba::string_plus::make_string<StringType>("KIND_OF_BRACKET");
+        case UMBA_TOKENIZER_TOKEN_PLANTUML_PSEUDO_STATE            : return umba::string_plus::make_string<StringType>("PLANTUML_TRANSITION");
+        case UMBA_TOKENIZER_TOKEN_PLANTUML_HISTORY_STATE           : return umba::string_plus::make_string<StringType>("PLANTUML_PSEUDO_STATE");
+
         case UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_START: return umba::string_plus::make_string<StringType>("COMMENT_START");
         case UMBA_TOKENIZER_TOKEN_OPERATOR_MULTI_LINE_COMMENT_END  : return umba::string_plus::make_string<StringType>("COMMENT_END");
         //case : return umba::string_plus::make_string<StringType>("");

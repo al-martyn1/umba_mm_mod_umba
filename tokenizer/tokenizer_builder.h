@@ -102,7 +102,7 @@ protected: // methods - helpers
         if (addedTokens.find(tk)!=addedTokens.end())
         {
             if (!allowExisting)
-                throw std::runtime_error("token already used");
+                throw std::runtime_error("token already used: " + getTokenizerTokenStr<std::string>(tk));
             return;
         }
         addedTokens[tk] = tkStr;
