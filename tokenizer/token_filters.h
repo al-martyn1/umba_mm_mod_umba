@@ -167,6 +167,105 @@ struct TokenInfo
 
 
 //----------------------------------------------------------------------------
+//! Простой фильтр, который буферизирует RAW данные. Он хранит только итератор первого RAW символа
+template<typename TokenizerType>
+struct RawCharsCollectingFilter
+{
+
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TokenizerType);
+    using payload_type             = umba::tokenizer::payload_type           ;
+
+protected:
+
+    token_handler_type nextTokenHandler;
+
+    TokenInfo  rawSequenceStartInfo;
+
+    void reset()
+    {
+        rawSequenceStartInfo = TokenInfo{};
+        rawSequenceStartInfo.payloadToken = UMBA_TOKENIZER_TOKEN_UNEXPECTED;
+    }
+
+    void saveRawCharsSequenceStartInfo(bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData)
+    {
+        UMBA_ASSERT(payloadToken==UMBA_TOKENIZER_TOKEN_RAW_CHAR);
+        rawSequenceStartInfo = TokenInfo{lineStartFlag, payloadToken, b, e, parsedData};
+    }
+
+    static
+    bool isRawCharPayloadToken(payload_type payloadToken)
+    {
+        return payloadToken==UMBA_TOKENIZER_TOKEN_RAW_CHAR;
+    }
+
+    bool isCollectingRawCharsMode() const
+    {
+        return isRawCharPayloadToken(rawSequenceStartInfo.payloadToken);
+    }
+
+    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg) const
+    {
+        if (!nextTokenHandler)
+            return true;
+
+        return nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+    }
+
+public:
+
+    RawCharsCollectingFilter(token_handler_type curTokenHandler)
+    : nextTokenHandler(curTokenHandler)
+    {
+        reset();
+    }
+
+    UMBA_RULE_OF_FIVE(RawCharsCollectingFilter, default, default, default, default, default);
+
+    bool operator()( TokenizerType         &tokenizer
+                   , bool                  lineStartFlag
+                   , payload_type          payloadToken
+                   , iterator_type         &b
+                   , iterator_type         &e
+                   , token_parsed_data     parsedData // std::variant<...>
+                   , messages_string_type  &msg
+                   )
+    {
+        if (isCollectingRawCharsMode()==isRawCharPayloadToken(payloadToken))
+        {
+            // режим не меняется
+
+            if (!isCollectingRawCharsMode()) // не режим коллекционирования, просто пропускаем
+                return callNextTokenHandler( tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+
+        }
+        // if (nextTokenHandler)
+        //     return nextTokenHandler(lineStartFlag, payloadToken, b, e, parsedData, msg);
+        // return true;
+
+        !!!
+    }
+
+
+// struct TokenInfo
+// {
+//     bool                                 lineStartFlag;
+//     payload_type                         payloadToken;
+//     iterator_type                        b;
+//     iterator_type                        e;
+//     // std::basic_string_view<value_type>   strValue;
+//     token_parsed_data                    parsedData;
+
+
+}; // struct RawCharsCollectingFilter
+
+//----------------------------------------------------------------------------
+
+
+
+
+
+//----------------------------------------------------------------------------
 //! Предоставляет функционал буферизации токенов
 /*! Возможно, тут стоит использовать boost::small_vector.
     Хотя, он тоже лезет в кучу, а единожды увеличившийся стандартный вектор не склонен к уменьшению объема
@@ -228,6 +327,9 @@ protected:
 
     bool flushTokenBufferAndCallNextHandler(TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg, bool bClear=true)
     {
+        if (!nextTokenHandler)
+            return true;
+
         if (!flushTokenBuffer(tokenizer, msg, b, e, bClear))
             return false;
         bool res = nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /*strValue*/, msg);
@@ -235,6 +337,15 @@ protected:
            clearTokenBuffer();
         return res;
     }
+
+    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg) const
+    {
+        if (!nextTokenHandler)
+            return true;
+
+        return nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+    }
+
 
 public:
 
@@ -334,7 +445,7 @@ public:
             }
             else
             {
-                return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
+                return this->callNextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
             }
         }
 
@@ -347,7 +458,7 @@ public:
                  return false;
 
             // Пробрасываем пришедшее на текущем шаге
-            return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
+            return this->callNextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData /* strValue */ , msg);
         }
 
 
@@ -365,7 +476,7 @@ public:
         {
             payloadData.hasSuffix      = true;
             payloadData.suffixStartPos = suffixStartIter;
-            return this->nextTokenHandler( tokenizer, prevTokenInfo.lineStartFlag, prevTokenInfo.payloadToken
+            return this->callNextTokenHandler( tokenizer, prevTokenInfo.lineStartFlag, prevTokenInfo.payloadToken
                                          , literalStartIter, literalEndIter, payloadData, msg
                                          );
         };
@@ -799,7 +910,7 @@ public:
 
         auto tki = this->tokenBuffer.front();
         //auto tmpB = this->tokenBuffer.front().b;
-        if (!this->nextTokenHandler(tokenizer, tki.lineStartFlag, resultPayloadToken, tki.b, e, this->tokenBuffer[resultPayloadDataIndex].parsedData /*strValue*/, msg))
+        if (!this->callNextTokenHandler(tokenizer, tki.lineStartFlag, resultPayloadToken, tki.b, e, this->tokenBuffer[resultPayloadDataIndex].parsedData /*strValue*/, msg))
         {
              b = tki.b;
              this->reset();
@@ -856,7 +967,7 @@ struct IdentifierToKeywordConversionFilter : FilterBase<TokenizerType, VectorTyp
     {
         if (payloadToken!=matchTo)
         {
-            return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+            return this->callNextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
         }
 
         auto identifierData = std::get<typename TokenizerType::IdentifierData>(parsedData);
@@ -869,9 +980,9 @@ struct IdentifierToKeywordConversionFilter : FilterBase<TokenizerType, VectorTyp
         typename std::unordered_map<string_type, payload_type>::const_iterator kit = keywordsMap.find(identifierStr);
 
         if (kit==keywordsMap.end())
-            return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+            return this->callNextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
         else
-            return this->nextTokenHandler(tokenizer, lineStartFlag, kit->second, b, e, parsedData, msg);
+            return this->callNextTokenHandler(tokenizer, lineStartFlag, kit->second, b, e, parsedData, msg);
 
     }
 

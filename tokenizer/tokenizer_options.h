@@ -49,6 +49,7 @@ struct TokenizerOptions
     int                         numberDefaultBase                = 10   ;  // Система счисления по умолчанию, применяется, когда не был указан префикс, явно задающий систему счисления.
     bool                        tabsAsSpaces                     = true ;  // 
     bool                        disableFloatingPointNumbers      = false;
+    bool                        unclassifiedCharsRaw             = true ;  //
     FloatingPointSeparatorType  floatingPointSeparatorType       = FloatingPointSeparatorType::dot;
 
     payload_type getTabToken() const
