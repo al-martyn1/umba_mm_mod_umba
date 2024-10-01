@@ -655,6 +655,30 @@ protected: // methods - helpers - из "грязного" проекта, где
         return true;
     };
 
+    bool processUnclassifiedCharsRawLambda(InputIteratorType it, InputIteratorType itEnd) const
+    {
+        if (options.unclassifiedCharsRaw)
+        {
+            if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_RAW_CHAR, it, it+1)) // выплюнули
+                return false;
+            st = TokenizerInternalState::stInitial;
+        }
+        else
+        {
+            return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+        }
+    };
+
+                    // if (options.unclassifiedCharsRaw)
+                    // {
+                    //  
+                    // }
+                    // else
+                    // {
+                    //     return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                    // }
+
+
     // ITokenizerLiteralParser*            pCurrentLiteralParser = 0;
     // payload_type                        literalTokenId = 0;
     // MessagesStringType                  externHandlerMessage;
@@ -1001,7 +1025,7 @@ public: // methods - методы собственно разбора
                 }
                 else
                 {
-                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                    return processUnclassifiedCharsRawLambda(it, itEnd);
                 }
 
                 //if ((charClass::linefeed))
@@ -1114,7 +1138,8 @@ public: // methods - методы собственно разбора
                 }
                 else
                 {
-                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                    //return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                    return processUnclassifiedCharsRawLambda(it, itEnd);
                 }
             } break;
 
@@ -1179,7 +1204,8 @@ public: // methods - методы собственно разбора
                 }
                 else
                 {
-                    return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                    //return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                    return processUnclassifiedCharsRawLambda(it, itEnd);
                 }
             } break;
 
@@ -1205,7 +1231,7 @@ public: // methods - методы собственно разбора
                 else // Нет продолжения префикса, вероятно, он у нас окончился
                 {
                     curPayload = numbersTrie[numberPrefixIdx].payload;
-                    if (curPayload==payload_invalid) // текущий префикс нифига не префикс
+                    if (curPayload==payload_invalid) // текущий префикс нифига не префикс - в начале был префикс, а потом перестал им быть - может, банальная опечатка, и мы находимся в середине префикса, и кода payload'а у нас нету
                     {
                         // Надо проверить, является ли то, что уже есть, чисто числом
 
@@ -1233,6 +1259,8 @@ public: // methods - методы собственно разбора
                         if (!idx)
                            prefixIsNumber = false; // Нет цифр в префиксе
 
+                        // !!! Тут ещё надо проработать - а вдруг это 0 с каким-то суффиксом?
+                        // по идее, всю цепочку итераторов надо бы хранить где-то, чтобы в данном случае сбросить её пользователю, а не выдавать ошибку
                         if (!prefixIsNumber)
                             return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
 
@@ -1287,7 +1315,7 @@ public: // methods - методы собственно разбора
 
 
                     if (requiresDigits)
-                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__); // нужна хоть одна цифра, а её нет
+                        return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__); // нужна хоть одна цифра после префикса, а её нет
 
                     std::reverse(&prefixDigits[0], &prefixDigits[idx]);
                     for(std::size_t idx2=0; idx2!=idx; ++idx2)
@@ -1380,7 +1408,7 @@ public: // methods - методы собственно разбора
                         return unexpectedHandlerLambda(tokenStartIt, itEnd, __FILE__, __LINE__); // но у нас нет операторов, начинающихся с точки
                     goto explicit_readoperator; // Надо обработать текущий символ
                 }
-                else // точка - не операторный символ, и не начало дробной части плавающего числа
+                else // точка - не операторный символ, и не начало дробной части плавающего числа (разделитель дробной части уже был)
                 {
                     return unexpectedHandlerLambda(tokenStartIt, itEnd, __FILE__, __LINE__);
                 }
@@ -1663,7 +1691,10 @@ public: // methods - методы собственно разбора
             //------------------------------
             default:
             {
+                // У нас тут необработанное состояние, вообще-то мы сюда не должны попадать
                 return unexpectedHandlerLambda(it, itEnd, __FILE__, __LINE__);
+                //return processUnclassifiedCharsRawLambda(it, itEnd);
+                
             }
 
         } // end switch
