@@ -11,7 +11,9 @@
 
 //
 #include <array>
-#include <initializer_list>		
+#include <initializer_list>
+#include <unordered_map>
+#include <functional>
 
 /*
 
@@ -701,34 +703,46 @@ struct SimpleSequenceComposingFilter : FilterBase<TokenizerType, VectorType>
     UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TBase);
     using payload_type             = umba::tokenizer::payload_type        ;
 
+    // First argument is index in sequence
+    using extra_check_function_type = std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data)>;
+
     UMBA_RULE_OF_FIVE(SimpleSequenceComposingFilter, default, default, default, default, default);
 
 
     payload_type                resultPayloadToken = 0;
     std::size_t                 resultPayloadDataIndex   = 0;
     std::vector<payload_type>   payloadsMatchList;
+    extra_check_function_type   extraCheckFunction;
 
     // https://www.scs.stanford.edu/~dm/blog/param-pack.html
     // https://selfboot.cn/2024/05/07/variadic_arguments_in_c++/
     // https://dev.to/pauljlucas/variadic-functions-in-c-2alg
 
-    //template<payload_type ...P>
     SimpleSequenceComposingFilter( token_handler_type                   curTokenHandler
                                  , payload_type                         resultPayloadToken_
                                  , std::size_t                          resultPayloadDataIndex_ /* обычно 0 */
                                  , const std::vector<payload_type>      &payloadsList_
-                                 // , std::initializer_list<payload_type>    payloadsList_
-                                 // #if defined(_MSC_VER)
-                                 // , payload_type                      ...payloadsList_
-                                 // #elif defined(__GNUC__)
-                                 // , auto                              ...payloadsList_
-                                 // #endif
                                  )
     : TBase(curTokenHandler)
     , resultPayloadToken(resultPayloadToken_)
     , resultPayloadDataIndex(resultPayloadDataIndex_)
-    //, payloadsMatchList(std::initializer_list<payload_type>{payloadsList_...})
     , payloadsMatchList(payloadsList_)
+    {
+        UMBA_ASSERT(!payloadsMatchList.empty());
+        UMBA_ASSERT(resultPayloadDataIndex<payloadsMatchList.size());
+    }
+
+    SimpleSequenceComposingFilter( token_handler_type                   curTokenHandler
+                                 , payload_type                         resultPayloadToken_
+                                 , std::size_t                          resultPayloadDataIndex_ /* обычно 0 */
+                                 , const std::vector<payload_type>      &payloadsList_
+                                 , extra_check_function_type            extraCheckFunction_
+                                 )
+    : TBase(curTokenHandler)
+    , resultPayloadToken(resultPayloadToken_)
+    , resultPayloadDataIndex(resultPayloadDataIndex_)
+    , payloadsMatchList(payloadsList_)
+    , extraCheckFunction(extraCheckFunction_)
     {
         UMBA_ASSERT(!payloadsMatchList.empty());
         UMBA_ASSERT(resultPayloadDataIndex<payloadsMatchList.size());
@@ -765,6 +779,17 @@ public:
             return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
         }
 
+        if (extraCheckFunction)
+        {
+            // using extra_check_function_type = std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data)>;
+            if (!extraCheckFunction(this->tokenBuffer.size(), tokenizer, lineStartFlag, payloadToken, b, e, parsedData))
+            {
+                // пришедшая нагрузка не прошла дополнительную проверку
+                // флушим, прокидываем текущие аргументы и очищаем буфер
+                return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
+            }
+        }
+
         // Иначе - кладём в буфер
         this->tokenBufferPushBack(lineStartFlag, payloadToken, b, e, parsedData);
 
@@ -791,6 +816,67 @@ public:
 //----------------------------------------------------------------------------
 
 
+
+//----------------------------------------------------------------------------
+template<typename TokenizerType, typename VectorType=std::vector<TokenInfo<TokenizerType> > >
+struct IdentifierToKeywordConversionFilter : FilterBase<TokenizerType, VectorType>
+{
+    using TBase = FilterBase<TokenizerType, VectorType>;
+
+    UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(TBase);
+    using payload_type             = umba::tokenizer::payload_type        ;
+    // using string_type              = typename TokenizerType::string_type  ;
+
+    UMBA_RULE_OF_FIVE(IdentifierToKeywordConversionFilter, default, default, default, default, default);
+
+    payload_type                                  matchTo        = 0;
+    std::unordered_map<string_type, payload_type> keywordsMap;
+    bool                                          caseSensitive  = true;
+
+    IdentifierToKeywordConversionFilter( token_handler_type                                  curTokenHandler
+                                       , payload_type                                        matchTo_
+                                       , const std::unordered_map<string_type, payload_type> keywordsMap_
+                                       , bool                                                caseSensitive_=true
+                                 )
+    : TBase(curTokenHandler)
+    , matchTo      (matchTo_      )
+    , keywordsMap  (keywordsMap_  )
+    , caseSensitive(caseSensitive_)
+    {
+    }
+
+    bool operator()( TokenizerType         &tokenizer
+                   , bool                  lineStartFlag
+                   , payload_type          payloadToken
+                   , iterator_type         &b
+                   , iterator_type         &e
+                   , token_parsed_data     parsedData // std::variant<...>
+                   , messages_string_type  &msg
+                   )
+    {
+        if (payloadToken!=matchTo)
+        {
+            return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+        }
+
+        auto identifierData = std::get<typename TokenizerType::IdentifierData>(parsedData);
+        string_type identifierStr = string_type(identifierData.data);
+        //string_type identifier = umba::string_plus::make_string<string_type>(umba::iterator::makeString(tringLiteralData.suffixStartPos, itEnd));
+
+        if (!caseSensitive)
+            umba::string_plus::tolower(identifierStr);
+
+        typename std::unordered_map<string_type, payload_type>::const_iterator kit = keywordsMap.find(identifierStr);
+
+        if (kit==keywordsMap.end())
+            return this->nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+        else
+            return this->nextTokenHandler(tokenizer, lineStartFlag, kit->second, b, e, parsedData, msg);
+
+    }
+
+
+}; // struct IdentifierToKeywordConversionFilter
 
 //----------------------------------------------------------------------------
 
