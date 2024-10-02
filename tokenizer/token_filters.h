@@ -233,6 +233,11 @@ public:
                    , messages_string_type  &msg
                    )
     {
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_RST)
+        {
+            return reset(callNextTokenHandler( tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg));
+        }
+
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
             if (isCollectingMode()) // режим коллекционирования токенов
@@ -370,9 +375,10 @@ protected:
         return true;
     }
 
-    void reset()
+    bool reset(bool res=true)
     {
         clearTokenBuffer();
+        return res;
     }
 
     bool flushTokenBufferAndCallNextHandler(TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg, bool bClear=true)
@@ -476,6 +482,11 @@ public:
                    , messages_string_type  &msg
                    )
     {
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_RST)
+        {
+            return this->reset(this->callNextTokenHandler( tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg));
+        }
+
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
             return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
@@ -670,7 +681,13 @@ protected:
         tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::opchar); // Ничего не устанавливаем, сбрасываем opchar
     }
 
+    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg) const
+    {
+        if (!nextTokenHandler)
+            return true;
 
+        return nextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+    }
 
 public:
 
@@ -689,6 +706,10 @@ public:
                    , messages_string_type  &msg
                    )
     {
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_RST)
+        {
+            return reset(tokenizer, callNextTokenHandler( tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg));
+        }
 
         switch(st)
         {
@@ -909,6 +930,11 @@ struct SimpleSequenceComposingFilter : FilterBase<TokenizerType, VectorType>
         UMBA_ASSERT(resultPayloadDataIndex<payloadsMatchList.size());
     }
 
+    bool reset(bool res=true)
+    {
+        TBase::reset();
+        return res;
+    }
 
 protected:
 
@@ -924,6 +950,11 @@ public:
                    , messages_string_type  &msg
                    )
     {
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_RST)
+        {
+            return reset(this->callNextTokenHandler( tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg));
+        }
+
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_FIN)
         {
             return this->flushTokenBufferAndCallNextHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg, true /* bClear */ );
@@ -1015,6 +1046,11 @@ struct IdentifierToKeywordConversionFilter : FilterBase<TokenizerType, VectorTyp
                    , messages_string_type  &msg
                    )
     {
+        if (payloadToken==UMBA_TOKENIZER_TOKEN_RST)
+        {
+            return this->callNextTokenHandler( tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);
+        }
+
         if (payloadToken!=matchTo)
         {
             return this->callNextTokenHandler(tokenizer, lineStartFlag, payloadToken, b, e, parsedData, msg);

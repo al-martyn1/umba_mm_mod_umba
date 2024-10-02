@@ -766,6 +766,15 @@ public: // methods - методы собственно разбора
         literalTokenId = 0;
         externHandlerMessage.clear();
         stringLiteralValueCollector.clear();
+
+        {
+            MessagesStringType msg;
+            InputIteratorType b, e;
+            static_cast<const TBase*>(this)->hadleToken( false, UMBA_TOKENIZER_TOKEN_RST, b, e
+                                                       , EmptyData() // std::basic_string_view<value_type>()
+                                                       , msg
+                                                       );
+        }
     }
 
 
@@ -1769,6 +1778,7 @@ protected: // methods - хандлеры из "грязного" проекта,
     {
         if (tokenType!=UMBA_TOKENIZER_TOKEN_CTRL_FIN && inputDataBegin==inputDataEnd)
             return true;
+
         MessagesStringType msg;
         bool bRes = static_cast<const TBase*>(this)->hadleToken( curPosAtLineBeginning, tokenType, inputDataBegin, inputDataEnd
                                                                , EmptyData() // std::basic_string_view<value_type>()
