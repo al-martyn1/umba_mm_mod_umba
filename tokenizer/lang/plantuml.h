@@ -204,6 +204,11 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
                                                                                 , {"dotted"          , UMBA_TOKENIZER_TOKEN_PLANTUML_DOTTED       }
                                                                                 , {"bold"            , UMBA_TOKENIZER_TOKEN_PLANTUML_BOLD         }
                                                                                 , {"italic"          , UMBA_TOKENIZER_TOKEN_PLANTUML_ITALIC       }
+                                                                                , {"skinparam"       , UMBA_TOKENIZER_TOKEN_PLANTUML_SKINPARAM    }
+                                                                                , {"linetype"        , UMBA_TOKENIZER_TOKEN_PLANTUML_LINETYPE     }
+                                                                                , {"polyline"        , UMBA_TOKENIZER_TOKEN_PLANTUML_POLYLINE     }
+                                                                                //, {""          ,        }
+
                                                                                 }
                                                                               );
 
@@ -312,6 +317,30 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
                                                                         , 1u
                                                                         , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_STEREOTYPE_LEFT, UMBA_TOKENIZER_TOKEN_IDENTIFIER, UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_STEREOTYPE_RIGHT }
                                                                         );
+
+
+    // Композитим цвет
+    tokenizer.template installTokenFilter<SimpleSequenceComposingFilter>( UMBA_TOKENIZER_TOKEN_PLANTUML_COLOR
+                                                                        , 1u
+                                                                        , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_HASH, UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC, UMBA_TOKENIZER_TOKEN_IDENTIFIER }
+                                                                        );
+    tokenizer.template installTokenFilter<SimpleSequenceComposingFilter>( UMBA_TOKENIZER_TOKEN_PLANTUML_COLOR
+                                                                        , 1u
+                                                                        , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_HASH, UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_DEC }
+                                                                        );
+    tokenizer.template installTokenFilter<SimpleSequenceComposingFilter>( UMBA_TOKENIZER_TOKEN_PLANTUML_COLOR
+                                                                        , 1u
+                                                                        , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_HASH, UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT, UMBA_TOKENIZER_TOKEN_IDENTIFIER }
+                                                                        );
+    tokenizer.template installTokenFilter<SimpleSequenceComposingFilter>( UMBA_TOKENIZER_TOKEN_PLANTUML_COLOR
+                                                                        , 1u
+                                                                        , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_HASH, UMBA_TOKENIZER_TOKEN_NUMBER_LITERAL_BASE_OCT }
+                                                                        );
+    tokenizer.template installTokenFilter<SimpleSequenceComposingFilter>( UMBA_TOKENIZER_TOKEN_PLANTUML_COLOR
+                                                                        , 1u
+                                                                        , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_HASH, UMBA_TOKENIZER_TOKEN_IDENTIFIER }
+                                                                        );
+
 
     tokenizer.template installTokenFilter<RawCharsCollectingFilter>();
 
