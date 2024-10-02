@@ -191,7 +191,7 @@ std::string transliterateEx( const std::string &str
     std::size_t idx = 0;
     while(idx<str.size())
     {
-        std::size_t nCharBytes = getNumberOfBytesUtf8(str[idx]);
+        std::size_t nCharBytes = getNumberOfCharsUtf8(str[idx]);
         if (nCharBytes==0)
             break;
 

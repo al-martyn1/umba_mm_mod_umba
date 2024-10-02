@@ -540,7 +540,7 @@ public:
     // char               m_utfCollectBuf[32];
     // #endif
 
-    // std::size_t getNumberOfBytesUtf8(utf8_char_t ch)
+    // std::size_t getNumberOfCharsUtf8(utf8_char_t ch)
     // typedef std::uint8_t     utf8_char_t   ;
 
     //!!!!!!
