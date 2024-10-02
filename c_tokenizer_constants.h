@@ -8,20 +8,24 @@
 
 // Control token, which finalizes input
 #define UMBA_TOKENIZER_TOKEN_CTRL_FIN                                                 (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0000u) /* empty token, finalizes processing current text */
-#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
+//#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
+
+// Для сброса состояния фильтров
+#define UMBA_TOKENIZER_TOKEN_RST                                                      (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
 
 
 
 #define UMBA_TOKENIZER_TOKEN_NUL                                                      0x0000u
-#define UMBA_TOKENIZER_TOKEN_RAW_CHAR                                                 0x0001u
-#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0002u
-#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0003u
-#define UMBA_TOKENIZER_TOKEN_TAB                                                      0x0004u
-#define UMBA_TOKENIZER_TOKEN_FORM_FEED                                                0x0005u /* Надо добавить поддержку FF */
-#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0006u
-#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0007u
-#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0008u
-#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x0009u
+#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               0x0001u
+#define UMBA_TOKENIZER_TOKEN_RAW_CHAR                                                 0x0002u
+#define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0003u
+#define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0004u
+#define UMBA_TOKENIZER_TOKEN_TAB                                                      0x0005u
+#define UMBA_TOKENIZER_TOKEN_FORM_FEED                                                0x0006u /* Надо добавить поддержку FF */
+#define UMBA_TOKENIZER_TOKEN_IDENTIFIER                                               0x0007u
+#define UMBA_TOKENIZER_TOKEN_SEMIALPHA                                                0x0008u
+#define UMBA_TOKENIZER_TOKEN_ESCAPE                                                   0x0009u
+#define UMBA_TOKENIZER_TOKEN_LINE_CONTINUATION                                        0x000Au
 
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_OPEN                                       0x0011u
 #define UMBA_TOKENIZER_TOKEN_CURLY_BRACKET_CLOSE                                      0x0012u
@@ -334,7 +338,9 @@
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_DOTTED                                   (UMBA_TOKENIZER_TOKEN_PLANTUML_NORMAL_KEYWORDS_FIRST+0x020u)
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_BOLD                                     (UMBA_TOKENIZER_TOKEN_PLANTUML_NORMAL_KEYWORDS_FIRST+0x021u)
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_ITALIC                                   (UMBA_TOKENIZER_TOKEN_PLANTUML_NORMAL_KEYWORDS_FIRST+0x022u)
-
+#define UMBA_TOKENIZER_TOKEN_PLANTUML_SKINPARAM                                (UMBA_TOKENIZER_TOKEN_PLANTUML_NORMAL_KEYWORDS_FIRST+0x023u)
+#define UMBA_TOKENIZER_TOKEN_PLANTUML_LINETYPE                                 (UMBA_TOKENIZER_TOKEN_PLANTUML_NORMAL_KEYWORDS_FIRST+0x024u)
+#define UMBA_TOKENIZER_TOKEN_PLANTUML_POLYLINE                                 (UMBA_TOKENIZER_TOKEN_PLANTUML_NORMAL_KEYWORDS_FIRST+0x025u)
 
 
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_UML_FRAME_KEYWORDS_FIRST                 UMBA_TOKENIZER_TOKEN_KEYWORD_SET2_FIRST
@@ -370,6 +376,13 @@
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_STEREOTYPE_OUTPUTPIN                     (UMBA_TOKENIZER_TOKEN_PLANTUML_GENERIC_STEREOTYPE+0x009u)
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_STEREOTYPE_EXPANSIONINPUT                (UMBA_TOKENIZER_TOKEN_PLANTUML_GENERIC_STEREOTYPE+0x00Au)
 #define UMBA_TOKENIZER_TOKEN_PLANTUML_STEREOTYPE_EXPANSIONOUTPUT               (UMBA_TOKENIZER_TOKEN_PLANTUML_GENERIC_STEREOTYPE+0x00Bu)
+
+
+
+#define UMBA_TOKENIZER_TOKEN_PLANTUML_UNCLASSIFIED_FIRST                       UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_FIRST
+#define UMBA_TOKENIZER_TOKEN_PLANTUML_UNCLASSIFIED_LAST                        UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_LAST
+
+#define UMBA_TOKENIZER_TOKEN_PLANTUML_COLOR                                    UMBA_TOKENIZER_TOKEN_PLANTUML_UNCLASSIFIED_FIRST
 
 
 // Start Tag <name>
