@@ -8,10 +8,11 @@
 
 // Control token, which finalizes input
 #define UMBA_TOKENIZER_TOKEN_CTRL_FIN                                                 (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0000u) /* empty token, finalizes processing current text */
+#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
 
 
 
-#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               0x0000u
+#define UMBA_TOKENIZER_TOKEN_NUL                                                      0x0000u
 #define UMBA_TOKENIZER_TOKEN_RAW_CHAR                                                 0x0001u
 #define UMBA_TOKENIZER_TOKEN_LINEFEED                                                 0x0002u
 #define UMBA_TOKENIZER_TOKEN_SPACE                                                    0x0003u
@@ -297,8 +298,8 @@
 
 // #define UMBA_TOKENIZER_TOKEN_CTRL_FLAG                                                0x8000u
 
-#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_START                                  (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)                            /* empty token, signals that C/C++ preprocessor mode starts */
-#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_END                                    (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0002u)                            /* empty token, signals that C/C++ preprocessor mode ends */
+#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_START                                  (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0010u)                            /* empty token, signals that C/C++ preprocessor mode starts */
+#define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_END                                    (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0011u)                            /* empty token, signals that C/C++ preprocessor mode ends */
 #define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_DEFINE                                 (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|UMBA_TOKENIZER_TOKEN_CC_PP_DEFINE)  /* empty token, that "define" PP directive detected. Non-paired token */
 #define UMBA_TOKENIZER_TOKEN_CTRL_CC_PP_INCLUDE                                (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|UMBA_TOKENIZER_TOKEN_CC_PP_INCLUDE) /* empty token, that "include" PP directive detected. Non-paired token */
 
