@@ -662,6 +662,8 @@ protected: // methods - helpers - из "грязного" проекта, где
             if (!parsingHandlerLambda(UMBA_TOKENIZER_TOKEN_RAW_CHAR, it, it+1)) // выплюнули
                 return false;
             st = TokenizerInternalState::stInitial;
+
+            return true;
         }
         else
         {
