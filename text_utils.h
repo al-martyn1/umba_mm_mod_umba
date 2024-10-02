@@ -240,7 +240,7 @@ std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symb
     while(curPos<str.size())
     {
         //auto uch = (utf8_char_t)str[curPos];
-        //auto symbolNumBytes = getNumberOfBytesUtf8(uch);
+        //auto symbolNumBytes = getNumberOfCharsUtf8(uch);
         auto symbolNumBytes = symbolLenCalculator(&str[curPos]);
 
         std::size_t nextPos = curPos + symbolNumBytes;
