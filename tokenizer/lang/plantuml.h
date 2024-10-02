@@ -75,6 +75,8 @@ makeTokenizerBuilderPlantUml()
                           .addOperator(make_string<StringType>("--" ), UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_HSPLIT               )
                           .addOperator(make_string<StringType>("||" ), UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_VSPLIT               )
 
+                          .addOperator(make_string<StringType>("|"  ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR                    )
+
                           .addOperator(make_string<StringType>("<<" ), UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_STEREOTYPE_LEFT      )
                           .addOperator(make_string<StringType>(">>" ), UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_STEREOTYPE_RIGHT     )
 
@@ -106,7 +108,7 @@ makeTokenizerBuilderPlantUml()
                           //.addOperator(make_string<StringType>("||" ), UMBA_TOKENIZER_TOKEN_OPERATOR_LOGICAL_OR                    )
                           .addOperator(make_string<StringType>("~"  ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_NOT                   )
                           .addOperator(make_string<StringType>("&"  ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_AND                   )
-                          .addOperator(make_string<StringType>("|"  ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR                    )
+                          //.addOperator(make_string<StringType>("|"  ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_OR                    )
                           .addOperator(make_string<StringType>("^"  ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_XOR                   )
                           // .addOperator(make_string<StringType>("<<" ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_LEFT            )
                           // .addOperator(make_string<StringType>(">>" ), UMBA_TOKENIZER_TOKEN_OPERATOR_BITWISE_SHIFT_RIGHT           )
@@ -169,6 +171,7 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
 
     using SimpleSequenceComposingFilter       = umba::tokenizer::filters::SimpleSequenceComposingFilter<tokenizer_type>;
     using IdentifierToKeywordConversionFilter = umba::tokenizer::filters::IdentifierToKeywordConversionFilter<tokenizer_type>;
+    using RawCharsCollectingFilter            = umba::tokenizer::filters::RawCharsCollectingFilter<tokenizer_type>;
 
 
     auto tokenizer = builder.makeTokenizer();
@@ -310,17 +313,8 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
                                                                         , std::vector<payload_type>{ UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_STEREOTYPE_LEFT, UMBA_TOKENIZER_TOKEN_IDENTIFIER, UMBA_TOKENIZER_TOKEN_OPERATOR_PLANTUML_STEREOTYPE_RIGHT }
                                                                         );
 
+    tokenizer.template installTokenFilter<RawCharsCollectingFilter>();
 
-    // if (preprocessorFilter)
-    //     tokenizer.template installTokenFilter<umba::tokenizer::filters::CcPreprocessorFilter<typename TokenizerBuilder::tokenizer_type> >();
-    //  
-    // if (suffixGluing)
-    //     tokenizer.template installTokenFilter<umba::tokenizer::filters::SimpleSuffixGluingFilter<typename TokenizerBuilder::tokenizer_type> >();
-
-    // // Символ хэша приобретает значение операторного только внутри директивы define
-    // // По умолчанию он не операторный
-    // // Сбрасываем операторный флаг для символа '#'
-    // tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::opchar); // Ничего не устанавливаем, сбрасываем opchar
 
     return tokenizer;
 }
