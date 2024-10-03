@@ -113,7 +113,7 @@
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET3_LAST                                        0x4BFFu
 
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_FIRST                                       0x4C00u
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_LAST                                        0x4CFFu
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET4_LAST                                        0x4FFFu
 
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET5_FIRST                                       0x5000u
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET5_LAST                                        0x53FFu
@@ -125,7 +125,7 @@
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET7_LAST                                        0x5BFFu
 
 #define UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_FIRST                                       0x5C00u
-#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_LAST                                        0x5CFFu
+#define UMBA_TOKENIZER_TOKEN_KEYWORD_SET8_LAST                                        0x5FFFu
 
 
 // #define UMBA_TOKENIZER_TOKEN_CTRL_PP_DEFINE                                           (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0003u) /* empty token, that "define" PP directive detected. Non-paired token */
