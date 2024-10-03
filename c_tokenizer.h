@@ -362,7 +362,9 @@ trie_index_type tokenTrieFindNext(const ContainerType &tokenTrie, trie_index_typ
         TrieNode cmpNode;
         cmpNode.token = tk;
         const TrieNode *pB = &tokenTrie[lookupChunkStartIdx];
-        const TrieNode *pE = &tokenTrie[lookupChunkStartIdx+lookupChunkSize];
+        UMBA_ASSERT((lookupChunkStartIdx+lookupChunkSize)<=std::size(tokenTrie));
+        // const TrieNode *pE = &tokenTrie[lookupChunkStartIdx+lookupChunkSize]; // Это вызывает ошибку при отладке в MSVC, так как массив не настоящий, и идёт обращение по индексу к элементу, который за последним
+        const TrieNode *pE = pB+lookupChunkSize;
 
         auto resIt = ::std::lower_bound( pB, pE, cmpNode ); // , TrieNodeTokenLess()
 

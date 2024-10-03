@@ -24,6 +24,8 @@
     #include <cstdint>
 #endif
 
+#include <iterator>
+
 
 //----------------------------------------------------------------------------
 #include "char_class.h"
