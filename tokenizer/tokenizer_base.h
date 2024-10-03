@@ -770,7 +770,7 @@ public: // methods - методы собственно разбора
         {
             MessagesStringType msg;
             InputIteratorType b, e;
-            static_cast<const TBase*>(this)->hadleToken( false, UMBA_TOKENIZER_TOKEN_RST, b, e
+            static_cast<const TBase*>(this)->hadleToken( false, UMBA_TOKENIZER_TOKEN_CTRL_RST, b, e
                                                        , EmptyData() // std::basic_string_view<value_type>()
                                                        , msg
                                                        );

@@ -11,7 +11,7 @@
 //#define UMBA_TOKENIZER_TOKEN_UNEXPECTED                                               (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
 
 // Для сброса состояния фильтров
-#define UMBA_TOKENIZER_TOKEN_RST                                                      (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
+#define UMBA_TOKENIZER_TOKEN_CTRL_RST                                                 (UMBA_TOKENIZER_TOKEN_CTRL_FLAG|0x0001u)
 
 
 
