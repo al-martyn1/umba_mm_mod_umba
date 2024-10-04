@@ -74,7 +74,7 @@ public: // depending types
 
     using ITokenizerLiteralParser  = typename TBase::ITokenizerLiteralParser;
 
-    using token_parsed_data        = typename TBase::token_parsed_data;
+    using token_parsed_data_type   = typename TBase::token_parsed_data_type;
 
 
 //------------------------------
@@ -95,7 +95,7 @@ public: // handler types
                                                                          , payload_type
                                                                          , InputIteratorType&
                                                                          , InputIteratorType&
-                                                                         , token_parsed_data // std::basic_string_view<value_type>
+                                                                         , token_parsed_data_type // std::basic_string_view<value_type>
                                                                          , messages_string_type&
                                                                          )
                                                                     >;
@@ -142,7 +142,7 @@ protected: // handler methods, called from base
 
     bool hadleToken( bool bLineStart, payload_type tokenType
                    , InputIteratorType &inputDataBegin, InputIteratorType &inputDataEnd
-                   , token_parsed_data parsedData // std::basic_string_view<value_type> parsedData
+                   , token_parsed_data_type parsedData // std::basic_string_view<value_type> parsedData
                    , MessagesStringType &msg
                    ) const
     {

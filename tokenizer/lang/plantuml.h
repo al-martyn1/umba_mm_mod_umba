@@ -260,10 +260,10 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
                                                                                                    , UMBA_TOKENIZER_TOKEN_IDENTIFIER
                                                                                                    , UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE
                                                                                                    }
-                                                                          // std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data)>;
+                                                                          // std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data_type)>;
                                                                         , typename SimpleSequenceComposingFilter::extra_check_function_type(
                                                                               []( std::size_t idx, tokenizer_type &tokenizer, bool lineStartFlag, payload_type payloadToken
-                                                                                , typename tokenizer_type::iterator_type b, typename tokenizer_type::iterator_type e, typename tokenizer_type::token_parsed_data parsedData
+                                                                                , typename tokenizer_type::iterator_type b, typename tokenizer_type::iterator_type e, typename tokenizer_type::token_parsed_data_type parsedData
                                                                               ) -> bool
                                                                               {
                                                                                   if (idx!=1)
@@ -285,10 +285,10 @@ typename TokenizerBuilder::tokenizer_type makeTokenizerPlantUml(TokenizerBuilder
                                                                                                    , UMBA_TOKENIZER_TOKEN_OPERATOR_MULTIPLICATION
                                                                                                    , UMBA_TOKENIZER_TOKEN_SQUARE_BRACKET_CLOSE
                                                                                                    }
-                                                                          // std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data)>;
+                                                                          // std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data_type)>;
                                                                         , typename SimpleSequenceComposingFilter::extra_check_function_type(
                                                                               []( std::size_t idx, tokenizer_type &tokenizer, bool lineStartFlag, payload_type payloadToken
-                                                                                , typename tokenizer_type::iterator_type b, typename tokenizer_type::iterator_type e, typename tokenizer_type::token_parsed_data parsedData
+                                                                                , typename tokenizer_type::iterator_type b, typename tokenizer_type::iterator_type e, typename tokenizer_type::token_parsed_data_type parsedData
                                                                               ) -> bool
                                                                               {
                                                                                   if (idx!=1)

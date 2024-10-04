@@ -63,17 +63,17 @@ TokenFilter должен
 
 
 //----------------------------------------------------------------------------
-#define UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(className)              \
-            using token_handler_type       = typename className ::token_handler_type   ;   \
-                                                                                           \
-            using char_type                = typename className ::char_type            ;   \
-            using value_type               = typename className ::value_type           ;   \
-            using char_class_table_type    = typename className ::char_class_table_type;   \
-            using trie_vector_type         = typename className ::trie_vector_type     ;   \
-            using string_type              = typename className ::string_type          ;   \
-            using iterator_type            = typename className ::iterator_type        ;   \
-            using messages_string_type     = typename className ::messages_string_type ;   \
-            using token_parsed_data        = typename className ::token_parsed_data
+#define UMBA_TOKENIZER_TOKEN_FILTERS_DECLARE_USING_DEPENDENT_TYPES(className)                \
+            using token_handler_type         = typename className ::token_handler_type   ;   \
+                                                                                             \
+            using char_type                  = typename className ::char_type            ;   \
+            using value_type                 = typename className ::value_type           ;   \
+            using char_class_table_type      = typename className ::char_class_table_type;   \
+            using trie_vector_type           = typename className ::trie_vector_type     ;   \
+            using string_type                = typename className ::string_type          ;   \
+            using iterator_type              = typename className ::iterator_type        ;   \
+            using messages_string_type       = typename className ::messages_string_type ;   \
+            using token_parsed_data_type     = typename className ::token_parsed_data_type
 
 
 //----------------------------------------------------------------------------
@@ -108,13 +108,13 @@ public:
 
     UMBA_RULE_OF_FIVE(SimplePassTroughFilter, default, default, default, default, default);
 
-    bool operator()( TokenizerType         &tokenizer
-                   , bool                  lineStartFlag
-                   , payload_type          payloadToken
-                   , iterator_type         &b
-                   , iterator_type         &e
-                   , token_parsed_data     parsedData // std::variant<...>
-                   , messages_string_type  &msg
+    bool operator()( TokenizerType           &tokenizer
+                   , bool                    lineStartFlag
+                   , payload_type            payloadToken
+                   , iterator_type           &b
+                   , iterator_type           &e
+                   , token_parsed_data_type  parsedData // std::variant<...>
+                   , messages_string_type    &msg
                    )
     {
         if (nextTokenHandler)
@@ -142,15 +142,15 @@ struct TokenInfo
     iterator_type                        b;
     iterator_type                        e;
     // std::basic_string_view<value_type>   strValue;
-    token_parsed_data                    parsedData;
+    token_parsed_data_type               parsedData;
 
     UMBA_RULE_OF_FIVE(TokenInfo, default, default, default, default, default);
 
-    TokenInfo( bool               lineStartFlag_
-             , payload_type       payloadToken_
-             , iterator_type      b_
-             , iterator_type      e_
-             , token_parsed_data  parsedData_ // std::variant<...>
+    TokenInfo( bool                    lineStartFlag_
+             , payload_type            payloadToken_
+             , iterator_type           b_
+             , iterator_type           e_
+             , token_parsed_data_type  parsedData_ // std::variant<...>
              )
     : lineStartFlag(lineStartFlag_)
     , payloadToken(payloadToken_)
@@ -189,7 +189,7 @@ protected:
         return res;
     }
 
-    void saveSequenceStartInfo(bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData)
+    void saveSequenceStartInfo(bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data_type parsedData)
     {
         UMBA_ASSERT(payloadToken!=UMBA_TOKENIZER_TOKEN_NUL); // если не равно, то всё нормас
         sequenceStartInfo = token_info_type{lineStartFlag, payloadToken, b, e, parsedData};
@@ -206,7 +206,7 @@ protected:
         return isCollectingPayloadToken(sequenceStartInfo.payloadToken);
     }
 
-    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg) const
+    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data_type parsedData, messages_string_type &msg) const
     {
         if (!nextTokenHandler)
             return true;
@@ -224,13 +224,13 @@ public:
 
     UMBA_RULE_OF_FIVE(TokenCollectingFilter, default, default, default, default, default);
 
-    bool operator()( TokenizerType         &tokenizer
-                   , bool                  lineStartFlag
-                   , payload_type          payloadToken
-                   , iterator_type         &b
-                   , iterator_type         &e
-                   , token_parsed_data     parsedData // std::variant<...>
-                   , messages_string_type  &msg
+    bool operator()( TokenizerType           &tokenizer
+                   , bool                    lineStartFlag
+                   , payload_type            payloadToken
+                   , iterator_type           &b
+                   , iterator_type           &e
+                   , token_parsed_data_type  parsedData // std::variant<...>
+                   , messages_string_type    &msg
                    )
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_RST)
@@ -342,7 +342,7 @@ protected:
         tokenBuffer.clear();
     }
 
-    bool tokenBufferPushBack(bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, bool res=true)
+    bool tokenBufferPushBack(bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data_type parsedData, bool res=true)
     {
         tokenBuffer.emplace_back(lineStartFlag, payloadToken, b, e, parsedData);
         return res;
@@ -381,7 +381,7 @@ protected:
         return res;
     }
 
-    bool flushTokenBufferAndCallNextHandler(TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg, bool bClear=true)
+    bool flushTokenBufferAndCallNextHandler(TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data_type parsedData, messages_string_type &msg, bool bClear=true)
     {
         if (!nextTokenHandler)
             return true;
@@ -394,7 +394,7 @@ protected:
         return res;
     }
 
-    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg) const
+    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data_type parsedData, messages_string_type &msg) const
     {
         if (!nextTokenHandler)
             return true;
@@ -473,13 +473,13 @@ protected:
 
 public:
 
-    bool operator()( TokenizerType         &tokenizer
-                   , bool                  lineStartFlag
-                   , payload_type          payloadToken
-                   , iterator_type         &b
-                   , iterator_type         &e
-                   , token_parsed_data     parsedData // std::variant<...>
-                   , messages_string_type  &msg
+    bool operator()( TokenizerType           &tokenizer
+                   , bool                    lineStartFlag
+                   , payload_type            payloadToken
+                   , iterator_type           &b
+                   , iterator_type           &e
+                   , token_parsed_data_type  parsedData // std::variant<...>
+                   , messages_string_type    &msg
                    )
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_RST)
@@ -681,7 +681,7 @@ protected:
         tokenizer.setResetCharClassFlags('#', umba::tokenizer::CharClass::none, umba::tokenizer::CharClass::opchar); // Ничего не устанавливаем, сбрасываем opchar
     }
 
-    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data parsedData, messages_string_type &msg) const
+    bool callNextTokenHandler( TokenizerType &tokenizer, bool lineStartFlag, payload_type payloadToken, iterator_type &b, iterator_type &e, token_parsed_data_type parsedData, messages_string_type &msg) const
     {
         if (!nextTokenHandler)
             return true;
@@ -697,13 +697,13 @@ public:
     : nextTokenHandler(curTokenHandler)
     {}
 
-    bool operator()( TokenizerType         &tokenizer
-                   , bool                  lineStartFlag
-                   , payload_type          payloadToken
-                   , iterator_type         &b
-                   , iterator_type         &e
-                   , token_parsed_data     parsedData // std::variant<...>
-                   , messages_string_type  &msg
+    bool operator()( TokenizerType           &tokenizer
+                   , bool                    lineStartFlag
+                   , payload_type            payloadToken
+                   , iterator_type           &b
+                   , iterator_type           &e
+                   , token_parsed_data_type  parsedData // std::variant<...>
+                   , messages_string_type    &msg
                    )
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_RST)
@@ -886,7 +886,7 @@ struct SimpleSequenceComposingFilter : FilterBase<TokenizerType, VectorType>
     using payload_type             = umba::tokenizer::payload_type        ;
 
     // First argument is index in sequence
-    using extra_check_function_type = std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data)>;
+    using extra_check_function_type = std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data_type)>;
 
     UMBA_RULE_OF_FIVE(SimpleSequenceComposingFilter, default, default, default, default, default);
 
@@ -941,13 +941,13 @@ protected:
 
 public:
 
-    bool operator()( TokenizerType         &tokenizer
-                   , bool                  lineStartFlag
-                   , payload_type          payloadToken
-                   , iterator_type         &b
-                   , iterator_type         &e
-                   , token_parsed_data     parsedData // std::variant<...>
-                   , messages_string_type  &msg
+    bool operator()( TokenizerType           &tokenizer
+                   , bool                    lineStartFlag
+                   , payload_type            payloadToken
+                   , iterator_type           &b
+                   , iterator_type           &e
+                   , token_parsed_data_type  parsedData // std::variant<...>
+                   , messages_string_type    &msg
                    )
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_RST)
@@ -973,7 +973,7 @@ public:
 
         if (extraCheckFunction)
         {
-            // using extra_check_function_type = std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data)>;
+            // using extra_check_function_type = std::function<bool(std::size_t,TokenizerType&,bool,payload_type,iterator_type,iterator_type,token_parsed_data_type)>;
             if (!extraCheckFunction(this->tokenBuffer.size(), tokenizer, lineStartFlag, payloadToken, b, e, parsedData))
             {
                 // пришедшая нагрузка не прошла дополнительную проверку
@@ -1063,13 +1063,13 @@ struct IdentifierToKeywordConversionFilter : FilterBase<TokenizerType, VectorTyp
         return TBase::reset(res);
     }
 
-    bool operator()( TokenizerType         &tokenizer
-                   , bool                  lineStartFlag
-                   , payload_type          payloadToken
-                   , iterator_type         &b
-                   , iterator_type         &e
-                   , token_parsed_data     parsedData // std::variant<...>
-                   , messages_string_type  &msg
+    bool operator()( TokenizerType           &tokenizer
+                   , bool                    lineStartFlag
+                   , payload_type            payloadToken
+                   , iterator_type           &b
+                   , iterator_type           &e
+                   , token_parsed_data_type  parsedData // std::variant<...>
+                   , messages_string_type    &msg
                    )
     {
         if (payloadToken==UMBA_TOKENIZER_TOKEN_CTRL_RST)
