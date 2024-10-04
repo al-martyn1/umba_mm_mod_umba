@@ -12,6 +12,7 @@ namespace tokenizer {
 
 
 template< typename CharType            // Input chars type
+        , typename UserDataType        = void*
         , typename CharClassTableType  = std::array<CharClass, 128>
         , typename TrieVectorType      = std::vector<TrieNode>
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
@@ -19,8 +20,9 @@ template< typename CharType            // Input chars type
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
         , typename InputIteratorTraits = umba::iterator::TextIteratorTraits<InputIteratorType>
         >
-class TokenizerFunctionHandlers : public TokenizerBaseImpl< TokenizerFunctionHandlers< CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits >
+class TokenizerFunctionHandlers : public TokenizerBaseImpl< TokenizerFunctionHandlers< CharType, UserDataType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits >
                                                           , CharType
+                                                          , UserDataType
                                                           , CharClassTableType
                                                           , TrieVectorType
                                                           , StringType
@@ -35,6 +37,7 @@ public: // depending types
 
     using TBase = TokenizerBaseImpl< TokenizerFunctionHandlers
                                    , CharType
+                                   , UserDataType
                                    , CharClassTableType
                                    , TrieVectorType
                                    , StringType
@@ -44,6 +47,7 @@ public: // depending types
                                    >;
 
     using TSelf = TokenizerFunctionHandlers< CharType
+                                           , UserDataType
                                            , CharClassTableType
                                            , TrieVectorType
                                            , StringType
@@ -63,6 +67,7 @@ public: // depending types
     //                                , InputIteratorType
     //                                >;
 
+    using user_data_type           = typename TBase::user_data_type       ;
     using char_type                = typename TBase::char_type            ;
     using value_type               = typename TBase::value_type           ;
     using char_class_table_type    = typename TBase::char_class_table_type;

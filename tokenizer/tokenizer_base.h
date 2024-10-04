@@ -142,9 +142,13 @@ StringType getTokenizerTokenStr(payload_type p)
 
 
 //----------------------------------------------------------------------------
+// CharType идёт первым после TBase параметром, чтобы можно было задавать только его, оставляя остальные по умолчанию
+// UsedDataType идёт вторым, чтобы при необходимости его также можно было задать, оставляя остальные по умолчанию
+
 #include "umba/warnings/push_disable_padding_added.h"
 template< typename TBase
         , typename CharType            // Input chars type
+        , typename UserDataType        = void*
         , typename CharClassTableType  = std::array<CharClass, 128>
         , typename TrieVectorType      = std::vector<TrieNode>
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
@@ -158,6 +162,7 @@ class TokenizerBaseImpl
 //------------------------------
 public: // depending types
 
+    using user_data_type           = UserDataType;
     using char_type                = CharType;
     using value_type               = CharType;
     using char_class_table_type    = CharClassTableType;
