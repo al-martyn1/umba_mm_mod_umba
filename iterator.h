@@ -36,6 +36,12 @@ std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingI
 template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
 std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
 
+template<typename CharT, typename Traits=std::char_traits<CharT>, bool UtfIterator=true >
+std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &it);
+
+template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
+std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &it);
+
 //----------------------------------------------------------------------------
 
 
@@ -82,11 +88,17 @@ protected:
     TextPositionInfo    m_positionInfo;
 
 
-    template<typename CharT, typename Traits /* =std::char_traits<CharT> */, bool UtfIteratorT >
+    template<typename CharT, typename Traits, bool UtfIteratorT >
     friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
 
-    template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */, bool UtfIteratorT >
+    template<typename CharT, typename Traits, typename Allocator, bool UtfIteratorT >
     friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
+
+    template<typename CharT, typename Traits, bool UtfIteratorT>
+    friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
+    
+    template<typename CharT, typename Traits, typename Allocator, bool UtfIteratorT>
+    friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
 
 
     const_pointer getRawValueTypePointer() const
@@ -396,7 +408,7 @@ TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator
 
 
 //----------------------------------------------------------------------------
-template<typename CharT, typename Traits /* =std::char_traits<CharT> */, bool UtfIterator >
+template<typename CharT, typename Traits, bool UtfIterator>
 std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e)
 {
     if (b.isBothEndIterators(e))
@@ -411,7 +423,7 @@ std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingI
     return std::basic_string_view<CharT, Traits>(b.getRawValueTypePointer(), distanceCharT);
 }
 
-template<typename CharT, typename Traits /* =std::char_traits<CharT> */, typename Allocator /* =std::allocator<CharT> */, bool UtfIterator >
+template<typename CharT, typename Traits, typename Allocator, bool UtfIterator>
 std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e)
 {
     if (b.isBothEndIterators(e))
@@ -424,6 +436,24 @@ std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountin
     }
 
     return std::basic_string<CharT, Traits, Allocator>(b.getRawValueTypePointer(), distanceCharT);
+}
+
+template<typename CharT, typename Traits, bool UtfIterator>
+std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &it)
+{
+    if (it.isEndIterator())
+        return std::basic_string_view<CharT, Traits>();
+
+    return std::basic_string_view<CharT, Traits>(it.getRawValueTypePointer(), it.symbolLength());
+}
+
+template<typename CharT, typename Traits, typename Allocator, bool UtfIterator>
+std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &it)
+{
+    if (it.isEndIterator())
+        return std::basic_string<CharT, Traits, Allocator>();
+
+    return std::basic_string<CharT, Traits, Allocator>(it.getRawValueTypePointer(), it.symbolLength());
 }
 
 //----------------------------------------------------------------------------
