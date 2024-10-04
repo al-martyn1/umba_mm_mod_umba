@@ -16,13 +16,14 @@ namespace umba {
 namespace tokenizer {
 
 template< typename CharType            // Input chars type
+        , typename UserDataType        = void*
         , typename CharClassTableType  = std::array<CharClass, 128>
         , typename TrieVectorType      = std::vector<TrieNode>
         , typename StringType          = std::basic_string<CharType>  // Тип строки, которая хранит входные символы
         , typename MessagesStringType  = std::string  // Тип строки, которая используется для сообщений (в том числе и от внешних суб-парсеров)
         , typename InputIteratorType   = umba::iterator::TextPositionCountingIterator<CharType>
         , typename InputIteratorTraits = umba::iterator::TextIteratorTraits<InputIteratorType>
-        , typename TokenizerType       = Tokenizer< CharType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits >
+        , typename TokenizerType       = Tokenizer< CharType, UserDataType, CharClassTableType, TrieVectorType, StringType, MessagesStringType, InputIteratorType, InputIteratorTraits >
         >
 class TokenizerBuilder
 {
@@ -30,6 +31,7 @@ class TokenizerBuilder
 //------------------------------
 public: // depending types
 
+    using user_data_type           = UserDataType;
     using char_type                = CharType;
     using value_type               = CharType;
     using char_class_table_type    = CharClassTableType;
