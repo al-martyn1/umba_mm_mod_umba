@@ -49,5 +49,5 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 # target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_ROOT}/..)
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE "Shell32")
+    target_link_libraries(${PROJECT_NAME} PRIVATE "ws2_32" "iphlpapi" "Shell32")
 endif()
