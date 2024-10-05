@@ -191,6 +191,11 @@ public: // depending types
     {
         std::basic_string_view<value_type>  data;
 
+        StringType asString() const
+        {
+            return StringType(data);
+        }
+
     }; // struct CommentData
 
     //------------------------------
@@ -201,12 +206,22 @@ public: // depending types
         bool                 hasSuffix = false;
         iterator_type        suffixStartPos;
 
+        StringType asString() const
+        {
+            return StringType(data);
+        }
+
     }; // struct StringLiteralData
 
     //------------------------------
     struct IdentifierData
     {
         std::basic_string_view<value_type>  data;
+
+        StringType asString() const
+        {
+            return StringType(data);
+        }
 
     }; // struct IdentifierData
 
