@@ -58,15 +58,6 @@ public: // depending types
 
     friend TBase;
 
-    // friend class TokenizerBaseImpl< TokenizerFunctionHandlers
-    //                                , CharType
-    //                                , CharClassTableType
-    //                                , TrieVectorType
-    //                                , StringType
-    //                                , MessagesStringType
-    //                                , InputIteratorType
-    //                                >;
-
     using user_data_type           = typename TBase::user_data_type       ;
     using char_type                = typename TBase::char_type            ;
     using value_type               = typename TBase::value_type           ;
