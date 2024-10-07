@@ -1,7 +1,8 @@
 #pragma once
 
 #include "iterator.h"
-
+//
+#include "text_position_info.h"
 
 //----------------------------------------------------------------------------
 // umba::iterator::
@@ -23,6 +24,12 @@ struct TextIteratorTraits
         return 1;
     }
 
+    static umba::TextPositionInfo getPositionInfo(iterator_type it)
+    {
+        return umba::TextPositionInfo{0};
+    }
+
+
 }; // template< typename IteratorType > struct TextIteratorTraits
 
 //----------------------------------------------------------------------------
@@ -41,6 +48,13 @@ struct TextIteratorTraits< TextPositionCountingIterator<CharType, UtfIterator> >
     {
         return it.symbolLength();
     }
+
+    static umba::TextPositionInfo getPositionInfo(iterator_type it)
+    {
+        return it.getPosition(true);
+    }
+
+
 };
 
 
