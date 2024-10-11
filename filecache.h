@@ -106,7 +106,8 @@ public:
     };
 
 
-    typedef FileCacheInfo FileInfo; //!< Алиас для обращения как к FileCache::FileInfo
+    typedef FileCacheInfo FileInfo;     //!< Алиас для обращения как к FileCache::FileInfo
+    typedef FileCacheInfo FileInfoType; //!< Алиас для обращения как к FileCache::FileInfo для совместимости с IncludeFinder
 
 
 protected:
@@ -316,7 +317,7 @@ public:
 
     //! Возвращает запись с информацией о файле
     const FileCacheInfo* getFileInfo( const FilenameStringType &fileName
-                                    , bool checkModified
+                                    , bool checkModified = true
                                     , const FilenameStringType  &curDir = FilenameStringType()
                                     )
     {
