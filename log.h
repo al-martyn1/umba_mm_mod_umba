@@ -30,6 +30,7 @@ extern umba::SimpleFormatter& getLogMsgStream(int level=0);
 // source parsing errors
 // requires std::stringr curFile, unsigned lineNo in log scope
 #define UMBA_LOG_ERR_INPUT                 umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string()/*"err"*/, curFile.c_str(), lineNo, __FILE__, __LINE__ )
+#define UMBA_LOG_ERR_INPUT_EX(errType)     umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string(errType)  , curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_WARN_INPUT(warnType)      umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts, */  std::string(warnType) , curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_INFO_INPUT(infoType)      umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts, */  std::string(infoType) , curFile.c_str(), lineNo, __FILE__, __LINE__ )
 
@@ -255,6 +256,11 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
         if (logEntryType==LogEntryType::err)
         {
             s<< "error:";
+            if (!warnType.empty())
+            {
+                // also need to check warn is enabled or not
+                s<< "("<<warnType<<")";
+            }
         }
         else if (logEntryType==LogEntryType::warn)
         {
@@ -278,7 +284,14 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
     else
     {
         if (logEntryType==LogEntryType::err)
+        {
             s<< "error:";
+            if (!warnType.empty())
+            {
+                // also need to check warn is enabled or not
+                s<< "("<<warnType<<")";
+            }
+        }
         else if (logEntryType==LogEntryType::warn)
         {
             s<< "warning";
