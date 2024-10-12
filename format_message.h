@@ -291,6 +291,11 @@ public:
         return formattedMacros;
     }
 
+    StringType string() const
+    {
+        return toString();
+    }
+
     FormatMessage& arg(const StringType &argName, const StringType &val, std::size_t fieldWidth=0, EFormatAlign align=EFormatAlign::left)
     {
         StringType completemntString = getComplementString( val, fieldWidth, (CharType)' ' /* fillChar */ );
