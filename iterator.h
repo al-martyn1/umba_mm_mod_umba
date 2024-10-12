@@ -206,6 +206,7 @@ protected:
                 if (!i)
                     continue;
 
+                ch = m_pData[m_dataIndex];
                 if (!isNextCharUtf(ch))
                     break;
             }
@@ -233,6 +234,7 @@ protected:
             if (!i)
                 continue;
 
+            ch = m_pData[m_dataIndex+i];
             if (!isNextCharUtf(ch))
                 break;
         }
