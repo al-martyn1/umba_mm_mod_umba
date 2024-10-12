@@ -26,7 +26,7 @@ OutputIterator appendOctalEscapeSequence(OutputIterator outIt, unsigned uch)
     char buf[4] = { 0 };
     for(auto i=0u; i!=3; ++i)
     {
-        buf[i] = (char)(uch%8);
+        buf[i] = '0'+(char)(uch%8);
         uch /= 8;
     }
 
