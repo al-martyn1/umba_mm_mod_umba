@@ -17,12 +17,14 @@ namespace umba
 {
 
 //! Отображение имен файлов в id и обратно. Использует только строки std::string (UTF-8)
-template<typename FileIdType=std::size_t>
+template<typename FileIdType_=std::size_t>
 class FilenameSet
 {
 
 public:
 
+    using FilenameStringType = std::string;
+    using FileIdType         = FileIdType_;
 
     struct FileInfo
     {
@@ -31,10 +33,7 @@ public:
         FilenameStringType                 realFilename;     //!< Имя файла для использования (чтения/записи и тп)
         FileIdType                         fileId;           //!< Идентификатор файла
     };
-
     using FileInfoType       = FileInfo;
-    using FilenameStringType = std::string;
-    using FileIdType         = FileIdType;
 
     static const FileIdType    invalidFileId = (FileIdType)-1; //!< Неверный/недопустимый идентификатор
 
@@ -60,8 +59,8 @@ protected:
         FileInfo newFileInfo;
 
         newFileInfo.orgFilename  = fileName;
-        newFileInfo.cmpFilename  = makeCanonicalForCompare(realName);
-        newFileInfo.realFilename = realFilename;
+        newFileInfo.cmpFilename  = umba::filename::makeCanonicalForCompare(realName);
+        newFileInfo.realFilename = realName;
 
         newFileInfo.fileId = invalidFileId;
 
@@ -75,8 +74,8 @@ protected:
                             , FilenameStringType realName=FilenameStringType()
                             )
     {
-        auto it = m_idMap.find(makeCanonicalForCompare(name));
-        if (it!=m_idMap.end())
+        auto it = m_nameMap.find(umba::filename::makeCanonicalForCompare(name));
+        if (it!=m_nameMap.end())
         {
             return it->second.get();
         }
@@ -84,10 +83,10 @@ protected:
         if (!allowCreateNewId)
             return 0;
 
-        FileInfo fileInfo = makeFileInfo( const name, realName );
-        fileInfo.fileId   = ++m_fileIdCounter; // we keep 0 as marker value
+        FileInfo fileInfo = makeFileInfo(name, realName);
+        fileInfo.fileId   = ++m_idCounter; // we keep 0 as marker value
 
-        auto sharedData = std::name_shared<FileInfo>(fileInfo);
+        auto sharedData = std::make_shared<FileInfo>(fileInfo);
 
         m_nameMap[sharedData->cmpFilename] = sharedData;
         m_idMap  [sharedData->fileId]      = sharedData;
