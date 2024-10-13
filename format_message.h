@@ -48,6 +48,7 @@ protected:
 
     umba::macros::StringStringMap<StringType>  formattedMacros    ;
     StringType                                 messageText        ;
+    bool                                       onlyForArgs = false;
     bool                                       fShowbase   = true ;
     bool                                       fShowsign   = false;
     unsigned                                   uBase       = 10   ;
@@ -214,9 +215,15 @@ public:
         UMBA_USED(ltag);
     }
 
+    // Иногда нам тут нужно только формирование аргументов для получения через values() и отложенного последующего использования
+    FormatMessage()
+    : onlyForArgs(true)
+    {}
+
 
     StringType toString() const
     {
+        UMBA_ASSERT(!onlyForArgs); // нам нужны аргументы для отложенного использования, а мы вызвали форматирование
         return umba::macros::substMacros( messageText, umba::macros::MacroTextFromMapRef<StringType>(formattedMacros)
                                         , umba::macros::smf_KeepUnknownVars | umba::macros::smf_DisableRecursion
                                         );
