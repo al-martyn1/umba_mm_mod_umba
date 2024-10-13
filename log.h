@@ -255,12 +255,13 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
 
         if (logEntryType==LogEntryType::err)
         {
-            s<< "error:";
+            s<< "error";
             if (!warnType.empty())
             {
                 // also need to check warn is enabled or not
                 s<< "("<<warnType<<")";
             }
+            s<< ":";
         }
         else if (logEntryType==LogEntryType::warn)
         {
@@ -285,12 +286,13 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
     {
         if (logEntryType==LogEntryType::err)
         {
-            s<< "error:";
+            s<< "error";
             if (!warnType.empty())
             {
                 // also need to check warn is enabled or not
                 s<< "("<<warnType<<")";
             }
+            s<< ":";
         }
         else if (logEntryType==LogEntryType::warn)
         {
