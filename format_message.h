@@ -229,6 +229,28 @@ public:
                                         );
     }
 
+    // Отдаёт шаблон сообщения и позволяет далее задавать аргументы
+    FormatMessage& toString(StringType &msg)
+    {
+        msg = messageText;
+        return *this;
+    }
+
+    FormatMessage& getMessageTemplate(StringType &msg) // аналогично toString с параметром, но явно говорит, чего хотим
+    {
+        return toString(msg);
+    }
+
+    FormatMessage& getTemplate(StringType &msg) // аналогично toString с параметром, но явно говорит, чего хотим
+    {
+        return toString(msg);
+    }
+
+    FormatMessage& getMsgTemplate(StringType &msg) // аналогично toString с параметром, но явно говорит, чего хотим
+    {
+        return toString(msg);
+    }
+
     operator StringType() const
     {
         return toString();
