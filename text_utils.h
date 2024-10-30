@@ -13,6 +13,7 @@
 #include "utf.h"
 
 #include <string>
+#include <algorithm>
 
 // umba::text_utils::
 namespace umba{
@@ -46,6 +47,41 @@ enum class TextAlignment
 };
 
 
+
+//-----------------------------------------------------------------------------
+template<typename StringType, typename SpacePredType> inline
+std::size_t textLineGetIndentSize(const StringType &s, SpacePredType pred)
+{
+    std::size_t i = 0;
+    for(auto ch : s)
+    {
+        if (!pred(ch))
+            break;
+        ++i;
+    }
+
+    return i;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType, typename SpacePredType> inline
+void textStripCommonIndent(std::vector<StringType> &v, SpacePredType pred)
+{
+    std::size_t minIndentLen = 0;
+    for(auto && s : v)
+        minIndentLen = std::min(minIndentLen, textLineGetIndentSize(s, pred));
+    for(auto & s : v)
+        s.erase(0, minIndentLen);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType, typename SpacePredType> inline
+std::vector<StringType> textStripCommonIndentCopy(const std::vector<StringType> &v, SpacePredType pred)
+{
+    std::vector<StringType> res = v;
+    textStripCommonIndent(res, pred);
+    return res;
+}
 
 //-----------------------------------------------------------------------------
 inline
