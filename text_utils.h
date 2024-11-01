@@ -67,7 +67,7 @@ std::size_t textLineGetIndentSize(const StringType &s, SpacePredType pred)
 template<typename StringType, typename SpacePredType> inline
 void textStripCommonIndent(std::vector<StringType> &v, SpacePredType pred)
 {
-    std::size_t minIndentLen = 0;
+    std::size_t minIndentLen = (std::size_t)-1;
     for(auto && s : v)
         minIndentLen = std::min(minIndentLen, textLineGetIndentSize(s, pred));
     for(auto & s : v)
