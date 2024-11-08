@@ -14,8 +14,9 @@
     \addtogroup UMBA_INTERNALS
 */
 
-#include "char_writers.h"
-#include "i_char_writer.h"
+//#include "char_writers.h"
+#include "string_char_writers.h"
+//#include "i_char_writer.h"
 #include "umba.h"
 
 #include <exception>

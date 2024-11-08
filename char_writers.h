@@ -14,6 +14,12 @@
     #include "utf8.h"
 #endif
 
+#if (defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED)
+    #include <iostream>
+    //
+    #include "winconhelpers.h"
+#endif
+
 //-----------------------------------------------------------------------------
 
 // umba::term::colors::
