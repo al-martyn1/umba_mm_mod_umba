@@ -21,16 +21,6 @@
 #include <cstring>
 #include <stddef.h>
 
-#if !defined(UMBA_MCU_USED)
-    #include <iostream>
-    #include <string>
-
-    #if defined(WIN32) || defined(_WIN32)
-        #include "winconhelpers.h"
-    #endif
-
-#endif
-
 
 //-----------------------------------------------------------------------------
 
