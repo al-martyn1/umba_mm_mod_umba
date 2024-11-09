@@ -191,7 +191,8 @@ std::vector< StringType > splitPath(StringType path)
 
     auto pathSep = getNativePathSep<typename StringType::value_type>();
 
-    NativePrefixFlagsInfo npfi = stripNativePrefixes(path, pathSep); // Разделители пути тут нормализуются
+    path = normalizePathSeparators(path, pathSep);
+    NativePrefixFlagsInfo npfi = stripNativePrefixes(path, pathSep);
 
     std::vector< StringType > parts;
     std::string curPart;
