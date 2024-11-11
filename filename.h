@@ -183,6 +183,53 @@ template<typename StringType> inline StringType stripFirstExtSepCopy( const Stri
 
 
 //-----------------------------------------------------------------------------
+//! Добавляет разделитель пути, если его нет в конце
+template<typename StringType> inline
+void appendPathSepInline( StringType &p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+{
+    if (!hasLastPathSep<StringType>(p)) p.append(1,pathSep);
+}
+
+//-----------------------------------------------------------------------------
+//! Добавляет разделитель пути в возвращаемую копию аргумента, если его нет в конце
+template<typename StringType> inline
+StringType appendPathSepCopy( const StringType &p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+{
+    StringType pCopy = p; appendPathSepInline<StringType>(pCopy, pathSep); return pCopy;
+}
+
+//-----------------------------------------------------------------------------
+//! Нормализует разделители путей
+template<typename StringType> inline
+StringType normalizePathSeparators( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+{
+
+    std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
+
+    // for(auto &ch : fileName)
+    // {
+    //     if (isPathSep(ch))
+    //         ch = pathSep;
+    // }
+
+    return fileName;
+}
+
+//-----------------------------------------------------------------------------
+//! Возвращает true, если в пути содержаться разделители пути
+template<typename StringType> inline
+StringType hasPathSeparators( const StringType &fileName )
+{
+    for(auto ch : fileName)
+    {
+        if (isPathSep(ch))
+            return true;
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
 //!
 template<typename StringType> inline
 std::vector< StringType > splitPath(StringType path)
@@ -292,53 +339,6 @@ std::vector< StringType > getKeepCasePaths()
     }
 }
 */
-
-//-----------------------------------------------------------------------------
-//! Добавляет разделитель пути, если его нет в конце
-template<typename StringType> inline
-void appendPathSepInline( StringType &p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
-{
-    if (!hasLastPathSep<StringType>(p)) p.append(1,pathSep);
-}
-
-//-----------------------------------------------------------------------------
-//! Добавляет разделитель пути в возвращаемую копию аргумента, если его нет в конце
-template<typename StringType> inline
-StringType appendPathSepCopy( const StringType &p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
-{
-    StringType pCopy = p; appendPathSepInline<StringType>(pCopy, pathSep); return pCopy;
-}
-
-//-----------------------------------------------------------------------------
-//! Нормализует разделители путей
-template<typename StringType> inline
-StringType normalizePathSeparators( StringType fileName, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
-{
-
-    std::replace_if( fileName.begin(), fileName.end(), isPathSep<typename StringType::value_type>, pathSep );
-
-    // for(auto &ch : fileName)
-    // {
-    //     if (isPathSep(ch))
-    //         ch = pathSep;
-    // }
-
-    return fileName;
-}
-
-//-----------------------------------------------------------------------------
-//! Возвращает true, если в пути содержаться разделители пути
-template<typename StringType> inline
-StringType hasPathSeparators( const StringType &fileName )
-{
-    for(auto ch : fileName)
-    {
-        if (isPathSep(ch))
-            return true;
-    }
-
-    return false;
-}
 
 //-----------------------------------------------------------------------------
 // Выделяем код обрезания различных спец префиксов в отдельные функции
