@@ -8,6 +8,13 @@
 
 #include "i_char_writer.h"
 
+#if defined(UMBA_MCU_USED)
+    // #error "UMBA_MCU_USED"
+#endif
+
+#if defined(UMBA_DISABLE_AUTO_ENCODING)
+    // #error "UMBA_DISABLE_AUTO_ENCODING"
+#endif
 
 #if ( (defined(WIN32) || defined(_WIN32)) && !defined(UMBA_MCU_USED) && !defined(UMBA_DISABLE_AUTO_ENCODING) )
     #include "encoding/encoding.h"
