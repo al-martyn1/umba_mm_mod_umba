@@ -13,7 +13,9 @@
 #include "stl.h"
 #include "string_plus.h"
 
+//
 #include <algorithm>
+#include <iterator>
 
 //#include "splits.h"
 //#include "isa.h"
@@ -273,8 +275,30 @@ std::vector< StringType > splitPath(StringType path)
 
 }
 
-//template<typename StringType> inline bool stripLastPathSep( StringType &p ) { if (hasLastPathSep(p)) { p.erase( p.size()-1, 1 ); return true; } return false; }                              //!< Возвращает true, если последний символ - разделитель пути, обрезая его
+//-----------------------------------------------------------------------------
+//!
+template<typename StringType> inline
+StringType mergePath( const std::vector< StringType > &pathParts, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+{
+    return umba::string_plus::merge(pathParts, pathSep);
+}
 
+//-----------------------------------------------------------------------------
+//!
+template<typename StringType> inline
+StringType mergePath( const std::vector< StringType > &pathParts, std::size_t idxBegin, std::size_t idxEnd, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+{
+    using pp_type = std::vector< StringType >;
+    using pp_item_cptr = typename pp_type::const_pointer;
+
+    if (idxEnd<=idxBegin)
+        return StringType();
+
+    auto stringifier = [](const auto &v) { return v; };
+    return umba::string_plus::merge< StringType, pp_item_cptr, decltype(stringifier) >
+                                   ( &pathParts[idxBegin], &pathParts[idxEnd], pathSep, stringifier )
+                                   ;
+}
 
 //-----------------------------------------------------------------------------
 //! Разделяет список путей
