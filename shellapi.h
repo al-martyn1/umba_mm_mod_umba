@@ -8,6 +8,10 @@
 #include "filesys.h"
 #include "enum_helpers.h"
 
+//
+#include <set>
+#include <unordered_set>
+
 #if defined(WIN32) || defined(_WIN32)
 
     #include <shellapi.h>
@@ -660,10 +664,124 @@ inline ProcessParentKind getProcessParentKind()
 
 }
 
+
 //----------------------------------------------------------------------------
-inline std::string getDebugAppRootFolder( std::string *pCwd )
+namespace utils
+{
+
+inline
+bool isKindOfName(const std::unordered_set<std::string>& s, const std::string &name)
+{
+    // return s.find(name)!=s.end();
+    // return true;
+    std::unordered_set<std::string>::const_iterator foundIt   = s.find(name);
+    std::unordered_set<std::string>::const_iterator endIt     = s.end();
+    //return foundIt!=endIt;
+    return foundIt!=endIt;
+}
+
+inline
+const std::unordered_set<std::string>& getBuildTypesSet()
+{
+    static std::unordered_set<std::string> s = { "debug", "release", "minsizerel", "relwithdebinfo" };
+    return s;
+}
+
+inline
+const std::unordered_set<std::string>& getOutputRootsSet()
+{
+    static std::unordered_set<std::string> s = { "build", "builds", "out" };
+    return s;
+}
+
+inline
+const std::unordered_set<std::string>& getBinFolderNamesSet()
+{
+    static std::unordered_set<std::string> s = { "bin" };
+    return s;
+}
+
+template<typename StringType>
+StringType trimFolderSpecialChars(const StringType &s)
+{
+    return umba::string_plus::trim_copy( s
+                                       , [](auto ch)
+                                         {
+                                             using CharType = decltype(ch);
+                                             return ch==(CharType)'.' || ch==(CharType)'_';
+                                         }
+                                       );
+}
+
+inline
+std::string normalizeDebugAppFolderName(const std::string &name)
+{
+    return umba::string_plus::tolower_copy(trimFolderSpecialChars(name));
+}
+
+// Имя каталога name должно быть нормалиизовано
+inline bool isKindOfBuildTypeName (const std::string &name) { return isKindOfName(getBuildTypesSet(), name); }
+inline bool isKindOfOutputRootName(const std::string &name) { return isKindOfName(getOutputRootsSet(), name); }
+inline bool isKindOfBinFolderName (const std::string &name) { return isKindOfName(getBinFolderNamesSet(), name); }
+
+inline
+std::string getDebugAppRootFolderGenericImplHelper(const std::vector< std::string > &pathParts, const std::string &orgPath=std::string())
+{
+    if (pathParts.empty())
+        return orgPath;
+
+    // Вижуалка (по умолчанию) запускает прогу с текущим каталогом выше Debug/Release пути
+    // Это видимо связано с тем, что по дефолту Debug/Release кладутся прямо в корень проекта рядом с солюшеном
+
+    if (isKindOfBuildTypeName(normalizeDebugAppFolderName(pathParts.back())))
+    {
+        // мы где-то в билд каталоге непосредственно
+        auto idx = pathParts.size()-1;
+        while(idx-->0)
+        {
+            if (isKindOfOutputRootName(normalizeDebugAppFolderName(pathParts[idx])))
+            {
+                return umba::filename::mergePath(pathParts, 0u, idx);
+            }
+        }
+
+        // Ничего не смогли сделать
+        return orgPath;
+    }
+
+    // Вероятно, мы выше каталога билд-конфига (Release/Debug)
+    // Делаем в принципе всё то же, что и в первом варианте
+    auto idx = pathParts.size();
+    while(idx-->0)
+    {
+        if (isKindOfOutputRootName(normalizeDebugAppFolderName(pathParts[idx])))
+        {
+            return umba::filename::mergePath(pathParts, 0u, idx);
+        }
+    }
+
+    // Ничего не смогли сделать
+    return orgPath;
+
+}
+
+
+} // namespace utils
+
+
+//----------------------------------------------------------------------------
+inline std::string getDebugAppRootFolder( std::string *pCwd
+                                        , const std::string &goDownTo=std::string() // если у нас билд каталог за пределами корня сорцов, тут можно задать, куда спуститься
+                                        )
 {
     std::string cwd = umba::filesys::getCurrentDirectory();
+
+    auto cwdPathParts = umba::filename::splitPath(cwd);
+
+
+    // StringType mergePath( const std::vector< StringType > &pathParts, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
+
+    // debug release minsizerel relwithdebinfo
 
     std::string rootPath;
     umba::shellapi::ProcessParentKind processParentKind = umba::shellapi::getProcessParentKind();
@@ -672,18 +790,33 @@ inline std::string getDebugAppRootFolder( std::string *pCwd )
     {
         // По умолчанию студия задаёт текущим каталогом на уровень выше от того, где лежит бинарник
         // Задаём c учетом принятого формата выходного каталога ".out/toolchain/platform/config"
-        rootPath = umba::filename::makeCanonical(umba::filename::appendPath(cwd, std::string("..\\..\\..\\")));
+        // ".out/toolchain/platform/..\\..\\..\\"
+        // rootPath = umba::filename::makeCanonical(umba::filename::appendPath(cwd, std::string("..\\..\\..\\")));
+
+        rootPath = utils::getDebugAppRootFolderGenericImplHelper(cwdPathParts, cwd);
+
     }
+
     else if (processParentKind==umba::shellapi::ProcessParentKind::vsCode)
     {
         // По умолчанию VSCode задаёт текущим каталогом тот, где лежит бинарник
         // Задаём c учетом принятого формата выходного каталога ".out/toolchain/platform/config"
-        rootPath = umba::filename::makeCanonical(umba::filename::appendPath(cwd, std::string("..\\..\\..\\..\\")));
+        // ".out/toolchain/platform/config\\..\\..\\..\\..\\"
+
+        // Не-не-не
+
+        // rootPath = umba::filename::makeCanonical(umba::filename::appendPath(cwd, std::string("..\\..\\..\\..\\")));
+        rootPath = utils::getDebugAppRootFolderGenericImplHelper(cwdPathParts, cwd);
     }
 
     if (!rootPath.empty())
     {
         rootPath = umba::filename::appendPathSepCopy(rootPath);
+    }
+
+    if (!goDownTo.empty())
+    {
+        rootPath = umba::filename::appendPathSepCopy(umba::filename::appendPath(rootPath, goDownTo));
     }
 
     if (pCwd)
