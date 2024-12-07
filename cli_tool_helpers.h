@@ -342,7 +342,7 @@ bool readFile( const std::string &fileName, std::string &data )
 {
     std::vector<char> buf;
 
-    if (!umba::filesys::readFile(fileName, buf))
+    if (!umba::filesys::readFile(umba::filename::makeCanonical(fileName), buf))
         return false;
 
     data.clear();
@@ -358,7 +358,7 @@ bool readFile( const std::string &fileName, std::string &data )
 inline
 bool writeFile( const std::string &fileName, const std::string &data, bool bOverwrite )
 {
-    return umba::filesys::writeFile(fileName, data.data(), data.size(), bOverwrite);
+    return umba::filesys::writeFile(umba::filename::makeCanonical(fileName), data.data(), data.size(), bOverwrite);
 }
 
 //----------------------------------------------------------------------------
@@ -368,7 +368,7 @@ bool readFile(umba::cli_tool_helpers::IoFileType ioFt, const std::string &fileNa
     if (ioFt==IoFileType::stdinFile)
         return readStream(std::cin, data);
 
-    return readFile(fileName, data);
+    return readFile(umba::filename::makeCanonical(fileName), data);
 }
 
 //----------------------------------------------------------------------------
@@ -378,7 +378,7 @@ bool writeFile(umba::cli_tool_helpers::IoFileType ioFt, const std::string &fileN
     if (ioFt==IoFileType::stdoutFile)
         return writeStream(std::cout, data);
 
-    return writeFile(fileName, data, bOverwrite);
+    return writeFile(umba::filename::makeCanonical(fileName), data, bOverwrite);
 }
 
 //----------------------------------------------------------------------------
