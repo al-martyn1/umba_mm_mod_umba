@@ -44,8 +44,39 @@ namespace umba
     void debugBreak()
     {
         if (isDebuggerPresent())
-            DebugBreak();
+        {
+            #if defined(_MSC_VER)
+                __debugbreak();
+            #else
+                DebugBreak();
+            #endif
+        }
     }
+
+    #if defined(_MSC_VER)
+        #define UMBA_DEBUGBREAK()                         \
+                do                                        \
+                {                                         \
+                using umba::isDebuggerPresent; \
+                    if (isDebuggerPresent())              \
+                    {                                     \
+                        __debugbreak();                   \
+                    }                                     \
+                }                                         \
+                while(false)
+    #else
+        #define UMBA_DEBUGBREAK()                         \
+                do                                        \
+                {                                         \
+                using umba::isDebuggerPresent; \
+                    if (isDebuggerPresent())              \
+                    {                                     \
+                        DebugBreak();                     \
+                    }                                     \
+                }                                         \
+                while(false)
+    #endif
+
 
 #elif defined(UMBA_MCU_USED) && ( defined(STM32F1_SERIES) || defined(STM32F3_SERIES) || defined(STM32F4_SERIES) )
 
@@ -68,8 +99,25 @@ namespace umba
     void debugBreak()
     {
         if (isDebuggerPresent())
-            __BKPT(0xDE);
+        {
+            // https://stackoverflow.com/questions/173618/is-there-a-portable-equivalent-to-debugbreak-debugbreak
+            // __BKPT(0xDE); // CMSIS
+            // See also https://github.com/scottt/debugbreak/blob/master/debugbreak.h
+
+            asm volatile ("bkpt");
+        }
     }
+
+    #define UMBA_DEBUGBREAK()                             \
+            do                                            \
+            {                                             \
+                using umba::isDebuggerPresent; \
+                if (isDebuggerPresent())                  \
+                {                                         \
+                    asm volatile ("bkpt");                \
+                }                                         \
+            }                                             \
+            while(false)
 
 #else
 
@@ -84,6 +132,16 @@ namespace umba
     {
     }
 
+    #define UMBA_DEBUGBREAK()                             \
+            do                                            \
+            {                                             \
+                using umba::isDebuggerPresent; \
+                if (isDebuggerPresent())                  \
+                {                                         \
+                }                                         \
+            }                                             \
+            while(false)                                  
+
 #endif
 
 
@@ -91,10 +149,10 @@ namespace umba
 
 
 //! Ассерция, под отладчиком останавливается до самого ассерта
-#define UMBA_DEBUG_SESSION_ASSERT( expr )    if (umba::isDebuggerPresent()) do { if (!(expr)) umba::debugBreak(); UMBA_ASSERT( expr ); } while(0)
+#define UMBA_DEBUG_SESSION_ASSERT( expr )    if (umba::isDebuggerPresent()) do { if (!(expr)) UMBA_DEBUGBREAK(); UMBA_ASSERT( expr ); } while(0)
 
 //! Безусловный фейл только при работе под отладчиком
-#define UMBA_DEBUG_SESSION_ASSERT_FAIL()     if (umba::isDebuggerPresent()) do { if (!(expr)) umba::debugBreak(); UMBA_ASSERT_FAIL( ); } while(0)
+#define UMBA_DEBUG_SESSION_ASSERT_FAIL()     if (umba::isDebuggerPresent()) do { UMBA_DEBUGBREAK(); UMBA_ASSERT_FAIL( ); } while(0)
 
 
 
