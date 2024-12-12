@@ -952,7 +952,7 @@ StringType merge( Iter b, Iter e, const wchar_t *delim, const ToStringObj &strin
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, char delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, char delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -971,7 +971,7 @@ std::string merge( const std::vector<ItemType> &tokens, char delim, const ToStri
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const char *delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const char *delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -990,7 +990,7 @@ std::string merge( const std::vector<ItemType> &tokens, const char *delim, const
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const std::string &delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const std::string &delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1009,7 +1009,7 @@ std::string merge( const std::vector<ItemType> &tokens, const std::string &delim
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1028,7 +1028,7 @@ std::string merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToS
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const wchar_t *delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const wchar_t *delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1047,7 +1047,7 @@ std::string merge( const std::vector<ItemType> &tokens, const wchar_t *delim, co
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const std::wstring &delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const std::wstring &delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
