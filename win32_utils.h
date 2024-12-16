@@ -44,7 +44,11 @@ bool isWindows32OnWindows64()
     auto hKernel = GetModuleHandle(TEXT("kernel32"));
     if (hKernel)
     {
-        LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(hKernel,"IsWow64Process");
+        // disable_C4191.h
+        // disable_unsafe_conversion.h
+        #include "umba/warnings/push_disable_unsafe_conversion.h"
+        LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS)GetProcAddress(hKernel,"IsWow64Process");
+        #include "umba/warnings/pop.h"
         if (fnIsWow64Process)
         {
             if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
