@@ -317,6 +317,7 @@ std::string getCurrentProcessExecutableFileName()
                                     , &nameBuf[0]
                                     , 4095
                                     );
+    UMBA_USED(dwRes);
     nameBuf[4095] = 0; // кладём ноль в последний элемент массива, чтобы не париться
 
     return toUtf8(nameBuf);
@@ -510,9 +511,15 @@ int callSystem(const std::string &cmd, std::string *pErrMsg=0, bool allocateCons
         if (pErrMsg)
         {
             if (resVal==-1)
-               *pErrMsg = std::string("Launch command failed: ") + std::strerror(errno);
+            {
+              #include "umba/warnings/push_disable_fn_or_var_unsafe.h"
+              *pErrMsg = std::string("Launch command failed: ") + std::strerror(errno);
+              #include "umba/warnings/pop.h"
+            }
             else
+            {
                *pErrMsg = "Command result code: " + std::to_string(resVal);
+            }
         }
     }
 
