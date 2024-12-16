@@ -80,17 +80,17 @@ inline std::string reencodeArgv(const wchar_t* wArgv)
     #endif
 }
 
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 inline std::vector<std::string> makeArgsVecForConsoleApp(int argc, char *argv[])
 {
     std::vector<std::string> resVec; resVec.reserve((std::size_t)argc);
-
     for(int i=0; i<argc; ++i)
     {
-       resVec.emplace_back(reencodeArgv(argv[i]));
+        resVec.emplace_back(reencodeArgv(argv[i]));
     }
-
     return resVec;
 }
+#include "umba/warnings/pop.h"
 
 inline std::vector<std::string> makeArgsVecForConsoleApp(int argc, wchar_t *argv[])
 {
@@ -131,7 +131,7 @@ inline std::vector<std::string> makeArgsVecForWindowedApp()
         return std::vector<std::string>();
     }
 
-    std::size_t idx = 0;
+    //std::size_t idx = 0;
 
     std::vector<std::string> resVec; resVec.reserve((std::size_t)nArgs);
     for(int i=0; i<nArgs; ++i)
