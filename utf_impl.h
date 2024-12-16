@@ -319,18 +319,21 @@ std::basic_string<utf16_char_t> utf16_from_utf32( const std::basic_string<utf32_
 constexpr inline
 bool isFirstCharUtf32(utf32_char_t ch)
 {
+    UMBA_USED(ch);
     return true;
 }
 
 constexpr inline
 bool isNextCharUtf32(utf32_char_t ch)
 {
+    UMBA_USED(ch);
     return false;
 }
 
 constexpr inline
 std::size_t getNumberOfCharsUtf32(utf32_char_t ch)
 {
+    UMBA_USED(ch);
     return 1;
 }
 
