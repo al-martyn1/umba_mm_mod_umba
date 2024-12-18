@@ -200,7 +200,7 @@ IoFileType detectFilenameType(const std::string &n, bool bInput=false)
 #endif
 
     return IoFileType::regularFile;
-};
+}
 
 //----------------------------------------------------------------------------
 inline
