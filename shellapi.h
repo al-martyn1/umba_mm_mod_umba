@@ -200,11 +200,17 @@ bool deleteDirectory(const std::string &path)
 
     std::wstring wp = filename::makeCanonical(filesys::encodeToNative(path));
 
-    SHFILEOPSTRUCTW  shFileOpStruct = { 0 };
+    SHFILEOPSTRUCTW  shFileOpStruct = {};
     wp.append(1, (wchar_t)0); // Надо два нуля в конце, потому что функция принимает разделяемый нулём список строк, и двойной ноль - окончание списка
+    
+    shFileOpStruct.hwnd   = 0;
     shFileOpStruct.wFunc  = FO_DELETE;
     shFileOpStruct.pFrom  = (PCZZWSTR)wp.c_str();
+    shFileOpStruct.pTo    = 0;
     shFileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR;  // FOF_NOERRORUI - FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR
+    shFileOpStruct.fAnyOperationsAborted = 0;
+    shFileOpStruct.hNameMappings         = 0;
+    shFileOpStruct.lpszProgressTitle     = 0;
     
     return SHFileOperationW(&shFileOpStruct)==0 ? true : false;
 
@@ -389,6 +395,7 @@ std::string getUmbaTempLogNowFileName( const std::string &suffix, std::string fi
 inline
 void writeUmbaEventLogNow( const std::string &eventName, std::string eventMsg, std::string fileNameFormat=std::string())
 {
+    UMBA_USED(fileNameFormat);
     if (eventMsg.empty())
         return;
 
