@@ -105,6 +105,24 @@ StreamType& printOnlyVersion(StreamType &os)
 }
 
 template<typename StreamType> inline
+StreamType& printCommitHash( StreamType &os, const std::string &indent = "" )
+{
+    if (appCommitHash.empty())
+        return os;
+
+    os << indent << "#" << appCommitHash << "\n";
+
+    return os;
+}
+
+template<typename StreamType> inline
+StreamType& printBuildDateTime( StreamType &os, const std::string &indent = "" )
+{
+    os << indent << "Built at " << appBuildDate << " "<< appBuildTime << "\n";
+    return os;
+}
+
+template<typename StreamType> inline
 StreamType& printNameVersion( StreamType &os, const std::string &indent = "" )
 {
     os << indent << appFullName << " version ";
@@ -130,27 +148,14 @@ StreamType& printNameVersion( StreamType &os, const std::string &indent = "" )
     #endif
 
     #if !defined(UMBA_PRINT_NAME_VERSION_NO_BUILD_DATE_TIME)
-    os << "Built at "<< appBuildDate <<" "<< appBuildTime <<"\n";
+    // os << "Built at "<< appBuildDate <<" "<< appBuildTime <<"\n";
+    printBuildDateTime(os);
     #endif
 
-    return os;
-}
+    #if !defined(UMBA_PRINT_NAME_VERSION_COMMIT_HASH)
+    printCommitHash(os);
+    #endif
 
-template<typename StreamType> inline
-StreamType& printCommitHash( StreamType &os, const std::string &indent = "" )
-{
-    if (appCommitHash.empty())
-        return os;
-
-    os << indent << "#" << appCommitHash << "\n";
-
-    return os;
-}
-
-template<typename StreamType> inline
-StreamType& printBuildDateTime( StreamType &os, const std::string &indent = "" )
-{
-    os << indent << "Built at " << appBuildDate << " "<< appBuildTime << "\n";
     return os;
 }
 
