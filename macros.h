@@ -5,7 +5,8 @@
 #pragma once
 
 #include "string_plus.h"
-
+#include "debug_helpers.h"
+//
 #include <map>
 #include <set>
 #include <string>
@@ -127,6 +128,7 @@ namespace util{
 
 //----------------------------------------------------------------------------
 //! Находит символ Ch, которые не заключен в скобки startBr/endBr
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 template < char startBr
          , char endBr
          , char Ch
@@ -147,6 +149,7 @@ findChar(const ::std::basic_string<CharType, Traits, Allocator> &str, typename :
     }
     return ::std::basic_string<CharType, Traits, Allocator>::npos;
 }
+#include "umba/warnings/pop.h"
 
 //----------------------------------------------------------------------------
 //!
@@ -252,6 +255,7 @@ StringType toString(IntType i)
 
 
 //-----------------------------------------------------------------------------
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 template < typename CharType
          , typename Traits
          , typename Allocator
@@ -370,6 +374,9 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
                    {
                     if (!(flags&smf_ArgsAllowed))
                        {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::runtime_error("Parametrized macros not allowed");
                        }
 
@@ -421,6 +428,9 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
             //flags = smf_ArgsAllowed|smf_ConditionAllowed
             if (!(flags&smf_ConditionAllowed))
                {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw std::runtime_error("Conditional macros not allowed");
                }
 
@@ -434,6 +444,9 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
 
             if (macroName[qPos]!='*' && macroName[qPos]!='+')
                {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw std::runtime_error( ::std::string("Conditional macro inclusion (body: '")
                                         + umba::string_plus::make_string<::std::string>(macroName) // MARTY_CON_NS str2con(macroName)
                                         + ::std::string("') - invalid condition, ?* nor ?+ used")
@@ -488,6 +501,7 @@ substMacros( const ::std::basic_string<CharType, Traits, Allocator>             
 
     return res;
    }
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 template < typename MacroTextGetter

@@ -7,7 +7,8 @@
 #include "macro_helpers.h"
 #include "stl.h"
 #include "undef_FormatMessage.h"
-
+#include "debug_helpers.h"
+//
 #include <algorithm>
 #include <cstdint>
 #include <exception>
@@ -282,7 +283,12 @@ public:
     FormatMessage& base(unsigned b)
     {
         if (b>36)
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("FormatMessage::base: number base is out of limit (36)");
+        }
         uBase = b;
         return *this;
     }

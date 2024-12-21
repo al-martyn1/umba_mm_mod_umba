@@ -15,10 +15,11 @@
 */
 
 //#include "char_writers.h"
+#include "debug_helpers.h"
 #include "string_char_writers.h"
 //#include "i_char_writer.h"
 #include "umba.h"
-
+//
 #include <exception>
 #include <iostream>
 //#include "umba/simple_formatter.h"

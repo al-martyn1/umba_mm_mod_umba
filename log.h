@@ -9,6 +9,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <cstdint>
 
 
 // requires global vars
@@ -28,7 +29,10 @@ extern umba::SimpleFormatter& getLogMsgStream(int level=0);
 
 
 // source parsing errors
-// requires std::stringr curFile, unsigned lineNo in log scope
+// requires 
+//   std::string curFile
+//   unsigned lineNo
+// in log scope
 #define UMBA_LOG_ERR_INPUT                 umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string()/*"err"*/, curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_ERR_INPUT_EX(errType)     umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string(errType)  , curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_WARN_INPUT(warnType)      umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts, */  std::string(warnType) , curFile.c_str(), lineNo, __FILE__, __LINE__ )
@@ -218,8 +222,8 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
                                     , LogEntryType              logEntryType
                                     // , const GeneratorOptions &gopts
                                     , const std::string         &warnType
-                                    , const char* inputFile   , unsigned inputLineNo
-                                    , const char* srcFile = 0 , unsigned srcLineNo = 0
+                                    , const char* inputFile   , std::size_t inputLineNo
+                                    , const char* srcFile = 0 , int srcLineNo = 0 /* Компилятор генерит int конствнту при использовании __LINE__ */
                                     )
 {
     if ( (logEntryType==LogEntryType::warn && isWarningDisabled(warnType))

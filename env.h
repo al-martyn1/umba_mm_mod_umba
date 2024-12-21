@@ -10,6 +10,7 @@
 
 
 #include "umba.h"
+#include "debug_helpers.h"
 //
 #include "filesys.h"
 //
@@ -43,6 +44,9 @@ template<typename ValueType>
 bool getVar(const std::string &varName, ValueType &val)
 {
     // static_assert?
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("umba::env::getVar not implemented for this type");
 }
 
@@ -92,6 +96,9 @@ template<typename ValueType> // for compatibility
 bool getVar(const std::wstring &varName, ValueType &val)
 {
     // static_assert?
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("umba::env::getVar not implemented for this type");
 }
 
@@ -140,6 +147,9 @@ UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(unsigned long long, std::stoull)
 template<typename ValueType>
 bool setVar(const std::string &varName, const ValueType &val)
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("umba::env::setVar not implemented for this type");
 }
 
@@ -172,6 +182,9 @@ UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(unsigned long long)
 template<typename ValueType>
 bool setVar(const std::wstring &varName, const ValueType &val)
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("umba::env::setVar not implemented for this type");
 }
 

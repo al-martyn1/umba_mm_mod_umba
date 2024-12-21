@@ -12,6 +12,7 @@
 #include "text_utils.h"
 #include "utf8.h"
 #include "filesys.h"
+#include "debug_helpers.h"
 //
 #include <algorithm>
 #include <fstream>
@@ -458,6 +459,7 @@ bool readBinaryFile( const std::string &fileName, std::string &data )
     return readBinaryFile( input, data );
 }
 
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 inline
 std::vector<std::string> prepareArgs( int argc, char **argv )
 {
@@ -519,7 +521,7 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
 
     return resVec;
 }
-
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 inline
@@ -1616,6 +1618,7 @@ struct CommandLineOption
         return true;
     }
 
+    #include "umba/warnings/push_disable_spectre_mitigation.h"
     template<typename EnumType, typename EnumMapper >
     bool getParamValue( EnumType &val, std::string &errMsg, const EnumMapper &mapper )
     {
@@ -1662,8 +1665,8 @@ struct CommandLineOption
         val = mapper(enumIntVal);
 
         return true;
-
     }
+    #include "umba/warnings/pop.h"
 
     std::string getOptionNames( std::string sep = "/" ) const
     {
