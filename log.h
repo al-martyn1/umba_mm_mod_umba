@@ -103,7 +103,7 @@ bool addRemoveLogOptionsImpl( std::unordered_map<std::string, bool>& optDisabled
 
         if (opt=="all")
         {
-            for(const auto optFromAll: allOpts)
+            for(const auto &optFromAll: allOpts)
             {
                 optDisabledMap[optFromAll] = bRemove;
             }
