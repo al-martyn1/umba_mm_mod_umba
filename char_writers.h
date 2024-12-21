@@ -228,8 +228,8 @@ HANDLE WINAPI GetStdHandle(
 );
 */
 
-//! Реализация CharWriter, производящая вывод в поток вывода std::ostream&
 #include "warnings/push_disable_padding_added.h"
+//! Реализация CharWriter, производящая вывод в поток вывода std::ostream&
 struct StdStreamCharWriter : UMBA_IMPLEMENTS ICharWriter
 {
 
@@ -794,8 +794,8 @@ public:
         #endif
     }
 
-    //! Очистить в текущей строке N позиции от текущего положения
     #include "umba/warnings/push_disable_spectre_mitigation.h"
+    //! Очистить в текущей строке N позиции от текущего положения
     virtual void terminalClearLine() override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
@@ -816,14 +816,12 @@ public:
                     numPositionsToClear = maxPosToClear;
                 }
 
-                #include "umba/warnings/push_disable_spectre_mitigation.h"
                 if (numPositionsToClear>0)
                 {
                     term::win32::setConsoleTextAttribute( m_hCon, FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE );
                     DWORD charsWritten = 0;
                     FillConsoleOutputCharacter( m_hCon, (TCHAR)' ', (DWORD)numPositionsToClear, curCoords, &charsWritten);
                 }
-                #include "umba/warnings/pop.h"
             }
         }
         #endif

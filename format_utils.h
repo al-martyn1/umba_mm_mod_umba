@@ -132,8 +132,8 @@ size_t formatNumber( uint8_t* pBuf, size_t bufSize, uint64_t val, int ss, size_t
 }
 
 //----------------------------------------------------------------------------
-//! Форматирует число. Знаковая версия
 #include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Форматирует число. Знаковая версия
 inline
 size_t formatNumber( char* pBuf, size_t bufSize, int64_t val, int ss, size_t fmtWidth = 0, char fillChar = ' ', CaseParam caseParam = CaseParam::upper )
 {
