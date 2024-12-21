@@ -11,7 +11,8 @@
 
 #include "alloca.h"
 #include "exception.h"
-
+#include "debug_helpers.h"
+//
 #include <algorithm>
 #include <cctype>
 #include <exception>
@@ -1460,10 +1461,21 @@ void build_pairs( const typename StringType::value_type *braces, StringType *pLe
         CharType b = *braces;
 
         if (is_left(b)==is_right(b))
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("umba::cpp::ascii_brace::build_pairs (1): paired brace can't be left and right at the same time");
+        }
 
         if (!is_paired(b))
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("umba::cpp::ascii_brace::build_pairs (2): can't build pair for non-paired brace");
+        }
+
 
         bool isLeft = is_left(b);
 
@@ -1699,6 +1711,9 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
             //bracesStack.push_back(ch);
             if (bracesStack.empty())
             {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw umba::FileParsingException("Found closing brace, but there is no opening brace found before", fileName, lineNumber, linePos);
             }
 
@@ -1707,6 +1722,9 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
 
             if (get_pair(openingBrace)!=ch)
             {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw umba::FileParsingException("Opening brace doesn't match closing brace", fileName, lineNumber, linePos);
             }
         }

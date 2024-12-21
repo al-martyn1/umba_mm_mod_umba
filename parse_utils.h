@@ -109,6 +109,7 @@ bool isWhitespace( uint8_t ch )
 
 
 //! Преобразование из цифрового сивола
+#include "warnings/push_disable_spectre_mitigation.h"
 inline
 int toDigit( char ch )
 {
@@ -120,6 +121,7 @@ int toDigit( char ch )
         return (int)(ch-'A'+10);
     return -1;
 }
+#include "warnings/pop.h"
 
 //! Преобразование из цифрового сивола
 inline

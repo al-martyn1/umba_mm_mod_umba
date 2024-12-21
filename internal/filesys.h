@@ -11,6 +11,8 @@
 
 #include "../umba.h"
 //
+#include "../debug_helpers.h"
+//
 #include "../alloca.h"
 #include "../stl.h"
 
@@ -481,6 +483,9 @@ struct FileStat
     //! Хелпер получения статистики файла в ОС-зависимом формате по имени в std::wstring
     inline int struct_file_stat_get_stat( const std::wstring &fileName, struct_file_stat *statBuf )
     {
+        #ifdef UMBA_DEBUGBREAK
+            UMBA_DEBUGBREAK();
+        #endif
         throw std::runtime_error("Not implemented: wide version of the struct_file_stat_get_stat (getFileStat) not implemented for non-WIN32");
     }
 
@@ -524,6 +529,9 @@ bool getPathStat(const StringType &path, FileStat &fileStat)
 {
     UMBA_USED(path);
     UMBA_USED(fileStat);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: getPathStat");
 }
 
@@ -803,6 +811,9 @@ inline filetime_t getFileTimeNow()
 template<typename StringType> inline
 StringType getCurrentDirectory()
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: getCurrentDirectory not specialized for this StringType");
 }
 
@@ -811,6 +822,9 @@ StringType getCurrentDirectory()
 template<typename StringType> inline
 bool setCurrentDirectory(const StringType &newCurDir)
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: setCurrentDirectory not specialized for this StringType");
 }
 
@@ -820,6 +834,9 @@ template<typename StringType> inline
 bool deleteFile( const StringType &filename )
 {
     UMBA_USED(filename);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: deleteFile not specialized for this StringType");
 }
 
@@ -829,6 +846,9 @@ template<typename StringType> inline
 bool deleteDirectory( const StringType &dirname )
 {
     UMBA_USED(dirname);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: deleteDirectory not specialized for this StringType");
 }
 
@@ -837,6 +857,9 @@ bool deleteDirectory( const StringType &dirname )
 template<typename StringType> inline bool createDirectory( const StringType &dirname )
 {
     UMBA_USED(dirname);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: createDirectory not specialized for this StringType");
 }
 
@@ -846,6 +869,9 @@ template<typename StringType> inline bool createDirectoryEx( const StringType &d
 {
     UMBA_USED(dirname);
     UMBA_USED(forceCreatePath);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: createDirectory not specialized for this StringType");
 }
 
@@ -862,6 +888,9 @@ template<typename StringType> inline bool createDirectoryEx( const StringType &d
 template<typename StringType> inline bool isFileReadonly( const StringType &fname )
 {
     UMBA_USED(fname);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: isFileReadonly not specialized for this StringType");
 }
 
@@ -1589,6 +1618,9 @@ bool deleteDirectory<std::string>( const std::string &filename )
 template<typename StringType> inline
 bool isFileReadable( const StringType &filename )
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: isFileReadable not specialized for this StringType");
 }
 
@@ -1709,6 +1741,9 @@ bool isFileReadable<std::string>( const std::string &filename )
 template<> inline
 bool readFile<std::wstring, uint8_t>( const std::wstring &filename, std::vector<uint8_t> &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true /* read something */ )
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: readFile not specialized for this StringType");
 }
 
@@ -1717,6 +1752,9 @@ bool readFile<std::wstring, uint8_t>( const std::wstring &filename, std::vector<
 template<> inline
 bool readFile<std::wstring, char>( const std::wstring &filename, std::vector<char> &filedata, FileStat *pFileStat = 0, bool ignoreSizeErrors = true /* read something */ )
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("Not implemented: readFile not specialized for this StringType");
 }
 

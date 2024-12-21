@@ -5,6 +5,10 @@
 
 //----------------------------------------------------------------------------
 
+#include "filename.h"
+#include "filesys.h"
+#include "debug_helpers.h"
+//
 #include <exception>
 #include <fstream>
 #include <iostream>
@@ -12,9 +16,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include "filename.h"
-#include "filesys.h"
+//
 
 #if defined(WIN32) || defined(_WIN32)
 
@@ -289,6 +291,9 @@ void adjustInputOutputFilenames( std::string &inputFilename , umba::cli_tool_hel
     inputFileType = detectFilenameType(inputFilename, true /* input file */);
     if (!checkIoFileType(inputFileType, checkMsg, true /* input file */))
     {
+        #ifdef UMBA_DEBUGBREAK
+            UMBA_DEBUGBREAK();
+        #endif
         throw std::runtime_error(checkMsg);
     }
 
@@ -296,6 +301,9 @@ void adjustInputOutputFilenames( std::string &inputFilename , umba::cli_tool_hel
     outputFileType = detectFilenameType(outputFilename, false /* not input file */);
     if (!checkIoFileType(outputFileType, checkMsg, false /* not input file */))
     {
+        #ifdef UMBA_DEBUGBREAK
+            UMBA_DEBUGBREAK();
+        #endif
         throw std::runtime_error(checkMsg);
     }
 }
@@ -416,6 +424,9 @@ std::string readInput( const std::string &inputFilename , umba::cli_tool_helpers
         {
             //LOG_ERR_OPT << "failed to get clipboard text\n";
             //return 1;
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("failed to get text from the clipboard");
         }
         #if defined(WIN32) || defined(_WIN32)
@@ -426,6 +437,9 @@ std::string readInput( const std::string &inputFilename , umba::cli_tool_helpers
 #endif
     if (!readFile(inputFileType, inputFilename, text))
     {
+        #ifdef UMBA_DEBUGBREAK
+            UMBA_DEBUGBREAK();
+        #endif
         throw std::runtime_error(std::string("failed to read input file '") + inputFilename + std::string("'"));
         //LOG_ERR_OPT << "failed to read input file '" << inputFilename << "'\n";
         //return 1;
@@ -489,6 +503,9 @@ void writeOutput( const std::string &outputFilename, umba::cli_tool_helpers::IoF
         if (!clipboardTextSet(text, fromUtfConverter, utfSource))
         #endif
         {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("failed to set clipboard text");
             // LOG_ERR_OPT << "failed to set clipboard text\n";
             // return 1;
@@ -498,6 +515,9 @@ void writeOutput( const std::string &outputFilename, umba::cli_tool_helpers::IoF
 #endif
     if (!umba::cli_tool_helpers::writeFile(outputFileType, outputFilename, bom+text, bOverwrite))
     {
+        #ifdef UMBA_DEBUGBREAK
+            UMBA_DEBUGBREAK();
+        #endif
         throw std::runtime_error(std::string("failed to write output file '") + outputFilename + std::string("'"));
         //LOG_ERR_OPT << "failed to write output file '" << outputFilename << "'\n";
         //return 1;

@@ -133,6 +133,7 @@ size_t formatNumber( uint8_t* pBuf, size_t bufSize, uint64_t val, int ss, size_t
 
 //----------------------------------------------------------------------------
 //! Форматирует число. Знаковая версия
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 inline
 size_t formatNumber( char* pBuf, size_t bufSize, int64_t val, int ss, size_t fmtWidth = 0, char fillChar = ' ', CaseParam caseParam = CaseParam::upper )
 {
@@ -154,6 +155,7 @@ size_t formatNumber( char* pBuf, size_t bufSize, int64_t val, int ss, size_t fmt
         return formatNumber( pBuf, bufSize, (uint64_t)val, ss, fmtWidth, fillChar, caseParam );
     }
 }
+#include "umba/warnings/pop.h"
 
 //----------------------------------------------------------------------------
 //! Форматирует число. Знаковая версия

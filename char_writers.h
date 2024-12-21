@@ -795,6 +795,7 @@ public:
     }
 
     //! Очистить в текущей строке N позиции от текущего положения
+    #include "umba/warnings/push_disable_spectre_mitigation.h"
     virtual void terminalClearLine() override
     {
         if (m_consoleType==term::UMBA_CONSOLETYPE_ANSI_TERMINAL)
@@ -826,8 +827,8 @@ public:
             }
         }
         #endif
-
     }
+    #include "umba/warnings/pop.h"
 
     virtual void terminalClearScreenEnd() override
     {
