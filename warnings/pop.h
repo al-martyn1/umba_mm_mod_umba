@@ -4,3 +4,6 @@
     #pragma warning(pop)
 #endif
 
+#if defined(__GNUC__)
+    #pragma GCC diagnostic pop
+#endif

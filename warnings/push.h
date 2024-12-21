@@ -8,3 +8,7 @@
     #pragma warning(push)
 #endif
 
+#if defined(__GNUC__)
+    #pragma GCC diagnostic push
+#endif
+
