@@ -26,7 +26,7 @@ struct TextIteratorTraits
 
     static umba::TextPositionInfo getPositionInfo(iterator_type it)
     {
-        return umba::TextPositionInfo{0};
+        return umba::TextPositionInfo{};
     }
 
 
