@@ -199,8 +199,8 @@ struct StringsGreaterFirstBySize
 };
 
 //-----------------------------------------------------------------------------
-//! Расширяет строку до заданной длины, вставляя дополнительные пробелы
 #include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Расширяет строку до заданной длины, вставляя дополнительные пробелы
 inline
 std::string expandStringWidth( std::string str, std::string::size_type width )
 {
@@ -268,8 +268,8 @@ struct SymbolLenCalculatorEncodingSingleByte
 };
 
 //-----------------------------------------------------------------------------
-//! Вычисляет длину строки в символах
 #include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Вычисляет длину строки в символах
 template<typename SymbolLenCalculator> inline
 std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symbolLenCalculator)
 {

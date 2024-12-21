@@ -367,8 +367,8 @@ std::vector< StringType > getKeepCasePaths()
 //-----------------------------------------------------------------------------
 // Выделяем код обрезания различных спец префиксов в отдельные функции
 
-//! Отрезаем спец префиксы, ничего не трогая в имени, даже разделители путей
 #include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Отрезаем спец префиксы, ничего не трогая в имени, даже разделители путей
 template<typename StringType> inline
 NativePrefixFlagsInfo stripNativePrefixes(StringType &fileName, typename StringType::value_type pathSep)
 {
@@ -687,8 +687,8 @@ StringType makeCanonicalForCompare( StringType                      fileName
 }
 
 //-----------------------------------------------------------------------------
-//! Возвращает true,  если путь абсолютный
 #include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Возвращает true,  если путь абсолютный
 template<typename StringType> inline
 bool isAbsPath( StringType p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
 {

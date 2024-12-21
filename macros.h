@@ -127,8 +127,8 @@ namespace util{
 
 
 //----------------------------------------------------------------------------
-//! Находит символ Ch, которые не заключен в скобки startBr/endBr
 #include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Находит символ Ch, которые не заключен в скобки startBr/endBr
 template < char startBr
          , char endBr
          , char Ch

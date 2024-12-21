@@ -108,8 +108,8 @@ bool isWhitespace( uint8_t ch )
 }
 
 
-//! Преобразование из цифрового сивола
 #include "warnings/push_disable_spectre_mitigation.h"
+//! Преобразование из цифрового сивола
 inline
 int toDigit( char ch )
 {
@@ -262,6 +262,7 @@ int64_t toNumberSimple( const uint8_t* pBuf, size_t bufSize, int ss, size_t *pRe
     return toNumberSimple( (const char*)pBuf, bufSize, ss, pReadedCount );
 }
 
+#include "warnings/push_disable_spectre_mitigation.h"
 //! Преобразование строки в число. *pReadedCount - инкрементируется, а не присваивается
 /*! Пропускаются пробельные символы, определяется знак
  */
@@ -311,6 +312,7 @@ bool toNumberEx( const char* pBuf, size_t bufSize, int ss, int64_t *pRes, size_t
 
     return true;
 }
+#include "warnings/pop.h"
 
 //! \copydoc toNumberEx
 inline
