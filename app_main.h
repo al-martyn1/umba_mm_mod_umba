@@ -6,6 +6,8 @@
 
 #include "umba.h"
 //
+#include "preprocessor.h"
+//
 #include "filesys.h"
 
 #if defined(UMBA_FILESYS_USE_UTF8)
@@ -189,7 +191,7 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
 
         #if defined(UNICODE) || defined(_UNICODE)
 
-            // Юникодное консольное приложение
+            // Unicode консольное приложение
             #define UMBA_APP_MAIN()    int umbaMainImpl(int argc, char* argv[]); /* UTF8 entry */                        \
                                        int wmain(int argc, wchar_t* argv[])                                              \
                                        {                                                                                 \
@@ -203,7 +205,7 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
 
         #else
 
-            // Анси консольное приложение
+            // Ansi консольное приложение
             #define UMBA_APP_MAIN()    int umbaMainImpl(int argc, char* argv[]); /* UTF8 entry */                        \
                                        int main(int argc, char* argv[])                                                  \
                                        {                                                                                 \
@@ -224,12 +226,15 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
 
         #if defined(UNICODE) || defined(_UNICODE)
 
+            // Unicode windows приложение
             #define UMBA_APP_MAIN()    int umbaMainImpl(int argc, char* argv[]); /* UTF8 entry */                        \
                                        HINSTANCE hInstance     = 0;                                                      \
                                        HINSTANCE hPrevInstance = 0;                                                      \
                                        int       nCmdShow      = 0;                                                      \
+                                       /*UMBA_USED(hInstance); UMBA_USED(hPrevInstance); UMBA_USED(nCmdShow);*/          \
                                        int APIENTRY wWinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance_, LPWSTR lpCmdLine, int nCmdShow_)\
                                        {                                                                                 \
+                                           UMBA_USED(lpCmdLine);                                                         \
                                            hInstance     = hInstance_;                                                   \
                                            hPrevInstance = hPrevInstance_;                                               \
                                            nCmdShow      = nCmdShow_;                                                    \
@@ -244,12 +249,15 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
                                        
         #else
 
+            // Ansi windows приложение
             #define UMBA_APP_MAIN()    int umbaMainImpl(int argc, char* argv[]); /* UTF8 entry */                        \
                                        HINSTANCE hInstance     = 0;                                                      \
                                        HINSTANCE hPrevInstance = 0;                                                      \
                                        int       nCmdShow      = 0;                                                      \
+                                       /*UMBA_USED(hInstance); UMBA_USED(hPrevInstance); UMBA_USED(nCmdShow);*/          \
                                        int APIENTRY WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance_, LPSTR lpCmdLine, int nCmdShow_)\
                                        {                                                                                 \
+                                           UMBA_USED(lpCmdLine);                                                         \
                                            hInstance     = hInstance_;                                                   \
                                            hPrevInstance = hPrevInstance_;                                               \
                                            nCmdShow      = nCmdShow_;                                                    \
