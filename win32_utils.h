@@ -266,7 +266,7 @@ bool regQueryAppInstallLocation(const StringType &appUninstallSectionName, Strin
 
     const auto& regPaths = getUninstallRegPathsVector<StringType>();
 
-    for(const auto rp: regPaths)
+    for(const auto &rp: regPaths)
     {
         HKEY hk = 0;
         LSTATUS
