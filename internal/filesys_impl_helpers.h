@@ -22,7 +22,7 @@
 
 
 //-----------------------------------------------------------------------------
-// umba::filesys::
+// umba::filesys::impl_helpers::
 namespace umba{
 namespace filesys{
 namespace impl_helpers {
