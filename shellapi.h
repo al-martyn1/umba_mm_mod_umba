@@ -23,6 +23,8 @@
     #include "winconhelpers.h"
     //
     #include "internal/winstrerrorname.h"
+    #include "internal/filesys.h"
+    #include "filename.h"
 
 #else
 
@@ -1022,14 +1024,64 @@ inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, cons
 
 
 //----------------------------------------------------------------------------
+inline
+bool fileAttributeHiddenSet(const std::string &fname, bool bSet)
+{
+    auto preparedName = umba::filename::prepareForNativeUsage(umba::filesys::impl_helpers::encodeToNative(fname));
+    DWORD attrs = GetFileAttributesW(preparedName.c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+        return false;
 
-// //----------------------------------------------------------------------------
-// inline
-// HKEY regCreateKey(HKEY hKeyRoot, const std::wstring &path, REGSAM samDesired)
-// {
-    // User Variables   - HKEY_CURRENT_USER\Environment
-    // System Variables - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+    if (bSet)
+        attrs |=  FILE_ATTRIBUTE_HIDDEN;
+    else
+        attrs &= ~FILE_ATTRIBUTE_HIDDEN;
 
+    return SetFileAttributesW(preparedName.c_str(), attrs) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool fileAttributeHiddenGet(const std::string &fname)
+{
+    auto preparedName = umba::filename::prepareForNativeUsage(umba::filesys::impl_helpers::encodeToNative(fname));
+    DWORD attrs = GetFileAttributesW(preparedName.c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+        return false;
+
+    return (attrs&INVALID_FILE_ATTRIBUTES) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+bool shellParamShowHiddenFilesSet(bool bShow)
+{
+    SHELLSTATE  shSt;
+    SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, FALSE);
+    shSt.fShowAllObjects = bShow ? TRUE : FALSE;
+    SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, TRUE);
+    return true;
+    // fShowAllObjects/SSF_SHOWALLOBJECTS   - TRUE to show all objects, including hidden files and folders. FALSE to hide hidden files and folders.
+    // fShowSuperHidden/SSF_SHOWSUPERHIDDEN - TRUE to show operating system files - 
+    // fShowSysFiles/SSF_SHOWSYSFILES       - TRUE to show system files, FALSE to hide them.
+
+}
+
+//----------------------------------------------------------------------------
+inline
+bool shellParamShowHiddenFilesGet(bool bShow)
+{
+    UMBA_USED(bShow);
+    SHELLSTATE  shSt;
+    SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, FALSE);
+    return shSt.fShowAllObjects ? true : false;
+}
+
+//----------------------------------------------------------------------------
 
 
 
