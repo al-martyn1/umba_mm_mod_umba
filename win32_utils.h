@@ -177,35 +177,70 @@ inline
 bool regQueryValueEx( HKEY               hKey
                     , const std::wstring valueName
                     , std::wstring       &value
+                    , DWORD              *pType=0
                     )
 {
     wchar_t buf[1024];
     DWORD type;
     DWORD cbData = sizeof(buf); // in bytes
 
-    LSTATUS status = RegQueryValueExW( hKey
-                                     , valueName.c_str()
-                                     , 0 // reserved
-                                     , &type
-                                     , (LPBYTE)&buf[0]
-                                     , &cbData
-                                     );
-    if (status==ERROR_SUCCESS && type==REG_SZ)
-    {
-        if (cbData>(sizeof(buf)-1))
-            cbData = sizeof(buf)-1;
+    wchar_t *pBuf = &buf[0];
 
-        std::size_t numChars = cbData/sizeof(wchar_t);
-        if (numChars>0)
-        {
-            if (buf[numChars-1]==0)
-                --numChars;
-            value.assign(buf, numChars);
-        }
-        else
-        {
-            value.clear();
-        }
+    LSTATUS 
+    status = RegQueryValueExW( hKey
+                             , valueName.c_str()
+                             , 0 // reserved
+                             , &type
+                             , (LPBYTE)pBuf
+                             , &cbData
+                             );
+
+    std::vector<wchar_t> dynBuf;
+    if (status==ERROR_MORE_DATA)
+    {
+        std::size_t needChars = cbData/sizeof(buf[0]);
+        if (cbData%sizeof(buf[0]))
+            ++needChars;
+        dynBuf.resize(needChars, 0);
+        pBuf = dynBuf.data();
+    }
+
+    status = RegQueryValueExW( hKey
+                             , valueName.c_str()
+                             , 0 // reserved
+                             , &type
+                             , (LPBYTE)pBuf
+                             , &cbData
+                             );
+
+    if (status==ERROR_SUCCESS && (type==REG_SZ || type==REG_EXPAND_SZ))
+    {
+        // if (cbData>(sizeof(buf)-1))
+        //     cbData = sizeof(buf)-1;
+        //  
+        // std::size_t numChars = cbData/sizeof(wchar_t);
+        // if (numChars>0)
+        // {
+        //     if (buf[numChars-1]==0)
+        //         --numChars;
+        //     value.assign(buf, numChars);
+        // }
+        // else
+        // {
+        //     value.clear();
+        // }
+
+        if (pType)
+            *pType = type;
+
+        std::size_t charsCopied = cbData/sizeof(buf[0]);
+        if (cbData%sizeof(buf[0]))
+            ++charsCopied;
+
+        if (charsCopied>0 && pBuf[charsCopied-1]==0)
+            --charsCopied; // strip terminating zero
+
+        value.assign(pBuf, charsCopied);
 
         return true;
     }
@@ -218,35 +253,70 @@ inline
 bool regQueryValueEx( HKEY               hKey
                     , const std::string  valueName
                     , std::string        &value
+                    , DWORD              *pType=0
                     )
 {
     char  buf[1024];
     DWORD type;
     DWORD cbData = sizeof(buf); // in bytes
 
-    LSTATUS status = RegQueryValueExA( hKey
-                                     , valueName.c_str()
-                                     , 0 // reserved
-                                     , &type
-                                     , (LPBYTE)&buf[0]
-                                     , &cbData
-                                     );
-    if (status==ERROR_SUCCESS && type==REG_SZ)
-    {
-        if (cbData>(sizeof(buf)-1))
-            cbData = sizeof(buf)-1;
+    char *pBuf = &buf[0];
 
-        std::size_t numChars = cbData; ///sizeof(wchar_t);
-        if (numChars>0)
-        {
-            if (buf[numChars-1]==0)
-                --numChars;
-            value.assign(buf, numChars);
-        }
-        else
-        {
-            value.clear();
-        }
+    LSTATUS 
+    status = RegQueryValueExA( hKey
+                             , valueName.c_str()
+                             , 0 // reserved
+                             , &type
+                             , (LPBYTE)pBuf
+                             , &cbData
+                             );
+
+    std::vector<char> dynBuf;
+    if (status==ERROR_MORE_DATA)
+    {
+        std::size_t needChars = cbData/sizeof(buf[0]);
+        // if (cbData%sizeof(buf[0]))
+        //     ++needChars;
+        dynBuf.resize(needChars, 0);
+        pBuf = dynBuf.data();
+    }
+
+    status = RegQueryValueExA( hKey
+                             , valueName.c_str()
+                             , 0 // reserved
+                             , &type
+                             , (LPBYTE)pBuf
+                             , &cbData
+                             );
+
+    if (status==ERROR_SUCCESS && (type==REG_SZ || type==REG_EXPAND_SZ))
+    {
+        // if (cbData>(sizeof(buf)-1))
+        //     cbData = sizeof(buf)-1;
+        //  
+        // std::size_t numChars = cbData; ///sizeof(wchar_t);
+        // if (numChars>0)
+        // {
+        //     if (buf[numChars-1]==0)
+        //         --numChars;
+        //     value.assign(buf, numChars);
+        // }
+        // else
+        // {
+        //     value.clear();
+        // }
+
+        if (pType)
+            *pType = type;
+
+        std::size_t charsCopied = cbData/sizeof(buf[0]);
+        if (cbData%sizeof(buf[0]))
+            ++charsCopied;
+
+        if (charsCopied>0 && pBuf[charsCopied-1]==0)
+            --charsCopied; // strip terminating zero
+
+        value.assign(pBuf, charsCopied);
 
         return true;
     }
