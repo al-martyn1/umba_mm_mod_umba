@@ -564,7 +564,7 @@ enum class MessageBoxKind
 };
 
 //------------------------------
-//! Отображает блокирующее выполнение GUI сообщение (Message Box), параметры - в в UTF-8
+//! Отображает блокирующее выполнение GUI сообщение (Message Box), параметры - в UTF-8
 inline
 void showMessageBox(const std::string &msg, std::string title=std::string(), MessageBoxKind mbKind=MessageBoxKind::mbDefault)
 {
@@ -1017,10 +1017,29 @@ inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, cons
     return registerShellExtentionHandlerForExtentionList(bSystemRoot, fromUtf8(appNameId), fromUtf8(extCommaList));
 }
 
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+
+// //----------------------------------------------------------------------------
+// inline
+// HKEY regCreateKey(HKEY hKeyRoot, const std::wstring &path, REGSAM samDesired)
+// {
+    // User Variables   - HKEY_CURRENT_USER\Environment
+    // System Variables - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+
+
+
+
+//----------------------------------------------------------------------------
+
 } // namespace win32
 
 #endif
 
+//----------------------------------------------------------------------------
 
 
 
