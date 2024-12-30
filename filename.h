@@ -347,6 +347,21 @@ std::vector< StringType > splitPathList( const StringType &pl, typename StringTy
     //return umba::string_plus::split( pl, pathListSep, true /* skipEmpty */ );
 }
 
+//-----------------------------------------------------------------------------
+//!
+template<typename StringType> inline
+StringType mergePathList( const std::vector< StringType > &plParts, typename StringType::value_type pathListSep = getNativePathListSep<typename StringType::value_type>())
+{
+    using pp_type      = std::vector< StringType >;
+    using pp_item_cptr = typename pp_type::const_iterator;
+
+    auto stringifier = [](const StringType&v) { return v; };
+    return umba::string_plus::merge< StringType, pp_item_cptr, decltype(stringifier) >
+                                   ( plParts.begin(), plParts.end(), pathListSep, stringifier )
+                                   ;
+}
+
+
 /*
 template<typename StringType> inline
 std::vector< StringType > getKeepCasePaths()
