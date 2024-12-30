@@ -90,6 +90,7 @@ const std::vector<StringType>& getUninstallRegPathsVector()
 inline
 HKEY regCreateKey(HKEY hKeyRoot, const std::wstring &path, REGSAM samDesired)
 {
+    // https://learn.microsoft.com/ru-ru/windows/win32/winprog64/accessing-an-alternate-registry-view
     if (isWindows32OnWindows64()) // 32х-битные системы сейчас конечно уже экзотика, но на всякий случай - я же и на XP могу работать
     {
         samDesired |= KEY_WOW64_64KEY;
@@ -157,6 +158,12 @@ LSTATUS regOpenKeyEx( HKEY              hKey
                     , PHKEY             phkResult
                     )
 {
+    // https://learn.microsoft.com/ru-ru/windows/win32/winprog64/accessing-an-alternate-registry-view
+    if (isWindows32OnWindows64()) // 32х-битные системы сейчас конечно уже экзотика, но на всякий случай - я же и на XP могу работать
+    {
+        samDesired |= KEY_WOW64_64KEY;
+    }
+
     return RegOpenKeyExA(hKey, subKey.c_str(), ulOptions, samDesired, phkResult);
 }
 
@@ -169,15 +176,42 @@ LSTATUS regOpenKeyEx( HKEY               hKey
                     , PHKEY              phkResult
                     )
 {
+    // https://learn.microsoft.com/ru-ru/windows/win32/winprog64/accessing-an-alternate-registry-view
+    if (isWindows32OnWindows64()) // 32х-битные системы сейчас конечно уже экзотика, но на всякий случай - я же и на XP могу работать
+    {
+        samDesired |= KEY_WOW64_64KEY;
+    }
+
     return RegOpenKeyExW(hKey, subKey.c_str(), ulOptions, samDesired, phkResult);
 }
 
 //----------------------------------------------------------------------------
 inline
+bool regQueryValueType(HKEY hKey, const std::string &valueName, DWORD &type, LSTATUS *pStatus=0)
+{
+    LSTATUS st = RegQueryValueExA(hKey, valueName.c_str(), 0, &type, 0, 0);
+    if (pStatus)
+       *pStatus = st;
+    return st==ERROR_SUCCESS;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool regQueryValueType(HKEY hKey, const std::wstring &valueName, DWORD &type, LSTATUS *pStatus=0)
+{
+    LSTATUS st = RegQueryValueExW(hKey, valueName.c_str(), 0, &type, 0, 0);
+    if (pStatus)
+       *pStatus = st;
+    return st==ERROR_SUCCESS;
+}
+
+//----------------------------------------------------------------------------
+inline
 bool regQueryValueEx( HKEY               hKey
-                    , const std::wstring valueName
+                    , const std::wstring &valueName
                     , std::wstring       &value
                     , DWORD              *pType=0
+                    , LSTATUS            *pStatus=0
                     )
 {
     wchar_t buf[1024];
@@ -204,6 +238,12 @@ bool regQueryValueEx( HKEY               hKey
         dynBuf.resize(needChars, 0);
         pBuf = dynBuf.data();
     }
+    else if (status!=ERROR_SUCCESS)
+    {
+        if (pStatus)
+           *pStatus = status;
+        return false;
+    }
 
     status = RegQueryValueExW( hKey
                              , valueName.c_str()
@@ -213,47 +253,42 @@ bool regQueryValueEx( HKEY               hKey
                              , &cbData
                              );
 
-    if (status==ERROR_SUCCESS && (type==REG_SZ || type==REG_EXPAND_SZ))
+    if (status!=ERROR_SUCCESS)
     {
-        // if (cbData>(sizeof(buf)-1))
-        //     cbData = sizeof(buf)-1;
-        //  
-        // std::size_t numChars = cbData/sizeof(wchar_t);
-        // if (numChars>0)
-        // {
-        //     if (buf[numChars-1]==0)
-        //         --numChars;
-        //     value.assign(buf, numChars);
-        // }
-        // else
-        // {
-        //     value.clear();
-        // }
-
-        if (pType)
-            *pType = type;
-
-        std::size_t charsCopied = cbData/sizeof(buf[0]);
-        if (cbData%sizeof(buf[0]))
-            ++charsCopied;
-
-        if (charsCopied>0 && pBuf[charsCopied-1]==0)
-            --charsCopied; // strip terminating zero
-
-        value.assign(pBuf, charsCopied);
-
-        return true;
+        if (pStatus)
+           *pStatus = status;
+        return false;
     }
 
-    return false;
+    if (type!=REG_SZ && type!=REG_EXPAND_SZ)
+    {
+        if (pStatus)
+           *pStatus = ERROR_DATATYPE_MISMATCH;
+        return false;
+    }
+    
+    if (pType)
+        *pType = type;
+
+    std::size_t charsCopied = cbData/sizeof(buf[0]);
+    if (cbData%sizeof(buf[0]))
+        ++charsCopied;
+
+    if (charsCopied>0 && pBuf[charsCopied-1]==0)
+        --charsCopied; // strip terminating zero
+
+    value.assign(pBuf, charsCopied);
+
+    return true;
 }
 
 //----------------------------------------------------------------------------
 inline
 bool regQueryValueEx( HKEY               hKey
-                    , const std::string  valueName
+                    , const std::string  &valueName
                     , std::string        &value
                     , DWORD              *pType=0
+                    , LSTATUS            *pStatus=0
                     )
 {
     char  buf[1024];
@@ -280,6 +315,12 @@ bool regQueryValueEx( HKEY               hKey
         dynBuf.resize(needChars, 0);
         pBuf = dynBuf.data();
     }
+    else if (status!=ERROR_SUCCESS)
+    {
+        if (pStatus)
+           *pStatus = status;
+        return false;
+    }
 
     status = RegQueryValueExA( hKey
                              , valueName.c_str()
@@ -289,39 +330,167 @@ bool regQueryValueEx( HKEY               hKey
                              , &cbData
                              );
 
-    if (status==ERROR_SUCCESS && (type==REG_SZ || type==REG_EXPAND_SZ))
+    if (status!=ERROR_SUCCESS)
     {
-        // if (cbData>(sizeof(buf)-1))
-        //     cbData = sizeof(buf)-1;
-        //  
-        // std::size_t numChars = cbData; ///sizeof(wchar_t);
-        // if (numChars>0)
-        // {
-        //     if (buf[numChars-1]==0)
-        //         --numChars;
-        //     value.assign(buf, numChars);
-        // }
-        // else
-        // {
-        //     value.clear();
-        // }
-
-        if (pType)
-            *pType = type;
-
-        std::size_t charsCopied = cbData/sizeof(buf[0]);
-        if (cbData%sizeof(buf[0]))
-            ++charsCopied;
-
-        if (charsCopied>0 && pBuf[charsCopied-1]==0)
-            --charsCopied; // strip terminating zero
-
-        value.assign(pBuf, charsCopied);
-
-        return true;
+        if (pStatus)
+           *pStatus = status;
+        return false;
     }
 
-    return false;
+    if (type!=REG_SZ && type!=REG_EXPAND_SZ)
+    {
+        if (pStatus)
+           *pStatus = ERROR_DATATYPE_MISMATCH;
+        return false;
+    }
+    
+    if (pType)
+        *pType = type;
+
+    std::size_t charsCopied = cbData/sizeof(buf[0]);
+    if (cbData%sizeof(buf[0]))
+        ++charsCopied;
+
+    if (charsCopied>0 && pBuf[charsCopied-1]==0)
+        --charsCopied; // strip terminating zero
+
+    value.assign(pBuf, charsCopied);
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool regEnumValue( HKEY         hKey
+                 , DWORD        dwIndex
+                 , std::string  &name
+                 , DWORD        &dwType
+                 , LSTATUS      *pStatus=0
+                 )
+{
+    // https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-element-size-limits
+    char buf[260+12];
+    DWORD cchValueName = sizeof(buf)/sizeof(buf[0]);
+
+    LSTATUS st = RegEnumValueA( hKey
+                              , dwIndex
+                              , &buf[0]
+                              , &cchValueName
+                              , 0 // lpReserved
+                              , &dwType
+                              , 0 // lpData
+                              , 0 // lpcbData
+                              );
+    if (st!=ERROR_SUCCESS)
+    {
+        if (pStatus)
+           *pStatus = st;
+        return false;
+    }
+
+    name.assign(&buf[0], cchValueName);
+
+    if (pStatus)
+       *pStatus = ERROR_SUCCESS;
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool regEnumValue( HKEY         hKey
+                 , DWORD        dwIndex
+                 , std::wstring &name
+                 , DWORD        &dwType
+                 , LSTATUS      *pStatus=0
+                 )
+{
+    // https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-element-size-limits
+    wchar_t buf[16384];
+    DWORD cchValueName = sizeof(buf)/sizeof(buf[0]);
+
+    LSTATUS st = RegEnumValueW( hKey
+                              , dwIndex
+                              , &buf[0]
+                              , &cchValueName
+                              , 0 // lpReserved
+                              , &dwType
+                              , 0 // lpData
+                              , 0 // lpcbData
+                              );
+    if (st!=ERROR_SUCCESS)
+    {
+        if (pStatus)
+           *pStatus = st;
+        return false;
+    }
+
+    name.assign(&buf[0], cchValueName);
+
+    if (pStatus)
+       *pStatus = ERROR_SUCCESS;
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+struct RegValueInfo
+{
+    StringType     name;
+    DWORD          type;
+
+}; // struct RegValueInfo
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+inline
+void regEnumValues(HKEY hKey, std::vector< RegValueInfo<StringType> > &valInfos, LSTATUS *pStatus=0)
+{
+    // if (pStatus)
+    //    *pStatus = ERROR_SUCCESS;
+
+    DWORD dwIndex = 0;
+    for(;;++dwIndex)
+    {
+        RegValueInfo<StringType> valInfo;
+        if (!regEnumValue(hKey, dwIndex, valInfo.name, valInfo.type, pStatus))
+            break;
+
+        valInfos.emplace_back(valInfo);
+    }
+}
+
+//----------------------------------------------------------------------------
+inline
+bool regSetValue(HKEY hKey, const std::string &name, const std::string &value, LSTATUS *pStatus=0, bool expandSz=false)
+{
+    LSTATUS st = RegSetValueExA( hKey, name.c_str()
+                               , 0 // Reserved
+                               , expandSz ? REG_EXPAND_SZ : REG_SZ
+                               , (const BYTE*)value.c_str()
+                               , (DWORD)(value.size()+1)
+                               );
+    if (pStatus)
+       *pStatus = st;
+
+    return st==ERROR_SUCCESS;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool regSetValue(HKEY hKey, const std::wstring &name, const std::wstring &value, LSTATUS *pStatus=0, bool expandSz=false)
+{
+    LSTATUS st = RegSetValueExW( hKey, name.c_str()
+                               , 0 // Reserved
+                               , expandSz ? REG_EXPAND_SZ : REG_SZ
+                               , (const BYTE*)value.c_str()
+                               , (DWORD)((value.size()+1)*sizeof(wchar_t))
+                               );
+    if (pStatus)
+       *pStatus = st;
+
+    return st==ERROR_SUCCESS;
 }
 
 //----------------------------------------------------------------------------
