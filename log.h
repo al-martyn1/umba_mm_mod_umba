@@ -1,10 +1,10 @@
 /*! \file
-    \brief Хелперы для утилит командной строки (CLI)
+    \brief Вывод в лог (на консоль), хелперы
 */
 
 
 #if !defined(UMBA_SIMPLE_FORMATTER_H)
-    #error "umba/cli_log.h requires umba/simple_formatter.h to be included first"
+    #error "umba/log.h requires umba/simple_formatter.h to be included first"
 #endif
 
 #include <string>
