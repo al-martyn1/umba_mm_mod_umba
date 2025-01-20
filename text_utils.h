@@ -380,12 +380,16 @@ template<typename SymbolLenCalculator> inline
 std::string prepareTextParaMakeString( const std::string &para, std::string::size_type paraWidth
                                      , TextAlignment textAlignment // = TextAlignment::width
                                      , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                                     , bool bAppendMissingComma=true
                                      )
 {
     std::vector<std::string> v = prepareTextParaMakeLines( para, paraWidth, textAlignment, symbolLenCalculator );
     auto res = umba::string_plus::merge( v, '\n'); // umba::string_plus::merge
-    if (!res.empty() && res.back()!='.' && res.back()!='!' && res.back()!='?' && res.back()!=':' && res.back()!=';')
-        res.push_back('.');
+    if (bAppendMissingComma)
+    {
+        if (!res.empty() && res.back()!='.' && res.back()!='!' && res.back()!='?' && res.back()!=':' && res.back()!=';')
+            res.push_back('.');
+    }
     return res;
 }
 
@@ -404,6 +408,7 @@ template<typename SymbolLenCalculator> inline
 std::string formatTextParas( std::string text, std::string::size_type paraWidth
                            , TextAlignment textAlignment // = TextAlignment::width
                            , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                           , bool bAppendMissingComma=true
                            )
 {
     std::vector<std::string> paras = umba::string_plus::split(text, '\n', true /* skipEmpty */);
@@ -425,7 +430,7 @@ std::string formatTextParas( std::string text, std::string::size_type paraWidth
         {
             if (!text.empty())
                 text.append("\n\n");
-            text.append(prepareTextParaMakeString(p, paraWidth, textAlignment, symbolLenCalculator));
+            text.append(prepareTextParaMakeString(p, paraWidth, textAlignment, symbolLenCalculator, bAppendMissingComma));
         }
     }
 
@@ -438,9 +443,10 @@ std::string formatTextParas( std::string text, std::string::size_type paraWidth
 inline
 std::string formatTextParas( std::string text, std::string::size_type paraWidth
                            , TextAlignment textAlignment // = TextAlignment::width
+                           , bool bAppendMissingComma=true
                            )
 {
-    return formatTextParas<SymbolLenCalculatorEncodingSingleByte>(text, paraWidth, textAlignment, SymbolLenCalculatorEncodingSingleByte());
+    return formatTextParas<SymbolLenCalculatorEncodingSingleByte>(text, paraWidth, textAlignment, SymbolLenCalculatorEncodingSingleByte(), bAppendMissingComma);
 }
 
 //-----------------------------------------------------------------------------
