@@ -196,6 +196,7 @@ bool regexMatch( const std::basic_string<CharType> &text, const std::basic_regex
 
             //TODO: !!! Если не обрезать, то регулярки в GCC 7.3 падают
             // Чет не работает, а обрезать в прикладухе - работает
+
             // if (text.size()>7000u)
             // {
             //     text.erase(7000u, text.npos);
@@ -230,6 +231,7 @@ bool regexMatch( const std::vector<CharType> &text, const std::basic_regex<CharT
 
             //TODO: !!! Если не обрезать, то регулярки в GCC 7.3 падают
             // Чет не работает, а обрезать в прикладухе - работает
+
             // if (text.size()>7000u)
             // {
             //     text.erase(text.begin()+7000u, text.end());

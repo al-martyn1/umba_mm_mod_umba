@@ -24,6 +24,7 @@
 #endif
 
 
+// umba::time_service::
 
 namespace umba{
 namespace time_service{
@@ -180,7 +181,7 @@ namespace time_service{
 
         void init()
         {
-            /* !!! Сделать как надо */
+            /* !!! Сделать как надо umba::time_service::init() */
             // if( SysTick_Config(SystemCoreClock / 1000) )
             if (0)
             {
@@ -192,7 +193,7 @@ namespace time_service{
 
         void start(void)
         {
-            /* !!! Сделать как надо */
+            /* !!! Сделать как надо umba::time_service::start() */
             // SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
             #ifndef UMBA_TIMESERVICE_NO_TACTIC_DELAY
             delayMs( 250 );
@@ -201,7 +202,7 @@ namespace time_service{
 
         void stop(void)
         {
-            /* !!! Сделать как надо */
+            /* !!! Сделать как надо umba::time_service::stop() */
             // SysTick->CTRL &= ~(SysTick_CTRL_ENABLE_Msk);
         }
 
@@ -254,7 +255,7 @@ namespace time_service{
         {
             TimeTick tickHi, tickLo, tickMod;
 
-            /* !!! Сделать как надо */
+            /* !!! Сделать как надо umba::time_service::getCurTimeHires() */
             //getCurTimeHiresRaw( &tickHi, &tickLo, &tickMod );
             //if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
             //    getCurTimeHiresRaw( &tickHi, &tickLo, &tickMod );

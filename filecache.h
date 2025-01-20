@@ -235,7 +235,7 @@ protected:
 
         std::map<FilenameStringType, FileCacheInfo>::iterator it = m_cache.find(newFileInfo.cmpFilename);
 
-        if (it==m_cache.end()) // !!! Not found
+        if (it==m_cache.end())
         {
             if (!readFile<FilenameStringType, ByteType>(newFileInfo.ntvFilename, newFileInfo.originalFileData , &newFileInfo.fileStat, false  /* !ignoreSizeErrors */ ))
                 return 0;

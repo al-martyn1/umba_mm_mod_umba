@@ -183,6 +183,7 @@ protected: // utils
         }
     }
 
+    #include "umba/warnings/push_disable_spectre_mitigation.h"
     static unsigned getCorrectBase(unsigned base)
     {
         if (base<2)
@@ -199,6 +200,7 @@ protected: // utils
         //     default: return 10;
         // }
     }
+    #include "umba/warnings/pop.h"
 
 
 public:

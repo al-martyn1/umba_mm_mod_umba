@@ -1645,7 +1645,7 @@ struct CommandLineOption
         //std::string optArgCopy = toLower(optArg);
 
         /*
-        !!!
+        !!! Тут закоменчено что-то старое, хз зачем я тут внимание акцентировал.
         std::map<std::string, int>::const_iterator eit = optInfo.enumVals.find(optArgCopy);
         if (eit == optInfo.enumVals.end())
         {

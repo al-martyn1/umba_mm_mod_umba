@@ -137,7 +137,7 @@ size_t buildSomeTypeArray( ArrayItemType *pArrayBuf
 
 /*
 
-!!! Usage
+Example:
 
 template< typename... SomeTypeListItems >
 inline

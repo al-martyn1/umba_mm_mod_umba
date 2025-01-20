@@ -680,7 +680,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
     #elif defined(_M_IA64)
 
         #define UMBA_ARCH_IA64
-        #define UMBA_ARCH_LITTLE_ENDIAN /* !!! ??? */
+        #define UMBA_ARCH_LITTLE_ENDIAN /* !!! ??? Чо сказать хотел, не понятно */
 
     #else
 

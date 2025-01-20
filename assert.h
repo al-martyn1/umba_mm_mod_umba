@@ -78,7 +78,7 @@
     #else 
 
         // GCC/Clang - пока оставим без ассерта
-        /* !!! Сделать как надо */
+        /* !!! Сделать как надо UMBA_ASSERT для GCC/Clang */
         #define UMBA_ASSERT( statement )
 
     #endif
