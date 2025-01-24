@@ -2,6 +2,8 @@
     \brief Вывод в лог (на консоль), хелперы
 */
 
+#pragma once
+
 
 #if !defined(UMBA_SIMPLE_FORMATTER_H)
     #error "umba/log.h requires umba/simple_formatter.h to be included first"
@@ -21,7 +23,7 @@ extern umba::SimpleFormatter  umbaLogStreamMsg;
 extern umba::SimpleFormatter  umbaLogStreamNul;
 
 //! Возвращает umbaLogStreamMsg/umbaLogStreamNul в зависимости от запрошенного уровня (level) verbosity и текущих настроек программы. В простейшем случае просто проверяется флаг quet
-extern umba::SimpleFormatter& getLogMsgStream(int level=0);
+extern umba::SimpleFormatter& getLogMsgStream(int level); // =0
 
 // Если надо будет протоколировать в какой-то отдельный поток вывода в каком-то скопе,
 // то там надо будет как-то извращаться. Но пока это обычно для утилит командной строки,
