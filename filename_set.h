@@ -17,7 +17,7 @@ namespace umba
 {
 
 //! Отображение имен файлов в id и обратно. Использует только строки std::string (UTF-8)
-template<typename FileIdType_=std::size_t>
+template<typename FileIdType_=std::size_t /* , typename FilenameStringType_=std::string */ >
 class FilenameSet
 {
 
@@ -70,9 +70,9 @@ protected:
     //------------------------------
     //! Реализация получения идентификатора файла
     const FileInfo* getFileInfoImpl( const FilenameStringType &name //!< имя файла
-                            , bool  allowCreateNewId         //!< Можно ли создавать новый ID, если файлу ранее ID не выдавался
-                            , FilenameStringType realName=FilenameStringType()
-                            )
+                                   , bool  allowCreateNewId         //!< Можно ли создавать новый ID, если файлу ранее ID не выдавался
+                                   , FilenameStringType realName=FilenameStringType()
+                                   )
     {
         auto it = m_nameMap.find(umba::filename::makeCanonicalForCompare(name));
         if (it!=m_nameMap.end())
