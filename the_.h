@@ -49,6 +49,41 @@ public:
         return ((tVal == VArgs) || ...);
     }
 
+    // Закрытый промежуток (сегмент, числовой отрезок) - когда его концы (границы) входят в диапазон (a <= X <= b), обозначается как [a,b]
+    // Открытый промежуток (интервал) - границы не входят (a < X < b), обозначается как (a,b)
+
+    //! Границы строго входят 
+    template<typename MinType, typename MaxType>
+    bool inClosedRange(MinType min_, MaxType max_) const
+    {
+        return tVal>=min_ && tVal<=max_;
+    }
+
+    //! Границы строго входят 
+    template<auto min_, auto max_>
+    bool inClosedRange() const
+    {
+        return tVal>=min_ && tVal<=max_;
+    }
+
+
+    // На самом деле интервал полуоткрытый - закрытый снизу и открытый сверху, но другие варианты нам не нужны
+
+    //! Граница слева входит, справа - нет. Полуоткрытый begin/end
+    template<typename MinType, typename MaxType>
+    bool inOpenRange(MinType min_, MaxType max_) const
+    {
+        return tVal>=min_ && tVal<max_;
+    }
+
+    //! Граница слева входит, справа - нет. Полуоткрытый begin/end
+    template<auto min_, auto max_>
+    bool inOpenRange() const
+    {
+        return tVal>=min_ && tVal<max_;
+    }
+
+
 }; // class TheValue
 
 
