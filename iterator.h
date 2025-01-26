@@ -233,6 +233,11 @@ public:
         textPositionInfoInit(m_positionInfo, fileId);
     }
 
+    void setFileId(TextPositionInfo::file_id_type fileId)
+    {
+        m_positionInfo.fileId = fileId;
+    }
+
 
     template<typename CharT, typename Traits=std::char_traits<CharT>, class Allocator=std::allocator<CharT> >
     explicit TextPositionCountingIterator( typename std::basic_string<CharT, Traits, Allocator>::const_iterator b
