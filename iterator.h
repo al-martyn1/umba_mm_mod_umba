@@ -341,6 +341,8 @@ public:
         return m_pData + m_dataIndex; // Может выходить за пределы m_dataSize, это нормально.
     }
 
+    std::size_t getOffsetFromStart() const { return m_dataIndex; }
+
     // Возвращает длинну символа в CharType'ах
     std::size_t symbolLength() const
     {

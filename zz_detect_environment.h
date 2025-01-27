@@ -841,6 +841,18 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
 #endif
 
 
+#if defined(UMBA_ARCH_X64) || defined(UMBA_ARCH_ARM64) || defined(UMBA_ARCH_IA64)
+    #define UMBA_TARGET_BIT_SIZE    64
+#else
+    #define UMBA_TARGET_BIT_SIZE    32
+#endif
+
+
+
+
+
+
+
 
 // UMBA_PP_NO_*, UMBA_PP_HAS_* - preprocessor feature flags
 // UMBA_CC_ - Plain С feature flags
