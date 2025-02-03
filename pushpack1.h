@@ -2,7 +2,7 @@
     \brief Сохранение текущих настроек и установка упаковки структур по 1
 */
 
-#include "ppstringify.h"
+// #include "ppstringify.h"
 
 // http://www.keil.com/support/man/docs/armcc/armcc_chr1359124990875.htm
 // http://www.keil.com/support/man/docs/armcc/armcc_chr1359124982232.htm
