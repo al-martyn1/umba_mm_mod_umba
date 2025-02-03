@@ -224,6 +224,15 @@ void textPositionInfoInit(TextPositionInfo &tpi, TextPositionInfo::file_id_type 
 }
 
 inline
+TextPositionInfo textPositionInfoInitialized(TextPositionInfo::file_id_type fileId=0u)
+{
+    TextPositionInfo tpi;
+    umba_text_position_info_init(&tpi, fileId);
+    return tpi;
+}
+
+
+inline
 void textPositionInfoInit(TextPositionInfoNoFileId &tpi)
 {
     umba_text_position_info_no_file_id_init(&tpi);
