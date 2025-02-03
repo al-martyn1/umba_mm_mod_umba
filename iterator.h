@@ -342,6 +342,11 @@ protected:
 
 public:
 
+    void setLineNumber(std::size_t lno)
+    {
+        lineNo = std::uint32_t(lno);
+    }
+
     TextPositionInfo getPosition(bool findLineLen=false) const // длина строки не всегда нужна, а только чтобы, например, вывести ошибочную строку при возникновении ошибки
     {
         // Положение в строке мы не вычисляем каждый раз при инкременте итератора, а только тогда, когда у нас запрашивают позиции
