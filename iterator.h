@@ -85,7 +85,7 @@ protected:
     std::size_t         m_dataSize  = 0;
     std::size_t         m_dataIndex = 0;
     std::uint32_t       lineNo      = 0; // номера строк не могут быть больше 4Gb
-    // std::uint32_t       fileId      = 0; // количество файлов не может быть больше 4Gb // А нужно ли витераторе хранить идентификатор файла?
+    std::uint32_t       fileId      = 0; // количество файлов не может быть больше 4Gb // А нужно ли в итераторе хранить идентификатор файла? Нужно
 
     //TextPositionInfo    m_positionInfo;
 
@@ -230,36 +230,45 @@ protected:
 public:
 
     TextPositionCountingIterator() = default;
-    explicit TextPositionCountingIterator(const CharType* pData, std::size_t dataSize /* , std::size_t a_fileId=0u */ )
+
+    explicit TextPositionCountingIterator( const CharType* pData
+                                         , std::size_t dataSize
+                                         , std::size_t a_fileId=std::size_t(-1)
+                                         )
     : m_pData(pData), m_dataSize(dataSize), m_dataIndex(0)
     {
-        // fileId = std::uint32_t(a_fileId);
+        fileId = std::uint32_t(a_fileId);
     }
-
-    // void setFileId(TextPositionInfo::file_id_type a_fileId)
-    // {
-    //     // m_positionInfo.fileId = fileId;
-    //     fileId = std::uint32_t(a_fileId);
-    // }
 
 
     template<typename CharT, typename Traits=std::char_traits<CharT>, class Allocator=std::allocator<CharT> >
     explicit TextPositionCountingIterator( typename std::basic_string<CharT, Traits, Allocator>::const_iterator b
                                          , typename std::basic_string<CharT, Traits, Allocator>::const_iterator e
-                                         // , std::size_t a_fileId = 0u // TextPositionInfo::file_id_type a_fileId=0u
+                                         , std::size_t a_fileId = std::size_t(-1) // TextPositionInfo::file_id_type a_fileId=0u
                                          )
     : m_pData(0), m_dataSize(0), m_dataIndex(0)
     {
         m_pData = &*b;
         m_dataSize = (std::size_t)std::distance(b, e);
         // textPositionInfoInit(m_positionInfo, fileId);
-        // fileId = std::uint32_t(a_fileId);
+        fileId = std::uint32_t(a_fileId);
     }
 
     TextPositionCountingIterator(const TextPositionCountingIterator&) = default;
     TextPositionCountingIterator& operator=(const TextPositionCountingIterator&) = default;
     TextPositionCountingIterator(TextPositionCountingIterator&&) = default;
     TextPositionCountingIterator& operator=(TextPositionCountingIterator&&) = default;
+
+    void setFileId(TextPositionInfo::file_id_type a_fileId)
+    {
+        // m_positionInfo.fileId = fileId;
+        fileId = std::uint32_t(a_fileId);
+    }
+
+    void setLineNumber(std::size_t lineNumber)
+    {
+        lineNo = std::uint32_t(lineNumber);
+    }
 
     #if 0
     difference_type distanceTo(const ThisClass &other) const
@@ -342,11 +351,6 @@ protected:
 
 public:
 
-    void setLineNumber(std::size_t lno)
-    {
-        lineNo = std::uint32_t(lno);
-    }
-
     TextPositionInfo getPosition(bool findLineLen=false) const // длина строки не всегда нужна, а только чтобы, например, вывести ошибочную строку при возникновении ошибки
     {
         // Положение в строке мы не вычисляем каждый раз при инкременте итератора, а только тогда, когда у нас запрашивают позиции
@@ -355,7 +359,7 @@ public:
         resPos.symbolOffset = m_dataIndex - findLineStartFromCurPos();       //!< From line start
         resPos.lineLen      = findLineLen ? (findLineEndFromCurPos() - resPos.lineOffset) : 0u;   //!< From start to first line end symbol or to end of text
         resPos.lineNumber   = std::size_t(lineNo);                           //!< Zero based line number
-        resPos.fileId       = std::size_t(-1); // std::size_t(fileId);
+        resPos.fileId       = std::size_t(fileId); // std::size_t(-1); // std::size_t(fileId);
         return resPos;
     }
 
