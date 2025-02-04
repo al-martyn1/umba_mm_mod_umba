@@ -234,8 +234,9 @@ public:
     explicit TextPositionCountingIterator( const CharType* pData
                                          , std::size_t dataSize
                                          , std::size_t a_fileId=std::size_t(-1)
+                                         , std::size_t pos = 0
                                          )
-    : m_pData(pData), m_dataSize(dataSize), m_dataIndex(0)
+    : m_pData(pData), m_dataSize(dataSize), m_dataIndex(pos)
     {
         fileId = std::uint32_t(a_fileId);
     }
