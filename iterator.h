@@ -325,21 +325,39 @@ public:
 
 protected:
 
+    // const CharType*     m_pData     = 0;
+    // std::size_t         m_dataSize  = 0;
+    // std::size_t         m_dataIndex = 0;
+    // std::uint32_t       lineNo      = 0; // номера строк не могут быть больше 4Gb
+    // std::uint32_t       fileId      = 0; // количество файлов не может быть больше 4Gb // А нужно ли в итераторе хранить идентификатор файла? Нужно
+
     std::size_t findLineStartFromCurPos() const
     {
+        if (!m_dataSize)
+            return 0;
+
         std::size_t idx = m_dataIndex;
+        if (idx && idx>=m_dataSize)
+            --idx;
+
         for(; idx!=0; --idx)
         {
             if (m_pData[idx]=='\r' || m_pData[idx]=='\n')
-                return idx+1;
+                return ((idx+1)>=m_dataSize) ? idx : idx+1;
         }
 
-        return idx;
+        return ((idx)>=m_dataSize) ? idx-1 : idx;
     }
 
     std::size_t findLineEndFromCurPos() const
     {
+        if (!m_dataSize)
+            return 0;
+
         std::size_t idx = m_dataIndex;
+        if (idx && idx>=m_dataSize)
+            --idx;
+
         for(; idx!=m_dataSize; ++idx)
         {
             if (m_pData[idx]=='\r' || m_pData[idx]=='\n')
@@ -355,9 +373,11 @@ public:
     TextPositionInfo getPosition(bool findLineLen=false) const // длина строки не всегда нужна, а только чтобы, например, вывести ошибочную строку при возникновении ошибки
     {
         // Положение в строке мы не вычисляем каждый раз при инкременте итератора, а только тогда, когда у нас запрашивают позиции
+        auto lineStartFromCurPos = findLineStartFromCurPos();
+
         TextPositionInfo resPos; // = m_positionInfo;
-        resPos.lineOffset   = findLineStartFromCurPos();                     //!< From data origin to line start
-        resPos.symbolOffset = m_dataIndex - findLineStartFromCurPos();       //!< From line start
+        resPos.lineOffset   = lineStartFromCurPos;                     //!< From data origin to line start
+        resPos.symbolOffset = m_dataIndex - lineStartFromCurPos;       //!< From line start
         resPos.lineLen      = findLineLen ? (findLineEndFromCurPos() - resPos.lineOffset) : 0u;   //!< From start to first line end symbol or to end of text
         resPos.lineNumber   = std::size_t(lineNo);                           //!< Zero based line number
         resPos.fileId       = std::size_t(fileId); // std::size_t(-1); // std::size_t(fileId);
