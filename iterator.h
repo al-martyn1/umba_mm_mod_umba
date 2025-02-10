@@ -347,9 +347,21 @@ protected:
         if (idx && idx>=m_dataSize)
             --idx;
 
+        // Если мы указываем на символ перевода строки
+        // то мы сейчас в конце строки, и надо откатится назад
+        // CR LF, LF
+        auto ch = m_pData[idx];
+        if (idx && (ch==(CharType)'\r' || ch==(CharType)'\n'))
+        {
+            --idx;  
+            auto ch2 = m_pData[idx];
+            if (idx && ch2==(CharType)'\r' && ch!=ch2)
+                --idx;
+        }
+
         for(; idx!=0; --idx)
         {
-            if (m_pData[idx]=='\r' || m_pData[idx]=='\n')
+            if (m_pData[idx]==(CharType)'\r' || m_pData[idx]==(CharType)'\n')
                 return ((idx+1)>=m_dataSize) ? idx : idx+1;
         }
 
@@ -367,7 +379,7 @@ protected:
 
         for(; idx!=m_dataSize; ++idx)
         {
-            if (m_pData[idx]=='\r' || m_pData[idx]=='\n')
+            if (m_pData[idx]==(CharType)'\r' || m_pData[idx]==(CharType)'\n')
                 return idx;
         }
 
