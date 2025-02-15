@@ -159,12 +159,12 @@
 #elif defined(UMBA_HAS_CRT_ASSERT) 
 
     #define UMBA_ASSERT( expr )                assert(expr)
-    #define UMBA_ASSERT_EX( expr, msg )        UMBA_ASSERT( expr )     
+    #define UMBA_ASSERT_EX( expr, msg )        assert((msg, expr))
 
 #else
 
     #define UMBA_ASSERT( expr )
-    #define UMBA_ASSERT_EX( expr, msg )        UMBA_ASSERT( expr )     
+    #define UMBA_ASSERT_EX( expr, msg )
 
 #endif
 
