@@ -64,16 +64,16 @@
 
 #if defined(UMBA_QT_USED)
 
-    #define UMBA_ASSERT( statement )             Q_ASSERT(statement)
-    #define UMBA_ASSERT_EX( statement, msg )     Q_ASSERT_X(statement, __FILE__ ":" UMBA_STRINGIFY(__LINE__), msg )
+    #define UMBA_ASSERT( expr )             Q_ASSERT(expr)
+    #define UMBA_ASSERT_EX( expr, msg )     Q_ASSERT_X(expr, __FILE__ ":" UMBA_STRINGIFY(__LINE__), msg )
 
 
 #elif defined(UMBA_WIN32_USED) /* Win32 без Qt */
 
     #if defined(UMBA_MSVC_COMPILER_USED)
 
-        #define UMBA_ASSERT( statement )           _ASSERTE(statement)
-        #define UMBA_ASSERT_EX( statement, msg )   _ASSERTE((msg, (statement)))
+        #define UMBA_ASSERT( expr )           _ASSERTE(expr)
+        #define UMBA_ASSERT_EX( expr, msg )   _ASSERTE((msg, (expr)))
 
     #elif defined(UMBA_GCC_COMPILER_USED) /* У GCC (MinGW) внезапно, _ASSERTE ничего не делает, поэтому стырил реализацию из винды, только вместо _CrtDbgReportW которой нет у GCC, подсунул MessageBoxW */
 
@@ -124,18 +124,18 @@
         #endif
 
         #if !defined(NDEBUG)
-            #define UMBA_ASSERT( statement )             UMBA_ASSERTE(statement)
-            #define UMBA_ASSERT_EX( statement, msg )     UMBA_ASSERT_EXPR((statement), UMBA_CRT_WIDE(msg))
+            #define UMBA_ASSERT( expr )             UMBA_ASSERTE(expr)
+            #define UMBA_ASSERT_EX( expr, msg )     UMBA_ASSERT_EXPR((expr), UMBA_CRT_WIDE(msg))
         #else
-            #define UMBA_ASSERT( statement )
-            #define UMBA_ASSERT_EX( statement, msg )
+            #define UMBA_ASSERT( expr )
+            #define UMBA_ASSERT_EX( expr, msg )
         #endif
 
     #else
 
         #pragma message("!!! UMBA_ASSERT not supported by this compiler")
-        #define UMBA_ASSERT( statement )
-        #define UMBA_ASSERT_EX( statement, msg )
+        #define UMBA_ASSERT( expr )
+        #define UMBA_ASSERT_EX( expr, msg )
 
     #endif
 
@@ -144,27 +144,27 @@
     #if defined(UMBA_ARMCC_COMPILER_USED)
 
         // __disable_irq - armcc intrinsic
-        #define UMBA_ASSERT( statement )            do { if(! (statement) ) { __disable_irq(); while(1){ __BKPT(0xAB); if(0) break;} }  } while(0)
-        #define UMBA_ASSERT_EX( statement, msg )    UMBA_ASSERT( statement )     
+        #define UMBA_ASSERT( expr )            do { if(! (expr) ) { __disable_irq(); while(1){ __BKPT(0xAB); if(0) break;} }  } while(0)
+        #define UMBA_ASSERT_EX( expr, msg )    UMBA_ASSERT( expr )     
 
     #else 
 
         // GCC/Clang - пока оставим без ассерта
         /* !!! Сделать как надо UMBA_ASSERT для GCC/Clang */
-        #define UMBA_ASSERT( statement )
-        #define UMBA_ASSERT_EX( statement, msg )    UMBA_ASSERT( statement )     
+        #define UMBA_ASSERT( expr )
+        #define UMBA_ASSERT_EX( expr, msg )    UMBA_ASSERT( expr )     
 
     #endif
 
 #elif defined(UMBA_HAS_CRT_ASSERT) 
 
-    #define UMBA_ASSERT( statement )                assert(statement)
-    #define UMBA_ASSERT_EX( statement, msg )        UMBA_ASSERT( statement )     
+    #define UMBA_ASSERT( expr )                assert(expr)
+    #define UMBA_ASSERT_EX( expr, msg )        UMBA_ASSERT( expr )     
 
 #else
 
-    #define UMBA_ASSERT( statement )
-    #define UMBA_ASSERT_EX( statement, msg )        UMBA_ASSERT( statement )     
+    #define UMBA_ASSERT( expr )
+    #define UMBA_ASSERT_EX( expr, msg )        UMBA_ASSERT( expr )     
 
 #endif
 
