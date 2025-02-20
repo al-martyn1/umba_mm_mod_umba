@@ -73,7 +73,7 @@
     #if defined(UMBA_MSVC_COMPILER_USED)
 
         #define UMBA_ASSERT( expr )           _ASSERTE(expr)
-        #define UMBA_ASSERT_EX( expr, msg )   _ASSERTE((msg, (expr)))
+        #define UMBA_ASSERT_EX( expr, msg )   _ASSERT_EXPR((expr), _CRT_WIDE(msg)) /* То, как реализовано в _ASSERTE - выдаёт варнинг warning C4548: expression before comma has no effect; expected expression with side-effect */
 
     #elif defined(UMBA_GCC_COMPILER_USED) /* У GCC (MinGW) внезапно, _ASSERTE ничего не делает, поэтому стырил реализацию из винды, только вместо _CrtDbgReportW которой нет у GCC, подсунул MessageBoxW */
 
