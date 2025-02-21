@@ -45,7 +45,7 @@ extern umba::SimpleFormatter& getLogMsgStream(int level); // =0
 #define UMBA_LOG_WARN(warnType)            umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts,  */ std::string(warnType) , (const char*)0 , 0     , __FILE__, __LINE__ )
 #define UMBA_LOG_INFO(infoType)            umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string(infoType) , (const char*)0 , 0     , __FILE__, __LINE__ )
                                                                             /*         */
-#define UMBA_LOG_MSG                       umba::log::startLogError( umbaLogStreamMsg, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string()/*"msg"*/, (const char*)0 , 0     , (const char*)0, 0 )
+#define UMBA_LOG_MSG                       umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string()/*"msg"*/, (const char*)0 , 0     , (const char*)0, 0 )
 
 
 
