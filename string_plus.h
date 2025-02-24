@@ -2322,6 +2322,32 @@ bool unquote_if_quoted( StringType &s, const StringType &quotStart, const String
 }
 
 //-----------------------------------------------------------------------------
+enum class SimpleQuotesType
+{
+    notQuoted  = 0,
+    aposQuoted,
+    quoted,
+    dblQuoted = quoted
+};
+
+template<typename StringType> inline
+SimpleQuotesType unquote(StringType &s)
+{
+    using CharType = typename StringType::value_type;
+    if (unquote(s, CharType('\"'), CharType('\"')))
+        return SimpleQuotesType::dblQuoted;
+    if (unquote(s, CharType('\''), CharType('\'')))
+        return SimpleQuotesType::aposQuoted;
+
+    return SimpleQuotesType::notQuoted;
+}
+
+// bool is_quoted( const StringType &s                        //!< Строка для проверки
+//               , typename StringType::value_type quotStart    //!< Открывающая кавычка
+//               , typename StringType::value_type quotEnd = 0  //!< Закрывающая кавычка, если 0 - то срабатывает автоопределение обоих кавычек (используются парные символы по открывающией кавычке)
+//               )
+
+//-----------------------------------------------------------------------------
 //! Закавычивает строку
 template<typename StringType> inline
 StringType quote( const typename StringType::value_type *str                                         //!< Строка для закавычивания
