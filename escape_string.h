@@ -6,6 +6,7 @@
 
 
 //----------------------------------------------------------------------------
+// umba::
 namespace umba {
 
 
@@ -26,12 +27,30 @@ OutputIterator appendOctalEscapeSequence(OutputIterator outIt, unsigned uch)
     char buf[4] = { 0 };
     for(auto i=0u; i!=3; ++i)
     {
-        buf[i] = '0'+(char)(uch%8);
-        uch /= 8;
+        buf[i] = '0'+(char)(uch&0x07);
+        uch >>= 3;
     }
 
     std::swap(buf[0], buf[2]);
     *outIt++ = (CharType)'\\';
+    return appendToOutputEscapeHelper<CharType>(outIt, &buf[0]);
+}
+
+//----------------------------------------------------------------------------
+template<typename CharType, typename OutputIterator> inline
+OutputIterator appendHexEscapeSequence(OutputIterator outIt, unsigned uch)
+{
+    char buf[4] = { 0 };
+    for(auto i=0u; i!=2; ++i)
+    {
+        auto d = uch&0xF;
+        buf[i] = d < 10 ? ('0'+(char)(d)) : ('A'+(char)(d-10));
+        uch >>= 4;
+    }
+
+    std::swap(buf[0], buf[1]);
+    *outIt++ = (CharType)'\\';
+    *outIt++ = (CharType)'x';
     return appendToOutputEscapeHelper<CharType>(outIt, &buf[0]);
 }
 
@@ -65,7 +84,8 @@ OutputIterator escapeStringC(OutputIterator outIt, InputIterator b, InputIterato
                 if (ch>=(CharType)' ')
                     *outIt++ = ch;
                 else
-                    outIt = appendOctalEscapeSequence<CharType>(outIt, (unsigned)ch);
+                    outIt = appendHexEscapeSequence<CharType>(outIt, (unsigned)ch);
+                    //outIt = appendOctalEscapeSequence<CharType>(outIt, (unsigned)ch);
         }
     }
 

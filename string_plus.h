@@ -11,7 +11,8 @@
 
 #include "alloca.h"
 #include "exception.h"
-
+#include "debug_helpers.h"
+//
 #include <algorithm>
 #include <cctype>
 #include <exception>
@@ -952,7 +953,7 @@ StringType merge( Iter b, Iter e, const wchar_t *delim, const ToStringObj &strin
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, char delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, char delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -971,7 +972,7 @@ std::string merge( const std::vector<ItemType> &tokens, char delim, const ToStri
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const char *delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const char *delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -990,7 +991,7 @@ std::string merge( const std::vector<ItemType> &tokens, const char *delim, const
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const std::string &delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const std::string &delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1009,7 +1010,7 @@ std::string merge( const std::vector<ItemType> &tokens, const std::string &delim
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1028,7 +1029,7 @@ std::string merge( const std::vector<ItemType> &tokens, wchar_t delim, const ToS
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const wchar_t *delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const wchar_t *delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1047,7 +1048,7 @@ std::string merge( const std::vector<ItemType> &tokens, const wchar_t *delim, co
     \return Результат слияния строковых представлений объектов
  */
 template<typename StringType, typename ItemType, typename ToStringObj> inline
-std::string merge( const std::vector<ItemType> &tokens, const std::wstring &delim, const ToStringObj &stringifier )
+StringType merge( const std::vector<ItemType> &tokens, const std::wstring &delim, const ToStringObj &stringifier )
 {
     return merge<StringType>( tokens.begin(), tokens.end(), delim, stringifier );
 }
@@ -1460,10 +1461,21 @@ void build_pairs( const typename StringType::value_type *braces, StringType *pLe
         CharType b = *braces;
 
         if (is_left(b)==is_right(b))
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("umba::cpp::ascii_brace::build_pairs (1): paired brace can't be left and right at the same time");
+        }
 
         if (!is_paired(b))
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("umba::cpp::ascii_brace::build_pairs (2): can't build pair for non-paired brace");
+        }
+
 
         bool isLeft = is_left(b);
 
@@ -1699,6 +1711,9 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
             //bracesStack.push_back(ch);
             if (bracesStack.empty())
             {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw umba::FileParsingException("Found closing brace, but there is no opening brace found before", fileName, lineNumber, linePos);
             }
 
@@ -1707,6 +1722,9 @@ void split_against_braces_helper( std::vector< std::pair< typename StringType::s
 
             if (get_pair(openingBrace)!=ch)
             {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw umba::FileParsingException("Opening brace doesn't match closing brace", fileName, lineNumber, linePos);
             }
         }
@@ -2302,6 +2320,32 @@ bool unquote_if_quoted( StringType &s, const StringType &quotStart, const String
 {
     return unquote( s, quotStart, quotEnd );
 }
+
+//-----------------------------------------------------------------------------
+enum class SimpleQuotesType
+{
+    notQuoted  = 0,
+    aposQuoted,
+    quoted,
+    dblQuoted = quoted
+};
+
+template<typename StringType> inline
+SimpleQuotesType unquote(StringType &s)
+{
+    using CharType = typename StringType::value_type;
+    if (unquote(s, CharType('\"'), CharType('\"')))
+        return SimpleQuotesType::dblQuoted;
+    if (unquote(s, CharType('\''), CharType('\'')))
+        return SimpleQuotesType::aposQuoted;
+
+    return SimpleQuotesType::notQuoted;
+}
+
+// bool is_quoted( const StringType &s                        //!< Строка для проверки
+//               , typename StringType::value_type quotStart    //!< Открывающая кавычка
+//               , typename StringType::value_type quotEnd = 0  //!< Закрывающая кавычка, если 0 - то срабатывает автоопределение обоих кавычек (используются парные символы по открывающией кавычке)
+//               )
 
 //-----------------------------------------------------------------------------
 //! Закавычивает строку

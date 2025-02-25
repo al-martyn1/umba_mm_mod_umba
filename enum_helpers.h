@@ -570,7 +570,7 @@ const char* toNormalEnumNameCase( const char* s )
 inline
 bool isStringsEqual( const char* s1, const char* s2 )
 {
-    return std::strcmp(s1,s2);
+    return std::strcmp(s1,s2)==0;
 }
 
 //! Возвращает главное строковое представление для перечисления из строки со всеми вариантами. Оно используется для сериализации.

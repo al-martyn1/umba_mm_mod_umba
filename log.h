@@ -1,14 +1,17 @@
 /*! \file
-    \brief Хелперы для утилит командной строки (CLI)
+    \brief Вывод в лог (на консоль), хелперы
 */
+
+#pragma once
 
 
 #if !defined(UMBA_SIMPLE_FORMATTER_H)
-    #error "umba/cli_log.h requires umba/simple_formatter.h to be included first"
+    #error "umba/log.h requires umba/simple_formatter.h to be included first"
 #endif
 
 #include <string>
 #include <unordered_map>
+#include <cstdint>
 
 
 // requires global vars
@@ -20,7 +23,7 @@ extern umba::SimpleFormatter  umbaLogStreamMsg;
 extern umba::SimpleFormatter  umbaLogStreamNul;
 
 //! Возвращает umbaLogStreamMsg/umbaLogStreamNul в зависимости от запрошенного уровня (level) verbosity и текущих настроек программы. В простейшем случае просто проверяется флаг quet
-extern umba::SimpleFormatter& getLogMsgStream(int level=0);
+extern umba::SimpleFormatter& getLogMsgStream(int level); // =0
 
 // Если надо будет протоколировать в какой-то отдельный поток вывода в каком-то скопе,
 // то там надо будет как-то извращаться. Но пока это обычно для утилит командной строки,
@@ -28,7 +31,10 @@ extern umba::SimpleFormatter& getLogMsgStream(int level=0);
 
 
 // source parsing errors
-// requires std::stringr curFile, unsigned lineNo in log scope
+// requires 
+//   std::string curFile
+//   unsigned lineNo
+// in log scope
 #define UMBA_LOG_ERR_INPUT                 umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string()/*"err"*/, curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_ERR_INPUT_EX(errType)     umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::err ,  /* gopts, */  std::string(errType)  , curFile.c_str(), lineNo, __FILE__, __LINE__ )
 #define UMBA_LOG_WARN_INPUT(warnType)      umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts, */  std::string(warnType) , curFile.c_str(), lineNo, __FILE__, __LINE__ )
@@ -39,7 +45,7 @@ extern umba::SimpleFormatter& getLogMsgStream(int level=0);
 #define UMBA_LOG_WARN(warnType)            umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::warn,  /* gopts,  */ std::string(warnType) , (const char*)0 , 0     , __FILE__, __LINE__ )
 #define UMBA_LOG_INFO(infoType)            umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string(infoType) , (const char*)0 , 0     , __FILE__, __LINE__ )
                                                                             /*         */
-#define UMBA_LOG_MSG                       umba::log::startLogError( umbaLogStreamMsg, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string()/*"msg"*/, (const char*)0 , 0     , (const char*)0, 0 )
+#define UMBA_LOG_MSG                       umba::log::startLogError( umbaLogStreamErr, umba::log::LogEntryType::msg ,  /* gopts,  */ std::string()/*"msg"*/, (const char*)0 , 0     , (const char*)0, 0 )
 
 
 
@@ -99,7 +105,7 @@ bool addRemoveLogOptionsImpl( std::unordered_map<std::string, bool>& optDisabled
 
         if (opt=="all")
         {
-            for(const auto optFromAll: allOpts)
+            for(const auto &optFromAll: allOpts)
             {
                 optDisabledMap[optFromAll] = bRemove;
             }
@@ -218,8 +224,8 @@ umba::SimpleFormatter& startLogError( umba::SimpleFormatter     &s
                                     , LogEntryType              logEntryType
                                     // , const GeneratorOptions &gopts
                                     , const std::string         &warnType
-                                    , const char* inputFile   , unsigned inputLineNo
-                                    , const char* srcFile = 0 , unsigned srcLineNo = 0
+                                    , const char* inputFile   , std::size_t inputLineNo
+                                    , const char* srcFile = 0 , int srcLineNo = 0 /* Компилятор генерит int конствнту при использовании __LINE__ */
                                     )
 {
     if ( (logEntryType==LogEntryType::warn && isWarningDisabled(warnType))

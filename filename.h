@@ -347,6 +347,21 @@ std::vector< StringType > splitPathList( const StringType &pl, typename StringTy
     //return umba::string_plus::split( pl, pathListSep, true /* skipEmpty */ );
 }
 
+//-----------------------------------------------------------------------------
+//!
+template<typename StringType> inline
+StringType mergePathList( const std::vector< StringType > &plParts, typename StringType::value_type pathListSep = getNativePathListSep<typename StringType::value_type>())
+{
+    using pp_type      = std::vector< StringType >;
+    using pp_item_cptr = typename pp_type::const_iterator;
+
+    auto stringifier = [](const StringType&v) { return v; };
+    return umba::string_plus::merge< StringType, pp_item_cptr, decltype(stringifier) >
+                                   ( plParts.begin(), plParts.end(), pathListSep, stringifier )
+                                   ;
+}
+
+
 /*
 template<typename StringType> inline
 std::vector< StringType > getKeepCasePaths()
@@ -367,7 +382,8 @@ std::vector< StringType > getKeepCasePaths()
 //-----------------------------------------------------------------------------
 // Выделяем код обрезания различных спец префиксов в отдельные функции
 
-//! Отрезаем спец префиксы, нничего не трогая в имени, даже разделители путей
+#include "umba/warnings/push_disable_spectre_mitigation.h"
+//! Отрезаем спец префиксы, ничего не трогая в имени, даже разделители путей
 template<typename StringType> inline
 NativePrefixFlagsInfo stripNativePrefixes(StringType &fileName, typename StringType::value_type pathSep)
 {
@@ -410,6 +426,7 @@ NativePrefixFlagsInfo stripNativePrefixes(StringType &fileName, typename StringT
 
     return npfi;
 }
+#include "umba/warnings/pop.h"
 
 // Добавляет нативные префиксы
 template<typename StringType> inline
@@ -685,6 +702,7 @@ StringType makeCanonicalForCompare( StringType                      fileName
 }
 
 //-----------------------------------------------------------------------------
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 //! Возвращает true,  если путь абсолютный
 template<typename StringType> inline
 bool isAbsPath( StringType p, typename StringType::value_type pathSep = getNativePathSep<typename StringType::value_type>() )
@@ -710,7 +728,7 @@ bool isAbsPath( StringType p, typename StringType::value_type pathSep = getNativ
 
     return false;
 }
-
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 //! Подготавливает имя для "нативного" использования - для передачи имени в системные API

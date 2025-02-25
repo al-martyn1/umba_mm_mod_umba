@@ -11,9 +11,12 @@
 
 #include "string_plus.h"
 #include "utf.h"
-
+#include "debug_helpers.h"
+//
 #include <string>
 #include <algorithm>
+#include <exception>
+#include <stdexcept>
 
 // umba::text_utils::
 namespace umba{
@@ -196,6 +199,7 @@ struct StringsGreaterFirstBySize
 };
 
 //-----------------------------------------------------------------------------
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 //! Расширяет строку до заданной длины, вставляя дополнительные пробелы
 inline
 std::string expandStringWidth( std::string str, std::string::size_type width )
@@ -217,6 +221,7 @@ std::string expandStringWidth( std::string str, std::string::size_type width )
 
     return str;
 }
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 //! Расширяет строку до заданной длины, вставляя дополнительные пробелы
@@ -263,6 +268,7 @@ struct SymbolLenCalculatorEncodingSingleByte
 };
 
 //-----------------------------------------------------------------------------
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 //! Вычисляет длину строки в символах
 template<typename SymbolLenCalculator> inline
 std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symbolLenCalculator)
@@ -278,6 +284,13 @@ std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symb
         //auto uch = (utf8_char_t)str[curPos];
         //auto symbolNumBytes = getNumberOfCharsUtf8(uch);
         auto symbolNumBytes = symbolLenCalculator(&str[curPos]);
+        if (symbolNumBytes==0)
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
+            throw std::runtime_error("Invalid symbol lenght: not a UTF-8 string?");
+        }
 
         std::size_t nextPos = curPos + symbolNumBytes;
 
@@ -290,8 +303,8 @@ std::size_t getStringLen(const std::string &str, const SymbolLenCalculator &symb
     }
 
     return numSymbols;
-
 }
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 //! Форматирует абзац (параграф). На входе - строка текста абзаца, на выходе - разбито на строки, и строки выровнены с учетом textAlignment
@@ -367,12 +380,16 @@ template<typename SymbolLenCalculator> inline
 std::string prepareTextParaMakeString( const std::string &para, std::string::size_type paraWidth
                                      , TextAlignment textAlignment // = TextAlignment::width
                                      , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                                     , bool bAppendMissingComma=true
                                      )
 {
     std::vector<std::string> v = prepareTextParaMakeLines( para, paraWidth, textAlignment, symbolLenCalculator );
     auto res = umba::string_plus::merge( v, '\n'); // umba::string_plus::merge
-    if (!res.empty() && res.back()!='.' && res.back()!='!' && res.back()!='?' && res.back()!=':' && res.back()!=';')
-        res.push_back('.');
+    if (bAppendMissingComma)
+    {
+        if (!res.empty() && res.back()!='.' && res.back()!='!' && res.back()!='?' && res.back()!=':' && res.back()!=';')
+            res.push_back('.');
+    }
     return res;
 }
 
@@ -391,6 +408,7 @@ template<typename SymbolLenCalculator> inline
 std::string formatTextParas( std::string text, std::string::size_type paraWidth
                            , TextAlignment textAlignment // = TextAlignment::width
                            , const SymbolLenCalculator &symbolLenCalculator // = SymbolLenCalculatorEncodingSingleByte()
+                           , bool bAppendMissingComma=true
                            )
 {
     std::vector<std::string> paras = umba::string_plus::split(text, '\n', true /* skipEmpty */);
@@ -412,7 +430,7 @@ std::string formatTextParas( std::string text, std::string::size_type paraWidth
         {
             if (!text.empty())
                 text.append("\n\n");
-            text.append(prepareTextParaMakeString(p, paraWidth, textAlignment, symbolLenCalculator));
+            text.append(prepareTextParaMakeString(p, paraWidth, textAlignment, symbolLenCalculator, bAppendMissingComma));
         }
     }
 
@@ -425,9 +443,10 @@ std::string formatTextParas( std::string text, std::string::size_type paraWidth
 inline
 std::string formatTextParas( std::string text, std::string::size_type paraWidth
                            , TextAlignment textAlignment // = TextAlignment::width
+                           , bool bAppendMissingComma=true
                            )
 {
-    return formatTextParas<SymbolLenCalculatorEncodingSingleByte>(text, paraWidth, textAlignment, SymbolLenCalculatorEncodingSingleByte());
+    return formatTextParas<SymbolLenCalculatorEncodingSingleByte>(text, paraWidth, textAlignment, SymbolLenCalculatorEncodingSingleByte(), bAppendMissingComma);
 }
 
 //-----------------------------------------------------------------------------

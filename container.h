@@ -7,6 +7,7 @@
 
 //-----------------------------------------------------------------------------
 
+#include "debug_helpers.h"
 
 #if defined(UMBA_USE_BOOST)
 
@@ -74,42 +75,45 @@ template <class T, std::size_t N, class Allocator BOOST_CONTAINER_DOCONLY(= void
 using small_vector = boost::container::small_vector<T, N, Allocator, Options>;
 
 
+#if 0
 
-// BOOST_INTRUSIVE_OPTION_TYPE(growth_factor, GrowthFactor, GrowthFactor, growth_factor_type)
+BOOST_INTRUSIVE_OPTION_TYPE(growth_factor, GrowthFactor, GrowthFactor, growth_factor_type)
 
-// #define BOOST_INTRUSIVE_OPTION_TYPE(OPTION_NAME, TYPE, TYPEDEF_EXPR, TYPEDEF_NAME) \
-// template< class TYPE> \
-// struct OPTION_NAME \
-// { \
-//    template<class Base> \
-//    struct pack : Base \
-//    { \
-//       typedef TYPEDEF_EXPR TYPEDEF_NAME; \
-//    }; \
-// }; \
-//
-//
-//    typedef static_vector_opt< packed_options::throw_on_overflow
-//                             , packed_options::inplace_alignment> implementation_defined;
-//
-// BOOST_INTRUSIVE_OPTION_CONSTANT(throw_on_overflow, bool, ThrowOnOverflow, throw_on_overflow)
-// BOOST_INTRUSIVE_OPTION_CONSTANT(inplace_alignment, std::size_t, Alignment, inplace_alignment)
-//
-//
-// #define BOOST_INTRUSIVE_OPTION_CONSTANT(OPTION_NAME, TYPE, VALUE, CONSTANT_NAME) \
-// template< TYPE VALUE> \
-// struct OPTION_NAME \
-// { \
-//    static const TYPE value = VALUE; \
-//  \
-//    template<class Base> \
-//    struct pack : Base \
-//    { \
-//       static const TYPE CONSTANT_NAME = VALUE; \
-//    }; \
-// }; \
-//
-//
+#define BOOST_INTRUSIVE_OPTION_TYPE(OPTION_NAME, TYPE, TYPEDEF_EXPR, TYPEDEF_NAME) \
+template< class TYPE> \
+struct OPTION_NAME \
+{ \
+   template<class Base> \
+   struct pack : Base \
+   { \
+      typedef TYPEDEF_EXPR TYPEDEF_NAME; \
+   }; \
+}; \
+
+
+   typedef static_vector_opt< packed_options::throw_on_overflow
+                            , packed_options::inplace_alignment> implementation_defined;
+
+BOOST_INTRUSIVE_OPTION_CONSTANT(throw_on_overflow, bool, ThrowOnOverflow, throw_on_overflow)
+BOOST_INTRUSIVE_OPTION_CONSTANT(inplace_alignment, std::size_t, Alignment, inplace_alignment)
+
+
+#define BOOST_INTRUSIVE_OPTION_CONSTANT(OPTION_NAME, TYPE, VALUE, CONSTANT_NAME) \
+template< TYPE VALUE> \
+struct OPTION_NAME \
+{ \
+   static const TYPE value = VALUE; \
+ \
+   template<class Base> \
+   struct pack : Base \
+   { \
+      static const TYPE CONSTANT_NAME = VALUE; \
+   }; \
+}; \
+
+
+
+#endif
 
 #endif // UMBA_USE_BOOST
 

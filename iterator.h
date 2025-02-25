@@ -30,17 +30,17 @@ namespace iterator {
 template<typename CharType=char, bool UtfIterator=true>
 class TextPositionCountingIterator;
 
-template<typename CharT, typename Traits=std::char_traits<CharT>, bool UtfIterator=true >
-std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
-
-template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
-std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
-
-template<typename CharT, typename Traits=std::char_traits<CharT>, bool UtfIterator=true >
-std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &it);
-
-template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
-std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &it);
+// template<typename CharT, typename Traits=std::char_traits<CharT>, bool UtfIterator=true >
+// std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
+//  
+// template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
+// std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e);
+//  
+// template<typename CharT, typename Traits=std::char_traits<CharT>, bool UtfIterator=true >
+// std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &it);
+//  
+// template<typename CharT, typename Traits=std::char_traits<CharT>, typename Allocator=std::allocator<CharT>, bool UtfIterator=true >
+// std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &it);
 
 //----------------------------------------------------------------------------
 
@@ -84,41 +84,41 @@ protected:
     const CharType*     m_pData     = 0;
     std::size_t         m_dataSize  = 0;
     std::size_t         m_dataIndex = 0;
+    std::uint32_t       lineNo      = 0; // номера строк не могут быть больше 4Gb
+    std::uint32_t       fileId      = 0; // количество файлов не может быть больше 4Gb // А нужно ли в итераторе хранить идентификатор файла? Нужно
 
-    TextPositionInfo    m_positionInfo;
-
-
-    template<typename CharT, typename Traits, bool UtfIteratorT >
-    friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
-
-    template<typename CharT, typename Traits, typename Allocator, bool UtfIteratorT >
-    friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
-
-    template<typename CharT, typename Traits, bool UtfIteratorT>
-    friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
-    
-    template<typename CharT, typename Traits, typename Allocator, bool UtfIteratorT>
-    friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
+    //TextPositionInfo    m_positionInfo;
 
 
-    const_pointer getRawValueTypePointer() const
-    {
-        UMBA_ASSERT(!isEndIterator());
-        return m_pData + m_dataIndex; // Может выходить за пределы m_dataSize, это нормально.
-    }
+    // template<typename CharT, typename Traits, bool UtfIteratorT >
+    // friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
+    //  
+    // template<typename CharT, typename Traits, typename Allocator, bool UtfIteratorT >
+    // friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &b, const TextPositionCountingIterator<CharT,UtfIteratorT> &e);
+    //  
+    // template<typename CharT, typename Traits, bool UtfIteratorT>
+    // friend std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
+    //  
+    // template<typename CharT, typename Traits, typename Allocator, bool UtfIteratorT>
+    // friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
+
 
     operator const_pointer() const
     {
         return getRawValueTypePointer();
     }
 
-    //!< Допустим, мы что-то парсим, и построчно сохраняем контекст парсинга, для того, чтобы можно был при изменении входных данных парсить только то, что изменилось (после точки/строки изменнения). При этом входной контейнер мог увеличиться и переаллоцироваться, и указатель в итераторе протухает. Надо сделать rebase
+    //! Допустим, мы что-то парсим, и построчно сохраняем контекст парсинга, для того, чтобы можно был при изменении входных 
+    // данных парсить только то, что изменилось (после точки/строки изменнения). При этом входной контейнер мог увеличиться 
+    // и переаллоцироваться, и указатель в итераторе протухает. Надо сделать rebase
     void rebase(const CharType* pData)
     {
         UMBA_ASSERT(!isEndIterator());
         m_pData = pData;
     }
 
+
+public:
 
     bool isEndReached(std::size_t idx) const
     {
@@ -134,6 +134,9 @@ protected:
     {
         return m_pData==0;
     }
+
+
+protected:
 
     bool isBothEndIterators(const ThisClass &other) const
     {
@@ -190,9 +193,10 @@ protected:
                     ++m_dataIndex; // Пропускаем LF, который идёт за CR
             }
 
-            m_positionInfo.lineOffset   = m_dataIndex;
-            m_positionInfo.symbolOffset = 0;
-            ++m_positionInfo.lineNumber;
+            // m_positionInfo.lineOffset   = m_dataIndex;
+            // m_positionInfo.symbolOffset = 0;
+            // ++m_positionInfo.lineNumber;
+            ++lineNo;
             return;
         }
 
@@ -217,31 +221,6 @@ protected:
         }
     }
 
-    // Возвращает длинну символа в CharType'ах
-    std::size_t symbolLength() const
-    {
-        UMBA_ASSERT(!isEndIterator() && !isEndReached());
-
-        char ch = m_pData[m_dataIndex];
-        std::size_t numChars = getNumberOfCharsUtf(ch);
-        if (!numChars)
-             numChars = 1;
-
-        std::size_t i = 0;
-
-        for(; i!=numChars && !isEndReached(m_dataIndex+i); ++i)
-        {
-            if (!i)
-                continue;
-
-            ch = m_pData[m_dataIndex+i];
-            if (!isNextCharUtf(ch))
-                break;
-        }
-
-        return i;
-    }
-
     std::size_t findNearestLinefeedIndex() const
     {
         for(std::size_t i=m_dataIndex; i!=m_dataSize; ++i)
@@ -258,29 +237,46 @@ protected:
 public:
 
     TextPositionCountingIterator() = default;
-    explicit TextPositionCountingIterator(const CharType* pData, std::size_t dataSize, TextPositionInfo::file_id_type fileId=0u)
-    : m_pData(pData), m_dataSize(dataSize), m_dataIndex(0)
+
+    explicit TextPositionCountingIterator( const CharType* pData
+                                         , std::size_t dataSize
+                                         , std::size_t a_fileId=std::size_t(-1)
+                                         , std::size_t pos = 0
+                                         )
+    : m_pData(pData), m_dataSize(dataSize), m_dataIndex(pos)
     {
-        textPositionInfoInit(m_positionInfo, fileId);
+        fileId = std::uint32_t(a_fileId);
     }
 
 
     template<typename CharT, typename Traits=std::char_traits<CharT>, class Allocator=std::allocator<CharT> >
     explicit TextPositionCountingIterator( typename std::basic_string<CharT, Traits, Allocator>::const_iterator b
                                          , typename std::basic_string<CharT, Traits, Allocator>::const_iterator e
-                                         , TextPositionInfo::file_id_type fileId=0u
+                                         , std::size_t a_fileId = std::size_t(-1) // TextPositionInfo::file_id_type a_fileId=0u
                                          )
     : m_pData(0), m_dataSize(0), m_dataIndex(0)
     {
         m_pData = &*b;
         m_dataSize = (std::size_t)std::distance(b, e);
-        textPositionInfoInit(m_positionInfo, fileId);
+        // textPositionInfoInit(m_positionInfo, fileId);
+        fileId = std::uint32_t(a_fileId);
     }
 
     TextPositionCountingIterator(const TextPositionCountingIterator&) = default;
     TextPositionCountingIterator& operator=(const TextPositionCountingIterator&) = default;
     TextPositionCountingIterator(TextPositionCountingIterator&&) = default;
     TextPositionCountingIterator& operator=(TextPositionCountingIterator&&) = default;
+
+    void setFileId(TextPositionInfo::file_id_type a_fileId)
+    {
+        // m_positionInfo.fileId = fileId;
+        fileId = std::uint32_t(a_fileId);
+    }
+
+    void setLineNumber(std::size_t lineNumber)
+    {
+        lineNo = std::uint32_t(lineNumber);
+    }
 
     #if 0
     difference_type distanceTo(const ThisClass &other) const
@@ -304,8 +300,6 @@ public:
     // auto pe   = e.getRawValueTypePointer();
     // auto dist = (std::size_t)std::distance(pb, pe);
     // return std::basic_string_view<CharT, Traits>(pb, dist);
-
-
 
     CharType operator*() const
     {
@@ -336,21 +330,84 @@ public:
         return res;
     }
 
+protected:
 
+    // const CharType*     m_pData     = 0;
+    // std::size_t         m_dataSize  = 0;
+    // std::size_t         m_dataIndex = 0;
+    // std::uint32_t       lineNo      = 0; // номера строк не могут быть больше 4Gb
+    // std::uint32_t       fileId      = 0; // количество файлов не может быть больше 4Gb // А нужно ли в итераторе хранить идентификатор файла? Нужно
+
+    std::size_t findLineStartFromCurPos() const
+    {
+        if (!m_dataSize)
+            return 0;
+
+        std::size_t idx = m_dataIndex;
+        if (idx && idx>=m_dataSize)
+            --idx;
+
+        // Если мы указываем на символ перевода строки
+        // то мы сейчас в конце строки, и надо откатится назад
+        // CR LF, LF
+        auto ch = m_pData[idx];
+        if (idx && (ch==(CharType)'\r' || ch==(CharType)'\n'))
+        {
+            --idx;  
+            auto ch2 = m_pData[idx];
+            if (idx && ch2==(CharType)'\r' && ch!=ch2)
+                --idx;
+        }
+
+        for(; idx!=0; --idx)
+        {
+            if (m_pData[idx]==(CharType)'\r' || m_pData[idx]==(CharType)'\n')
+                return ((idx+1)>=m_dataSize) ? idx : idx+1;
+        }
+
+        return ((idx)>=m_dataSize) ? idx-1 : idx;
+    }
+
+    std::size_t findLineEndFromCurPos() const
+    {
+        if (!m_dataSize)
+            return 0;
+
+        std::size_t idx = m_dataIndex;
+        if (idx && idx>=m_dataSize)
+            --idx;
+
+        for(; idx!=m_dataSize; ++idx)
+        {
+            if (m_pData[idx]==(CharType)'\r' || m_pData[idx]==(CharType)'\n')
+                return idx;
+        }
+
+        return idx;
+    }
+
+
+public:
 
     TextPositionInfo getPosition(bool findLineLen=false) const // длина строки не всегда нужна, а только чтобы, например, вывести ошибочную строку при возникновении ошибки
     {
         // Положение в строке мы не вычисляем каждый раз при инкременте итератора, а только тогда, когда у нас запрашивают позиции
-        TextPositionInfo resPos = m_positionInfo;
-        resPos.symbolOffset = (TextPositionInfo::symbol_offset_type)(m_dataIndex - m_positionInfo.lineOffset);
-        resPos.lineLen      = findLineLen ? (TextPositionInfo::symbol_offset_type)(findNearestLinefeedIndex() - m_positionInfo.lineOffset) : 0;
+        auto lineStartFromCurPos = findLineStartFromCurPos();
+
+        TextPositionInfo resPos; // = m_positionInfo;
+        resPos.lineOffset   = lineStartFromCurPos;                     //!< From data origin to line start
+        resPos.symbolOffset = m_dataIndex - lineStartFromCurPos;       //!< From line start
+        resPos.lineLen      = findLineLen ? (findLineEndFromCurPos() - resPos.lineOffset) : 0u;   //!< From start to first line end symbol or to end of text
+        resPos.lineNumber   = std::size_t(lineNo);                           //!< Zero based line number
+        resPos.fileId       = std::size_t(fileId); // std::size_t(-1); // std::size_t(fileId);
         return resPos;
     }
 
     TextPositionCountingIterator getLineStartIterator() const
     {
         TextPositionCountingIterator res = *this;
-        res.m_dataIndex = m_positionInfo.lineOffset; // перемотали на начало строки
+        // res.m_dataIndex = m_positionInfo.lineOffset; // перемотали на начало строки
+        res.m_dataIndex = findLineStartFromCurPos();
         return res;
     }
 
@@ -360,6 +417,42 @@ public:
         res.m_dataIndex = res.findNearestLinefeedIndex(); // перемотали на конец строки
         return res;
     }
+
+    const_pointer getRawValueTypePointer() const
+    {
+        //UMBA_ASSERT(!isEndIterator());
+        if (isEndIterator())
+            return 0;
+        return m_pData + m_dataIndex; // Может выходить за пределы m_dataSize, это нормально.
+    }
+
+    std::size_t getOffsetFromStart() const { return m_dataIndex; }
+
+    // Возвращает длинну символа в CharType'ах
+    std::size_t symbolLength() const
+    {
+        UMBA_ASSERT(!isEndIterator() && !isEndReached());
+
+        char ch = m_pData[m_dataIndex];
+        std::size_t numChars = getNumberOfCharsUtf(ch);
+        if (!numChars)
+             numChars = 1;
+
+        std::size_t i = 0;
+
+        for(; i!=numChars && !isEndReached(m_dataIndex+i); ++i)
+        {
+            if (!i)
+                continue;
+
+            ch = m_pData[m_dataIndex+i];
+            if (!isNextCharUtf(ch))
+                break;
+        }
+
+        return i;
+    }
+
 
 }; // class TextPositionCountingIterator
 
@@ -410,10 +503,11 @@ TextPositionCountingIterator<CharType>& operator+=( TextPositionCountingIterator
 
 
 //----------------------------------------------------------------------------
-template<typename CharT, typename Traits, bool UtfIterator>
+template<typename CharT, bool UtfIterator, typename Traits = std::char_traits<CharT>>
 std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e)
 {
-    if (b.isBothEndIterators(e))
+    auto pRawCharsPtr = b.getRawValueTypePointer();
+    if (!pRawCharsPtr)
         return std::basic_string_view<CharT, Traits>();
 
     std::size_t distanceCharT = 0;
@@ -422,13 +516,14 @@ std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingI
         distanceCharT += i.symbolLength();
     }
 
-    return std::basic_string_view<CharT, Traits>(b.getRawValueTypePointer(), distanceCharT);
+    return std::basic_string_view<CharT, Traits>(pRawCharsPtr, distanceCharT);
 }
 
-template<typename CharT, typename Traits, typename Allocator, bool UtfIterator>
+template<typename CharT, bool UtfIterator, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
 std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &b, const TextPositionCountingIterator<CharT,UtfIterator> &e)
 {
-    if (b.isBothEndIterators(e))
+    auto pRawCharsPtr = b.getRawValueTypePointer();
+    if (!pRawCharsPtr)
         return std::basic_string<CharT, Traits, Allocator>();
 
     std::size_t distanceCharT = 0;
@@ -437,25 +532,27 @@ std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountin
         distanceCharT += i.symbolLength();
     }
 
-    return std::basic_string<CharT, Traits, Allocator>(b.getRawValueTypePointer(), distanceCharT);
+    return std::basic_string<CharT, Traits, Allocator>(pRawCharsPtr, distanceCharT);
 }
 
-template<typename CharT, typename Traits, bool UtfIterator>
+template<typename CharT, bool UtfIterator, typename Traits = std::char_traits<CharT>>
 std::basic_string_view<CharT, Traits> makeStringView(const TextPositionCountingIterator<CharT,UtfIterator> &it)
 {
-    if (it.isEndIterator())
+    auto pRawCharsPtr = it.getRawValueTypePointer();
+    if (!pRawCharsPtr)
         return std::basic_string_view<CharT, Traits>();
 
-    return std::basic_string_view<CharT, Traits>(it.getRawValueTypePointer(), it.symbolLength());
+    return std::basic_string_view<CharT, Traits>(pRawCharsPtr, it.symbolLength());
 }
 
-template<typename CharT, typename Traits, typename Allocator, bool UtfIterator>
+template<typename CharT, bool UtfIterator, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
 std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIterator> &it)
 {
-    if (it.isEndIterator())
+    auto pRawCharsPtr = it.getRawValueTypePointer();
+    if (!pRawCharsPtr)
         return std::basic_string<CharT, Traits, Allocator>();
 
-    return std::basic_string<CharT, Traits, Allocator>(it.getRawValueTypePointer(), it.symbolLength());
+    return std::basic_string<CharT, Traits, Allocator>(pRawCharsPtr, it.symbolLength());
 }
 
 //----------------------------------------------------------------------------

@@ -52,6 +52,7 @@ std::string generateIdFromText_generic(const std::string &t, char replaceChar)
 inline
 std::string generateIdFromText_forDoxygen(const std::string &t, char replaceChar = '-')
 {
+    UMBA_USED(replaceChar);
     return generateIdFromText_generic(t, '-');
 }
 

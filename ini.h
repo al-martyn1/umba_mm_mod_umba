@@ -14,7 +14,8 @@
 #include "numeric_version.h"
 #include "rgbquad.h"
 #include "string_plus.h"
-
+#include "debug_helpers.h"
+//
 #include <algorithm>
 #include <cctype>
 #include <cstring>
@@ -140,6 +141,9 @@ public:
     {
         if (fileName.empty())
         {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             //throw umba::FileException( "Invalid (empty) file name", const std::string& fileName )
             throw std::invalid_argument("Invalid (empty) file name");
         }
@@ -250,7 +254,12 @@ class SimpleStdIfstreamIniFileReader : public IniFileReaderInterface
 
         std::ifstream in(filenameToOpen.c_str());
         if (!in)
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw umba::FileException( "Failed to open file", filenameToOpen );
+        }
 
         std::vector<std::string> lines;
 
@@ -582,6 +591,9 @@ protected:
     {
         if (!m_allowDefines)
         {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw umba::FileParsingException( redefine ? "Unexpected #redefine" : "Unexpected #define", getFileName(fileId), lineNumber );
         }
 
@@ -589,12 +601,22 @@ protected:
         umba::string_plus::trim( str );
 
         if (str.empty())
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw umba::FileParsingException( redefine ? "Missing #redefine value" : "Missing #define value", getFileName(fileId), lineNumber );
+        }
 
         if (!redefine)
         {
             if (m_conditionalTags.find(str)!=m_conditionalTags.end())
+            {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw umba::FileParsingException( "Value already defined", getFileName(fileId), lineNumber );
+            }
         }
 
         m_conditionalTags.insert(str);
@@ -607,7 +629,12 @@ protected:
         umba::string_plus::trim(includeFileName);
 
         if (includeFileName.empty())
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw umba::FileParsingException( std::string("No file name taken for include"), getFileName(fileId), lineNumber );
+        }
 
         std::string baseName;
         if (!m_fileNames.empty() && m_fileNames[0]!="-")
@@ -617,7 +644,12 @@ protected:
         std::string filenameToLookup = m_pFileReader->makeLookupKeyFromFileName(filenameToOpen);
 
         if (m_readedFiles.find(filenameToLookup)!=m_readedFiles.end())
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw umba::FileParsingException( std::string("Recursive include derective detected - file '") + filenameToOpen + ("' already included"), getFileName(fileId), lineNumber );
+        }
 
         auto readedFiles = m_readedFiles;
         readedFiles.insert(filenameToLookup);
@@ -761,10 +793,20 @@ public:
                     umba::string_plus::trim( testStr );
 
                     if (testStr.empty())
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw umba::FileParsingException( "Invalid (empty) condition", getFileName(it->fileId), it->lineNumber );
+                    }
 
                     if (testStr=="!")
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw umba::FileParsingException( "Invalid condition", getFileName(it->fileId), it->lineNumber );
+                    }
 
                     bool condition = isDefined(testStr);
 
@@ -776,14 +818,24 @@ public:
                 else if (lineCond==ifdefElse)
                 {
                     if (conditions.empty())
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw umba::FileParsingException( "Unexpected #else", getFileName(it->fileId), it->lineNumber );
+                    }
                     conditions.back() = !conditions.back();
                     curCondition = conditionCalc(conditions);
                 }
                 else if (lineCond==endif)
                 {
                     if (conditions.empty())
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw umba::FileParsingException( "Unexpected #endif", getFileName(it->fileId), it->lineNumber );
+                    }
                     curCondition = conditionPop(conditions);
                 }
                 else if (lineCond==define)
@@ -802,6 +854,9 @@ public:
                     {
                         if (!m_allowDefines)
                         {
+                            #ifdef UMBA_DEBUGBREAK
+                                UMBA_DEBUGBREAK();
+                            #endif
                             throw umba::FileParsingException( "Unexpected #undef", getFileName(it->fileId), it->lineNumber );
                         }
 
@@ -821,6 +876,9 @@ public:
                 }
                 else
                 {
+                    #ifdef UMBA_DEBUGBREAK
+                        UMBA_DEBUGBREAK();
+                    #endif
                     throw umba::FileParsingException( std::string("Unexpected directive - '") + directives[lineCond] + std::string("'"), getFileName(it->fileId), it->lineNumber );
                 }
 
@@ -1161,6 +1219,9 @@ public:
                         return false;
                     if (V=="1" || V=="TRUE"  /* || V=="T" */ || V=="YES" || V=="Y")
                         return true;
+                    #ifdef UMBA_DEBUGBREAK
+                        UMBA_DEBUGBREAK();
+                    #endif
                     throw std::invalid_argument("Value can't be converted to bool");
                 }
 
@@ -1180,8 +1241,12 @@ public:
                     size_t pos = 0;
                     uint32_t verMajor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                     if (pos==0)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NumericVersion");
-
+                    }
                     strVer.erase( 0, pos ); pos = 0;
 
                     uint32_t verMinor = 0;
@@ -1189,7 +1254,12 @@ public:
                     if (!strVer.empty())
                     {
                         if (strVer[0]!='.')
+                        {
+                            #ifdef UMBA_DEBUGBREAK
+                                UMBA_DEBUGBREAK();
+                            #endif
                             throw std::invalid_argument("Value can't be converted to NumericVersion");
+                        }
 
                         strVer.erase(0, 1);
                         umba::string_plus::trim(strVer);
@@ -1198,12 +1268,22 @@ public:
                         {
                             verMinor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                             if (pos==0)
+                            {
+                                #ifdef UMBA_DEBUGBREAK
+                                    UMBA_DEBUGBREAK();
+                                #endif
                                 throw std::invalid_argument("Value can't be converted to NumericVersion");
+                            }
                         }
                     }
 
                     if (verMajor>65535 || verMinor>65535)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NumericVersion - too big version number part");
+                    }
                     return NumericVersion{ (uint16_t)verMajor, (uint16_t)verMinor };
                 }
 
@@ -1216,8 +1296,12 @@ public:
                     size_t pos = 0;
                     uint32_t verMajor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                     if (pos==0)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-
+                    }
                     strVer.erase( 0, pos ); pos = 0;
 
                     uint32_t verMinor = 0;
@@ -1226,22 +1310,34 @@ public:
                     if (!strVer.empty())
                     {
                         if (strVer[0]!='.')
+                        {
+                            #ifdef UMBA_DEBUGBREAK
+                                UMBA_DEBUGBREAK();
+                            #endif
                             throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-
+                        }
                         strVer.erase(0, 1);
                         umba::string_plus::trim(strVer);
 
                         verMinor = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                         if (pos==0)
+                        {
+                            #ifdef UMBA_DEBUGBREAK
+                                UMBA_DEBUGBREAK();
+                            #endif
                             throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-
+                        }
                         strVer.erase( 0, pos ); pos = 0;
 
                         if (!strVer.empty())
                         {
                             if (strVer[0]!='.')
+                            {
+                                #ifdef UMBA_DEBUGBREAK
+                                    UMBA_DEBUGBREAK();
+                                #endif
                                 throw std::invalid_argument("Value can't be converted to NumericVersionEx");
-
+                            }
                             strVer.erase(0, 1);
                             umba::string_plus::trim(strVer);
 
@@ -1249,13 +1345,23 @@ public:
                             {
                                 verBuild = (uint32_t)stoul( strVer, &pos, 10 /* base */ ); // version is decimal
                                 if (pos==0)
+                                {
+                                    #ifdef UMBA_DEBUGBREAK
+                                        UMBA_DEBUGBREAK();
+                                    #endif
                                     throw std::invalid_argument("Value can't be converted to NumericVersionEx");
+                                }
                             }
                         }
                     }
 
                     if (verMajor>65535 || verMinor>65535)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NumericVersionEx - too big version number part");
+                    }
                     return NumericVersionEx{ (uint16_t)verMajor, (uint16_t)verMinor, (uint32_t)verBuild };
                 }
 
@@ -1282,8 +1388,12 @@ public:
                     std::string::size_type sepPos = strVer.find_first_of( " /" );
 
                     if (sepPos==std::string::npos)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NameVersion - missing version number");
-
+                    }
                     std::string name = std::string( strVer, 0, sepPos );
                     umba::string_plus::trim( name );
 
@@ -1291,8 +1401,12 @@ public:
                     umba::string_plus::trim( strVer );
 
                     if (strVer.empty())
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NameVersion - missing version number");
-
+                    }
                     return NameVersion{ name, parseNumericVersion( strVer ) };
                 }
 
@@ -1304,8 +1418,12 @@ public:
                     std::string::size_type sepPos = strVer.find_first_of( " /" );
 
                     if (sepPos==std::string::npos)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NameVersionEx - missing version number");
-
+                    }
                     std::string name = std::string( strVer, 0, sepPos );
                     umba::string_plus::trim( name );
 
@@ -1313,7 +1431,12 @@ public:
                     umba::string_plus::trim( strVer );
 
                     if (strVer.empty())
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Value can't be converted to NameVersionEx - missing version number");
+                    }
 
                     return NameVersionEx{ name, parseNumericVersionEx( strVer ) };
                 }
@@ -1344,7 +1467,12 @@ public:
                                  ) const                                              //!< Геттер-конвертер
                 {
                     if (valList.size()!=nameList.size())
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Name list not match values list");
+                    }
 
                     std::string upperValue = umba::string_plus::toupper_copy(value);
                     umba::string_plus::trim( upperValue );
@@ -1353,8 +1481,12 @@ public:
                     {
                         size_t foundAt = findEnumValue( nameList, upperValue );
                         if (foundAt==(size_t)-1)
+                        {
+                            #ifdef UMBA_DEBUGBREAK
+                                UMBA_DEBUGBREAK();
+                            #endif
                             throw std::invalid_argument( std::string("Unknown enumeration value - '") + upperValue + std::string("'"));
-
+                        }
                         return valList[foundAt];
                     }
 
@@ -1368,8 +1500,12 @@ public:
                     {
                         size_t foundAt = findEnumValue( nameList, flagStr );
                         if (foundAt==(size_t)-1)
+                        {
+                            #ifdef UMBA_DEBUGBREAK
+                                UMBA_DEBUGBREAK();
+                            #endif
                             throw std::invalid_argument( std::string("Unknown enumeration value - '") + flagStr + std::string("'"));
-
+                        }
                         res |= (EnumUnderlyingType)valList[foundAt];
                     }
 
@@ -1383,8 +1519,12 @@ public:
                 {
                     RgbQuad rgbq;
                     if (!rgbq.fromString(value))
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument( std::string("Value can't be converted to color"));
-
+                    }
                     return rgbq;
                 }
 
@@ -1392,8 +1532,12 @@ public:
                 {
                     size_t eraseCharsN = isIniCommentLine( text );
                     if (!eraseCharsN)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::invalid_argument("Comment text can't be retrieved on non-comment lines");
-
+                    }
                     std::string str = std::string(text, eraseCharsN );
 
                     return umba::string_plus::trim_copy(str);
@@ -1529,7 +1673,12 @@ public:
                 void checkCanGetValue() const
                 {
                     if (type!=LineType::normal)
+                    {
+                        #ifdef UMBA_DEBUGBREAK
+                            UMBA_DEBUGBREAK();
+                        #endif
                         throw std::runtime_error("Can't get value on this type of INI line");
+                    }
                 }
 
                 //! Возвращает true, если value'шка заквотена
@@ -1692,6 +1841,9 @@ public:
         //! Тровер
         void doThrow( const LineInfo &lineInfo, std::string value, const std::string &validatorName ) const
         {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw umba::FileParsingException( std::string("Invalid value '")
                                             + value + std::string("' in parameter '")
                                             + lineInfo.getName() + std::string("' - ")

@@ -27,7 +27,7 @@
     // #define UMBA_INSTRUCTION_BARRIER()                   __ISB()
     #define UMBA_INSTRUCTION_BARRIER()                   __isb()
 #else
-    #define UMBA_INSTRUCTION_BARRIER()                   do{}while(false) /* !!! Сделать как надо */
+    #define UMBA_INSTRUCTION_BARRIER()                   do{}while(false) /* !!! Сделать как надо UMBA_INSTRUCTION_BARRIER */
 #endif
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy версия UMBA_INSTRUCTION_BARRIER()
@@ -51,7 +51,7 @@
     // #define UMBA_DATA_MEMORY_BARRIER()                   __DMB()
     #define UMBA_DATA_MEMORY_BARRIER()                   __dmb(0)
 #else
-    #define UMBA_DATA_MEMORY_BARRIER()                   do{}while(false) /* !!! Сделать как надо */
+    #define UMBA_DATA_MEMORY_BARRIER()                   do{}while(false) /* !!! Сделать как надо UMBA_DATA_MEMORY_BARRIER */
 #endif
 #ifndef UMBA_DISABLE_DEPRECATED
     //! Legacy версия UMBA_DATA_MEMORY_BARRIER
@@ -69,7 +69,7 @@
     // #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          __DSB()
     #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          __dsb(0)
 #else
-    #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          do{}while(false) /* !!! Сделать как надо */
+    #define UMBA_DATA_SYNCHRONIZATION_BARRIER()          do{}while(false) /* !!! Сделать как надо UMBA_DATA_SYNCHRONIZATION_BARRIER */
 #endif
 
 #ifndef UMBA_DISABLE_DEPRECATED
@@ -120,7 +120,7 @@
 #if defined(__CMSIS_ARMCC_H)
     #define UMBA_INTERRUPTS_DISABLED()               __get_PRIMASK()
 #else
-    #define UMBA_INTERRUPTS_DISABLED()               0  /* !!! Сделать как надо */
+    #define UMBA_INTERRUPTS_DISABLED()               0  /* !!! Сделать как надо UMBA_INTERRUPTS_DISABLED */
 #endif
 
 #ifndef UMBA_DISABLE_DEPRECATED
@@ -136,7 +136,7 @@
 #if defined(UMBA_ARMCC_COMPILER_USED)
     #define UMBA_DISABLE_IRQ()                       __disable_irq()
 #else
-    #define UMBA_DISABLE_IRQ()                       do{}while(false) /* !!! Сделать как надо */
+    #define UMBA_DISABLE_IRQ()                       do{}while(false) /* !!! Сделать как надо UMBA_DISABLE_IRQ */
 #endif
 
 
@@ -145,7 +145,7 @@
 #if defined(UMBA_ARMCC_COMPILER_USED)
     #define UMBA_ENABLE_IRQ()                        __enable_irq()
 #else
-    #define UMBA_ENABLE_IRQ()                        do{}while(false) /* !!! Сделать как надо */
+    #define UMBA_ENABLE_IRQ()                        do{}while(false) /* !!! Сделать как надо UMBA_ENABLE_IRQ */
 #endif
 
 //---------------------------------------------------------
