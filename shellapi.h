@@ -45,6 +45,7 @@ namespace shellapi {
 
 
 //----------------------------------------------------------------------------
+inline
 int getLastError()
 {
 #if defined(WIN32) || defined(_WIN32)

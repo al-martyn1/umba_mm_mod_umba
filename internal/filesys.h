@@ -579,7 +579,7 @@ bool isFileExist(const StringType &path)
 //TODO: !!! Посмотреть "Именование файлов, путей и пространств имен" - https://learn.microsoft.com/ru-ru/windows/win32/fileio/naming-a-file
 
 //----------------------------------------------------------------------------
-template<>
+template<> inline
 bool getPathStat<std::string>(const std::string &path, FileStat &fileStat)
 {
     WIN32_FIND_DATAA findData;
@@ -595,7 +595,7 @@ bool getPathStat<std::string>(const std::string &path, FileStat &fileStat)
 }
 
 //----------------------------------------------------------------------------
-template<>
+template<> inline
 bool getPathStat<std::wstring>(const std::wstring &path, FileStat &fileStat)
 {
     WIN32_FIND_DATAW findData;
