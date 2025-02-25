@@ -109,16 +109,16 @@ char toUpper( char ch )
     return ch;
 }
 
+#include "umba/warnings/push_disable_spectre_mitigation.h"
 //! Просто потому, что standalone модуль и не тащить
 inline
 char toLower( char ch )
 {
-    #include "umba/warnings/push_disable_spectre_mitigation.h"
     if (ch>='A' && ch<='Z')
         return ch - 'A' + 'a';
-    #include "umba/warnings/pop.h"
     return ch;
 }
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 //! Просто потому, что standalone модуль и не тащить

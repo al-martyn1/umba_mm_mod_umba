@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debug_helpers.h"
+//
 #include <string>
 #include <cstdint>
 #include <exception>
@@ -235,6 +237,9 @@ std::basic_string<utf32_char_t> utf32_from_utf16( const utf16_char_t *pBegin, co
         }
         else if (ch>=0xDC00u)
         {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw unicode_convert_error((std::size_t)(pChar-pBegin), swapBytes ? "Invalid code sequence in UTF-16 with byte swap" : "Invalid code sequence in UTF-16");
         }
         else
@@ -242,6 +247,9 @@ std::basic_string<utf32_char_t> utf32_from_utf16( const utf16_char_t *pBegin, co
             utf32_char_t u32ch = ((utf32_char_t)(ch&0x03FFu)) << 10;
             if (pChar==pEnd)
             {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw unicode_convert_error((std::size_t)(pChar-pBegin), "Invalid code sequence in UTF-16 - unexpected end of data");
             }
 
@@ -249,6 +257,9 @@ std::basic_string<utf32_char_t> utf32_from_utf16( const utf16_char_t *pBegin, co
 
             if (ch2<0xDC00u || ch2>0xDFFFu)
             {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw unicode_convert_error((std::size_t)(pChar-pBegin), swapBytes ? "Invalid code sequence in UTF-16 with byte swap (pair second)" : "Invalid code sequence in UTF-16 (pair second)");
             }
 
@@ -319,18 +330,21 @@ std::basic_string<utf16_char_t> utf16_from_utf32( const std::basic_string<utf32_
 constexpr inline
 bool isFirstCharUtf32(utf32_char_t ch)
 {
+    UMBA_USED(ch);
     return true;
 }
 
 constexpr inline
 bool isNextCharUtf32(utf32_char_t ch)
 {
+    UMBA_USED(ch);
     return false;
 }
 
 constexpr inline
 std::size_t getNumberOfCharsUtf32(utf32_char_t ch)
 {
+    UMBA_USED(ch);
     return 1;
 }
 
@@ -578,7 +592,12 @@ void utf32_from_utf8_impl( const utf8_char_t *pBegin, const utf8_char_t *pEnd, O
         {
             // strRes.append(1, ch32); // complete symbol extracted
             if (ch32>0x10FFFFu)
+            {
+                #ifdef UMBA_DEBUGBREAK
+                    UMBA_DEBUGBREAK();
+                #endif
                 throw unicode_convert_error((std::size_t)(pChar-pBegin), "Invalid code sequence in UTF-8 - symbol code is out of range (>0x10FFFFu)");
+            }
 
             *pOutputIter++ = ch32;
         }

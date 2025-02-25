@@ -680,7 +680,7 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
     #elif defined(_M_IA64)
 
         #define UMBA_ARCH_IA64
-        #define UMBA_ARCH_LITTLE_ENDIAN /* !!! ??? */
+        #define UMBA_ARCH_LITTLE_ENDIAN /* !!! ??? Чо сказать хотел, не понятно */
 
     #else
 
@@ -839,6 +839,18 @@ Guide to predefined macros in C++ compilers - https://blog.kowalczyk.info/articl
     #endif
 
 #endif
+
+
+#if defined(UMBA_ARCH_X64) || defined(UMBA_ARCH_ARM64) || defined(UMBA_ARCH_IA64)
+    #define UMBA_TARGET_BIT_SIZE    64
+#else
+    #define UMBA_TARGET_BIT_SIZE    32
+#endif
+
+
+
+
+
 
 
 

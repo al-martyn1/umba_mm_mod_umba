@@ -7,7 +7,8 @@
 #include "macro_helpers.h"
 #include "stl.h"
 #include "undef_FormatMessage.h"
-
+#include "debug_helpers.h"
+//
 #include <algorithm>
 #include <cstdint>
 #include <exception>
@@ -182,6 +183,7 @@ protected: // utils
         }
     }
 
+    #include "umba/warnings/push_disable_spectre_mitigation.h"
     static unsigned getCorrectBase(unsigned base)
     {
         if (base<2)
@@ -198,6 +200,7 @@ protected: // utils
         //     default: return 10;
         // }
     }
+    #include "umba/warnings/pop.h"
 
 
 public:
@@ -282,7 +285,12 @@ public:
     FormatMessage& base(unsigned b)
     {
         if (b>36)
+        {
+            #ifdef UMBA_DEBUGBREAK
+                UMBA_DEBUGBREAK();
+            #endif
             throw std::runtime_error("FormatMessage::base: number base is out of limit (36)");
+        }
         uBase = b;
         return *this;
     }

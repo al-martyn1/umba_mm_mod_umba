@@ -3,6 +3,7 @@
 #include "umba.h"
 //
 #include "preprocessor.h"
+#include "debug_helpers.h"
 
 //
 #include "utf.h"
@@ -26,6 +27,9 @@ std::wstring& getGlobalMessageStringImpl()
 template<typename StringType> inline
 StringType getGlobalMessage()
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("umba::getGlobalMessage not implemented for this string type");
 }
 
@@ -44,6 +48,9 @@ std::wstring getGlobalMessage<std::wstring>()
 template<typename StringType> inline
 void setGlobalMessage(const StringType &)
 {
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
     throw std::runtime_error("umba::setGlobalMessage not implemented for this string type");
 }
 

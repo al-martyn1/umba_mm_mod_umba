@@ -23,6 +23,8 @@
     #include "winconhelpers.h"
     //
     #include "internal/winstrerrorname.h"
+    #include "internal/filesys.h"
+    #include "filename.h"
 
 #else
 
@@ -201,11 +203,17 @@ bool deleteDirectory(const std::string &path)
 
     std::wstring wp = filename::makeCanonical(filesys::encodeToNative(path));
 
-    SHFILEOPSTRUCTW  shFileOpStruct = { 0 };
+    SHFILEOPSTRUCTW  shFileOpStruct = {};
     wp.append(1, (wchar_t)0); // Надо два нуля в конце, потому что функция принимает разделяемый нулём список строк, и двойной ноль - окончание списка
+    
+    shFileOpStruct.hwnd   = 0;
     shFileOpStruct.wFunc  = FO_DELETE;
     shFileOpStruct.pFrom  = (PCZZWSTR)wp.c_str();
+    shFileOpStruct.pTo    = 0;
     shFileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR;  // FOF_NOERRORUI - FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR
+    shFileOpStruct.fAnyOperationsAborted = 0;
+    shFileOpStruct.hNameMappings         = 0;
+    shFileOpStruct.lpszProgressTitle     = 0;
     
     return SHFileOperationW(&shFileOpStruct)==0 ? true : false;
 
@@ -318,6 +326,7 @@ std::string getCurrentProcessExecutableFileName()
                                     , &nameBuf[0]
                                     , 4095
                                     );
+    UMBA_USED(dwRes);
     nameBuf[4095] = 0; // кладём ноль в последний элемент массива, чтобы не париться
 
     return toUtf8(nameBuf);
@@ -389,6 +398,7 @@ std::string getUmbaTempLogNowFileName( const std::string &suffix, std::string fi
 inline
 void writeUmbaEventLogNow( const std::string &eventName, std::string eventMsg, std::string fileNameFormat=std::string())
 {
+    UMBA_USED(fileNameFormat);
     if (eventMsg.empty())
         return;
 
@@ -511,9 +521,15 @@ int callSystem(const std::string &cmd, std::string *pErrMsg=0, bool allocateCons
         if (pErrMsg)
         {
             if (resVal==-1)
-               *pErrMsg = std::string("Launch command failed: ") + std::strerror(errno);
+            {
+              #include "umba/warnings/push_disable_fn_or_var_unsafe.h"
+              *pErrMsg = std::string("Launch command failed: ") + std::strerror(errno);
+              #include "umba/warnings/pop.h"
+            }
             else
+            {
                *pErrMsg = "Command result code: " + std::to_string(resVal);
+            }
         }
     }
 
@@ -551,7 +567,7 @@ enum class MessageBoxKind
 };
 
 //------------------------------
-//! Отображает блокирующее выполнение GUI сообщение (Message Box), параметры - в в UTF-8
+//! Отображает блокирующее выполнение GUI сообщение (Message Box), параметры - в UTF-8
 inline
 void showMessageBox(const std::string &msg, std::string title=std::string(), MessageBoxKind mbKind=MessageBoxKind::mbDefault)
 {
@@ -1004,10 +1020,79 @@ inline bool registerShellExtentionHandlerForExtentionList(bool bSystemRoot, cons
     return registerShellExtentionHandlerForExtentionList(bSystemRoot, fromUtf8(appNameId), fromUtf8(extCommaList));
 }
 
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+bool fileAttributeHiddenSet(const std::string &fname, bool bSet)
+{
+    auto preparedName = umba::filename::prepareForNativeUsage(umba::filesys::impl_helpers::encodeToNative(fname));
+    DWORD attrs = GetFileAttributesW(preparedName.c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+        return false;
+
+    if (bSet)
+        attrs |=  FILE_ATTRIBUTE_HIDDEN;
+    else
+        attrs &= ~FILE_ATTRIBUTE_HIDDEN;
+
+    return SetFileAttributesW(preparedName.c_str(), attrs) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool fileAttributeHiddenGet(const std::string &fname)
+{
+    auto preparedName = umba::filename::prepareForNativeUsage(umba::filesys::impl_helpers::encodeToNative(fname));
+    DWORD attrs = GetFileAttributesW(preparedName.c_str());
+    if (attrs==INVALID_FILE_ATTRIBUTES)
+        return false;
+
+    return (attrs&INVALID_FILE_ATTRIBUTES) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+bool shellParamShowHiddenFilesSet(bool bShow)
+{
+    SHELLSTATE  shSt;
+    SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, FALSE);
+    shSt.fShowAllObjects = bShow ? TRUE : FALSE;
+    SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, TRUE);
+    return true;
+    // fShowAllObjects/SSF_SHOWALLOBJECTS   - TRUE to show all objects, including hidden files and folders. FALSE to hide hidden files and folders.
+    // fShowSuperHidden/SSF_SHOWSUPERHIDDEN - TRUE to show operating system files - 
+    // fShowSysFiles/SSF_SHOWSYSFILES       - TRUE to show system files, FALSE to hide them.
+
+}
+
+//----------------------------------------------------------------------------
+inline
+bool shellParamShowHiddenFilesGet(bool bShow)
+{
+    UMBA_USED(bShow);
+    SHELLSTATE  shSt;
+    SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, FALSE);
+    return shSt.fShowAllObjects ? true : false;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+
 } // namespace win32
 
 #endif
 
+//----------------------------------------------------------------------------
 
 
 

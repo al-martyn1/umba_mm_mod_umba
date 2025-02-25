@@ -153,6 +153,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                 , const std::vector<StringType> &excludeFoldersExact = std::vector<StringType>()
                 , bool                          scanRecurse    = true
                 , bool                          logFoundHeader = true
+                , bool                          addFolders     = true
                 )
 {
     using namespace umba::omanip;
@@ -230,10 +231,14 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                                                                 }
                                                             }
                                                             // std::cout << entry.path() << "\n";
-                                                            return true; // continue
+
+                                                            if (!addFolders)
+                                                                return true; // continue
                                                         }
 
-                                                        if (fileStat.fileType!=umba::filesys:: /* FileType:: */ FileType::FileTypeFile)
+                                                        if ( fileStat.fileType!=umba::filesys::FileType::FileTypeFile
+                                                          && fileStat.fileType!=umba::filesys::FileType::FileTypeDir
+                                                           )
                                                         {
                                                             return true; // continue
                                                         }
@@ -373,8 +378,9 @@ void scanFolders( const AppConfigType            &appConfig        // with inclu
                 , std::set<StringType>           &foundExtentions
                 , std::vector<StringType>        *pFoundFilesRootFolders = 0
                 , const std::vector<StringType>  &excludeFoldersExact = std::vector<StringType>()
-                , bool                           scanRecurse = true
+                , bool                           scanRecurse    = true
                 , bool                           logFoundHeader = true
+                , bool                           addFolders     = true
                 )
 {
     scanFolders( appConfig.scanPaths
@@ -388,6 +394,7 @@ void scanFolders( const AppConfigType            &appConfig        // with inclu
                , excludeFoldersExact
                , scanRecurse
                , logFoundHeader
+               , addFolders
                );
 
     #if 0

@@ -255,8 +255,8 @@ public:
 
                         #if defined(_MSC_VER)
                            #pragma warning(push)
-                           #pragma warning(disable:4774) // warning C4774: 'sprintf' : format string expected in argument 2 is not a string literal
-                           #pragma warning(disable:4996) // warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                           #pragma warning(disable:4774) // - warning C4774: 'sprintf' : format string expected in argument 2 is not a string literal
+                           #pragma warning(disable:4996) // - warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                         #endif
                         sprintf(buf, fmt, cleanCode, result);
                         #if defined(_MSC_VER)
@@ -320,8 +320,8 @@ public:
 
                         #if defined(_MSC_VER)
                            #pragma warning(push)
-                           #pragma warning(disable:4774) // warning C4774: 'sprintf' : format string expected in argument 2 is not a string literal
-                           #pragma warning(disable:4996) // warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                           #pragma warning(disable:4774) // - warning C4774: 'sprintf' : format string expected in argument 2 is not a string literal
+                           #pragma warning(disable:4996) // - warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                         #endif
                         swprintf(buf, fmt, cleanCode, result);
                         #if defined(_MSC_VER)
