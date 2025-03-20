@@ -51,3 +51,5 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE "ws2_32" "iphlpapi" "Shell32")
 endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE WIN32_LEAN_AND_MEAN)
