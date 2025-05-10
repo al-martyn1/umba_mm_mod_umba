@@ -2912,6 +2912,17 @@ struct ArgsParser
         //     return true;
 
         // std::string optionsFileName = umba::filename::appendPath<std::string>(programLocationInfo.confPath, optFilename );
+
+        // Переделываем, как разбор обычного респонз файла
+
+        // int paRes = callArgParser(optLine, true, true); // argParser( optLine, *this, &optionsCollector, true, true ); // bool fBuiltin, bool ignoreInfos
+        // if (paRes)
+        // {
+        //     /* ctx. */ mustExit = true;
+        //    return paRes<0 ? false : true;
+        // }
+
+#if 1
         std::vector<StringType> opts;
         umba::command_line::readOptionsFile(optionsFileName, opts );
         for( auto optLine : opts)
@@ -2930,7 +2941,7 @@ struct ArgsParser
                return paRes<0 ? false : true;
             }
         }
-
+#endif
         return true;
     }
 
@@ -2952,8 +2963,21 @@ struct ArgsParser
         for(; it!=filenames.end(); ++it)
         {
             //std::cout << "Parse std builtin file: " << *it << "\n";
+#if 1
+            auto strResponseFile = StringType(1, typename StringType::value_type('@')) + *it;
+            int paRes = callArgParser(strResponseFile, true, true); // argParser( optLine, *this, &optionsCollector, true, true ); // bool fBuiltin, bool ignoreInfos
+            if (paRes)
+            {
+                /* ctx. */ mustExit = true;
+               return paRes<0 ? false : true;
+            }
+#else
+
             if (!parseOptionsFile( *it ) )
                 return false;
+
+#endif
+
         }
 
         return true;
