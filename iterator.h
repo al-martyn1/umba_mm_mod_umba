@@ -103,11 +103,6 @@ protected:
     // friend std::basic_string<CharT, Traits, Allocator> makeString(const TextPositionCountingIterator<CharT,UtfIteratorT> &it);
 
 
-    operator const_pointer() const
-    {
-        return getRawValueTypePointer();
-    }
-
     //! Допустим, мы что-то парсим, и построчно сохраняем контекст парсинга, для того, чтобы можно был при изменении входных 
     // данных парсить только то, что изменилось (после точки/строки изменнения). При этом входной контейнер мог увеличиться 
     // и переаллоцироваться, и указатель в итераторе протухает. Надо сделать rebase
@@ -119,6 +114,13 @@ protected:
 
 
 public:
+
+    explicit
+    operator const_pointer() const
+    {
+        return getRawValueTypePointer();
+    }
+
 
     bool isEndReached(std::size_t idx) const
     {
