@@ -17,7 +17,7 @@ namespace umba
 {
 
 //! Отображение имен файлов в id и обратно. Использует только строки std::string (UTF-8) - почему? Вернём обратно
-template<typename FileIdType_=std::size_t, typename FilenameStringType_=std::string >
+template<typename FileIdType_=std::size_t, typename FilenameStringType_=std::string, typename UserDataType=void* >
 class FilenameSet
 {
 
@@ -28,10 +28,11 @@ public:
 
     struct FileInfo
     {
-        FilenameStringType                 orgFilename;      //!< Исходное имя файла (как оно к нам поступило и будет отображаться)
-        FilenameStringType                 cmpFilename;      //!< Имя файла для сравнения
-        FilenameStringType                 realFilename;     //!< Имя файла для использования (чтения/записи и тп)
-        FileIdType                         fileId;           //!< Идентификатор файла
+        FilenameStringType                 orgFilename ;      //!< Исходное имя файла (как оно к нам поступило и будет отображаться)
+        FilenameStringType                 cmpFilename ;      //!< Имя файла для сравнения
+        FilenameStringType                 realFilename;      //!< Имя файла для использования (чтения/записи и тп)
+        FileIdType                         fileId      ;      //!< Идентификатор файла
+        mutable UserDataType               userData    ;      //!< Пользовательские данные, связанные с файлом
     };
 
     using FileInfoType       = FileInfo;
@@ -54,6 +55,8 @@ protected:
         if (realName.empty())
             realName = fileName;
 
+        realName = umba::filename::makeCanonical(realName);
+
         using namespace umba::filename;
         using namespace umba::filesys;
 
@@ -70,10 +73,11 @@ protected:
 
     //------------------------------
     //! Реализация получения идентификатора файла
-    const FileInfo* getFileInfoImpl( const FilenameStringType &name //!< имя файла
-                                   , bool  allowCreateNewId         //!< Можно ли создавать новый ID, если файлу ранее ID не выдавался
-                                   , FilenameStringType realName=FilenameStringType()
-                                   )
+    //const 
+    FileInfo* getFileInfoImpl( const FilenameStringType &name //!< имя файла
+                             , bool  allowCreateNewId         //!< Можно ли создавать новый ID, если файлу ранее ID не выдавался
+                             , FilenameStringType realName=FilenameStringType()
+                             )
     {
         auto it = m_nameMap.find(umba::filename::makeCanonicalForCompare(name));
         if (it!=m_nameMap.end())
@@ -125,6 +129,7 @@ public:
         UMBA_ASSERT(it!=m_idMap.end());
         return it->second.get();
     }
+
 
 }; // class FilenameSet
 
