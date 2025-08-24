@@ -16,14 +16,14 @@
 namespace umba
 {
 
-//! Отображение имен файлов в id и обратно. Использует только строки std::string (UTF-8)
-template<typename FileIdType_=std::size_t /* , typename FilenameStringType_=std::string */ >
+//! Отображение имен файлов в id и обратно. Использует только строки std::string (UTF-8) - почему? Вернём обратно
+template<typename FileIdType_=std::size_t, typename FilenameStringType_=std::string >
 class FilenameSet
 {
 
 public:
 
-    using FilenameStringType = std::string;
+    using FilenameStringType = FilenameStringType_;
     using FileIdType         = FileIdType_;
 
     struct FileInfo
@@ -33,6 +33,7 @@ public:
         FilenameStringType                 realFilename;     //!< Имя файла для использования (чтения/записи и тп)
         FileIdType                         fileId;           //!< Идентификатор файла
     };
+
     using FileInfoType       = FileInfo;
 
     static const FileIdType    invalidFileId = (FileIdType)-1; //!< Неверный/недопустимый идентификатор
