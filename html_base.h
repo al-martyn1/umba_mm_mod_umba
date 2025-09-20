@@ -194,7 +194,7 @@ inline
 bool isWhiteSpace(char ch)
 {
     return ch==' ' || ch=='\r' || ch=='\n' || ch=='\t';
-};
+}
 
 inline
 char isSimpleQuot(char ch)
