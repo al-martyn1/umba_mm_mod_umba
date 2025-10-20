@@ -67,7 +67,7 @@ StringType scanForOptionsFile( const std::vector<StringType> &flagsFileNames, St
 {
     while(!basePath.empty())
     {
-        for(const auto fileName : flagsFileNames)
+        for(const auto &fileName : flagsFileNames)
         {
             StringType testName = umba::filename::appendPath(basePath,fileName);
             if (umba::filesys::isFileReadable(testName))
