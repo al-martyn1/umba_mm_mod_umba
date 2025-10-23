@@ -147,7 +147,7 @@ public: // methods
             throw std::runtime_error("umba::types::FullQualifiedName::tailRemove: too many items to remove");
 
         auto b = name.begin();
-        name.erase(b, std::next(b, nItems));
+        name.erase(b, std::next(b, std::ptrdiff_t(nItems)));
 
         return makeRelative();
     }
