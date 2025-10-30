@@ -11,6 +11,7 @@
 #include <exception>
 #include <stdexcept>
 #include <iterator>
+#include <utility>
 
 //----------------------------------------------------------------------------
 
@@ -38,14 +39,17 @@ public: // types
         absolute
     };
 
-    using StringType      = StringTypeT;
-    using string_type     = StringTypeT;
+    using StringType           = StringTypeT;
+    using string_type          = StringTypeT;
 
 
-    using iterator        = typename std::vector<StringType>::iterator       ;
-    using const_iterator  = typename std::vector<StringType>::const_iterator ;
-    using reference       = typename std::vector<StringType>::reference      ;
-    using const_reference = typename std::vector<StringType>::const_reference;
+    using iterator             = typename std::vector<StringType>::iterator       ;
+    using const_iterator       = typename std::vector<StringType>::const_iterator ;
+    using reference            = typename std::vector<StringType>::reference      ;
+    using const_reference      = typename std::vector<StringType>::const_reference;
+
+    using string_size_type     = typename StringType::size_type;
+    using string_pos_len_type  = std::pair<string_size_type, string_size_type>;
 
 
 protected: // fields
@@ -58,6 +62,41 @@ protected: // fields
     //FullQualifiedNameFlags     flags = FullQualifiedNameFlags::none; // absolute
     std::vector<StringType>   name; 
     Scheme                    scheme = Scheme::relative;
+
+    static
+    string_pos_len_type findPosLen( const StringType &str, const StringType &substr, string_size_type fromPos)
+    {
+        return string_pos_len_type{ str.find(substr, fromPos), substr.size() };
+    }
+
+    static
+    string_pos_len_type findPosLen( const StringType &str, const std::vector<StringType> &substrs, string_size_type fromPos)
+    {
+        string_size_type foundPos = StringType::npos;
+        string_size_type foundLen = StringType::npos;
+
+        for(const auto substr : substrs)
+        {
+            string_size_type pos = str.find(substr, fromPos);
+            if (pos==StringType::npos)
+                continue;
+
+            if (foundPos==StringType::npos)
+            {
+                foundPos = pos;
+                foundLen = substr.size();
+                continue;
+            }
+
+            if (pos<foundPos) // какой-то разделитель найден раньше, чем предыдущий найдёныш
+            {
+                foundPos = pos;
+                foundLen = substr.size();
+            }
+        }
+
+        return string_pos_len_type{foundPos, foundLen};
+    }
 
 public: // ctors
 
@@ -77,12 +116,33 @@ public: // ctors
     : name(1, p1)
     {}
 
+    FullQualifiedName(const StringType &p, const StringType &sep)
+    {
+        using size_type = typename StringType::size_type;
+        size_type pos = 0;
+        size_type nextPos = p.find(sep);
+        while(nextPos!=StringType::npos)
+        {
+        
+        }
+
+    }
+
     FullQualifiedName(Scheme sch, std::initializer_list<StringType> pathParts)
     : name(pathParts.begin(), pathParts.end())
     , scheme(sch)
     {}
 
     FullQualifiedName(std::initializer_list<StringType> pathParts)
+    : name(pathParts.begin(), pathParts.end())
+    {}
+
+    FullQualifiedName(Scheme sch, const std::vector<StringType> &pathParts)
+    : name(pathParts.begin(), pathParts.end())
+    , scheme(sch)
+    {}
+
+    FullQualifiedName(const std::vector<StringType> &pathParts)
     : name(pathParts.begin(), pathParts.end())
     {}
 
