@@ -6,6 +6,7 @@
 #include "umba/rule_of_five.h"
 
 //
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <exception>
@@ -98,6 +99,91 @@ protected: // fields
         return string_pos_len_type{foundPos, foundLen};
     }
 
+    static
+    std::vector<StringType> sortPathSeparators(std::vector<StringType> &&seps)
+    {
+        std::stable_sort( seps.begin(), seps.end()
+                        , [](const auto& s1, const auto& s2)
+                          {
+                              return s1.size() > s2.size();
+                          }
+                        );
+        return seps;
+    }
+
+    void assignBySplitPath(const StringType &p, const StringType &sep)
+    {
+        name.clear();
+        scheme = Scheme::relative;
+
+        string_pos_len_type posLenPrev = {0,0};
+        while(true)
+        {
+            string_pos_len_type posLenNext = findPosLen( p, sep, posLenPrev.first+posLenPrev.second);
+
+            if (posLenNext.first==0)
+                scheme = Scheme::absolute;
+
+            if (posLenNext.first==StringType::npos)
+            {
+                auto startPos = posLenPrev.first+posLenPrev.second;
+                if (startPos<=p.size())
+                {
+                    name.emplace_back(p, startPos, p.size()-startPos);
+                }
+                return;
+            }
+            else
+            {
+                auto startPos = posLenPrev.first+posLenPrev.second;
+                if (startPos!=posLenNext.first)
+                    name.emplace_back(p, startPos, posLenNext.first-startPos);
+                posLenPrev = posLenNext;
+            }
+        }
+    }
+
+    void assignBySplitPath(const StringType &p, std::vector<StringType> seps)
+    {
+        name.clear();
+        scheme = Scheme::relative;
+
+        seps = sortPathSeparators(std::move(seps));
+
+        string_pos_len_type posLenPrev = {0,0};
+        while(true)
+        {
+            string_pos_len_type posLenNext = findPosLen( p, seps, posLenPrev.first+posLenPrev.second);
+
+            if (posLenNext.first==0)
+                scheme = Scheme::absolute;
+
+            if (posLenNext.first==StringType::npos)
+            {
+                auto startPos = posLenPrev.first+posLenPrev.second;
+                if (startPos<=p.size())
+                {
+                    name.emplace_back(p, startPos, p.size()-startPos);
+                }
+                return;
+            }
+            else
+            {
+                auto startPos = posLenPrev.first+posLenPrev.second;
+                if (startPos!=posLenNext.first)
+                    name.emplace_back(p, startPos, posLenNext.first-startPos);
+                posLenPrev = posLenNext;
+            }
+        }
+    }
+
+    void checkRemoveLasteEmptyPart()
+    {
+        if (!name.empty() && name.back().empty())
+            name.pop_back();
+    }
+
+
 public: // ctors
 
     UMBA_RULE_OF_FIVE(FullQualifiedName, default, default, default, default, default);
@@ -114,19 +200,34 @@ public: // ctors
 
     FullQualifiedName(const StringType &p1)
     : name(1, p1)
+    , scheme(Scheme::relative)
     {}
 
     FullQualifiedName(const StringType &p, const StringType &sep)
     {
-        using size_type = typename StringType::size_type;
-        size_type pos = 0;
-        size_type nextPos = p.find(sep);
-        while(nextPos!=StringType::npos)
-        {
-        
-        }
-
+        assignBySplitPath(p, sep);
     }
+
+    FullQualifiedName(const StringType &p, const std::vector<StringType> &seps)
+    {
+        assignBySplitPath(p, seps);
+    }
+
+    // FullQualifiedName(const StringType &p, const typename StringType::value_type *sep)
+    // {
+    //     assignBySplitPath(p, sep);
+    // }
+    //  
+    // FullQualifiedName(const typename StringType::value_type *p, const typename StringType::value_type *sep)
+    // {
+    //     assignBySplitPath(p, sep);
+    // }
+    //  
+    // FullQualifiedName(const typename StringType::value_type *p, const StringType &sep)
+    // {
+    //     assignBySplitPath(p, sep);
+    // }
+
 
     FullQualifiedName(Scheme sch, std::initializer_list<StringType> pathParts)
     : name(pathParts.begin(), pathParts.end())
@@ -232,13 +333,14 @@ public: // methods
         return res.removeTail(1);
     }
 
-    void push_back(const StringType &n)     { name.push_back(n); }
-    void append(const StringType &n)        { name.push_back(n); }
+    void push_back(const StringType &n)     { checkRemoveLasteEmptyPart(); name.push_back(n); }
+    void append(const StringType &n)        { checkRemoveLasteEmptyPart(); name.push_back(n); }
     void append(const FullQualifiedName &n)
     {
         if (n.isAbsolute())
             throw std::runtime_error("umba::types::FullQualifiedName::append: can't append absolute name");
 
+        checkRemoveLasteEmptyPart();
         name.insert(name.end(), n.name.begin(), n.name.end());
     }
 
