@@ -76,7 +76,7 @@ protected: // fields
         string_size_type foundPos = StringType::npos;
         string_size_type foundLen = StringType::npos;
 
-        for(const auto substr : substrs)
+        for(const auto &substr : substrs)
         {
             string_size_type pos = str.find(substr, fromPos);
             if (pos==StringType::npos)
