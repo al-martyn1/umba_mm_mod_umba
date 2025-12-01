@@ -1061,7 +1061,7 @@ bool fileAttributeHiddenGet(const std::string &fname)
 inline
 bool shellParamShowHiddenFilesSet(bool bShow)
 {
-    SHELLSTATE  shSt;
+    SHELLSTATE  shSt = {};
     SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, FALSE);
     shSt.fShowAllObjects = bShow ? TRUE : FALSE;
     SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, TRUE);
@@ -1077,7 +1077,7 @@ inline
 bool shellParamShowHiddenFilesGet(bool bShow)
 {
     UMBA_USED(bShow);
-    SHELLSTATE  shSt;
+    SHELLSTATE  shSt = {};
     SHGetSetSettings(&shSt, SSF_SHOWALLOBJECTS, FALSE);
     return shSt.fShowAllObjects ? true : false;
 }

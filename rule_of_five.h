@@ -4,8 +4,7 @@
  */
 #pragma once
 
-// #include "unicont/common/rule_of_five.h"
-
+// #include "umba/rule_of_five.h"
 
 //! Часть правила пяти для конструктора по умолчанию (устаревшее определение)
 /*!
