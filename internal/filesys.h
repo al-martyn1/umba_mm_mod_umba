@@ -28,6 +28,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <vector>
+#include <iterator>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -1429,14 +1431,31 @@ bool writeFile( const StringType            &filename    //!< Имя файла
 template<> inline
 std::string getCurrentDirectory<std::string>()
 {
-    char  ch = 0;
-    char *buf = &ch;
-    DWORD size = ::GetCurrentDirectoryA(1, buf);
-    if (!size) return std::string();
-    std::size_t allocSize = (size+1)*sizeof(char);
-    buf = (char*)_alloca(allocSize);
-    DWORD numCharsCopied = ::GetCurrentDirectoryA(size+1, buf);
-    return std::string(buf, (std::size_t)numCharsCopied );
+    typedef char          char_type;
+    typedef std::string   string_type;
+    // constexpr const std::size_t char_size = sizeof(char_type);
+
+    DWORD size = ::GetCurrentDirectoryA(0, 0); // Узнаем необходимое количество символов
+    if (size==0)
+        return string_type();
+
+    if (size<256) // терминирующий ноль включен в результат, но мы перестраховываемся, поэтому строго меньше
+    {
+        char_type buf[256];
+        size = ::GetCurrentDirectoryA((DWORD)std::size(buf), &buf[0]);
+        if (size==0)
+            return string_type();
+
+        return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
+    }
+
+    std::vector<char_type> buf;
+    buf.resize(size+1, 0); // Тут тоже перестраховка под Z-ноль. Сколько выделять - не важно, всё равно выделять в куче
+    size = ::GetCurrentDirectoryA((DWORD)std::size(buf), &buf[0]);
+    if (size==0)
+        return string_type();
+
+    return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
 }
 
 //------------------------------
@@ -1444,14 +1463,31 @@ std::string getCurrentDirectory<std::string>()
 template<> inline
 std::wstring getCurrentDirectory<std::wstring>()
 {
-    wchar_t  ch = 0;
-    wchar_t *buf = &ch;
-    DWORD size = ::GetCurrentDirectoryW(1, buf);
-    if (!size) return std::wstring();
-    std::size_t allocSize = (size+1)*sizeof(wchar_t);
-    buf = (wchar_t*)_alloca(allocSize);
-    DWORD numCharsCopied = ::GetCurrentDirectoryW(size+1, buf);
-    return std::wstring(buf, (std::size_t)numCharsCopied);
+    typedef wchar_t       char_type;
+    typedef std::wstring  string_type;
+    // constexpr const std::size_t char_size = sizeof(char_type);
+
+    DWORD size = ::GetCurrentDirectoryW(0, 0); // Узнаем необходимое количество символов
+    if (size==0)
+        return string_type();
+
+    if (size<256) // терминирующий ноль включен в результат, но мы перестраховываемся, поэтому строго меньше
+    {
+        char_type buf[256];
+        size = ::GetCurrentDirectoryW((DWORD)std::size(buf), &buf[0]);
+        if (size==0)
+            return string_type();
+
+        return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
+    }
+
+    std::vector<char_type> buf;
+    buf.resize(size+1, 0); // Тут тоже перестраховка под Z-ноль. Сколько выделять - не важно, всё равно выделять в куче
+    size = ::GetCurrentDirectoryW((DWORD)std::size(buf), &buf[0]);
+    if (size==0)
+        return string_type();
+
+    return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
 }
 
 //----------------------------------------------------------------------------

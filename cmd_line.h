@@ -13,6 +13,8 @@
 #include "utf8.h"
 #include "filesys.h"
 #include "debug_helpers.h"
+#include "rule_of_five.h"
+
 //
 #include <algorithm>
 #include <fstream>
@@ -652,7 +654,7 @@ enum class OptionType
 struct CommandLineOptionEnumInfo
 {
     std::set<std::string> valueNames;
-    int value;
+    int value = 0;
 };
 
 
@@ -969,10 +971,10 @@ struct CommandLineOptionInfo
 };
 
 
-
-
+#include "umba/warnings/interface_begin.h"
 struct ICommandLineOptionCollector
 {
+
     virtual ~ICommandLineOptionCollector() {}
 
     virtual void ignoreOptInfo( ) = 0;
@@ -1019,6 +1021,7 @@ struct ICommandLineOptionCollector
     //const std::set<std::string>
 
 };
+#include "umba/warnings/interface_end.h"
 
 
 
@@ -1731,6 +1734,7 @@ struct CommandLineOptionInfo
 // В наборе для проверки на уникальность храним все ключики - мапа ключ->опция
 // Опция хранится как объект
 
+// #include "umba/warnings/interface_begin.h"
 class CommandLineOptionCollectorImplBase : public ICommandLineOptionCollector
 {
 protected:
@@ -1750,6 +1754,8 @@ protected:
     virtual void onOptionDup( const std::string &opt ) = 0;
 
 public:
+
+    UMBA_RULE_OF_FIVE(CommandLineOptionCollectorImplBase, default, default, default, default, default);
 
     virtual bool isNormalPrintHelpStyle() const override
     {
@@ -2366,6 +2372,7 @@ struct CommandLineOptionInfo
 
 
 }; // class CommandLineOptionCollectorImplBase
+// #include "umba/warnings/interface_end.h"
 
 
 
@@ -2745,7 +2752,7 @@ struct BuiltinOptionsLocationFlag
 template<typename StringType, typename ArgParser, typename OptionsCollector >
 struct ArgsParser
 {
-
+    UMBA_RULE_OF_FIVE(ArgsParser, default, default, default, default, default);
     //ArgParsingContext<StringType>         ctx;
 
     umba::program_location::ProgramLocation<StringType>  programLocationInfo;
