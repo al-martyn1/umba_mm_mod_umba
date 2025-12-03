@@ -1,9 +1,9 @@
 /*! \file
+    \author al-martyn1 (https://github.com/al-martyn1/)
+    \copyright (c) al-martyn1 (https://github.com/al-martyn1/)
     \brief Абстрактное полностью квалифицированное имя
  */
 
-
-#include "umba/rule_of_five.h"
 
 //
 #include <algorithm>
@@ -55,12 +55,6 @@ public: // types
 
 protected: // fields
 
-    // static inline std::string namespaceSeparator = "::"; // Можно переопределять, но только глобально
-
-
-protected: // fields
-
-    //FullQualifiedNameFlags     flags = FullQualifiedNameFlags::none; // absolute
     std::vector<StringType>   name; 
     Scheme                    scheme = Scheme::relative;
 
@@ -186,7 +180,11 @@ protected: // fields
 
 public: // ctors
 
-    UMBA_RULE_OF_FIVE(FullQualifiedName, default, default, default, default, default);
+    FullQualifiedName() = default;
+    FullQualifiedName(const FullQualifiedName&) = default;
+    FullQualifiedName(FullQualifiedName&&) = default;
+    FullQualifiedName& operator=(const FullQualifiedName&) = default;
+    FullQualifiedName& operator=(FullQualifiedName&&) = default;
 
     FullQualifiedName(Scheme sch)
     : name()
@@ -212,22 +210,6 @@ public: // ctors
     {
         assignBySplitPath(p, seps);
     }
-
-    // FullQualifiedName(const StringType &p, const typename StringType::value_type *sep)
-    // {
-    //     assignBySplitPath(p, sep);
-    // }
-    //  
-    // FullQualifiedName(const typename StringType::value_type *p, const typename StringType::value_type *sep)
-    // {
-    //     assignBySplitPath(p, sep);
-    // }
-    //  
-    // FullQualifiedName(const typename StringType::value_type *p, const StringType &sep)
-    // {
-    //     assignBySplitPath(p, sep);
-    // }
-
 
     FullQualifiedName(Scheme sch, std::initializer_list<StringType> pathParts)
     : name(pathParts.begin(), pathParts.end())
