@@ -527,39 +527,102 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
 
 //-----------------------------------------------------------------------------
 inline
-bool isCommandLineOption( std::string cmdLineArg, std::string &opt, std::string &optArg, bool &bShort )
+bool isValidOptionNameChar(char ch)
 {
+    if (ch>='a' && ch<='z')
+        return true;
+
+    if (ch>='A' && ch<='Z')
+        return true;
+
+    if (ch>='0' && ch<='9')
+        return true;
+
+    if (ch=='-' || ch=='_')
+        return true;
+}
+
+//-----------------------------------------------------------------------------
+inline
+bool splitOptionString(const std::string &opt, std::string &optName, std::string &optVal, char &chSep)
+{
+    std::size_t pos = 0;
+    for(; pos!=opt.size(); ++pos)
+    {
+        if (isValidOptionNameChar(opt[pos]))
+            continue;
+
+        auto tailStart = pos;
+        if (opt[pos]==':' || opt[pos]=='=')
+        {
+            chSep = opt[pos];
+            tailStart += 1;
+        }
+        else
+        {
+            chSep = 0;
+        }
+
+        optName = std::string(opt, 0, pos);
+        optVal  = std::string(opt, tailStart, opt.size()-tailStart);
+
+        return (opt[pos]==':' || opt[pos]=='=') ? true : false;
+    }
+
+    optName = opt;
+    chSep   = 0;
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+inline
+bool isCommandLineOption( std::string cmdLineArg, std::string &opt, std::string &optArg, bool &bShort, char *pFoundSepChar )
+{
+    bool hasSep = false;
+    char sepChar = 0;
+
     if (umba::string_plus::starts_with_and_strip( cmdLineArg, "--"))
     {
         bShort = false;
-        bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
+        //bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
+        hasSep = splitOptionString(cmdLineArg, opt, optArg, sepChar);
         umba::string_plus::trim(opt);
         umba::string_plus::trim(optArg);
 
-        if ( !hasEq /* optArg.empty() */ )
+        if ( !hasSep /* hasEq */  /* optArg.empty() */ )
         {
             if (umba::string_plus::ends_with_and_strip( opt, "-"))
                 optArg = "-";
             else if (umba::string_plus::ends_with_and_strip( opt, "+"))
                 optArg = "+";
         }
+
+        if (pFoundSepChar)
+           *pFoundSepChar = sepChar;
 
         return true;
     }
+
+
     if (umba::string_plus::starts_with_and_strip( cmdLineArg, "-"))
     {
         bShort = true;
-        bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
+        hasSep = splitOptionString(cmdLineArg, opt, optArg, sepChar);
+        //bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
         umba::string_plus::trim(opt);
         umba::string_plus::trim(optArg);
 
-        if ( !hasEq /* optArg.empty() */ )
+        if ( !hasSep /* optArg.empty() */ )
         {
             if (umba::string_plus::ends_with_and_strip( opt, "-"))
                 optArg = "-";
             else if (umba::string_plus::ends_with_and_strip( opt, "+"))
                 optArg = "+";
         }
+
+        if (pFoundSepChar)
+           *pFoundSepChar = sepChar;
 
         return true;
     }
@@ -567,6 +630,7 @@ bool isCommandLineOption( std::string cmdLineArg, std::string &opt, std::string 
     return false;
 }
 
+#if 0
 inline
 bool isCommandLineOption( std::string opt, bool bShort, std::string optLongName )
 {
@@ -614,7 +678,7 @@ bool isCommandLineOption( std::string opt, bool bShort, std::string optLongName,
 
     return false;
 }
-
+#endif
 //-----------------------------------------------------------------------------
 inline
 bool parseInteger ( const std::string &str, uint64_t &u, int ss = 10 )
@@ -1037,6 +1101,7 @@ struct CommandLineOption
     std::string   name;
     std::string   optArg;
     bool          valueOptional;
+    char          sepChar;
     ICommandLineOptionCollector *pCollector;
 
     CommandLineOption( std::string a, ICommandLineOptionCollector *pCol = 0)
@@ -1047,9 +1112,10 @@ struct CommandLineOption
     , name()
     , optArg()
     , valueOptional(false)
+    , sepChar(0)
     , pCollector(pCol)
     {
-        fOption = isCommandLineOption( argOrg, name, optArg, fShort );
+        fOption = isCommandLineOption( argOrg, name, optArg, fShort, &sepChar );
         if (!fOption)
         {
             name = argOrg;
