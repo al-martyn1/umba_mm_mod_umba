@@ -649,6 +649,7 @@ HANDLE openFileForReadingWin32(const std::wstring &filename)
                       );
 }
 
+//----------------------------------------------------------------------------
 //! Хелпер (std::string) для генерик открытия файла для записи
 inline
 HANDLE openFileForWrittingWin32(const std::string &filename, bool bOverwrite)
@@ -686,6 +687,41 @@ HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
                       , 0 // hTemplateFile
                       );
 }
+
+//----------------------------------------------------------------------------
+inline
+HANDLE openFileExistingExclusiveForReadingWrittingWin32(const std::string &filename)
+{
+    if (filename.empty()) return INVALID_HANDLE_VALUE;
+
+    DWORD dwCreationDisposition = OPEN_EXISTING; // Opens a file or device, only if it exists. If the specified file or device does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
+
+    return CreateFileA( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_READ | GENERIC_WRITE
+                      , 0 // Prevents other processes from opening a file or device if they request delete, read, or write access.
+                      , 0 // lpSecurityAttributes
+                      , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
+                      , 0 // hTemplateFile
+                      );
+}
+
+inline
+HANDLE openFileExistingExclusiveForReadingWrittingWin32(const std::wstring &filename)
+{
+    if (filename.empty()) return INVALID_HANDLE_VALUE;
+
+    DWORD dwCreationDisposition = OPEN_EXISTING; // Opens a file or device, only if it exists. If the specified file or device does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
+
+    return CreateFileW( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_READ | GENERIC_WRITE
+                      , 0 // Prevents other processes from opening a file or device if they request delete, read, or write access.
+                      , 0 // lpSecurityAttributes
+                      , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
+                      , 0 // hTemplateFile
+                      );
+}
+
+//----------------------------------------------------------------------------
+
+
 
 // https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time
 
@@ -896,7 +932,7 @@ template<typename StringType> inline bool isFileReadonly( const StringType &fnam
     throw std::runtime_error("Not implemented: isFileReadonly not specialized for this StringType");
 }
 
-
+//----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
 inline
 bool isLastErrorAlreadyExists()
@@ -910,6 +946,42 @@ bool isLastErrorAlreadyExists()
     return errno==EEXIST;
 }
 #endif
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+bool isFileExistingExclusiveReadableWrittable(const StringType &fname)
+{
+#if defined(WIN32) || defined(_WIN32)
+
+    HANDLE hFile = openFileExistingExclusiveForReadingWrittingWin32(fname);
+    if (hFile==INVALID_HANDLE_VALUE) return false;
+    CloseHandle(hFile);
+    return true;
+
+#else
+
+    // !!! На не винде проверяем доступность на запись и чтение через плюсовые потоки
+    {
+        std::ofstream ofs;
+        ofs.clear();
+        ofs.open( fname.c_str(), std::ios_base::binary | std::ios_base::out | std::ios_base::ate ); // noreplace (C++23) open in exclusive mode
+        if (!ofs)
+            return false;
+    }
+
+    {
+        std::ifstream ifs;
+        ifs.clear();
+        ifs.open( fname.c_str(), std::ios_base::binary | std::ios_base::in ); // noreplace (C++23) open in exclusive mode
+        if (!ifs)
+            return false;
+    }
+
+    return true;
+
+#endif
+}
+
 
 
 //----------------------------------------------------------------------------

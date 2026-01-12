@@ -417,6 +417,34 @@ inline bool isFileReadable( const char *fname )
 
 
 //----------------------------------------------------------------------------
+inline bool isFileExistingExclusiveReadableWrittable( const std::wstring &fname )
+{
+    return fsysapi::isFileExistingExclusiveReadableWrittable(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileExistingExclusiveReadableWrittable( const std::string &fname )
+{
+    return fsysapi::isFileExistingExclusiveReadableWrittable(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileExistingExclusiveReadableWrittable( const wchar_t *fname )
+{
+    return fsysapi::isFileExistingExclusiveReadableWrittable(impl_helpers::encodeToNative(fname));
+}
+
+//------------------------------
+inline bool isFileExistingExclusiveReadableWrittable( const char *fname )
+{
+    return fsysapi::isFileExistingExclusiveReadableWrittable(impl_helpers::encodeToNative(fname));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 inline filetime_t getFileTimeNow()
 {
     return fsysapi::getFileTimeNow();
