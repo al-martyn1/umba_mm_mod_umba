@@ -461,70 +461,6 @@ bool readBinaryFile( const std::string &fileName, std::string &data )
     return readBinaryFile( input, data );
 }
 
-#include "umba/warnings/push_disable_spectre_mitigation.h"
-inline
-std::vector<std::string> prepareArgs( int argc, char **argv )
-{
-    UMBA_PROGRAM_LOCATION_INIT(argc, argv);
-
-    std::vector<std::string> resVec;
-
-    for( int i = 1; i<argc; ++i)
-    {
-        std::string argStr = argv[i];
-
-        #if !defined(UMBA_DISABLE_AUTO_ENCODING) && !defined(UMBA_APP_MAIN)
-            argStr = encoding::toUnicodeFromConsole(argStr);
-        #endif
-
-        if (argStr.empty())
-           continue;
-
-        if (argStr[0]!='-') // not an option at all
-        {
-            resVec.push_back(argStr);
-            continue;
-        }
-
-        if (argStr.size()<2) // exact one char len
-        {
-            resVec.push_back(argStr);
-            continue;
-        }
-
-        if (argStr[1]=='-') // long option '--'
-        {
-            resVec.push_back(argStr);
-            continue;
-        }
-
-
-        // Here we got an arg in form '-X...'
-        std::string::size_type pos = 1, sz = argStr.size(); // sz 2 or more
-        for(; pos!=sz; ++pos)
-        {
-            auto nextPos = pos+1;
-            if (nextPos!=sz && argStr[nextPos]=='=')
-            {
-                resVec.push_back(std::string("-") + std::string( argStr, pos ));
-                break;
-            }
-            else if (nextPos!=sz && (argStr[nextPos]=='+' || argStr[nextPos]=='-'))
-            {
-                resVec.push_back(std::string("-") + std::string( argStr, pos, 2 ));
-                pos = nextPos;
-            }
-            else
-            {
-                resVec.push_back( std::string("-") + std::string( argStr, pos, 1 ));
-            }
-        }
-    }
-
-    return resVec;
-}
-#include "umba/warnings/pop.h"
-
 //-----------------------------------------------------------------------------
 inline
 bool isValidOptionNameChar(char ch)
@@ -540,6 +476,8 @@ bool isValidOptionNameChar(char ch)
 
     if (ch=='-' || ch=='_')
         return true;
+
+    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -574,6 +512,73 @@ bool splitOptionString(const std::string &opt, std::string &optName, std::string
 
     return false;
 }
+
+
+#include "umba/warnings/push_disable_spectre_mitigation.h"
+inline
+std::vector<std::string> prepareArgs( int argc, char **argv )
+{
+    UMBA_PROGRAM_LOCATION_INIT(argc, argv);
+
+    std::vector<std::string> resVec;
+
+    for( int i = 1; i<argc; ++i)
+    {
+        std::string argStr = argv[i];
+
+        #if !defined(UMBA_DISABLE_AUTO_ENCODING) && !defined(UMBA_APP_MAIN)
+            argStr = encoding::toUnicodeFromConsole(argStr);
+        #endif
+
+        if (argStr.empty())
+           continue;
+
+        if (argStr[0]!='-') // not an option at all
+        {
+            resVec.push_back(argStr);
+            continue;
+        }
+
+        // Short option detected, may be it is long option
+
+        if (argStr.size()<2) // exact one char len
+        {
+            resVec.push_back(argStr);
+            continue;
+        }
+
+        if (argStr[1]=='-') // long option '--'
+        {
+            resVec.push_back(argStr);
+            continue;
+        }
+
+
+        // Here we got an arg in form '-X...'
+        std::string::size_type pos = 1, sz = argStr.size(); // sz 2 or more
+        for(; pos!=sz; ++pos)
+        {
+            auto nextPos = pos+1;
+            if (nextPos!=sz && (argStr[nextPos]=='=' || argStr[nextPos]==':'))
+            {
+                resVec.push_back(std::string("-") + std::string( argStr, pos ));
+                break;
+            }
+            else if (nextPos!=sz && (argStr[nextPos]=='+' || argStr[nextPos]=='-'))
+            {
+                resVec.push_back(std::string("-") + std::string( argStr, pos, 2 ));
+                pos = nextPos;
+            }
+            else
+            {
+                resVec.push_back( std::string("-") + std::string( argStr, pos, 1 ));
+            }
+        }
+    }
+
+    return resVec;
+}
+#include "umba/warnings/pop.h"
 
 //-----------------------------------------------------------------------------
 inline
@@ -1533,7 +1538,7 @@ struct CommandLineOption
         {
             if (!optInfo.paramOptional)
             {
-                errMsg = std::string("Missing mandatory value (") + optInfo.getAllOptionNames("/") + std::string(")");
+                errMsg = std::string("Missing mandatory value (") + optInfo.getAllOptionNames("/") + std::string("), argument: '" + argOrg + "'");
                 return false;
             }
 
