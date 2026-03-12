@@ -110,45 +110,55 @@ inline std::vector<std::string> makeArgsVecForConsoleApp(int argc, wchar_t *argv
 inline std::vector<std::string> makeArgsVecForWindowedApp()
 {
     // debugBreak();
+    LPWSTR pArgwWide = GetCommandLineW();
 
-
-    LPWSTR pArgcWide = GetCommandLineW();
-    std::wstring argcWideStr = pArgcWide ? std::wstring(pArgcWide) : std::wstring();
-
-    #if defined(UMBA_EVENTS_LOG_ENABLE)
-    std::ostringstream oss;
-    oss << "ArgsStr: " << toUtf8(argcWideStr) << "\n";
-    #endif
-
-    // if (isDebuggerPresent())
-    // {
-    //     argcWideStr = std::wstring(L"ArgsStr: ") + argcWideStr + std::wstring(L"\n");
-    //     OutputDebugStringW(argcWideStr.c_str());
-    // }
-
-    int nArgs = 0;
-    wchar_t ** wargv = CommandLineToArgvW( pArgcWide, &nArgs );
-    if (!wargv)
+    try
     {
+        std::wstring argvWideStr = pArgwWide ? std::wstring(pArgwWide) : std::wstring();
+    
+        #if defined(UMBA_EVENTS_LOG_ENABLE)
+        std::ostringstream oss;
+        oss << "ArgsStr: " << toUtf8(argvWideStr) << "\n";
+        #endif
+    
+        // if (isDebuggerPresent())
+        // {
+        //     argcWideStr = std::wstring(L"ArgsStr: ") + argcWideStr + std::wstring(L"\n");
+        //     OutputDebugStringW(argcWideStr.c_str());
+        // }
+    
+        int nArgs = 0;
+        // wchar_t ** wargv = CommandLineToArgvW( pArgcWide, &nArgs );
+        wchar_t** wargv = CommandLineToArgvW(argvWideStr.c_str(), &nArgs);
+        if (!wargv)
+        {
+            LocalFree((HLOCAL)pArgwWide);
+            return std::vector<std::string>();
+        }
+    
+        //std::size_t idx = 0;
+    
+        std::vector<std::string> resVec; resVec.reserve((std::size_t)nArgs);
+        for(int i=0; i<nArgs; ++i)
+        {
+            #if defined(UMBA_EVENTS_LOG_ENABLE)
+            oss << "arg["<< (idx++) << "]: " << toUtf8(wargv[i]) << "\n";
+            #endif
+            resVec.emplace_back(reencodeArgv(wargv[i]));
+        }
+    
+        #if defined(UMBA_EVENTS_LOG_ENABLE)
+        shellapi::writeUmbaEventLogNow("startup-main-prepare", oss.str());
+        #endif
+    
+        LocalFree((HLOCAL)pArgwWide);
+        return resVec;
+    }
+    catch(...)
+    {
+        LocalFree((HLOCAL)pArgwWide);
         return std::vector<std::string>();
     }
-
-    //std::size_t idx = 0;
-
-    std::vector<std::string> resVec; resVec.reserve((std::size_t)nArgs);
-    for(int i=0; i<nArgs; ++i)
-    {
-        #if defined(UMBA_EVENTS_LOG_ENABLE)
-        oss << "arg["<< (idx++) << "]: " << toUtf8(wargv[i]) << "\n";
-        #endif
-        resVec.emplace_back(reencodeArgv(wargv[i]));
-    }
-
-    #if defined(UMBA_EVENTS_LOG_ENABLE)
-    shellapi::writeUmbaEventLogNow("startup-main-prepare", oss.str());
-    #endif
-
-    return resVec;
 }
 
 inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &strArgs)

@@ -13,6 +13,8 @@
 #include "utf8.h"
 #include "filesys.h"
 #include "debug_helpers.h"
+#include "rule_of_five.h"
+
 //
 #include <algorithm>
 #include <fstream>
@@ -459,6 +461,59 @@ bool readBinaryFile( const std::string &fileName, std::string &data )
     return readBinaryFile( input, data );
 }
 
+//-----------------------------------------------------------------------------
+inline
+bool isValidOptionNameChar(char ch)
+{
+    if (ch>='a' && ch<='z')
+        return true;
+
+    if (ch>='A' && ch<='Z')
+        return true;
+
+    if (ch>='0' && ch<='9')
+        return true;
+
+    if (ch=='-' || ch=='_')
+        return true;
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+inline
+bool splitOptionString(const std::string &opt, std::string &optName, std::string &optVal, char &chSep)
+{
+    std::size_t pos = 0;
+    for(; pos!=opt.size(); ++pos)
+    {
+        if (isValidOptionNameChar(opt[pos]))
+            continue;
+
+        auto tailStart = pos;
+        if (opt[pos]==':' || opt[pos]=='=')
+        {
+            chSep = opt[pos];
+            tailStart += 1;
+        }
+        else
+        {
+            chSep = 0;
+        }
+
+        optName = std::string(opt, 0, pos);
+        optVal  = std::string(opt, tailStart, opt.size()-tailStart);
+
+        return (opt[pos]==':' || opt[pos]=='=') ? true : false;
+    }
+
+    optName = opt;
+    chSep   = 0;
+
+    return false;
+}
+
+
 #include "umba/warnings/push_disable_spectre_mitigation.h"
 inline
 std::vector<std::string> prepareArgs( int argc, char **argv )
@@ -484,6 +539,8 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
             continue;
         }
 
+        // Short option detected, may be it is long option
+
         if (argStr.size()<2) // exact one char len
         {
             resVec.push_back(argStr);
@@ -502,7 +559,7 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
         for(; pos!=sz; ++pos)
         {
             auto nextPos = pos+1;
-            if (nextPos!=sz && argStr[nextPos]=='=')
+            if (nextPos!=sz && (argStr[nextPos]=='=' || argStr[nextPos]==':'))
             {
                 resVec.push_back(std::string("-") + std::string( argStr, pos ));
                 break;
@@ -525,39 +582,52 @@ std::vector<std::string> prepareArgs( int argc, char **argv )
 
 //-----------------------------------------------------------------------------
 inline
-bool isCommandLineOption( std::string cmdLineArg, std::string &opt, std::string &optArg, bool &bShort )
+bool isCommandLineOption( std::string cmdLineArg, std::string &opt, std::string &optArg, bool &bShort, char *pFoundSepChar )
 {
+    bool hasSep = false;
+    char sepChar = 0;
+
     if (umba::string_plus::starts_with_and_strip( cmdLineArg, "--"))
     {
         bShort = false;
-        bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
+        //bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
+        hasSep = splitOptionString(cmdLineArg, opt, optArg, sepChar);
         umba::string_plus::trim(opt);
         umba::string_plus::trim(optArg);
 
-        if ( !hasEq /* optArg.empty() */ )
+        if ( !hasSep /* hasEq */  /* optArg.empty() */ )
         {
             if (umba::string_plus::ends_with_and_strip( opt, "-"))
                 optArg = "-";
             else if (umba::string_plus::ends_with_and_strip( opt, "+"))
                 optArg = "+";
         }
+
+        if (pFoundSepChar)
+           *pFoundSepChar = sepChar;
 
         return true;
     }
+
+
     if (umba::string_plus::starts_with_and_strip( cmdLineArg, "-"))
     {
         bShort = true;
-        bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
+        hasSep = splitOptionString(cmdLineArg, opt, optArg, sepChar);
+        //bool hasEq = umba::string_plus::split_to_pair(cmdLineArg, opt, optArg, '=');
         umba::string_plus::trim(opt);
         umba::string_plus::trim(optArg);
 
-        if ( !hasEq /* optArg.empty() */ )
+        if ( !hasSep /* optArg.empty() */ )
         {
             if (umba::string_plus::ends_with_and_strip( opt, "-"))
                 optArg = "-";
             else if (umba::string_plus::ends_with_and_strip( opt, "+"))
                 optArg = "+";
         }
+
+        if (pFoundSepChar)
+           *pFoundSepChar = sepChar;
 
         return true;
     }
@@ -565,6 +635,7 @@ bool isCommandLineOption( std::string cmdLineArg, std::string &opt, std::string 
     return false;
 }
 
+#if 0
 inline
 bool isCommandLineOption( std::string opt, bool bShort, std::string optLongName )
 {
@@ -612,7 +683,7 @@ bool isCommandLineOption( std::string opt, bool bShort, std::string optLongName,
 
     return false;
 }
-
+#endif
 //-----------------------------------------------------------------------------
 inline
 bool parseInteger ( const std::string &str, uint64_t &u, int ss = 10 )
@@ -652,7 +723,7 @@ enum class OptionType
 struct CommandLineOptionEnumInfo
 {
     std::set<std::string> valueNames;
-    int value;
+    int value = 0;
 };
 
 
@@ -969,10 +1040,10 @@ struct CommandLineOptionInfo
 };
 
 
-
-
+#include "umba/warnings/interface_begin.h"
 struct ICommandLineOptionCollector
 {
+
     virtual ~ICommandLineOptionCollector() {}
 
     virtual void ignoreOptInfo( ) = 0;
@@ -1019,6 +1090,7 @@ struct ICommandLineOptionCollector
     //const std::set<std::string>
 
 };
+#include "umba/warnings/interface_end.h"
 
 
 
@@ -1034,6 +1106,7 @@ struct CommandLineOption
     std::string   name;
     std::string   optArg;
     bool          valueOptional;
+    char          sepChar;
     ICommandLineOptionCollector *pCollector;
 
     CommandLineOption( std::string a, ICommandLineOptionCollector *pCol = 0)
@@ -1044,9 +1117,10 @@ struct CommandLineOption
     , name()
     , optArg()
     , valueOptional(false)
+    , sepChar(0)
     , pCollector(pCol)
     {
-        fOption = isCommandLineOption( argOrg, name, optArg, fShort );
+        fOption = isCommandLineOption( argOrg, name, optArg, fShort, &sepChar );
         if (!fOption)
         {
             name = argOrg;
@@ -1464,7 +1538,7 @@ struct CommandLineOption
         {
             if (!optInfo.paramOptional)
             {
-                errMsg = std::string("Missing mandatory value (") + optInfo.getAllOptionNames("/") + std::string(")");
+                errMsg = std::string("Missing mandatory value (") + optInfo.getAllOptionNames("/") + std::string("), argument: '" + argOrg + "'");
                 return false;
             }
 
@@ -1731,6 +1805,7 @@ struct CommandLineOptionInfo
 // В наборе для проверки на уникальность храним все ключики - мапа ключ->опция
 // Опция хранится как объект
 
+// #include "umba/warnings/interface_begin.h"
 class CommandLineOptionCollectorImplBase : public ICommandLineOptionCollector
 {
 protected:
@@ -1750,6 +1825,8 @@ protected:
     virtual void onOptionDup( const std::string &opt ) = 0;
 
 public:
+
+    UMBA_RULE_OF_FIVE(CommandLineOptionCollectorImplBase, default, default, default, default, default);
 
     virtual bool isNormalPrintHelpStyle() const override
     {
@@ -2366,6 +2443,7 @@ struct CommandLineOptionInfo
 
 
 }; // class CommandLineOptionCollectorImplBase
+// #include "umba/warnings/interface_end.h"
 
 
 
@@ -2745,7 +2823,7 @@ struct BuiltinOptionsLocationFlag
 template<typename StringType, typename ArgParser, typename OptionsCollector >
 struct ArgsParser
 {
-
+    UMBA_RULE_OF_FIVE(ArgsParser, default, default, default, default, default);
     //ArgParsingContext<StringType>         ctx;
 
     umba::program_location::ProgramLocation<StringType>  programLocationInfo;

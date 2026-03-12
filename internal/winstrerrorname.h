@@ -12,9 +12,10 @@ namespace win32{
 
 
 inline
-std::unordered_map<unsigned, const char*> makeStrErrorNameMap()
+// std::unordered_map<unsigned, const char*> makeStrErrorNameMap()
+const std::unordered_map<unsigned, const char*>& getStrErrorNameMap()
 {
-    return std::unordered_map<unsigned, const char*>
+    static std::unordered_map<unsigned, const char*> m // = 
         {
         { { 0, "NO_ERROR" }
         , { 1, "ERROR_INVALID_FUNCTION" }
@@ -2477,14 +2478,16 @@ std::unordered_map<unsigned, const char*> makeStrErrorNameMap()
         , { 15299, "ERROR_SYSTEM_DEVICE_NOT_FOUND" }
         }
         };
-}
 
-inline
-const std::unordered_map<unsigned, const char*>& getStrErrorNameMap()
-{
-    static auto m = makeStrErrorNameMap();
     return m;
 }
+
+// inline
+// const std::unordered_map<unsigned, const char*>& getStrErrorNameMap()
+// {
+//     static auto m = makeStrErrorNameMap();
+//     return m;
+// }
 
 
 
