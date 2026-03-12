@@ -28,6 +28,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <vector>
+#include <iterator>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -647,6 +649,7 @@ HANDLE openFileForReadingWin32(const std::wstring &filename)
                       );
 }
 
+//----------------------------------------------------------------------------
 //! Хелпер (std::string) для генерик открытия файла для записи
 inline
 HANDLE openFileForWrittingWin32(const std::string &filename, bool bOverwrite)
@@ -684,6 +687,41 @@ HANDLE openFileForWrittingWin32(const std::wstring &filename, bool bOverwrite)
                       , 0 // hTemplateFile
                       );
 }
+
+//----------------------------------------------------------------------------
+inline
+HANDLE openFileExistingExclusiveForReadingWrittingWin32(const std::string &filename)
+{
+    if (filename.empty()) return INVALID_HANDLE_VALUE;
+
+    DWORD dwCreationDisposition = OPEN_EXISTING; // Opens a file or device, only if it exists. If the specified file or device does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
+
+    return CreateFileA( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_READ | GENERIC_WRITE
+                      , 0 // Prevents other processes from opening a file or device if they request delete, read, or write access.
+                      , 0 // lpSecurityAttributes
+                      , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
+                      , 0 // hTemplateFile
+                      );
+}
+
+inline
+HANDLE openFileExistingExclusiveForReadingWrittingWin32(const std::wstring &filename)
+{
+    if (filename.empty()) return INVALID_HANDLE_VALUE;
+
+    DWORD dwCreationDisposition = OPEN_EXISTING; // Opens a file or device, only if it exists. If the specified file or device does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
+
+    return CreateFileW( umba::filename::prepareForNativeUsage(filename).c_str(), GENERIC_READ | GENERIC_WRITE
+                      , 0 // Prevents other processes from opening a file or device if they request delete, read, or write access.
+                      , 0 // lpSecurityAttributes
+                      , dwCreationDisposition, FILE_ATTRIBUTE_NORMAL
+                      , 0 // hTemplateFile
+                      );
+}
+
+//----------------------------------------------------------------------------
+
+
 
 // https://docs.microsoft.com/en-us/windows/win32/sysinfo/converting-a-time-t-value-to-a-file-time
 
@@ -894,7 +932,7 @@ template<typename StringType> inline bool isFileReadonly( const StringType &fnam
     throw std::runtime_error("Not implemented: isFileReadonly not specialized for this StringType");
 }
 
-
+//----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
 inline
 bool isLastErrorAlreadyExists()
@@ -908,6 +946,42 @@ bool isLastErrorAlreadyExists()
     return errno==EEXIST;
 }
 #endif
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+bool isFileExistingExclusiveReadableWrittable(const StringType &fname)
+{
+#if defined(WIN32) || defined(_WIN32)
+
+    HANDLE hFile = openFileExistingExclusiveForReadingWrittingWin32(fname);
+    if (hFile==INVALID_HANDLE_VALUE) return false;
+    CloseHandle(hFile);
+    return true;
+
+#else
+
+    // !!! На не винде проверяем доступность на запись и чтение через плюсовые потоки
+    {
+        std::ofstream ofs;
+        ofs.clear();
+        ofs.open( fname.c_str(), std::ios_base::binary | std::ios_base::out | std::ios_base::ate ); // noreplace (C++23) open in exclusive mode
+        if (!ofs)
+            return false;
+    }
+
+    {
+        std::ifstream ifs;
+        ifs.clear();
+        ifs.open( fname.c_str(), std::ios_base::binary | std::ios_base::in ); // noreplace (C++23) open in exclusive mode
+        if (!ifs)
+            return false;
+    }
+
+    return true;
+
+#endif
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -1429,14 +1503,31 @@ bool writeFile( const StringType            &filename    //!< Имя файла
 template<> inline
 std::string getCurrentDirectory<std::string>()
 {
-    char  ch = 0;
-    char *buf = &ch;
-    DWORD size = ::GetCurrentDirectoryA(1, buf);
-    if (!size) return std::string();
-    std::size_t allocSize = (size+1)*sizeof(char);
-    buf = (char*)_alloca(allocSize);
-    DWORD numCharsCopied = ::GetCurrentDirectoryA(size+1, buf);
-    return std::string(buf, (std::size_t)numCharsCopied );
+    typedef char          char_type;
+    typedef std::string   string_type;
+    // constexpr const std::size_t char_size = sizeof(char_type);
+
+    DWORD size = ::GetCurrentDirectoryA(0, 0); // Узнаем необходимое количество символов
+    if (size==0)
+        return string_type();
+
+    if (size<256) // терминирующий ноль включен в результат, но мы перестраховываемся, поэтому строго меньше
+    {
+        char_type buf[256];
+        size = ::GetCurrentDirectoryA((DWORD)std::size(buf), &buf[0]);
+        if (size==0)
+            return string_type();
+
+        return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
+    }
+
+    std::vector<char_type> buf;
+    buf.resize(size+1, 0); // Тут тоже перестраховка под Z-ноль. Сколько выделять - не важно, всё равно выделять в куче
+    size = ::GetCurrentDirectoryA((DWORD)std::size(buf), &buf[0]);
+    if (size==0)
+        return string_type();
+
+    return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
 }
 
 //------------------------------
@@ -1444,14 +1535,31 @@ std::string getCurrentDirectory<std::string>()
 template<> inline
 std::wstring getCurrentDirectory<std::wstring>()
 {
-    wchar_t  ch = 0;
-    wchar_t *buf = &ch;
-    DWORD size = ::GetCurrentDirectoryW(1, buf);
-    if (!size) return std::wstring();
-    std::size_t allocSize = (size+1)*sizeof(wchar_t);
-    buf = (wchar_t*)_alloca(allocSize);
-    DWORD numCharsCopied = ::GetCurrentDirectoryW(size+1, buf);
-    return std::wstring(buf, (std::size_t)numCharsCopied);
+    typedef wchar_t       char_type;
+    typedef std::wstring  string_type;
+    // constexpr const std::size_t char_size = sizeof(char_type);
+
+    DWORD size = ::GetCurrentDirectoryW(0, 0); // Узнаем необходимое количество символов
+    if (size==0)
+        return string_type();
+
+    if (size<256) // терминирующий ноль включен в результат, но мы перестраховываемся, поэтому строго меньше
+    {
+        char_type buf[256];
+        size = ::GetCurrentDirectoryW((DWORD)std::size(buf), &buf[0]);
+        if (size==0)
+            return string_type();
+
+        return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
+    }
+
+    std::vector<char_type> buf;
+    buf.resize(size+1, 0); // Тут тоже перестраховка под Z-ноль. Сколько выделять - не важно, всё равно выделять в куче
+    size = ::GetCurrentDirectoryW((DWORD)std::size(buf), &buf[0]);
+    if (size==0)
+        return string_type();
+
+    return string_type(&buf[0], &buf[size]); // Если всё норм, то size не содержит завершающий ноль
 }
 
 //----------------------------------------------------------------------------
