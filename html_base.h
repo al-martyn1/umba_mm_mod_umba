@@ -459,8 +459,17 @@ IteratorType parseSingleTag(HtmlTagType &parseTo, IteratorType b, IteratorType e
         if (*b=='/')
             return finalizeEmptyTag();
 
-        if (*b!='=')
+        if (*b!='=') //!!!
+        {
+            if (isNameFirstChar(*b)) // началось новое имя?
+            {
+                addAttribute(); // Добавляем атрибут без значения
+                --b; // делаем откат, у нас двунаправленный итератор
+                continue;
+            }
+        
             return finalizeTag();
+        }
 
         ++b;
         b = helpers::skipSpaces(b, e); // while(b!=e && isWhiteSpace(*b)) ++b; // пропускаем возможные пробелы
