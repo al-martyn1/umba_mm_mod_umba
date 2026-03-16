@@ -18,13 +18,14 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <unordered_map>
 #include <regex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 
 //TODO: !!! Надо бы переименовать в umba::filesys::scanners
@@ -171,7 +172,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 
 
     std::unordered_map<StringType,std::regex>  excludeRegexes;
-    std::unordered_map<StringType,StringType> excludeOriginalMasks;
+    std::unordered_map<StringType,StringType>  excludeOriginalMasks;
 
     for(auto excludeFileMask : excludeFilesMaskList)
     {
