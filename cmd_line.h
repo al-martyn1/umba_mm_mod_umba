@@ -2980,6 +2980,28 @@ struct ArgsParser
     }
 
 
+    bool parseOptionsFile( std::istream &optFileIfs )
+    {
+        std::vector<StringType> opts;
+        umba::command_line::readOptionsFile(optFileIfs, opts);
+        for( auto optLine : opts)
+        {
+            umba::string_plus::trim(optLine);
+            if (optLine.empty())
+                continue;
+
+            if (umba::command_line::isComment( optLine ))
+                continue;
+
+            int paRes = callArgParser(optLine, true, true); // argParser( optLine, *this, &optionsCollector, true, true ); // bool fBuiltin, bool ignoreInfos
+            if (paRes)
+            {
+                /* ctx. */ mustExit = true;
+               return paRes<0 ? false : true;
+            }
+        }
+    }
+
     //! Must return: 0 - ok, 1 normal stop, -1 - error
     // virtual int parseArg( std::string a, ICommandLineOptionsCollector *pCol, bool fBuiltin, bool ignoreInfos) = 0;
 
