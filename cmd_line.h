@@ -2846,6 +2846,11 @@ struct ArgsParser
     std::stack<StringType>                optFiles;
 
 
+    StringType getAppRoot() const
+    {
+        return programLocationInfo.getAppRoot();
+    }
+
     StringType getBasePath() const
     {
         StringType basePath;

@@ -136,6 +136,7 @@ StringType getExeName(); // { return throw std::runtime_error("getExeName: not s
     template<> inline
     std::string getExeName<std::string>()
     {
+        // !!! Надо сделать через dl_*
         return getArgv0<std::string>();
     }
 
@@ -339,6 +340,13 @@ struct ProgramLocation
              mergeTo[name] = val;
 
          return mergeTo;
+    }
+
+
+    //! returns AppRoot folder
+    StringType  getAppRoot() const
+    {
+        return rootPath;
     }
 
     //! Creates full path under AppRoot folder
