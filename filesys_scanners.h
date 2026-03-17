@@ -200,13 +200,16 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 
     bool bFound = false;
 
-
+    static const StringType currentDirName = umba::string::make_string<StringType>(".");
+    static const StringType upperDirName   = umba::string::make_string<StringType>("..");
 
     //for( std::list<std::string>::const_iterator rootPathIt=rootScanPaths.begin(); rootPathIt!=rootScanPaths.end(); ++rootPathIt )
     for( typename std::vector<StringType>::const_iterator rootPathIt=rootScanPaths.begin(); rootPathIt!=rootScanPaths.end(); ++rootPathIt )
     {
         std::list<StringType> scanPaths;
         scanPaths.emplace_back(*rootPathIt);
+
+        // template<typename StringType> inline StringType make_string( const std::wstring &str )
 
         for( typename std::list<StringType>::const_iterator it=scanPaths.begin(); it!=scanPaths.end(); ++it )
         {
@@ -215,6 +218,9 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
             if (!umba::filesys::enumerateDirectory( scanPath
                                                   , [&](StringType entryName, const umba::filesys::FileStat &fileStat)
                                                     {
+                                                        bool bUpperDir   = entryName==upperDirName;
+                                                        bool bCurrentDir = entryName==currentDirName;
+
                                                         auto entryNameOnly     = entryName;
                                                         auto entryNameForMatch = compareOnlyFilenames ? entryName : umba::filename::appendPath(scanPath, entryName);
                                                         entryNameForMatch      = umba::filename::normalizePathSeparators(entryNameForMatch,'/');
@@ -223,16 +229,19 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
 
                                                         if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileType::FileTypeDir)
                                                         {
-                                                            if (scanRecurse)
+                                                            if (!bUpperDir && !bCurrentDir)
                                                             {
-                                                                if (excludeFoldersExactSet.find(umba::string_plus::tolower_copy(entryNameOnly))==excludeFoldersExactSet.end())
+                                                                if (scanRecurse)
                                                                 {
-                                                                    scanPaths.push_back(entryName);
-                                                                }
-                                                                else
-                                                                {
-                                                                    logMsg << entryName << " - ";
-                                                                    logMsg << good_but_warning /* warning */  << "skipped" << notice << /* normal << */  " due to exclude exact folder rule" << normal << "\n";
+                                                                    if (excludeFoldersExactSet.find(umba::string_plus::tolower_copy(entryNameOnly))==excludeFoldersExactSet.end())
+                                                                    {
+                                                                        scanPaths.push_back(entryName);
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        logMsg << entryName << " - ";
+                                                                        logMsg << good_but_warning /* warning */  << "skipped" << notice << /* normal << */  " due to exclude exact folder rule" << normal << "\n";
+                                                                    }
                                                                 }
                                                             }
                                                             // std::cout << entry.path() << "\n";
