@@ -152,9 +152,10 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                 , std::set<StringType>          &foundExtentions
                 , std::vector<StringType>       *pFoundFilesRootFolders = 0
                 , const std::vector<StringType> &excludeFoldersExact = std::vector<StringType>()
-                , bool                          scanRecurse    = true
-                , bool                          logFoundHeader = true
-                , bool                          addFolders     = true
+                , bool                          scanRecurse          = true
+                , bool                          logFoundHeader       = true
+                , bool                          addFolders           = true
+                , bool                          compareOnlyFilenames = false // not full paths
                 )
 {
     using namespace umba::omanip;
@@ -214,7 +215,10 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
             if (!umba::filesys::enumerateDirectory( scanPath
                                                   , [&](StringType entryName, const umba::filesys::FileStat &fileStat)
                                                     {
-                                                        auto entryNameOnly = entryName;
+                                                        auto entryNameOnly     = entryName;
+                                                        auto entryNameForMatch = compareOnlyFilenames ? entryName : umba::filename::appendPath(scanPath, entryName);
+                                                        entryNameForMatch      = umba::filename::normalizePathSeparators(entryNameForMatch,'/');
+                                                        
                                                         entryName = umba::filename::appendPath(scanPath, entryName);
 
                                                         if (fileStat.fileType==umba::filesys:: /* FileType:: */ FileType::FileTypeDir)
@@ -266,7 +270,8 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                                                             logMsg << entryName << " - ";
                                                         }
 
-                                                        auto normalizedEntryName = umba::filename::normalizePathSeparators(entryName,'/');
+                                                        // entryNameForMatch
+                                                        //auto normalizedEntryName = umba::filename::normalizePathSeparators(entryName,'/');
 
                                                         //TODO: !!! Нужно что-то решать с отсутствующим расширением
 
@@ -279,7 +284,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                                                         bool matchInclude = true;
                                                         if (!includeRegexes.empty()) // матчим только если не пусто
                                                         {
-                                                            matchInclude = umba::regex_helpers::regexMatch(normalizedEntryName,includeRegexes,&includeRegexStr);
+                                                            matchInclude = umba::regex_helpers::regexMatch(entryNameForMatch,includeRegexes,&includeRegexStr);
                                                         }
 
                                                         if (!matchInclude)
@@ -292,7 +297,7 @@ void scanFolders( const std::vector<StringType> &rootScanPaths
                                                         {
                                                             addThisFile = true; // Вроде подошло, надо проверить исключения
 
-                                                            if (umba::regex_helpers::regexMatch(normalizedEntryName,excludeRegexes,&excludeRegexStr))
+                                                            if (umba::regex_helpers::regexMatch(entryNameForMatch,excludeRegexes,&excludeRegexStr))
                                                             {
                                                                 addThisFile = false;
                                                                 excludedByIncludeMask = false;
@@ -379,9 +384,10 @@ void scanFolders( const AppConfigType            &appConfig        // with inclu
                 , std::set<StringType>           &foundExtentions
                 , std::vector<StringType>        *pFoundFilesRootFolders = 0
                 , const std::vector<StringType>  &excludeFoldersExact = std::vector<StringType>()
-                , bool                           scanRecurse    = true
-                , bool                           logFoundHeader = true
-                , bool                           addFolders     = true
+                , bool                           scanRecurse          = true
+                , bool                           logFoundHeader       = true
+                , bool                           addFolders           = true
+                , bool                           compareOnlyFilenames = false // not full paths
                 )
 {
     scanFolders( appConfig.scanPaths
