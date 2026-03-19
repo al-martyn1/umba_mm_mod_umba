@@ -344,9 +344,14 @@ struct ProgramLocation
 
 
     //! returns AppRoot folder
-    StringType  getAppRoot() const
+    StringType getAppRoot() const
     {
         return rootPath;
+    }
+
+    StringType getAppConfPath() const
+    {
+        return confPath;
     }
 
     //! Creates full path under AppRoot folder

@@ -106,6 +106,16 @@ bool getVar(const std::wstring &varName, ValueType &val)
 template<>
 bool getVar<std::wstring>(const std::wstring &varName, std::wstring &val)
 {
+    #if defined(WIN32) || defined(_WIN32)
+    
+    // //! Получение переменной окружения, возвращает true, если значение получено
+    // inline
+    // bool getVar(const ::std::wstring &varName, ::std::wstring &val)
+
+    return envapi::getVar(varName, val);
+
+    #else
+
     filesys::native_fs_string_t strRes;
 
     if (!envapi::getVar(impl_helpers::encodeToNative(varName), strRes))
@@ -113,6 +123,8 @@ bool getVar<std::wstring>(const std::wstring &varName, std::wstring &val)
 
     val = impl_helpers::encodeToWide(strRes);
     return true;
+
+    #endif
 }
 
 //----------------------------------------------------------------------------
