@@ -2851,6 +2851,11 @@ struct ArgsParser
         return programLocationInfo.getAppRoot();
     }
 
+    StringType getAppConfPath() const
+    {
+        return programLocationInfo.getAppConfPath();
+    }
+
     StringType getBasePath() const
     {
         StringType basePath;
