@@ -1,10 +1,10 @@
-#pragma once
-
-//----------------------------------------------------------------------------
-
 /*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief Универсальная реализация UMBA_ASSERT
 */
+
+#pragma once
 
 //----------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@
 #if defined(UMBA_QT_USED)
 
     #define UMBA_ASSERT( expr )             Q_ASSERT(expr)
-    #define UMBA_ASSERT_EX( expr, msg )     Q_ASSERT_X(expr, __FILE__ ":" UMBA_STRINGIFY(__LINE__), msg )
+    #define UMBA_ASSERT_EX( expr, msg )     Q_ASSERT_X(expr, __FILE__ ":" UMBA_STRINGIFY(__LINE__ ), msg )
 
 
 #elif defined(UMBA_WIN32_USED) /* Win32 без Qt */
@@ -145,18 +145,18 @@
 
         // __disable_irq - armcc intrinsic
         #define UMBA_ASSERT( expr )            do { if(! (expr) ) { __disable_irq(); while(1){ __BKPT(0xAB); if(0) break;} }  } while(0)
-        #define UMBA_ASSERT_EX( expr, msg )    UMBA_ASSERT( expr )     
+        #define UMBA_ASSERT_EX( expr, msg )    UMBA_ASSERT( expr )
 
-    #else 
+    #else
 
         // GCC/Clang - пока оставим без ассерта
         /* !!! Сделать как надо UMBA_ASSERT для GCC/Clang */
         #define UMBA_ASSERT( expr )
-        #define UMBA_ASSERT_EX( expr, msg )    UMBA_ASSERT( expr )     
+        #define UMBA_ASSERT_EX( expr, msg )    UMBA_ASSERT( expr )
 
     #endif
 
-#elif defined(UMBA_HAS_CRT_ASSERT) 
+#elif defined(UMBA_HAS_CRT_ASSERT)
 
     #define UMBA_ASSERT( expr )                assert(expr)
     #define UMBA_ASSERT_EX( expr, msg )        assert((msg, expr))
@@ -188,9 +188,3 @@
 //---------------------------------------------------------
 //! UMBA_STATIC_ASSERT - assert времени компиляции
 #define UMBA_STATIC_ASSERT(X) UMBA_STATIC_ASSERT2(X, __LINE__)
-
-
-
-
-
-

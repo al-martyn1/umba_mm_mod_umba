@@ -1,8 +1,8 @@
-/*!
-    \file
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief На базе кода под STM32, адаптация для кроссплатформы, реализация
-
- */
+*/
 
 #include "assert.h"
 #include "critical_section.h"
@@ -323,5 +323,3 @@ namespace time_service{
         }
     }
 #endif
-
-

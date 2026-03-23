@@ -1,14 +1,16 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Прослойка абстракций для работы с файловой системой
+*/
+
 #pragma once
 
 //-----------------------------------------------------------------------------
 
-/*!
-    \file
-    \brief Прослойка абстракций для работы с файловой системой
- */
+
 
 //-----------------------------------------------------------------------------
-
 #include "../umba.h"
 //
 #include "../debug_helpers.h"
@@ -2093,8 +2095,3 @@ StringType getTempFolderPath()
 
 
 #include "../filename.h"
-
-
-
-
-

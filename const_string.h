@@ -1,9 +1,10 @@
-#pragma once
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Константные строки - обёртка для строковых литералов (экспериментальная фуета)
+*/
 
-/*!
-\file
-\brief Константные строки - обёртка для строковых литералов (экспериментальная фуета)
- */
+#pragma once
 
 #include "umba.h"
 

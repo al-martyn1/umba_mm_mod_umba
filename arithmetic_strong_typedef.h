@@ -1,4 +1,6 @@
 /*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief Какая-то шляпа, уже и не помню. Вроде оставлена чисто для совместимости
 */
 
@@ -34,8 +36,3 @@
 
 // Also to read:
 //   https://www.foonathan.net/2016/10/strong-typedefs/
-
-
-
-
-

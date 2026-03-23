@@ -1,3 +1,9 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief
+*/
+
 #pragma once
 
 
@@ -24,6 +30,3 @@
             inline bool operator>=(const ClassName &c1, const ClassName &c2) const { return c1.compare(c2)>=0; } \
             inline bool operator==(const ClassName &c1, const ClassName &c2) const { return c1.compare(c2)==0; } \
             inline bool operator!=(const ClassName &c1, const ClassName &c2) const { return c1.compare(c2)!=0; }
-
-
-

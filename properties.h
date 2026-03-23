@@ -1,12 +1,13 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Реализация properties на чистом C++
+*/
+
 #pragma once
 
 //----------------------------------------------------------------------------
 
-/*! \file
-    \brief Реализация properties на чистом C++
-*/
-
-//----------------------------------------------------------------------------
 //! Определяет указатель на структуру по указателю на поле экземпляра структуры
 #define UMBA_CONTAINING_RECORD(address, type, field) ((type *)(\
     1+(char*)(address) - \

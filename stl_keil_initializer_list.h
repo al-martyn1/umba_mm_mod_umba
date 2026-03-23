@@ -1,3 +1,9 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief
+*/
+
 // std::initializer_list support -*- C++ -*-
 
 // Copyright (C) 2008, 2009, 2010, 2011 Free Software Foundation, Inc.

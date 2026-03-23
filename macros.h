@@ -1,4 +1,6 @@
 /*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief Макросики-матросики. У макросов нет вопросов. Адаптация старенького кода для подстановки макросов. Осторожно! Может вызывать кровотечение из глаз
 */
 

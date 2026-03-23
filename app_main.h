@@ -1,3 +1,9 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief
+*/
+
 #pragma once
 
 /* 1) Проверить русские имена файлов
@@ -115,18 +121,18 @@ inline std::vector<std::string> makeArgsVecForWindowedApp()
     try
     {
         std::wstring argvWideStr = pArgwWide ? std::wstring(pArgwWide) : std::wstring();
-    
+
         #if defined(UMBA_EVENTS_LOG_ENABLE)
         std::ostringstream oss;
         oss << "ArgsStr: " << toUtf8(argvWideStr) << "\n";
         #endif
-    
+
         // if (isDebuggerPresent())
         // {
         //     argcWideStr = std::wstring(L"ArgsStr: ") + argcWideStr + std::wstring(L"\n");
         //     OutputDebugStringW(argcWideStr.c_str());
         // }
-    
+
         int nArgs = 0;
         // wchar_t ** wargv = CommandLineToArgvW( pArgcWide, &nArgs );
         wchar_t** wargv = CommandLineToArgvW(argvWideStr.c_str(), &nArgs);
@@ -135,9 +141,9 @@ inline std::vector<std::string> makeArgsVecForWindowedApp()
             LocalFree((HLOCAL)pArgwWide);
             return std::vector<std::string>();
         }
-    
+
         //std::size_t idx = 0;
-    
+
         std::vector<std::string> resVec; resVec.reserve((std::size_t)nArgs);
         for(int i=0; i<nArgs; ++i)
         {
@@ -146,11 +152,11 @@ inline std::vector<std::string> makeArgsVecForWindowedApp()
             #endif
             resVec.emplace_back(reencodeArgv(wargv[i]));
         }
-    
+
         #if defined(UMBA_EVENTS_LOG_ENABLE)
         shellapi::writeUmbaEventLogNow("startup-main-prepare", oss.str());
         #endif
-    
+
         LocalFree((HLOCAL)pArgwWide);
         return resVec;
     }
@@ -175,7 +181,7 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
             auto wArgStr = fromUtf8(argStrWithTitle);
             OutputDebugStringW(wArgStr.c_str());
         }
-        
+
         charPtrArgv.emplace_back((char*)a.c_str());
     }
 
@@ -256,7 +262,7 @@ inline std::vector<char*> makeCharPtrArgsVec(const std::vector<std::string> &str
                                            return umbaMainImpl((int)encodedArgv.size(), &encodedArgv[0]);                \
                                        }                                                                                 \
                                        int umbaMainImpl(int argc, char* argv[])
-                                       
+
         #else
 
             // Ansi windows приложение

@@ -1,3 +1,9 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief
+*/
+
 // https://rsdn.org/forum/cpp.applied/8544625.1
 // https://rsdn.org/forum/cpp.applied/8555847.1
 // https://habr.com/ru/articles/248897/

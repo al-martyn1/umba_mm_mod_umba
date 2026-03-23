@@ -1,8 +1,10 @@
-#pragma once
-/*!
-    \file
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief Форматирование сообщений при помощи макросов $(Macro)
- */
+*/
+
+#pragma once
 
 #include "macro_helpers.h"
 #include "stl.h"

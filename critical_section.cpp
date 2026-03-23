@@ -1,6 +1,9 @@
 /*! \file
-\brief Реализация критической секции
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Реализация критической секции
 */
+
 #include "critical_section.h"
 
 namespace umba{
@@ -48,5 +51,3 @@ void CriticalSection::unlock()
 
 
 } // namespace umba
-
-

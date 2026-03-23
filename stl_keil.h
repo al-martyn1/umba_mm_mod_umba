@@ -1,6 +1,9 @@
 /*! \file
-\brief Некоторые фичи C++11, которые не реализованы библиотеке компилятора Keil
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Некоторые фичи C++11, которые не реализованы библиотеке компилятора Keil
 */
+
 #pragma once
 
 namespace std

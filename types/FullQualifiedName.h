@@ -1,11 +1,11 @@
 /*! \file
-    \author al-martyn1 (https://github.com/al-martyn1/)
-    \copyright (c) al-martyn1 (https://github.com/al-martyn1/)
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief Абстрактное полностью квалифицированное имя
  */
 
+#pragma once
 
-//
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -55,7 +55,7 @@ public: // types
 
 protected: // fields
 
-    std::vector<StringType>   name; 
+    std::vector<StringType>   name;
     Scheme                    scheme = Scheme::relative;
 
     static
@@ -267,10 +267,10 @@ public: // methods
             clear();
             return *this;
         }
-    
+
         if (nItems>name.size())
             throw std::runtime_error("umba::types::FullQualifiedName::tailRemove: too many items to remove");
-    
+
         for(std::size_t i=0; i!=nItems; ++i)
             name.pop_back();
 
@@ -285,7 +285,7 @@ public: // methods
             clear();
             return makeRelative();
         }
-    
+
         if (nItems>name.size())
             throw std::runtime_error("umba::types::FullQualifiedName::tailRemove: too many items to remove");
 
@@ -310,7 +310,7 @@ public: // methods
     {
         if (empty())
             throw std::runtime_error("umba::types::FullQualifiedName::getHead: can't get head from empty name");
-    
+
         auto res = *this;
         return res.removeTail(1);
     }
@@ -378,4 +378,3 @@ public: // methods
 } // namespace types
 } // namespace umba
 // umba::types::
-

@@ -1,14 +1,14 @@
-/*!
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Различные общие макросы препроцессора
 
-\file
-\brief Различные общие макросы препроцессора
-
-Можно задавать поведение:
-\b UMBA_STRICT  - если включить, то полезет всякое гавно, на которое следует обратить внимание, задает также UMBA_DISABLE_DEPRECATED
-\b UMBA_DISABLE_DEPRECATED - отключить deprecated функции
+    Можно задавать поведение:
+    \b UMBA_STRICT  - если включить, то полезет всякое гавно, на которое следует обратить внимание, задает также UMBA_DISABLE_DEPRECATED
+    \b UMBA_DISABLE_DEPRECATED - отключить deprecated функции
 
 
-\addtogroup UMBA_CORE
+    \addtogroup UMBA_CORE
 
 */
 

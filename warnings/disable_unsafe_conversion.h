@@ -1,3 +1,9 @@
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief
+*/
+
 // warning C4191: 'type cast': unsafe conversion from 'FARPROC' to '...'
 #include "disable_C4191.h"
 
@@ -10,5 +16,3 @@
         #pragma GCC diagnostic ignored "-Wcast-function-type"
     #endif
 #endif
-
-

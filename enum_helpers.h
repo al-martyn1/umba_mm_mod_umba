@@ -1,13 +1,12 @@
-#pragma once
-
-//-----------------------------------------------------------------------------
-
 /*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief Хелперы для enum'ов
 */
 
-//-----------------------------------------------------------------------------
+#pragma once
 
+//-----------------------------------------------------------------------------
 
 #include "preprocessor.h"
 #include "stl.h"

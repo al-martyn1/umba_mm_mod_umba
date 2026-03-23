@@ -1,6 +1,9 @@
 /*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
     \brief ZZ Коды ошибок
 */
+
 UMBA_DECLARE_ERROR_CODE      (ok                      ,  0, "Ok, no error")
 UMBA_DECLARE_ERROR_CODE_ALIAS(success                 , ok, "Ok, operation successfully completed")
 UMBA_DECLARE_ERROR_CODE_ALIAS(done                    , ok, "Ok, operation done")

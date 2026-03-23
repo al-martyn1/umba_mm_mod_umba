@@ -1,5 +1,7 @@
 /*! \file
-\brief Базовые интерфейсы
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Базовые интерфейсы
 */
 
 #pragma once
@@ -175,4 +177,3 @@ struct IPingRequestGenerator : UMBA_INHERITS umba::IUnknown
 /*! @} */
 
 //-----------------------------------------------------------------------------
-

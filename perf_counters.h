@@ -1,6 +1,7 @@
-/*!
-\file
-\brief Подсистема perf_counters - счетчики производительности
+/*! \file
+    \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+    \copyright (c) 2018-2026 Alexander Martynov
+    \brief Подсистема perf_counters - счетчики производительности
 
     \section perf_counters_basics Общие сведения
 
