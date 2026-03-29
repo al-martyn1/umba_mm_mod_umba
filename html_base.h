@@ -50,12 +50,12 @@ enum class TagType
 
 
 //----------------------------------------------------------------------------
-template<bool UseCaseIndependentNames = true, char AttrAppendSeparatorChar = 0>
+template<bool UseCaseIndependentNames = true, char AttrAppendSeparatorChar = 0, typename PayloadType = std::string>
 struct HtmlTagT
 {
     TagType                                       tagType   = TagType::invalid;
     std::string                                   name      ;
-    std::string                                   text      ;
+    PayloadType                                   text      ;
     std::unordered_map<std::string, std::string>  attributes;
     std::vector<HtmlTagT>                         childs    ;  // Content
 
