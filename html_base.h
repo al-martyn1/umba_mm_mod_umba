@@ -43,7 +43,8 @@ enum class TagType
     text    =  0,
     tag         ,  // <tag> open tag
     close       ,  // </tag> close tag
-    empty          // <empty-tag/> - не содержит в себе вложенные тэги
+    empty       ,  // <empty-tag/> - не содержит в себе вложенные тэги
+    document       // Аналогично tag, но не имеет имени. Просто контейнер для вложенных элементов
 
 };
 
@@ -178,6 +179,111 @@ struct HtmlTagT
     {
         auto it = attributes.find(prepareName(attrName));
         return it==attributes.end() ? defVal : it->second;
+    }
+
+    // const HtmlTagT* 
+    std::size_t findChildIndex(const std::string &nameToCompare, std::size_t startFrom=0u) const
+    {
+        if (startFrom>=childs.size())
+            return std::size_t(-1);
+
+        for(std::size_t i=startFrom; i!=childs.size(); ++i)
+        {
+            if (childs[i].isTag(nameToCompare))
+                return i;
+        }
+
+        return std::size_t(-1);
+    }
+
+    const HtmlTagT* getChildPtr(std::size_t idx) const
+    {
+        if (idx>=childs.size())
+            return 0;
+        return &childs[idx];
+    }
+
+    const HtmlTagT* findChild(const std::string &nameToCompare) const
+    {
+        return getChildPtr(findChildIndex(nameToCompare));
+    }
+
+
+    PayloadType getText() const
+    {
+        if (tagType==TagType::text)
+             return text;
+
+        if (tagType!=TagType::tag && tagType!=TagType::document)
+            return PayloadType();
+
+        // У нас тут тэг с содержимым. Это может быть как текст, так и вложенные тэги.
+        // Текст вообще-то должен хранится в дочерних нодах текстового типа, но может лежать и в самом текущем узле
+
+        PayloadType res = text;
+
+        for(const auto &child: childs)
+        {
+            if (child.tagType==TagType::text)
+            {
+                if (!res.empty() && !child.text.empty())
+                {
+                    if constexpr (std::is_integral_v<typename PayloadType::value_type>)
+                        res.insert(res.end(), typename PayloadType::value_type(' ')); // Вставляем пробел
+                    else
+                        res.insert(res.end(), typename PayloadType::value_type()); // Вставляем пустую строку
+                }
+
+                res.insert(res.end(), child.text.begin(), child.text.end());
+            }
+        }
+
+        return res;
+    }
+
+    PayloadType getTextAll() const
+    {
+        if (tagType==TagType::text)
+             return text;
+
+        if (tagType!=TagType::tag && tagType!=TagType::document)
+            return PayloadType();
+
+        // У нас тут тэг с содержимым. Это может быть как текст, так и вложенные тэги.
+        // Текст вообще-то должен хранится в дочерних нодах текстового типа, но может лежать и в самом текущем узле
+
+        PayloadType res = text;
+
+        auto addSpace = [&]()
+        {
+            if (!res.empty())
+            {
+                if constexpr (std::is_integral_v<typename PayloadType::value_type>)
+                    res.insert(res.end(), typename PayloadType::value_type(' ')); // Вставляем пробел
+                else
+                    res.insert(res.end(), typename PayloadType::value_type()); // Вставляем пустую строку
+            }
+        };
+
+        for(const auto &child: childs)
+        {
+            if (child.tagType==TagType::text)
+            {
+                if (!child.text.empty())
+                    addSpace();
+                res.insert(res.end(), child.text.begin(), child.text.end());
+            }
+            else if (child.tagType==TagType::tag)
+            {
+                auto allChildText = child.getTextAll();
+                if (!allChildText.empty())
+                    addSpace();
+                res.insert(res.end(), allChildText.begin(), allChildText.end());
+            }
+
+        }
+
+        return res;
     }
 
 
