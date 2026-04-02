@@ -39,7 +39,7 @@ namespace impl_helpers = umba::filesys::impl_helpers;
 
 
 //----------------------------------------------------------------------------
-template<typename ValueType>
+template<typename ValueType> inline
 bool getVar(const std::string &varName, ValueType &val)
 {
     // static_assert?
@@ -50,7 +50,7 @@ bool getVar(const std::string &varName, ValueType &val)
 }
 
 //----------------------------------------------------------------------------
-template<>
+template<> inline
 bool getVar<std::string>(const std::string &varName, std::string &val)
 {
     filesys::native_fs_string_t strRes;
@@ -64,7 +64,7 @@ bool getVar<std::string>(const std::string &varName, std::string &val)
 
 //----------------------------------------------------------------------------
 #define UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(type, converterFunc) \
-            template<>                                                     \
+            template<> inline                                              \
             bool getVar<type>(const std::string &varName, type &val)       \
             {                                                              \
                 std::string strVal;                                        \
@@ -91,7 +91,7 @@ UMBA_ENV_IMPLEMENT_CHAR_GETVAR_SPECIALIZATION(unsigned long long, std::stoull)
 
 
 //----------------------------------------------------------------------------
-template<typename ValueType> // for compatibility
+template<typename ValueType> inline // for compatibility
 bool getVar(const std::wstring &varName, ValueType &val)
 {
     // static_assert?
@@ -102,7 +102,7 @@ bool getVar(const std::wstring &varName, ValueType &val)
 }
 
 //----------------------------------------------------------------------------
-template<>
+template<> inline
 bool getVar<std::wstring>(const std::wstring &varName, std::wstring &val)
 {
     #if defined(WIN32) || defined(_WIN32)
@@ -128,7 +128,7 @@ bool getVar<std::wstring>(const std::wstring &varName, std::wstring &val)
 
 //----------------------------------------------------------------------------
 #define UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(type, converterFunc) \
-            template<>                                                     \
+            template<> inline                                              \
             bool getVar<type>(const std::wstring &varName, type &val)      \
             {                                                              \
                 std::string strVal;                                        \
@@ -155,7 +155,7 @@ UMBA_ENV_IMPLEMENT_WIDE_GETVAR_SPECIALIZATION(unsigned long long, std::stoull)
 
 
 //----------------------------------------------------------------------------
-template<typename ValueType>
+template<typename ValueType> inline
 bool setVar(const std::string &varName, const ValueType &val)
 {
     #ifdef UMBA_DEBUGBREAK
@@ -165,17 +165,17 @@ bool setVar(const std::string &varName, const ValueType &val)
 }
 
 //----------------------------------------------------------------------------
-template<>
+template<> inline
 bool setVar<std::string>(const std::string &varName, const std::string &val)
 {
     return envapi::putVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
 }
 
 //----------------------------------------------------------------------------
-#define UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(type)                            \
-            template<> bool setVar<type>(const std::string &varName, const type &val)  \
-            {                                                                          \
-                return setVar<std::string>(varName, std::to_string(val));              \
+#define UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(type)                                   \
+            template<> inline bool setVar<type>(const std::string &varName, const type &val)  \
+            {                                                                                 \
+                return setVar<std::string>(varName, std::to_string(val));                     \
             }
 
 UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(int               )
@@ -190,7 +190,7 @@ UMBA_ENV_IMPLEMENT_CHAR_SETVAR_SPECIALIZATION(unsigned long long)
 
 
 //----------------------------------------------------------------------------
-template<typename ValueType>
+template<typename ValueType> inline
 bool setVar(const std::wstring &varName, const ValueType &val)
 {
     #ifdef UMBA_DEBUGBREAK
@@ -200,17 +200,17 @@ bool setVar(const std::wstring &varName, const ValueType &val)
 }
 
 //----------------------------------------------------------------------------
-template<>
+template<> inline
 bool setVar<std::wstring>(const std::wstring &varName, const std::wstring &val)
 {
     return envapi::putVar(impl_helpers::encodeToNative(varName), impl_helpers::encodeToNative(val));
 }
 
 //----------------------------------------------------------------------------
-#define UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(type)                            \
-            template<> bool setVar<type>(const std::wstring &varName, const type &val) \
-            {                                                                          \
-                return setVar<std::wstring>(varName, std::to_wstring(val));            \
+#define UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(type)                                   \
+            template<> inline bool setVar<type>(const std::wstring &varName, const type &val) \
+            {                                                                                 \
+                return setVar<std::wstring>(varName, std::to_wstring(val));                   \
             }
 
 UMBA_ENV_IMPLEMENT_WIDE_SETVAR_SPECIALIZATION(int               )
