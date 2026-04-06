@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Различные общие макросы препроцессора
 
+    Repository: https://github.com/al-martyn1/umba
+
     Можно задавать поведение:
     \b UMBA_STRICT  - если включить, то полезет всякое гавно, на которое следует обратить внимание, задает также UMBA_DISABLE_DEPRECATED
     \b UMBA_DISABLE_DEPRECATED - отключить deprecated функции

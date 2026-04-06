@@ -2,6 +2,8 @@
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Разная шляпа по разбору командной строки для консольных утилит
+
+    Repository: https://github.com/al-martyn1/umba
 */
 
 #pragma once

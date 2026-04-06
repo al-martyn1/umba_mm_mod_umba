@@ -2,13 +2,15 @@
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2018-2026 Alexander Martynov
     \brief
+
+    Repository: https://github.com/al-martyn1/umba
 */
 
-    /*
-        See also
-          https://devblogs.microsoft.com/cppblog/broken-warnings-theory/
-          https://learn.microsoft.com/en-us/cpp/preprocessor/warning?view=msvc-170
-    */
+/*
+    See also
+      https://devblogs.microsoft.com/cppblog/broken-warnings-theory/
+      https://learn.microsoft.com/en-us/cpp/preprocessor/warning?view=msvc-170
+*/
 
 #if defined(_MSC_VER)
     #pragma warning(push)

@@ -1,5 +1,3 @@
-My Main Page                         {#index}
-============
-@addtogroup UMBA_CORE
+# UMBA bike library
 
-Test README.md библиотеки UMBA (from README.md)
+My own bicycle library.

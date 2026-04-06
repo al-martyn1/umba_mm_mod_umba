@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Базовые определения для интерфейсов, и связанные с ним определения
 
+    Repository: https://github.com/al-martyn1/umba
+
     Версия COM для нищих.
 
     Предназначена для использования в MCU.

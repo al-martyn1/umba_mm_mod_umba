@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Прослойка абстракций для работы с файловой системой, версия, работающая одинаково с любыми типами имён (char/wchar_t)
 
+    Repository: https://github.com/al-martyn1/umba
+
     Все функции принимают как std::string, так и std::wstring, но возвращают всегда только std::string.
 
     В std::string юникод представлен в кодировке UTF-8.

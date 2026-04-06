@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Реализация критической секции.
 
+    Repository: https://github.com/al-martyn1/umba
+
     \section terms Терминология
 
     Критическая секция - это участок кода, который должен защищен от прерывания другой задачей, прерыванием и тп.

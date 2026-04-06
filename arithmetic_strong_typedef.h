@@ -2,6 +2,8 @@
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Какая-то шляпа, уже и не помню. Вроде оставлена чисто для совместимости
+
+    Repository: https://github.com/al-martyn1/umba
 */
 
 #pragma once

@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief ZZ Microcontroller Unit Low Level definitions
 
+    Repository: https://github.com/al-martyn1/umba
+
     Всяческие общие штуки, относящиеяся к МК.
     В данный момент только для STM32
 

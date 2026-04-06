@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Подсистема perf_counters - счетчики производительности
 
+    Repository: https://github.com/al-martyn1/umba
+
     \section perf_counters_basics Общие сведения
 
     Тип счетчика производительности (PerfTick) зависит от системы.

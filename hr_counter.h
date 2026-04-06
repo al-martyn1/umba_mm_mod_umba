@@ -3,6 +3,8 @@
     \copyright (c) 2018-2026 Alexander Martynov
     \brief Подсистема hr_counter - счетчики высокого разрешения
 
+    Repository: https://github.com/al-martyn1/umba
+
     Максимальные величины, которые можно получать на 32х битном типе на STM32:
 
     0x7FFFFFFF*2/ 72000000 = 59.65 сек
