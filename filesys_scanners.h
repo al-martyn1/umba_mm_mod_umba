@@ -1,7 +1,7 @@
 /*! \file
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2018-2026 Alexander Martynov
-    \brief Разные сканеры имен. По маскам и не только.
+    \brief Cканеры по файловой системе.
 
     Repository: https://github.com/al-martyn1/umba
 */
@@ -31,13 +31,12 @@
 #include <unordered_set>
 
 
-//TODO: !!! Надо бы переименовать в umba::filesys::scanners
-
 // umba::filesys::scanners::
 namespace umba {
 namespace filesys {
 namespace scanners {
 
+//----------------------------------------------------------------------------
 
 
 

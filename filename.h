@@ -971,6 +971,32 @@ template<typename StringType> inline StringType appendPath( const StringType &p,
 }
 
 //-----------------------------------------------------------------------------
+template<typename StringType> inline StringType appendPath( const StringType &p, const typename StringType::value_type *f_, typename StringType::value_type pathSep )
+{
+    StringType f = f_;
+
+    if (p.empty())
+        return f;
+
+    if (f.empty())
+        return p;
+
+    if (hasLastPathSep(p))
+        return p + stripFirstPathSepCopy(f);
+
+    if (hasFirstPathSep(f))
+        return p + f;
+
+    return p + StringType(1, pathSep) + f;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline StringType appendPath( const StringType &p, const typename StringType::value_type *f )
+{
+    return appendPath(p,f,getNativePathSep<typename StringType::value_type>());
+}
+
+//-----------------------------------------------------------------------------
 //! Добавляет расширение
 template<typename StringType> inline
 StringType appendExt( const StringType &n, const StringType &e, typename StringType::value_type extSep = getNativeExtSep<typename StringType::value_type>() )
