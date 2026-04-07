@@ -871,6 +871,19 @@ bool setCurrentDirectory(const StringType &newCurDir)
 }
 
 //----------------------------------------------------------------------------
+//! Перемещение (переименование) файла или каталога
+template<typename StringType> inline
+bool move(const StringType &oldName, const StringType &newName)
+{
+    UMBA_USED(oldName);
+    UMBA_USED(newName);
+    #ifdef UMBA_DEBUGBREAK
+        UMBA_DEBUGBREAK();
+    #endif
+    throw std::runtime_error("Not implemented: move not specialized for this StringType");
+}
+
+//----------------------------------------------------------------------------
 //! Удаление файла
 template<typename StringType> inline
 bool deleteFile( const StringType &filename )
@@ -990,6 +1003,26 @@ bool isFileExistingExclusiveReadableWrittable(const StringType &fname)
 
 //----------------------------------------------------------------------------
 #if defined(WIN32) || defined(_WIN32)
+
+//----------------------------------------------------------------------------
+//! Перемещение (переименование) файла или каталога, специализация для std::string
+template<> inline
+bool move<std::string>(const std::string &oldName, const std::string &newName)
+{
+    return ::MoveFileA( umba::filename::prepareForNativeUsage(oldName).c_str() // lpExistingFileName
+                      , umba::filename::prepareForNativeUsage(newName).c_str() // lpNewFileName
+                      ) ? true : false;
+}
+
+//----------------------------------------------------------------------------
+//! Перемещение (переименование) файла или каталога, специализация для std::wstring
+template<> inline
+bool move<std::wstring>(const std::wstring &oldName, const std::wstring &newName)
+{
+    return ::MoveFileW( umba::filename::prepareForNativeUsage(oldName).c_str() // lpExistingFileName
+                      , umba::filename::prepareForNativeUsage(newName).c_str() // lpNewFileName
+                      ) ? true : false;
+}
 
 //----------------------------------------------------------------------------
 //! Удаление файла, специализация для std::string

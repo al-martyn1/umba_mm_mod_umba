@@ -94,6 +94,16 @@ inline CharType getNativePathListSep( )
 
 
 //-----------------------------------------------------------------------------
+// Пути в Windows
+// \\server\path\to\share\ - сетевой путь
+// C:\windows\system32 - локальный путь
+// \\?\C:\windows\system32
+// \\?\UNC\server\share
+// префикс "\\?\" нельзя использовать с относительным путем
+// 
+// Именование файлов, путей и пространства имён - https://learn.microsoft.com/ru-ru/windows/win32/fileio/naming-a-file
+// Ограничение максимальной длины пути - https://learn.microsoft.com/ru-ru/windows/win32/fileio/maximum-file-path-limitation?tabs=registry
+
 //! Возвращает UNC префикс
 template<typename StringType> inline
 StringType getNativeUncPrefix()

@@ -518,6 +518,24 @@ inline bool setCurrentDirectory(const char *newCurDir)
 
 
 //----------------------------------------------------------------------------
+//! Перемещение (переименование) файла или каталога
+inline bool move(const std::string &oldName, const std::string &newName)
+{
+    return fsysapi::move(impl_helpers::encodeToNative(oldName), impl_helpers::encodeToNative(newName));
+}
+
+//------------------------------
+//! Перемещение (переименование) файла или каталога
+inline bool move(const std::wstring &oldName, const std::wstring &newName)
+{
+    return fsysapi::move(impl_helpers::encodeToNative(oldName), impl_helpers::encodeToNative(newName));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 //! Удаление файла
 inline bool deleteFile( const std::wstring &filename )
 {
