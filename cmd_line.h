@@ -709,16 +709,21 @@ bool parseInteger ( const std::string &str, uint64_t &u, int ss = 10 )
 //-----------------------------------------------------------------------------
 enum class OptionType
 {
-    optUnknown     ,
+    optUnknown          ,
 
-    optFlag        ,
-    optInt         ,
-    optString      ,
-    optEnum        ,
+    optFlag             ,
+    optInt              ,
+    optString           ,
+    optEnum             ,
 
-    optIntList     ,
-    optStringList  ,
+    optIntList          ,
+    optStringList       ,
+    optStringPairList   ,
+    optHeadedStringList , // eg name:val1,val2...
+
     optEnumList
+
+
 };
 
 
@@ -966,6 +971,8 @@ struct CommandLineOptionInfo
             case OptionType::optUnknown:
             case OptionType::optIntList:
             case OptionType::optStringList:
+            case OptionType::optStringPairList:
+            case OptionType::optHeadedStringList:
             case OptionType::optEnumList:
                 [[fallthrough]];
             //case OptionType::optUnknown:
@@ -1011,6 +1018,8 @@ struct CommandLineOptionInfo
             case OptionType::optUnknown:
             case OptionType::optIntList:
             case OptionType::optStringList:
+            case OptionType::optStringPairList  :
+            case OptionType::optHeadedStringList:
             case OptionType::optEnumList:
                 [[fallthrough]];
                 //case OptionType::optUnknown:
@@ -1021,7 +1030,7 @@ struct CommandLineOptionInfo
     }
 
 
-    std::string getAllOptionNames( const std::string &sep ) const
+    std::string getAllOptionNames( const std::string &sep="/" ) const
     {
         //return mergeStrings( optNames, sep );
         std::string res;
@@ -1509,9 +1518,27 @@ struct CommandLineOption
         return false;
     }
 
-    template< typename T>
-    bool getParamValueImplHelper( T &val, std::string &errMsg, T defVal, OptionType optType )
+    // 
+    std::string getNames(const std::string &sep="/") const
     {
+        const auto &optInfo = pCollector->getCurrentOptionInfo();
+        return optInfo.getAllOptionNames(sep);
+    }
+
+    std::string getNamesParen(const std::string &sep="/") const
+    {
+        return "(" + getNames(sep) + ")";
+    }
+
+
+    bool checkCurOptionType(std::string &errMsg, OptionType optTypeCheckFor) const
+    {
+        if (!pCollector)
+        {
+            errMsg = std::string("pCollector==0 (") + name + std::string(")");
+            return false;
+        }
+
         const auto &optInfo = pCollector->getCurrentOptionInfo();
 
         if (optInfo.optType==OptionType::optUnknown)
@@ -1520,11 +1547,35 @@ struct CommandLineOption
             return false;
         }
 
-        if (optInfo.optType!=optType)
+        if (optInfo.optType!=optTypeCheckFor)
         {
             errMsg = std::string("Option configured to use getParamValue method with different type (") + optInfo.getAllOptionNames("/") + std::string(")");
             return false;
         }
+
+        return true;
+    }
+
+    template< typename T>
+    bool getParamValueImplHelper( T &val, std::string &errMsg, T defVal, OptionType optType )
+    {
+        if (!checkCurOptionType(errMsg, optType))
+            return false;
+
+        const auto &optInfo = pCollector->getCurrentOptionInfo();
+
+
+        // if (optInfo.optType==OptionType::optUnknown)
+        // {
+        //     errMsg = std::string("Option not configured to use getParamValue method (") + optInfo.getAllOptionNames("/") + std::string(")");
+        //     return false;
+        // }
+        //  
+        // if (optInfo.optType!=optType)
+        // {
+        //     errMsg = std::string("Option configured to use getParamValue method with different type (") + optInfo.getAllOptionNames("/") + std::string(")");
+        //     return false;
+        // }
 
         if (optArg.empty() && optInfo.optType==OptionType::optFlag)
         {
@@ -1672,11 +1723,8 @@ struct CommandLineOption
 
     bool getParamValue( std::string &val, std::string &errMsg )
     {
-        if (!pCollector)
-        {
-            errMsg = std::string("pCollector==0 (") + name + std::string(")");
+        if (!checkCurOptionType(errMsg, OptionType::optString))
             return false;
-        }
 
         const auto &optInfo = pCollector->getCurrentOptionInfo();
 
@@ -1694,6 +1742,49 @@ struct CommandLineOption
 
         return true;
     }
+
+    bool getParamValue( std::vector<std::string> &strVec, std::string &errMsg, const std::string &listSeps=",;" )
+    {
+        if (!checkCurOptionType(errMsg, OptionType::optStringList))
+            return false;
+
+        strVec = parse_utils::optionStringSplitToVector(optArg, listSeps);
+
+        return true;
+    }
+
+    bool getParamValue( std::vector< std::pair<std::string, std::string> > &strPairsVec, std::string &errMsg, const std::string &listSeps=",;", const std::string &pairSeps=":=" )
+    {
+        if (!checkCurOptionType(errMsg, OptionType::optStringPairList))
+            return false;
+
+        strPairsVec.clear();
+
+        auto strVec = parse_utils::optionStringSplitToVector(optArg, listSeps);
+
+        for(auto && str: strVec)
+        {
+            std::string f, s;
+            parse_utils::optionStringSplitToPair(str, f, s, pairSeps);
+            strPairsVec.emplace_back(f, s);
+        }
+
+        return true;
+    }
+
+    bool getParamValue( std::string &head, std::vector<std::string> &strVec, std::string &errMsg, const std::string &listSeps=",;", const std::string &headSeps=":=" )
+    {
+        if (!checkCurOptionType(errMsg, OptionType::optHeadedStringList))
+            return false;
+
+        std::string str;
+        parse_utils::optionStringSplitToPair(optArg, head, str, headSeps);
+
+        strVec = parse_utils::optionStringSplitToVector(str, listSeps);
+
+        return true;
+    }
+
 
     #include "umba/warnings/push_disable_spectre_mitigation.h"
     template<typename EnumType, typename EnumMapper >

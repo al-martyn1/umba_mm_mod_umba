@@ -301,6 +301,32 @@ inline bool isPathDirectory(const char *path)
 
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+inline bool isPathDir(const std::wstring &path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathDir(const std::string &path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathDir(const wchar_t *path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isPathDir(const char *path)
+{
+    return fsysapi::isPathDirectory(impl_helpers::encodeToNative(path));
+}
+
+//----------------------------------------------------------------------------
+
 
 
 //----------------------------------------------------------------------------
@@ -353,6 +379,34 @@ inline bool isFileExist(const wchar_t *path)
 inline bool isFileExist(const char *path)
 {
     return fsysapi::isFileExist(impl_helpers::encodeToNative(path));
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline bool isDirExist(const std::wstring &path)
+{
+    return fsysapi::isDirExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isDirExist(const std::string &path)
+{
+    return fsysapi::isDirExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isDirExist(const wchar_t *path)
+{
+    return fsysapi::isDirExist(impl_helpers::encodeToNative(path));
+}
+
+//------------------------------
+inline bool isDirExist(const char *path)
+{
+    return fsysapi::isDirExist(impl_helpers::encodeToNative(path));
 }
 
 //----------------------------------------------------------------------------
@@ -515,6 +569,43 @@ inline bool setCurrentDirectory(const char *newCurDir)
 
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+//! Получение текущего рабочего каталога
+inline std::string getCurrentDir()
+{
+    return impl_helpers::encodeFromNative(fsysapi::getCurrentDirectory<native_fs_string_t>());
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDir(const std::wstring &newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDir(const std::string &newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDir(const wchar_t *newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//------------------------------
+//! Установка текущего рабочего каталога
+inline bool setCurrentDir(const char *newCurDir)
+{
+    return fsysapi::setCurrentDirectory(impl_helpers::encodeToNative(newCurDir));
+}
+
+//----------------------------------------------------------------------------
+
 
 
 //----------------------------------------------------------------------------
@@ -597,6 +688,36 @@ inline bool deleteDirectory( const char *dirname )
 
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+//! Удаление каталога
+inline bool deleteDir( const std::wstring &dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Удаление каталога
+inline bool deleteDir( const std::string &dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Удаление каталога
+inline bool deleteDir( const wchar_t *dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Удаление каталога
+inline bool deleteDir( const char *dirname )
+{
+    return fsysapi::deleteDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//----------------------------------------------------------------------------
+
 
 
 //----------------------------------------------------------------------------
@@ -629,6 +750,36 @@ inline bool createDirectory( const char *dirname )
 
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+//! Создание каталога
+inline bool createDir( const std::wstring &dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Создание каталога
+inline bool createDir( const std::string &dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Создание каталога
+inline bool createDir( const wchar_t *dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//------------------------------
+//! Создание каталога
+inline bool createDir( const char *dirname )
+{
+    return fsysapi::createDirectory(impl_helpers::encodeToNative(dirname));
+}
+
+//----------------------------------------------------------------------------
+
 
 
 //----------------------------------------------------------------------------
@@ -655,6 +806,36 @@ inline bool createDirectoryEx( const wchar_t *dirname, bool forceCreatePath )
 //------------------------------
 //! Создание каталога с возможностью создания полного пути
 inline bool createDirectoryEx( const char *dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirEx( const std::wstring &dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirEx( const std::string &dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirEx( const wchar_t *dirname, bool forceCreatePath )
+{
+    return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
+}
+
+//------------------------------
+//! Создание каталога с возможностью создания полного пути
+inline bool createDirEx( const char *dirname, bool forceCreatePath )
 {
     return fsysapi::createDirectoryEx(impl_helpers::encodeToNative(dirname), forceCreatePath);
 }

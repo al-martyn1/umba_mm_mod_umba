@@ -13,6 +13,8 @@
 #include "alloca.h"
 #include "exception.h"
 #include "debug_helpers.h"
+#include "basic_enums.h"
+
 //
 #include <algorithm>
 #include <cctype>
@@ -661,6 +663,23 @@ template <typename StringType> inline void toupper( StringType &str )
 template <typename StringType> inline void tosamecase( StringType &str ) { }
 
 //-----------------------------------------------------------------------------
+//! Конвертирет строку в заданный регистр
+template <typename StringType> inline void case_convert( StringType &str, CaseOption caseOpt)
+{
+    switch(caseOpt)
+    {
+        case CaseOption::keepCase:  tosamecase(str); break;
+        case CaseOption::toLower :  tolower(str); break;
+        case CaseOption::toUpper :  toupper(str); break;
+        default:
+        {
+            UMBA_ASSERT_FAIL();
+            throw std::runtime_error("Inalid CaseOption value");
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
 //! Конвертирует строку StringType в нижний регистр (работает только для базового диапазона ASCII), возвращая модифицированную копию
 template <typename StringType> inline StringType tolower_copy( const StringType &str )
 {
@@ -686,7 +705,15 @@ template <typename StringType> inline StringType tosamecase_copy( const StringTy
 }
 
 //-----------------------------------------------------------------------------
+//! Конвертирет строку в заданный регистр, возвращая модифицированную копию
+template <typename StringType> inline StringType case_convert_copy( const StringType &str, CaseOption caseOpt)
+{
+    StringType res = str;
+    case_convert(res, caseOpt);
+    return res;
+}
 
+//-----------------------------------------------------------------------------
 
 
 

@@ -582,6 +582,16 @@ bool isFileExist(const StringType &path)
 }
 
 //----------------------------------------------------------------------------
+template<typename StringType>
+bool isDirExist(const StringType &path)
+{
+    FileStat fileStat;
+    if (!getPathStat(path, fileStat))
+        return false;
+    return fileStat.isDir();
+}
+
+//----------------------------------------------------------------------------
 
 
 

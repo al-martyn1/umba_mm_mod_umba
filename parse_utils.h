@@ -10,9 +10,15 @@
 
 //----------------------------------------------------------------------------
 
+#include "string.h"
+#include "basic_enums.h"
+
+//
+#include <algorithm>
 #include <cstring>
 #include <stdint.h>
 #include <string.h>
+#include <type_traits>
 
 // #include "const_string.h"
 
@@ -535,8 +541,197 @@ bool removeNumberUnits( QString &numStr, QString &unitsStr, bool allowAposAsSepa
 
 #endif
 
+//----------------------------------------------------------------------------
 
 
+
+//----------------------------------------------------------------------------
+// Разбирает список по разделителям, убирает окружающие пробелы
+inline
+std::vector<std::string> optionStringSplitToVector(const std::string &str, const std::string &seps=",;")
+{
+    std::vector<std::string> resVec;
+    std::string buf;
+
+    for(auto ch : str)
+    {
+        if (seps.find(ch)!=seps.npos) // Найден разделитель
+        {
+            umba::string::trim(buf);
+            if (!buf.empty())
+                resVec.push_back(buf);
+            buf.clear();
+        }
+        else
+        {
+            buf.append(1, ch);
+        }
+    }
+
+    umba::string::trim(buf);
+    if (!buf.empty())
+        resVec.push_back(buf);
+
+    return resVec;
+}
+
+//----------------------------------------------------------------------------
+// Возвращает true, если разделитель найден
+inline
+bool optionStringSplitToPair(const std::string &str, std::string &first, std::string &second, const std::string &seps=":=")
+{
+    first.clear();
+    second.clear();
+
+    auto pos = str.find_first_of(seps);
+    if (pos==str.npos)
+    {
+        first = str;
+        umba::string::trim(first);
+        return false;
+    }
+
+    first.assign(str, 0, pos); umba::string::trim(first);
+    second.assign(str, pos+1); umba::string::trim(second);
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string optionStringExtractUpdateMarker(std::string optStr, bool &bRemove, bool defaultAdd=true)
+{
+    umba::string::trim(optStr);
+
+    if (optStr.empty())
+        return optStr;
+
+    if (optStr.front()=='-' || optStr.front()=='+')
+    {
+        if (optStr.front()=='-')
+            bRemove = true;
+        else
+            bRemove = false;
+
+        optStr.erase(0, 1);
+        umba::string::trim(optStr);
+    }
+    else
+    {
+        if (defaultAdd)
+            bRemove = false;
+        else // default - remove
+            bRemove = true;
+    }
+
+    return optStr;
+}
+
+//----------------------------------------------------------------------------
+// Трейт: является ли тип ассоциативным контейнером (имеет key_type)
+template<typename, typename = void>
+struct is_associative : std::false_type {};
+
+template<typename T>
+struct is_associative<T, std::void_t<typename T::key_type>> : std::true_type {};
+
+//----------------------------------------------------------------------------
+struct OptionPrepareDefault
+{
+    std::string operator()(const std::string &s) const
+    {
+        return s;
+    }
+}:
+
+//----------------------------------------------------------------------------
+template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+std::enable_if_t<is_associative<SetType>::value, bool>
+optionVecUpdateSet(const std::vector<std::string> &optVec, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+{
+    for(auto opt : optVec)
+    {
+        umba::string::trim(opt);
+
+        if (opt=="-") // 'remove all' marker
+        {
+            s.clear();
+            continue;
+        }
+
+        bool bRemove = false;
+        opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
+    
+        if (opt.empty())
+            return false;
+
+        umba::string::case_convert(opt, caseOption);
+    
+        if (bRemove)
+            s.erase(opt);
+        else
+            s.insert(opt);
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+// Версия для веторов, списков, и тп
+template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+std::enable_if_t<!is_associative<SetType>::value, bool>
+optionVecUpdateSet(const std::vector<std::string> &optVec, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+{
+    for(auto opt : optVec)
+    {
+        umba::string::trim(opt);
+
+        if (opt=="-") // 'remove all' marker
+        {
+            s.clear();
+            continue;
+        }
+
+        bool bRemove = false;
+        opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
+    
+        if (opt.empty())
+            return false;
+
+        umba::string::case_convert(opt, caseOption);
+
+        auto existingValIt = std::find(s.begin(), s.end(), opt);
+    
+        if (bRemove)
+        {
+            if (existingValIt!=s.end()) // Элемент существует - удаляем
+                s.erase(opt);
+        
+        }
+        else
+        {
+            if (existingValIt==s.end()) // Элемент не существует - добавляем
+                s.push_back(opt);
+        }
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+// Версия для веторов, списков, и тп
+template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+bool optionStringUpdateSet(const std::string> &optStr, SetType &s, const std::string &seps=",;", OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+{
+    auto optVec = optionStringSplitToVector(optStr, seps);
+    return optionVecUpdateSet(optVec, s, optPrepareHandler, caseOption, defaultAdd);
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 
 } // namespace parse_utils
 } // namespace umba
