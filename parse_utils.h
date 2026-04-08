@@ -642,89 +642,96 @@ struct OptionPrepareDefault
     {
         return s;
     }
-}:
+};
 
 //----------------------------------------------------------------------------
 template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
 std::enable_if_t<is_associative<SetType>::value, bool>
-optionVecUpdateSet(const std::vector<std::string> &optVec, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
 {
-    for(auto opt : optVec)
+    umba::string::trim(opt);
+
+    if (opt=="-") // 'remove all' marker
     {
-        umba::string::trim(opt);
-
-        if (opt=="-") // 'remove all' marker
-        {
-            s.clear();
-            continue;
-        }
-
-        bool bRemove = false;
-        opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
-    
-        if (opt.empty())
-            return false;
-
-        umba::string::case_convert(opt, caseOption);
-    
-        if (bRemove)
-            s.erase(opt);
-        else
-            s.insert(opt);
+        s.clear();
+        continue;
     }
+
+    bool bRemove = false;
+    opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
+    opt = optPrepareHandler(opt);
+
+    if (opt.empty())
+        return false;
+
+    umba::string::case_convert(opt, caseOption);
+
+    if (bRemove)
+        s.erase(opt);
+    else
+        s.insert(opt);
 
     return true;
 }
 
 //----------------------------------------------------------------------------
-// Версия для веторов, списков, и тп
+// Версия для векторов, списков, и тп
 template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
 std::enable_if_t<!is_associative<SetType>::value, bool>
-optionVecUpdateSet(const std::vector<std::string> &optVec, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
 {
-    for(auto opt : optVec)
+    umba::string::trim(opt);
+
+    if (opt=="-") // 'remove all' marker
     {
-        umba::string::trim(opt);
+        s.clear();
+        return true;
+    }
 
-        if (opt=="-") // 'remove all' marker
-        {
-            s.clear();
-            continue;
-        }
-
-        bool bRemove = false;
-        opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
+    bool bRemove = false;
+    opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
     
-        if (opt.empty())
-            return false;
+    if (opt.empty())
+        return false;
 
-        umba::string::case_convert(opt, caseOption);
+    umba::string::case_convert(opt, caseOption);
+    opt = optPrepareHandler(opt);
 
-        auto existingValIt = std::find(s.begin(), s.end(), opt);
+    auto existingValIt = std::find(s.begin(), s.end(), opt);
     
-        if (bRemove)
-        {
-            if (existingValIt!=s.end()) // Элемент существует - удаляем
-                s.erase(opt);
-        
-        }
-        else
-        {
-            if (existingValIt==s.end()) // Элемент не существует - добавляем
-                s.push_back(opt);
-        }
+    if (bRemove)
+    {
+        if (existingValIt!=s.end()) // Элемент существует - удаляем
+            s.erase(existingValIt);
+    }
+    else
+    {
+        if (existingValIt==s.end()) // Элемент не существует - добавляем
+            s.push_back(opt);
     }
 
     return true;
 }
 
 //----------------------------------------------------------------------------
-// Версия для веторов, списков, и тп
 template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
-bool optionStringUpdateSet(const std::string> &optStr, SetType &s, const std::string &seps=",;", OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+bool optionVectorUpdateSet(const std::vector<std::string> &optVec, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+{
+    for(const auto &opt : optVec)
+    {
+        if (!optionStringUpdateSet(opt, s, optPrepareHandler, caseOption, defaultAdd))
+            return false;
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+bool optionStringListUpdateSet(const std::string &optStr, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, const std::string &seps=",;", bool defaultAdd=true)
 {
     auto optVec = optionStringSplitToVector(optStr, seps);
-    return optionVecUpdateSet(optVec, s, optPrepareHandler, caseOption, defaultAdd);
+    return optionVectorUpdateSet(optVec, s, optPrepareHandler, caseOption, defaultAdd);
 }
 
 //----------------------------------------------------------------------------

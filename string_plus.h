@@ -660,7 +660,7 @@ template <typename StringType> inline void toupper( StringType &str )
 
 //-----------------------------------------------------------------------------
 //! Не меняет регистр символов
-template <typename StringType> inline void tosamecase( StringType &str ) { }
+template <typename StringType> inline void tosamecase(StringType& str) { UMBA_USED(str); }
 
 //-----------------------------------------------------------------------------
 //! Конвертирет строку в заданный регистр
