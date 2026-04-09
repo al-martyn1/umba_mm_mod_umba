@@ -654,7 +654,7 @@ optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareH
     if (opt=="-") // 'remove all' marker
     {
         s.clear();
-        continue;
+        return true;
     }
 
     bool bRemove = false;
