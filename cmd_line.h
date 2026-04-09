@@ -32,7 +32,9 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <iterator>
+#include <functional>
 
+//
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -3348,7 +3350,13 @@ ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
 // Переделать в шаблон, StringType вместо std::string?
 struct CommandInfo
 {
+    // int handler(const std::string &fullCommandStr)
+    using CommandHandlerType = std::function<int(const std::string &)>;
+    using command_handler_t  = CommandHandlerType;
+
+
     std::string                          commandName;
+    CommandHandlerType                   commandHandler;
     std::map<std::string, CommandInfo>   subCommands;
     std::unordered_set<std::string>      allowedOptions;
 
@@ -3388,22 +3396,28 @@ struct CommandInfo
 
 
     template<typename CmdIter>
-    void addCommandOptions(CmdIter b, CmdIter e, const std::vector<std::string> &options)
+    const CommandInfo* addCommandOptions(CmdIter b, CmdIter e, const std::vector<std::string> &options)
     {
         if (b==e)
         {
             allowedOptions.insert(options.begin(), options.end());
+            if (!commandHandler)
+                commandHandler = [](const std::string &fullCmd)
+                                 {
+                                     throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
+                                 };
+            return this;
         }
         else
         {
             auto &subCommandInfo = subCommands[*b];
             subCommandInfo.commandName = *b;
-            subCommandInfo.addCommandOptions(std::next(b), e, options);
+            return subCommandInfo.addCommandOptions(std::next(b), e, options);
         }
     }
 
     void addCommandOptions( const std::string &cmdSequenceStr // space separated
-                          , const std::string &optionsStr // comma sepaated
+                          , const std::string &optionsStr // comma separated
                           )
     {
         auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
@@ -3411,11 +3425,24 @@ struct CommandInfo
         addCommandOptions(cmdSeq.begin(), cmdSeq.end(), optVec);
     }
 
-    void addSubcommand( const std::string &cmdSequenceStr // space separated
-                      )
+    void addCommand( const std::string &cmdSequenceStr // space separated
+                   , CommandHandlerType commandHandler_
+                   )
     {
         auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
-        addCommandOptions(cmdSeq.begin(), cmdSeq.end(), std::vector<std::string>());
+        const CommandInfo* pCommandInfo = addCommandOptions(cmdSeq.begin(), cmdSeq.end(), std::vector<std::string>());
+        pCommandInfo->commandHandler = commandHandler_;
+    }
+
+    CommandHandlerType
+    void addCommand(const std::string &cmdSequenceStr)
+    {
+        addCommand( cmdSequenceStr
+                  , [](const std::string &fullCmd)
+                    {
+                        throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
+                    }
+                  );
     }
 
     // Хэндлер вызывается N+1 раз - первый раз для корневого элемента без имени
@@ -3471,7 +3498,7 @@ struct CommandInfo
 
     bool isOptionAllowed( const std::vector<std::string> &cmdSequence
                         , const std::vector<std::string> &optNames
-                        )
+                        ) const
     {
         bool bAllowed = false;
 
@@ -3495,10 +3522,57 @@ struct CommandInfo
 
     bool isOptionAllowed( const std::vector<std::string> &cmdSequence
                         , const CommandLineOption &opt
-                        )
+                        ) const
     {
         return isOptionAllowed(cmdSequence, opt.getOptionNamesVector());
     }
+
+
+    int executeCommand(const std::vector<std::string> &cmdSequence) const
+    {
+        std::string fullName;
+
+        const CommandInfo* pCommandInfo = 
+        traverseCommandSequense( cmdSequence
+                               , [&](auto pCommandInfo) -> bool
+                                 {
+                                     if (fullName.empty())
+                                     {
+                                         fullName = pCommandInfo->commandName;
+                                     }
+                                     else
+                                     {
+                                         if (!pCommandInfo->commandName.empty())
+                                         {
+                                             fullName.append(1, ' ');
+                                             fullName.append(pCommandInfo->commandName);
+                                         }
+                                     }
+
+                                     return true; // идём до конца
+                                 }
+                               );
+        if (fullName.empty())
+        {
+            throw std::runtime_error("umba::command_line::CommandInfo::execCommand: try to execute empty command");
+        }
+
+        if (!pCommandInfo)
+        {
+            throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' not found at all");
+        }
+
+        if (!pCommandInfo->commandHandler)
+        {
+            throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' found, but command handler is not set");
+        }
+
+        return pCommandInfo->commandHandler(fullName);
+    }
+    // const std::vector<std::string> &cmdSequence
+
+
+
 
 
 }; // struct CommandInfo
@@ -3508,33 +3582,172 @@ struct CommandInfo
 
 
 //----------------------------------------------------------------------------
-struct CommandSequenceController
+class CommandSequenceController
 {
-    CommandInfo     commandInfo; // 
-    bool            bSealed = false; // Запечатывание происходит, когда после команды или нескольки приходит опция
+
+    CommandInfo                   commandInfo; // 
+    mutable bool                  bSealed = false; // Запечатывание происходит, когда после команды или нескольких приходит опция
+    std::vector<std::string>      commandSequence;
 
 
+public:
+
+    std::string getFullCommandStr() const
+    {
+        return string::merge<std::string>(commandSequence.begin(), commandSequence.end(), ' ');
+    }
+
+    bool isSealed() const
+    {
+        return bSealed;
+    }
 
     void addCommandOptions( const std::string &cmdSequenceStr // space separated
-                          , const std::string &optionsStr // comma sepaated
+                          , const std::string &optionsStr // comma separated
                           )
     {
         commandInfo.addCommandOptions(cmdSequenceStr, optionsStr);
     }
 
-    void addSubcommand( const std::string &cmdSequenceStr )
+    void addGlobalOptions(const std::string &optionsStr)
     {
-        commandInfo.addSubcommand(cmdSequenceStr);
+        addCommandOptions("", optionsStr);
+    }
+
+    void addCommand(const std::string &cmdSequenceStr, CommandInfo commandHandler)
+    {
+        commandInfo.addCommand(cmdSequenceStr, commandHandler);
+    }
+
+    void addCommand( const std::string &cmdSequenceStr )
+    {
+        commandInfo.addCommand(cmdSequenceStr);
+    }
+
+    // Теоретически, можем запускать и не только не команды, которые насобирали
+    int executeCommand(const std::vector<std::string> &cmdSeq) const
+    {
+        return commandInfo.executeCommand(cmdSeq);
+    }
+
+    int executeCommand() const
+    {
+        return executeCommand(commandSequence);
     }
 
 
+    // Также "запечатывает" команду
+    bool isOptionAllowed(const CommandLineOption &opt) const
+    {
+        // Проверяем опцию, если последовательность команд не пуста, то "запечатываем" - нельзя последовательность команд давать вперемешку с опциями
+        if (!commandSequence.empty())
+        {
+            bSealed = true;
+        }
+
+        return commandInfo.isOptionAllowed(commandSequence, opt);
+    }
+
+    bool isOptionAllowed(const CommandLineOption &opt, std::string &errMsg)
+    {
+        if (isOptionAllowed(opt))
+            return true;
+
+        auto optNames = opt.getOptionNamesVector();
+        auto optName = CommandInfo::findLongestName(optNames);
+        if (optName.size()>1)
+            optName = "--" + optName;
+        else
+            optName = "-" + optName;
+
+        auto fullCmd = getFullCommandStr();
+
+        if (fullCmd.empty())
+            errMsg = "option '" + optName + "' is not a global option. It is a command specific option";
+        else
+            errMsg = "option '" + optName + "' cannot be applied for command '" + getFullCommandStr() + "'";
+
+        return false;
+    }
+
+
+    bool canAddSubCommand() const
+    {
+        if (bSealed)
+            return false;
+
+        if (!commandInfo.canReceiveSubCommands(commandSequence))
+            return false;
+
+        // тут добавим проверки по вкусу
+
+        return true;
+    }
+
+    bool isSubCommandAllowed(const std::string& cmd) const
+    {
+        if (!canAddSubCommand())
+            return false;
+
+        return commandInfo.isSubCommandAllowed(commandSequence, cmd);
+    }
+
+    bool isSubCommandAllowed(const std::string& cmd, std::string &errMsg) const
+    {
+        if (isSealed())
+        {
+            errMsg = "command and it's subcommands cannot be mixed with options";
+            return false;
+        }
+
+        if (isSubCommandAllowed(cmd))
+            return true;
+
+
+        auto fullCmd = getFullCommandStr();
+
+        if (fullCmd.empty())
+        {
+            errMsg = "unknown command '" + fullCmd + "'";
+        }
+        else
+        {
+            errMsg = "incompatible subcommand '" + cmd + "' for command '" + fullCmd + "'";
+        }
+
+        return false;
+    }
+
+    void addStandardCommonGlobalOptions()
+    {
+        addGlobalOptions("help,quet,verbose,version,color,build-info,build-info-x,no-builtin-options,no-custom-builtin-options,no-user-builtin-options,where");
+    }
+
+    void addStandardAutocompleteGlobalOptions()
+    {
+        addGlobalOptions("autocomplete-install,autocomplete-uninstall");
+    }
+
+    void addStandardHelpGlobalOptions()
+    {
+        addGlobalOptions("wiki,md,bash,clink");
+    }
+
+    void addAllStandardGlobalOptions()
+    {
+        addStandardCommonGlobalOptions();
+        addStandardAutocompleteGlobalOptions();
+        addStandardHelpGlobalOptions();
+    }
 
 
 }; // struct CommandSequenceController
 
+//----------------------------------------------------------------------------
 
 
 
+//----------------------------------------------------------------------------
 
 } // namespace command_line
 } // namespace umba
