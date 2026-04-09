@@ -29,6 +29,9 @@
 #include <vector>
 #include <stack>
 #include <sstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <iterator>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -1518,7 +1521,13 @@ struct CommandLineOption
         return false;
     }
 
-    // 
+    std::string getOptionNames( std::string sep = "/" ) const
+    {
+        const auto &optInfo = pCollector->getCurrentOptionInfo();
+        return optInfo.getAllOptionNames(sep);
+    }
+
+    // У нас уже была getOptionNames - пропустил. Ладно, будет алиас
     std::string getNames(const std::string &sep="/") const
     {
         const auto &optInfo = pCollector->getCurrentOptionInfo();
@@ -1530,6 +1539,11 @@ struct CommandLineOption
         return "(" + getNames(sep) + ")";
     }
 
+    std::vector<std::string> getOptionNamesVector() const
+    {
+        const auto &optInfo = pCollector->getCurrentOptionInfo();
+        return optInfo.optNames;
+    }
 
     bool checkCurOptionType(std::string &errMsg, OptionType optTypeCheckFor) const
     {
@@ -1835,12 +1849,6 @@ struct CommandLineOption
         return true;
     }
     #include "umba/warnings/pop.h"
-
-    std::string getOptionNames( std::string sep = "/" ) const
-    {
-        const auto &optInfo = pCollector->getCurrentOptionInfo();
-        return optInfo.getAllOptionNames(sep);
-    }
 
 
 /*
@@ -3321,9 +3329,211 @@ ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
                                                 , const std::wstring &confFolderName = umba::string_plus::make_string<std::wstring>(UMBA_PROGRAM_LOCATION_DEF_CONF_FOLDER_NAME)
                                                 )
 
-
-
 */
+
+
+// Для обработки команд, по примеру git'а: 
+//   git remote add
+//   git stash push
+//   git stash pop
+//   git stash list
+//   git stash clear
+//   git submodule add
+//   git submodule update
+//   git submodule foreach git pull
+//   git worktree list
+// Какие-то опции могут работать только с определёнными подкомандами
+// Какие-то опции могут работать глобально
+
+// Переделать в шаблон, StringType вместо std::string?
+struct CommandInfo
+{
+    std::string                          commandName;
+    std::map<std::string, CommandInfo>   subCommands;
+    std::unordered_set<std::string>      allowedOptions;
+
+
+    static
+    std::string findLongestName(const std::vector<std::string> &names)
+    {
+        if (names.empty())
+            return std::string();
+
+        std::string res = names.front();
+
+        for(const auto &n : names)
+        {
+            if (n.size() > res.size())
+                res = n;
+        }
+
+        return res;
+    }
+
+    static
+    std::vector<std::string> splitHelper(const std::string &str, char ch)
+    {
+        auto tmpVec = umba::string_plus::split(str, ch);
+        std::vector<std::string> resVec; resVec.reserve(tmpVec.size());
+
+        for(auto tmpStr : tmpVec)
+        {
+            umba::string_plus::trim(tmpStr);
+            if (!tmpStr.empty())
+                 resVec.push_back(tmpStr);
+        }
+
+        return resVec;
+    }
+
+
+    template<typename CmdIter>
+    void addCommandOptions(CmdIter b, CmdIter e, const std::vector<std::string> &options)
+    {
+        if (b==e)
+        {
+            allowedOptions.insert(options.begin(), options.end());
+        }
+        else
+        {
+            auto &subCommandInfo = subCommands[*b];
+            subCommandInfo.commandName = *b;
+            subCommandInfo.addCommandOptions(std::next(b), e, options);
+        }
+    }
+
+    void addCommandOptions( const std::string &cmdSequenceStr // space separated
+                          , const std::string &optionsStr // comma sepaated
+                          )
+    {
+        auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
+        auto optVec = splitHelper(optionsStr, ',');
+        addCommandOptions(cmdSeq.begin(), cmdSeq.end(), optVec);
+    }
+
+    void addSubcommand( const std::string &cmdSequenceStr // space separated
+                      )
+    {
+        auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
+        addCommandOptions(cmdSeq.begin(), cmdSeq.end(), std::vector<std::string>());
+    }
+
+    // Хэндлер вызывается N+1 раз - первый раз для корневого элемента без имени
+    template<typename TraverseHandler> // bool traverseHandler(const CommandInfo* pCommandInfo)
+    const CommandInfo* traverseCommandSequense(const std::vector<std::string> &cmdSequence, TraverseHandler traverseHandler) const
+    {
+        const CommandInfo* pCommandInfo = this;
+        if (!traverseHandler(pCommandInfo))
+             return pCommandInfo;
+
+        for(auto it=curCmdSequence.begin(); it!=curCmdSequence.end(); ++it)
+        {
+            auto subIt = pCommandInfo->subCommands.find(*it);
+            if (subIt==pCommandInfo->subCommands.end())
+                return 0; // подкоманда не найдена
+
+            pCommandInfo = &subIt->second;
+            if (!traverseHandler(pCommandInfo))
+                 return pCommandInfo;
+        }
+
+        return pCommandInfo; // Последовательность имён закончилась, выдаём указатель на инфу по последнему имени
+    }
+
+    // Есть ли доступные подкоманды?
+    bool isCompleteCommandSequence(const std::vector<std::string> &cmdSequence) const
+    {
+        const CommandInfo* pCommandInfo = traverseCommandSequense(cmdSequence, [](auto){ return true; });
+        if (!pCommandInfo)
+            return false;
+
+        return pCommandInfo->subCommands.empty();
+    }
+
+    // Проверяет, можно ли ещё принимать подкоманды
+    bool canReceiveSubCommands(const std::vector<std::string> &cmdSequence) const
+    {
+        return !isCompleteCommandSequence(cmdSequence);
+    }
+
+    bool isSubCommandAllowed(const std::vector<std::string> &curCmdSequence, const std::string &str) const
+    {
+        const CommandInfo* pCommandInfo = traverseCommandSequense(curCmdSequence, [](auto){ return true; });
+        if (!pCommandInfo)
+            return false;
+
+        auto subIt = pCommandInfo->subCommands.find(str);
+        if (subIt==pCommandInfo->subCommands.end())
+            return false;
+
+        return true;
+    }
+
+    bool isOptionAllowed( const std::vector<std::string> &cmdSequence
+                        , const std::vector<std::string> &optNames
+                        )
+    {
+        bool bAllowed = false;
+
+        traverseCommandSequense( cmdSequence
+                               , [&](auto pCommandInfo) -> bool
+                                 {
+                                     for(const auto opt: optNames)
+                                     {
+                                         if (pCommandInfo->allowedOptions.find(opt)!=pCommandInfo->allowedOptions.end())
+                                         {
+                                             bAllowed = true;
+                                             break;
+                                         }
+                                     }
+
+                                     return !bAllowed;
+                                 }
+                               );
+        return bAllowed;
+    }
+
+    bool isOptionAllowed( const std::vector<std::string> &cmdSequence
+                        , const CommandLineOption &opt
+                        )
+    {
+        return isOptionAllowed(cmdSequence, opt.getOptionNamesVector());
+    }
+
+
+}; // struct CommandInfo
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+struct CommandSequenceController
+{
+    CommandInfo     commandInfo; // 
+    bool            bSealed = false; // Запечатывание происходит, когда после команды или нескольки приходит опция
+
+
+
+    void addCommandOptions( const std::string &cmdSequenceStr // space separated
+                          , const std::string &optionsStr // comma sepaated
+                          )
+    {
+        commandInfo.addCommandOptions(cmdSequenceStr, optionsStr);
+    }
+
+    void addSubcommand( const std::string &cmdSequenceStr )
+    {
+        commandInfo.addSubcommand(cmdSequenceStr);
+    }
+
+
+
+
+}; // struct CommandSequenceController
+
+
+
 
 
 } // namespace command_line
