@@ -15,8 +15,10 @@
 #include "text_utils.h"
 #include "utf8.h"
 #include "filesys.h"
+#include "filename.h"
 #include "debug_helpers.h"
 #include "rule_of_five.h"
+#include "shellapi.h"
 
 //
 #include <algorithm>
@@ -3334,18 +3336,31 @@ ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
 */
 
 
-// Для обработки команд, по примеру git'а: 
-//   git remote add
-//   git stash push
-//   git stash pop
-//   git stash list
-//   git stash clear
-//   git submodule add
-//   git submodule update
-//   git submodule foreach git pull
-//   git worktree list
-// Какие-то опции могут работать только с определёнными подкомандами
-// Какие-то опции могут работать глобально
+/*
+
+Для обработки команд, по примеру git'а: 
+  git remote add
+  git stash push
+  git stash pop
+  git stash list
+  git stash clear
+  git submodule add
+  git submodule update
+  git submodule foreach git pull
+  git worktree list
+Какие-то опции могут работать только с определёнными подкомандами
+Какие-то опции могут работать глобально
+
+После того, как команда с подкомандами накоплены, могут идти опции команды, а также
+какие-то дополнительные аргументы. Это могут быть как файлы, так и какие-то имена, 
+не связанные с файловой системой.
+
+По умолчанию - это файлы, и на его базе делается абсолютное имя файла.
+Но как быть, если это не имя файла?
+Добавим обработчик трансформации параметра
+
+*/
+
 
 // Переделать в шаблон, StringType вместо std::string?
 struct CommandInfo
@@ -3354,13 +3369,30 @@ struct CommandInfo
     using CommandHandlerType = std::function<int(const std::string &, const std::vector<std::string> &)>;
     using command_handler_t  = CommandHandlerType;
 
+    // std::string handler( const std::string &fullCommandStr
+    //                    , const std::vector<std::string> &inputList // previosly added params
+    //                    , const std::string &paramValue
+    //                    , const std::string &cwd
+    //                    )
+    using ParameterTransformHandlerType = std::function<std::string( const std::string &
+                                                                   , const std::vector<std::string> &
+                                                                   , const std::string &
+                                                                   , const std::string &
+                                                                   )
+                                                       >;
+    using parameter_transform_handler_t = ParameterTransformHandlerType;
+
 
     std::string                          commandName;
-    CommandHandlerType                   commandHandler;
+    CommandHandlerType                   commandHandler;  // по умолчанию в корневом элементе нет никакого обработчика, и пустая команда недопустима
+    ParameterTransformHandlerType        parameterTransformHandler;
     std::map<std::string, CommandInfo>   subCommands;
     std::unordered_set<std::string>      allowedOptions;
+    std::string                          helpString;
+    std::size_t                          maxInputParams = std::size_t(-1);
 
 
+    //--------------------------------------------------
     static
     std::string findLongestName(const std::vector<std::string> &names)
     {
@@ -3378,6 +3410,7 @@ struct CommandInfo
         return res;
     }
 
+    //--------------------------------------------------
     static
     std::vector<std::string> splitHelper(const std::string &str, char ch)
     {
@@ -3394,124 +3427,298 @@ struct CommandInfo
         return resVec;
     }
 
+    //--------------------------------------------------
+    static
+    std::vector<std::string> splitCommandStr(const std::string &str)
+    {
+        return splitHelper(str, ' ');
+    }
 
+    //--------------------------------------------------
+    static
+    std::vector<std::string> splitOptionsStr(const std::string &str)
+    {
+        return splitHelper(str, ',');
+    }
+
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    // Добавляет команду (если её ещё нет) и устанавливает дефолтный обработчик, если он ещё не задан
     template<typename CmdIter>
-    const CommandInfo* addCommandOptions(CmdIter b, CmdIter e, const std::vector<std::string> &options)
+    CommandInfo* addCommandImpl(CmdIter b, CmdIter e)
     {
         if (b==e)
         {
-            allowedOptions.insert(options.begin(), options.end());
             if (!commandHandler)
+            {
                 commandHandler = [](const std::string &fullCmd, const std::vector<std::string> &inputs) -> int
                                  {
                                      // throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
-                                     throw std::runtime_error("command handler for command '" + fullCmd + "' not implemented (input: '" + string::merge<std::string>(inputs.begin(), inputs.end(), ' ') + "')");
+                                     throw std::runtime_error("command handler for command '" + fullCmd + "' not implemented "
+                                                              "(parameters: '" + umba::shellapi::makeSystemFunctionCommandString(inputs) + "')"
+                                                             );
                                  };
+            }
+
             return this;
         }
         else
         {
             auto &subCommandInfo = subCommands[*b];
             subCommandInfo.commandName = *b;
-            return subCommandInfo.addCommandOptions(std::next(b), e, options);
+            return subCommandInfo.addCommandImpl(std::next(b), e);
         }
     }
 
-    void addCommandOptions( const std::string &cmdSequenceStr // space separated
-                          , const std::string &optionsStr // comma separated
-                          )
+    //--------------------------------------------------
+    CommandInfo& addCommand(const std::vector<std::string> &cmdSeq)
     {
-        auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
-        auto optVec = splitHelper(optionsStr, ',');
-        addCommandOptions(cmdSeq.begin(), cmdSeq.end(), optVec);
-    }
-
-    void addOptionsToFinalCommands(const std::vector<std::string> &options)
-    {
-        if (subCommands.empty())
+        CommandInfo* pCommandInfo = addCommandImpl(cmdSeq.begin(), cmdSeq.end());
+        if (!pCommandInfo)
         {
-            allowedOptions.insert(options.begin(), options.end());
+            throw std::runtime_error("umba::command_line::CommandInfo::addCommand: something goes wrong");
         }
-        else
-        {
-            for(auto &kv : subCommands)
-            {
-                kv.second.addOptionsToFinalCommands(options);
-            }
-        }
+
+        return *pCommandInfo;
     }
 
-    void addOptionsToFinalCommands(const std::string &optionsStr)
+    //--------------------------------------------------
+    CommandInfo& addCommand(const std::string &cmdSequenceStr) // space separated
     {
-        auto optVec = splitHelper(optionsStr, ',');
-        addOptionsToFinalCommands(optVec);
+        auto cmdSeq = splitCommandStr(cmdSequenceStr);
+        return addCommand(cmdSeq);
     }
 
+    //--------------------------------------------------
 
-    void addCommand( const std::string &cmdSequenceStr // space separated
-                   , CommandHandlerType commandHandler_
-                   )
-    {
-        auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
-        const CommandInfo* pCommandInfoConst = addCommandOptions(cmdSeq.begin(), cmdSeq.end(), std::vector<std::string>());
-        CommandInfo* pCommandInfo = const_cast<CommandInfo*>(pCommandInfoConst);
-        pCommandInfo->commandHandler = commandHandler_;
-    }
 
-    void addCommand(const std::string &cmdSequenceStr)
-    {
-        addCommand( cmdSequenceStr
-                  , [](const std::string &fullCmd, const std::vector<std::string> &inputs) -> int
-                    {
-                        //throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
-                        throw std::runtime_error("command handler for command '" + fullCmd + "' not implemented (input: '" + string::merge<std::string>(inputs.begin(), inputs.end(), ' ') + "')");
-                    }
-                  );
-    }
 
+    //--------------------------------------------------
     // Хэндлер вызывается N+1 раз - первый раз для корневого элемента без имени
     template<typename TraverseHandler> // bool traverseHandler(const CommandInfo* pCommandInfo)
-    const CommandInfo* traverseCommandSequense(const std::vector<std::string> &cmdSequence, TraverseHandler traverseHandler) const
+    const CommandInfo* traverseCommandSequenseImpl(const std::vector<std::string> &cmdSequence, TraverseHandler traverseHandler, std::string *pCommandFullName=0) const
     {
+        std::string fullName;
+
         const CommandInfo* pCommandInfo = this;
         if (!traverseHandler(pCommandInfo))
              return pCommandInfo;
 
         for(auto it= cmdSequence.begin(); it!= cmdSequence.end(); ++it)
         {
+            if (fullName.empty())
+            {
+                fullName = *it;
+            }
+            else
+            {
+                if (!it->empty())
+                {
+                    fullName.append(1, ' ');
+                    fullName.append(*it);
+                }
+            }
+
             auto subIt = pCommandInfo->subCommands.find(*it);
             if (subIt==pCommandInfo->subCommands.end())
-                return 0; // подкоманда не найдена
+            {
+                if (pCommandFullName)
+                   *pCommandFullName = fullName;
+                return 0; // подкоманда не найдена (но имя не найденной команды всё равно возвращаем)
+            }
 
             pCommandInfo = &subIt->second;
-            if (!traverseHandler(pCommandInfo))
+            if (!traverseHandler(pCommandInfo)) // хэндлер указал остановится
+            {
+                if (pCommandFullName)
+                   *pCommandFullName = fullName;
                  return pCommandInfo;
+            }
         }
+
+        if (pCommandFullName)
+           *pCommandFullName = fullName;
 
         return pCommandInfo; // Последовательность имён закончилась, выдаём указатель на инфу по последнему имени
     }
 
-    // Есть ли доступные подкоманды?
+    //--------------------------------------------------
+    template<typename TraverseHandler> // bool traverseHandler(const CommandInfo* pCommandInfo)
+    const CommandInfo* traverseCommandSequense(const std::vector<std::string> &cmdSequence, TraverseHandler traverseHandler, std::string *pCommandFullName=0) const
+    {
+        return traverseCommandSequenseImpl(cmdSequence, traverseHandler, pCommandFullName);
+    }
+
+    //--------------------------------------------------
+    template<typename TraverseHandler> // bool traverseHandler(const CommandInfo* pCommandInfo)
+    CommandInfo* traverseCommandSequense(const std::vector<std::string> &cmdSequence, TraverseHandler traverseHandler, std::string *pCommandFullName=0)
+    {
+        return const_cast<CommandInfo*>(traverseCommandSequenseImpl(cmdSequence, traverseHandler, pCommandFullName));
+    }
+
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    const CommandInfo& findCommand(const std::vector<std::string> &cmdSequence, std::string *pCommandFullName=0) const
+    {
+        auto pCommandInfo = traverseCommandSequense(cmdSequence, [](const CommandInfo*) { return true; }, pCommandFullName );
+        if (!pCommandInfo)
+        {
+             auto cmdStr = string::merge<std::string>(cmdSequence.begin(), cmdSequence.end(), ' ');
+             throw std::runtime_error("umba::command_line::CommandInfo::findCommand: command '" + cmdStr + "' not found");
+        }
+
+        return *pCommandInfo;
+    }
+
+    //--------------------------------------------------
+    CommandInfo& findCommand(const std::vector<std::string> &cmdSequence, std::string *pCommandFullName=0)
+    {
+        auto pCommandInfo = traverseCommandSequense(cmdSequence, [](const CommandInfo*) { return true; }, pCommandFullName );
+        if (!pCommandInfo)
+        {
+             auto cmdStr = string::merge<std::string>(cmdSequence.begin(), cmdSequence.end(), ' ');
+             throw std::runtime_error("umba::command_line::CommandInfo::findCommand: command '" + cmdStr + "' not found");
+        }
+
+        return *pCommandInfo;
+    }
+
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    const CommandInfo& findCommand(const std::string &cmdStr, std::string *pCommandFullName=0) const
+    {
+        auto cmdSeq = splitCommandStr(cmdStr);
+        return findCommand(cmdSeq, pCommandFullName);
+    }
+
+    //--------------------------------------------------
+    CommandInfo& findCommand(const std::string &cmdStr, std::string *pCommandFullName=0)
+    {
+        auto cmdSeq = splitCommandStr(cmdStr);
+        return findCommand(cmdSeq, pCommandFullName);
+    }
+
+    //--------------------------------------------------
+
+    
+
+    //--------------------------------------------------
+    template<typename TraverseHandler>
+    bool traverseFinalCommands(TraverseHandler traverseHandler) // возвращает, надо ли продоложать
+    {
+        if (subCommands.empty())
+        {
+            return traverseHandler(this);
+        }
+        else
+        {
+            for(auto &[k, v] : subCommands)
+            {
+                if (!v.traverseFinalCommands(traverseHandler))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    CommandInfo& setOptions(const std::vector<std::string> &options)
+    {
+        allowedOptions.insert(options.begin(), options.end());
+        return *this;
+    }
+
+    //--------------------------------------------------
+    CommandInfo& setOptions(const std::string &optionsStr) // comma separated
+    {
+        auto optVec = splitOptionsStr(optionsStr);
+        return setOptions(optVec);
+    }
+
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    CommandInfo& setCommandHandler(CommandHandlerType commandHandler_)
+    {
+        commandHandler = commandHandler_;
+        return *this;
+    }
+
+    //--------------------------------------------------
+    CommandInfo& setParameterTransformHandler(ParameterTransformHandlerType parameterTransformHandler_)
+    {
+        parameterTransformHandler = parameterTransformHandler_;
+        return *this;
+    }
+
+    //--------------------------------------------------
+    CommandInfo& setHelpString(const std::string &helpString_)
+    {
+        helpString = helpString_;
+        return *this;
+    }
+
+    //--------------------------------------------------
+    CommandInfo& setMaxInputParams(std::size_t maxInputParams_)
+    {
+        maxInputParams = maxInputParams_;
+        return *this;
+    }
+
+    //--------------------------------------------------
+    std::size_t getMaxInputParams() const
+    {
+        return maxInputParams;
+    }
+
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    // Полностью определённая подкоманда?
     bool isCompleteCommandSequence(const std::vector<std::string> &cmdSequence) const
     {
         const CommandInfo* pCommandInfo = traverseCommandSequense(cmdSequence, [](auto){ return true; });
         if (!pCommandInfo)
-            return false;
+            return false; // подкоманда не найдена, считаем, что подкоманда определена
 
         return pCommandInfo->subCommands.empty();
     }
 
+    //--------------------------------------------------
     // Проверяет, можно ли ещё принимать подкоманды
     bool canReceiveSubCommands(const std::vector<std::string> &cmdSequence) const
     {
-        return !isCompleteCommandSequence(cmdSequence);
+        const CommandInfo* pCommandInfo = traverseCommandSequense(cmdSequence, [](auto){ return true; });
+        if (!pCommandInfo)
+            return false; // текущая подкоманда не найдена, добавлять нельзя
+
+        return !pCommandInfo->subCommands.empty();
     }
 
+    //--------------------------------------------------
     bool isSubCommandAllowed(const std::vector<std::string> &curCmdSequence, const std::string &str) const
     {
         const CommandInfo* pCommandInfo = traverseCommandSequense(curCmdSequence, [](auto){ return true; });
         if (!pCommandInfo)
-            return false;
+            return false; // родительская подкоманда не найдена, добавить нельзя вообще ничего
 
         auto subIt = pCommandInfo->subCommands.find(str);
         if (subIt==pCommandInfo->subCommands.end())
@@ -3520,6 +3727,11 @@ struct CommandInfo
         return true;
     }
 
+    //--------------------------------------------------
+
+    
+    
+    //--------------------------------------------------
     bool isOptionAllowed( const std::vector<std::string> &cmdSequence
                         , const std::vector<std::string> &optNames
                         ) const
@@ -3544,6 +3756,7 @@ struct CommandInfo
         return bAllowed;
     }
 
+    //--------------------------------------------------
     bool isOptionAllowed( const std::vector<std::string> &cmdSequence
                         , const CommandLineOption &opt
                         ) const
@@ -3551,55 +3764,72 @@ struct CommandInfo
         return isOptionAllowed(cmdSequence, opt.getOptionNamesVector());
     }
 
+    //--------------------------------------------------
 
+
+
+    //--------------------------------------------------
     int executeCommand(const std::vector<std::string> &cmdSequence, const std::vector<std::string> &inputList) const
     {
         std::string fullName;
 
-        const CommandInfo* pCommandInfo = 
-        traverseCommandSequense( cmdSequence
-                               , [&](auto pCommandInfo) -> bool
-                                 {
-                                     if (fullName.empty())
-                                     {
-                                         fullName = pCommandInfo->commandName;
-                                     }
-                                     else
-                                     {
-                                         if (!pCommandInfo->commandName.empty())
-                                         {
-                                             fullName.append(1, ' ');
-                                             fullName.append(pCommandInfo->commandName);
-                                         }
-                                     }
-
-                                     return true; // идём до конца
-                                 }
-                               );
-        if (fullName.empty())
+        try
         {
-            if (!commandHandler) // Для текущей команды (корневой) не задан обработчик - значит, путую команду нельзя выполнить
-                throw std::runtime_error("umba::command_line::CommandInfo::execCommand: try to execute empty command");
+            const CommandInfo& ci = findCommand(cmdSequence, &fullName);
 
-            return commandHandler(std::string(), inputList);
+            if (fullName.empty())
+            {
+                if (!ci.commandHandler) // Для текущей команды (корневой) не задан обработчик - значит, пуcтую команду нельзя выполнить
+                    throw std::runtime_error("umba::command_line::CommandInfo::execCommand: try to execute empty command");
+    
+                // Но обработчик может быть задан, и для пустой команды допустимо выполнение
+                return ci.commandHandler(std::string(), inputList);
+            }
+
+            if (!ci.commandHandler)
+            {
+                throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' found, but command handler is not set");
+            }
+    
+            return ci.commandHandler(fullName, inputList);
+
+        }
+        catch(const std::exception&)
+        {
+            // throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' not found at all");
+            throw;
         }
 
-        if (!pCommandInfo)
-        {
-            throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' not found at all");
-        }
-
-        if (!pCommandInfo->commandHandler)
-        {
-            throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' found, but command handler is not set");
-        }
-
-        return pCommandInfo->commandHandler(fullName, inputList);
     }
-    // const std::vector<std::string> &cmdSequence
 
+    std::string transformCommandParameter( const std::vector<std::string> &cmdSequence
+                                         , const std::vector<std::string> &inputList
+                                         , const std::string &paramValue
+                                         , const std::string &cwd
+                                         ) const
+    {
+        std::string fullName;
 
+        try
+        {
+            const CommandInfo& ci = findCommand(cmdSequence, &fullName);
 
+            if (ci.parameterTransformHandler)
+            {
+                return ci.parameterTransformHandler(fullName, inputList, paramValue, cwd);
+            }
+    
+            // Трансформатора нет, поэтому считаем, что у нас имя файла
+            return umba::filename::makeAbsPath( paramValue, cwd );
+        }
+
+        catch(const std::exception&)
+        {
+            // throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' not found at all");
+            throw;
+        }
+
+    }
 
 
 }; // struct CommandInfo
@@ -3626,9 +3856,24 @@ public:
         return inputList;
     }
 
-    void addInput(const std::string &input)
+    // Сырое добавление, без транформации
+    void addInput(const std::string &inputParam)
     {
-        inputList.push_back(input);
+        std::size_t maxParams = findCommand(commandSequence).getMaxInputParams(); // std::size_t(-1);
+
+        if (inputList.size() >= maxParams)
+        {
+            throw std::runtime_error("too many parameters for command: '" + string::merge<std::string>(commandSequence.begin(), commandSequence.end(), ' ') + "'");
+        }
+
+        inputList.push_back(inputParam);
+    }
+
+    // добавление с транформацией
+    void addInput(const std::string &inputParam, const std::string &cwd)
+    {
+        auto transformedParam = commandInfo.transformCommandParameter(commandSequence, inputList, inputParam, cwd);
+        addInput(transformedParam);
     }
 
     std::string getFullCommandStr() const
@@ -3646,32 +3891,48 @@ public:
         return bSealed;
     }
 
-    void addCommandOptions( const std::string &cmdSequenceStr // space separated
-                          , const std::string &optionsStr // comma separated
-                          )
+
+    CommandInfo& addCommand(const std::string &cmdSequenceStr)
     {
-        commandInfo.addCommandOptions(cmdSequenceStr, optionsStr);
+        return commandInfo.addCommand(cmdSequenceStr);
+    }
+
+    const CommandInfo& findCommand(const std::vector<std::string> &cmdSequence) const
+    {
+        return commandInfo.findCommand(cmdSequence);
+    }
+
+    CommandInfo& findCommand(const std::vector<std::string> &cmdSequence)
+    {
+        return commandInfo.findCommand(cmdSequence);
+    }
+
+    const CommandInfo& findCommand(const std::string &cmdSequenceStr) const
+    {
+        return commandInfo.findCommand(cmdSequenceStr);
+    }
+
+    CommandInfo& findCommand(const std::string &cmdSequenceStr)
+    {
+        return commandInfo.findCommand(cmdSequenceStr);
     }
 
     void addGlobalOptions(const std::string &optionsStr)
     {
-        addCommandOptions("", optionsStr);
+        //addCommandOptions("", optionsStr);
+        commandInfo.setOptions(optionsStr);
     }
 
     void addOptionsToFinalCommands(const std::string &optionsStr)
     {
-        commandInfo.addOptionsToFinalCommands(optionsStr);
+        commandInfo.traverseFinalCommands( [&](CommandInfo *pCommandInfo)
+                                           {
+                                               pCommandInfo->setOptions(optionsStr);
+                                               return true;
+                                           }
+                                         );
     }
 
-    void addCommand(const std::string &cmdSequenceStr, CommandInfo::CommandHandlerType commandHandler)
-    {
-        commandInfo.addCommand(cmdSequenceStr, commandHandler);
-    }
-
-    void addCommand( const std::string &cmdSequenceStr )
-    {
-        commandInfo.addCommand(cmdSequenceStr);
-    }
 
     // Теоретически, можем запускать и не только не команды, которые насобирали
     int executeCommand(const std::vector<std::string> &cmdSeq, const std::vector<std::string> &inputs) const
