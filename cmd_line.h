@@ -3350,8 +3350,8 @@ ProgramLocation<std::wstring> getProgramLocation( int argc, wchar_t **argv
 // Переделать в шаблон, StringType вместо std::string?
 struct CommandInfo
 {
-    // int handler(const std::string &fullCommandStr)
-    using CommandHandlerType = std::function<int(const std::string &)>;
+    // int handler(const std::string &fullCommandStr, const std::vector<std::string> &inputList)
+    using CommandHandlerType = std::function<int(const std::string &, const std::vector<std::string> &)>;
     using command_handler_t  = CommandHandlerType;
 
 
@@ -3402,9 +3402,10 @@ struct CommandInfo
         {
             allowedOptions.insert(options.begin(), options.end());
             if (!commandHandler)
-                commandHandler = [](const std::string &fullCmd)
+                commandHandler = [](const std::string &fullCmd, const std::vector<std::string> &inputs) -> int
                                  {
-                                     throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
+                                     // throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
+                                     throw std::runtime_error("command handler for command '" + fullCmd + "' not implemented (input: '" + string::merge<std::string>(inputs.begin(), inputs.end(), ' ') + "')");
                                  };
             return this;
         }
@@ -3425,22 +3426,45 @@ struct CommandInfo
         addCommandOptions(cmdSeq.begin(), cmdSeq.end(), optVec);
     }
 
+    void addOptionsToFinalCommands(const std::vector<std::string> &options)
+    {
+        if (subCommands.empty())
+        {
+            allowedOptions.insert(options.begin(), options.end());
+        }
+        else
+        {
+            for(auto &kv : subCommands)
+            {
+                kv.second.addOptionsToFinalCommands(options);
+            }
+        }
+    }
+
+    void addOptionsToFinalCommands(const std::string &optionsStr)
+    {
+        auto optVec = splitHelper(optionsStr, ',');
+        addOptionsToFinalCommands(optVec);
+    }
+
+
     void addCommand( const std::string &cmdSequenceStr // space separated
                    , CommandHandlerType commandHandler_
                    )
     {
         auto cmdSeq = splitHelper(cmdSequenceStr, ' ');
-        const CommandInfo* pCommandInfo = addCommandOptions(cmdSeq.begin(), cmdSeq.end(), std::vector<std::string>());
+        const CommandInfo* pCommandInfoConst = addCommandOptions(cmdSeq.begin(), cmdSeq.end(), std::vector<std::string>());
+        CommandInfo* pCommandInfo = const_cast<CommandInfo*>(pCommandInfoConst);
         pCommandInfo->commandHandler = commandHandler_;
     }
 
-    CommandHandlerType
     void addCommand(const std::string &cmdSequenceStr)
     {
         addCommand( cmdSequenceStr
-                  , [](const std::string &fullCmd)
+                  , [](const std::string &fullCmd, const std::vector<std::string> &inputs) -> int
                     {
-                        throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
+                        //throw std::runtime_error("command handler for command sequence '" + fullCmd + "' not implemented");
+                        throw std::runtime_error("command handler for command '" + fullCmd + "' not implemented (input: '" + string::merge<std::string>(inputs.begin(), inputs.end(), ' ') + "')");
                     }
                   );
     }
@@ -3453,7 +3477,7 @@ struct CommandInfo
         if (!traverseHandler(pCommandInfo))
              return pCommandInfo;
 
-        for(auto it=curCmdSequence.begin(); it!=curCmdSequence.end(); ++it)
+        for(auto it= cmdSequence.begin(); it!= cmdSequence.end(); ++it)
         {
             auto subIt = pCommandInfo->subCommands.find(*it);
             if (subIt==pCommandInfo->subCommands.end())
@@ -3528,7 +3552,7 @@ struct CommandInfo
     }
 
 
-    int executeCommand(const std::vector<std::string> &cmdSequence) const
+    int executeCommand(const std::vector<std::string> &cmdSequence, const std::vector<std::string> &inputList) const
     {
         std::string fullName;
 
@@ -3554,7 +3578,10 @@ struct CommandInfo
                                );
         if (fullName.empty())
         {
-            throw std::runtime_error("umba::command_line::CommandInfo::execCommand: try to execute empty command");
+            if (!commandHandler) // Для текущей команды (корневой) не задан обработчик - значит, путую команду нельзя выполнить
+                throw std::runtime_error("umba::command_line::CommandInfo::execCommand: try to execute empty command");
+
+            return commandHandler(std::string(), inputList);
         }
 
         if (!pCommandInfo)
@@ -3567,7 +3594,7 @@ struct CommandInfo
             throw std::runtime_error("umba::command_line::CommandInfo::execCommand: command '" + fullName + "' found, but command handler is not set");
         }
 
-        return pCommandInfo->commandHandler(fullName);
+        return pCommandInfo->commandHandler(fullName, inputList);
     }
     // const std::vector<std::string> &cmdSequence
 
@@ -3588,13 +3615,30 @@ class CommandSequenceController
     CommandInfo                   commandInfo; // 
     mutable bool                  bSealed = false; // Запечатывание происходит, когда после команды или нескольких приходит опция
     std::vector<std::string>      commandSequence;
+    std::vector<std::string>      inputList;
 
 
 public:
 
+
+    const std::vector<std::string>& getInputList() const
+    {
+        return inputList;
+    }
+
+    void addInput(const std::string &input)
+    {
+        inputList.push_back(input);
+    }
+
     std::string getFullCommandStr() const
     {
         return string::merge<std::string>(commandSequence.begin(), commandSequence.end(), ' ');
+    }
+
+    void seal()
+    {
+        bSealed = true;
     }
 
     bool isSealed() const
@@ -3614,7 +3658,12 @@ public:
         addCommandOptions("", optionsStr);
     }
 
-    void addCommand(const std::string &cmdSequenceStr, CommandInfo commandHandler)
+    void addOptionsToFinalCommands(const std::string &optionsStr)
+    {
+        commandInfo.addOptionsToFinalCommands(optionsStr);
+    }
+
+    void addCommand(const std::string &cmdSequenceStr, CommandInfo::CommandHandlerType commandHandler)
     {
         commandInfo.addCommand(cmdSequenceStr, commandHandler);
     }
@@ -3625,14 +3674,15 @@ public:
     }
 
     // Теоретически, можем запускать и не только не команды, которые насобирали
-    int executeCommand(const std::vector<std::string> &cmdSeq) const
+    int executeCommand(const std::vector<std::string> &cmdSeq, const std::vector<std::string> &inputs) const
     {
-        return commandInfo.executeCommand(cmdSeq);
+        return commandInfo.executeCommand(cmdSeq, inputs);
     }
 
+    // Выполняет введённую команду (находит и запускает соотв функтор)
     int executeCommand() const
     {
-        return executeCommand(commandSequence);
+        return executeCommand(commandSequence, inputList);
     }
 
 
@@ -3648,6 +3698,7 @@ public:
         return commandInfo.isOptionAllowed(commandSequence, opt);
     }
 
+    // Проверяет допустимость опции для текущей команды, а также "запечатывает" введённые команды
     bool isOptionAllowed(const CommandLineOption &opt, std::string &errMsg)
     {
         if (isOptionAllowed(opt))
@@ -3670,7 +3721,7 @@ public:
         return false;
     }
 
-
+    // просто проверяет, достигли ли мы конца допустимой последовательности комманд, или нет. Не производит никакой проверки добавляемой команды на допустимость добавления именно её
     bool canAddSubCommand() const
     {
         if (bSealed)
@@ -3684,14 +3735,19 @@ public:
         return true;
     }
 
+    // производит проверку на допустимость добавления конкретной подкоманды
     bool isSubCommandAllowed(const std::string& cmd) const
     {
+        // if (bSealed)
+        //     return false;
+
         if (!canAddSubCommand())
             return false;
 
         return commandInfo.isSubCommandAllowed(commandSequence, cmd);
     }
 
+    // производит проверку на допустимость добавления конкретной подкоманды, и при ошибке формирует сообщение
     bool isSubCommandAllowed(const std::string& cmd, std::string &errMsg) const
     {
         if (isSealed())
@@ -3699,6 +3755,12 @@ public:
             errMsg = "command and it's subcommands cannot be mixed with options";
             return false;
         }
+
+        if (!canAddSubCommand())
+        {
+            errMsg = "command and it's subcommands have already been completely entered";
+            return false;
+        }    
 
         if (isSubCommandAllowed(cmd))
             return true;
@@ -3717,6 +3779,36 @@ public:
 
         return false;
     }
+
+    // добавляет подкоманду, и при ошибке может выкидывать исключение
+    bool appendSubCommandSequence(const std::string& cmd, bool throwError=true)
+    {
+        std::string errMsg;
+        if (!isSubCommandAllowed(cmd, errMsg))
+        {
+            if (throwError)
+                throw std::runtime_error(errMsg);
+            return false;
+        }
+
+        commandSequence.push_back(cmd);
+
+        return true;
+    }
+
+    // добавляет подкоманду, при ошибке сохраняе её ткст в errMsg
+    bool appendSubCommandSequence(const std::string& cmd, std::string &errMsg)
+    {
+        if (!isSubCommandAllowed(cmd, errMsg))
+        {
+            return false;
+        }
+
+        commandSequence.push_back(cmd);
+
+        return true;
+    }
+
 
     void addStandardCommonGlobalOptions()
     {
