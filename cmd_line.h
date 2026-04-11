@@ -3383,6 +3383,7 @@ struct CommandInfo
     using parameter_transform_handler_t = ParameterTransformHandlerType;
 
 
+
     std::string                          commandName;
     CommandHandlerType                   commandHandler;  // по умолчанию в корневом элементе нет никакого обработчика, и пустая команда недопустима
     ParameterTransformHandlerType        parameterTransformHandler;
@@ -3390,6 +3391,7 @@ struct CommandInfo
     std::unordered_set<std::string>      allowedOptions;
     std::string                          helpString;
     std::size_t                          maxInputParams = std::size_t(-1);
+    bool                                 rawMode = false;
 
 
     //--------------------------------------------------
@@ -3688,6 +3690,19 @@ struct CommandInfo
     }
 
     //--------------------------------------------------
+    CommandInfo& setRawMode(bool rawMode_)
+    {
+        rawMode = rawMode_;
+        return *this;
+    }
+
+    //--------------------------------------------------
+    bool getRawMode() const
+    {
+        return rawMode;
+    }
+
+    //--------------------------------------------------
 
 
 
@@ -3697,7 +3712,7 @@ struct CommandInfo
     {
         const CommandInfo* pCommandInfo = traverseCommandSequense(cmdSequence, [](auto){ return true; });
         if (!pCommandInfo)
-            return false; // подкоманда не найдена, считаем, что подкоманда определена
+            return false; // подкоманда не найдена, считаем, что последовательность незакончена
 
         return pCommandInfo->subCommands.empty();
     }
@@ -3882,8 +3897,15 @@ public:
     // добавление с транформацией
     void addInput(const std::string &inputParam, const std::string &cwd)
     {
-        auto transformedParam = commandInfo.transformCommandParameter(commandSequence, inputList, inputParam, cwd);
-        addInput(transformedParam);
+        if (isRawMode())
+        {
+            addInput(inputParam);
+        }
+        else
+        {
+            auto transformedParam = commandInfo.transformCommandParameter(commandSequence, inputList, inputParam, cwd);
+            addInput(transformedParam);
+        }
     }
 
     //--------------------------------------------------
@@ -3904,6 +3926,14 @@ public:
     void seal()           { bSealed = true; }
     bool isSealed() const { return bSealed; }
 
+    bool isRawMode() const
+    {
+        if (!commandInfo.isCompleteCommandSequence(commandSequence))
+            return false;
+
+        return findCommand().getRawMode();
+    }
+
     //--------------------------------------------------
 
 
@@ -3916,6 +3946,9 @@ public:
 
     const CommandInfo& findCommand(const std::string &cmdSequenceStr) const            { return commandInfo.findCommand(cmdSequenceStr); }
     CommandInfo& findCommand(const std::string &cmdSequenceStr)                        { return commandInfo.findCommand(cmdSequenceStr); }
+
+    const CommandInfo& findCommand() const                                             { return commandInfo.findCommand(commandSequence); }
+    CommandInfo& findCommand()                                                         { return commandInfo.findCommand(commandSequence); }
 
     const CommandInfo& rootCommand() const { return commandInfo; }
     CommandInfo& rootCommand()             { return commandInfo; }
