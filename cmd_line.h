@@ -3802,6 +3802,11 @@ struct CommandInfo
 
     }
 
+    //--------------------------------------------------
+
+    
+    
+    //--------------------------------------------------
     std::string transformCommandParameter( const std::vector<std::string> &cmdSequence
                                          , const std::vector<std::string> &inputList
                                          , const std::string &paramValue
@@ -3831,6 +3836,7 @@ struct CommandInfo
 
     }
 
+    //--------------------------------------------------
 
 }; // struct CommandInfo
 
@@ -3851,11 +3857,14 @@ class CommandSequenceController
 public:
 
 
-    const std::vector<std::string>& getInputList() const
-    {
-        return inputList;
-    }
+    //--------------------------------------------------
+    const std::vector<std::string>& getInputList() const { return inputList; }
 
+    //--------------------------------------------------
+
+    
+    
+    //--------------------------------------------------
     // Сырое добавление, без транформации
     void addInput(const std::string &inputParam)
     {
@@ -3869,6 +3878,7 @@ public:
         inputList.push_back(inputParam);
     }
 
+    //--------------------------------------------------
     // добавление с транформацией
     void addInput(const std::string &inputParam, const std::string &cwd)
     {
@@ -3876,52 +3886,46 @@ public:
         addInput(transformedParam);
     }
 
+    //--------------------------------------------------
+
+    
+    
+    //--------------------------------------------------
     std::string getFullCommandStr() const
     {
         return string::merge<std::string>(commandSequence.begin(), commandSequence.end(), ' ');
     }
 
-    void seal()
-    {
-        bSealed = true;
-    }
+    //--------------------------------------------------
 
-    bool isSealed() const
-    {
-        return bSealed;
-    }
+    
+    
+    //--------------------------------------------------
+    void seal()           { bSealed = true; }
+    bool isSealed() const { return bSealed; }
+
+    //--------------------------------------------------
 
 
-    CommandInfo& addCommand(const std::string &cmdSequenceStr)
-    {
-        return commandInfo.addCommand(cmdSequenceStr);
-    }
 
-    const CommandInfo& findCommand(const std::vector<std::string> &cmdSequence) const
-    {
-        return commandInfo.findCommand(cmdSequence);
-    }
+    //--------------------------------------------------
+    CommandInfo& addCommand(const std::string &cmdSequenceStr)                         { return commandInfo.addCommand(cmdSequenceStr); }
 
-    CommandInfo& findCommand(const std::vector<std::string> &cmdSequence)
-    {
-        return commandInfo.findCommand(cmdSequence);
-    }
+    const CommandInfo& findCommand(const std::vector<std::string> &cmdSequence) const  { return commandInfo.findCommand(cmdSequence); }
+    CommandInfo& findCommand(const std::vector<std::string> &cmdSequence)              { return commandInfo.findCommand(cmdSequence); }
 
-    const CommandInfo& findCommand(const std::string &cmdSequenceStr) const
-    {
-        return commandInfo.findCommand(cmdSequenceStr);
-    }
+    const CommandInfo& findCommand(const std::string &cmdSequenceStr) const            { return commandInfo.findCommand(cmdSequenceStr); }
+    CommandInfo& findCommand(const std::string &cmdSequenceStr)                        { return commandInfo.findCommand(cmdSequenceStr); }
 
-    CommandInfo& findCommand(const std::string &cmdSequenceStr)
-    {
-        return commandInfo.findCommand(cmdSequenceStr);
-    }
+    const CommandInfo& rootCommand() const { return commandInfo; }
+    CommandInfo& rootCommand()             { return commandInfo; }
 
-    void addGlobalOptions(const std::string &optionsStr)
-    {
-        //addCommandOptions("", optionsStr);
-        commandInfo.setOptions(optionsStr);
-    }
+    //--------------------------------------------------
+
+
+
+    //--------------------------------------------------
+    void addGlobalOptions(const std::string &optionsStr) { commandInfo.setOptions(optionsStr); }
 
     void addOptionsToFinalCommands(const std::string &optionsStr)
     {
@@ -3933,7 +3937,11 @@ public:
                                          );
     }
 
+    //--------------------------------------------------
 
+
+
+    //--------------------------------------------------
     // Теоретически, можем запускать и не только не команды, которые насобирали
     int executeCommand(const std::vector<std::string> &cmdSeq, const std::vector<std::string> &inputs) const
     {
@@ -3946,7 +3954,11 @@ public:
         return executeCommand(commandSequence, inputList);
     }
 
+    //--------------------------------------------------
 
+
+
+    //--------------------------------------------------
     // Также "запечатывает" команду
     bool isOptionAllowed(const CommandLineOption &opt) const
     {
@@ -3959,6 +3971,7 @@ public:
         return commandInfo.isOptionAllowed(commandSequence, opt);
     }
 
+    //--------------------------------------------------
     // Проверяет допустимость опции для текущей команды, а также "запечатывает" введённые команды
     bool isOptionAllowed(const CommandLineOption &opt, std::string &errMsg)
     {
@@ -3982,6 +3995,11 @@ public:
         return false;
     }
 
+    //--------------------------------------------------
+
+    
+    
+    //--------------------------------------------------
     // просто проверяет, достигли ли мы конца допустимой последовательности комманд, или нет. Не производит никакой проверки добавляемой команды на допустимость добавления именно её
     bool canAddSubCommand() const
     {
@@ -3996,6 +4014,7 @@ public:
         return true;
     }
 
+    //--------------------------------------------------
     // производит проверку на допустимость добавления конкретной подкоманды
     bool isSubCommandAllowed(const std::string& cmd) const
     {
@@ -4008,6 +4027,7 @@ public:
         return commandInfo.isSubCommandAllowed(commandSequence, cmd);
     }
 
+    //--------------------------------------------------
     // производит проверку на допустимость добавления конкретной подкоманды, и при ошибке формирует сообщение
     bool isSubCommandAllowed(const std::string& cmd, std::string &errMsg) const
     {
@@ -4041,6 +4061,7 @@ public:
         return false;
     }
 
+    //--------------------------------------------------
     // добавляет подкоманду, и при ошибке может выкидывать исключение
     bool appendSubCommandSequence(const std::string& cmd, bool throwError=true)
     {
@@ -4057,7 +4078,8 @@ public:
         return true;
     }
 
-    // добавляет подкоманду, при ошибке сохраняе её ткст в errMsg
+    //--------------------------------------------------
+    // добавляет подкоманду, при ошибке сохраняе её текст в errMsg
     bool appendSubCommandSequence(const std::string& cmd, std::string &errMsg)
     {
         if (!isSubCommandAllowed(cmd, errMsg))
@@ -4070,28 +4092,33 @@ public:
         return true;
     }
 
-
+    //--------------------------------------------------
     void addStandardCommonGlobalOptions()
     {
         addGlobalOptions("help,quet,verbose,version,color,build-info,build-info-x,no-builtin-options,no-custom-builtin-options,no-user-builtin-options,where");
     }
 
+    //--------------------------------------------------
     void addStandardAutocompleteGlobalOptions()
     {
         addGlobalOptions("autocomplete-install,autocomplete-uninstall");
     }
 
+    //--------------------------------------------------
     void addStandardHelpGlobalOptions()
     {
         addGlobalOptions("wiki,md,bash,clink");
     }
 
+    //--------------------------------------------------
     void addAllStandardGlobalOptions()
     {
         addStandardCommonGlobalOptions();
         addStandardAutocompleteGlobalOptions();
         addStandardHelpGlobalOptions();
     }
+
+    //--------------------------------------------------
 
 
 }; // struct CommandSequenceController
