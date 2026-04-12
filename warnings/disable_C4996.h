@@ -7,6 +7,8 @@
 */
 
 #if defined(_MSC_VER)
-    #pragma message("!!! This function or variable may be unsafe")
+    #if defined(UMBA_ENABLE_WARNING_DISABLE_VERBOSE)
+        #pragma message("!!! This function or variable may be unsafe")
+    #endif
     #pragma warning(disable:4996) // - warning C4996: This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 #endif

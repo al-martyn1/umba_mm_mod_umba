@@ -645,40 +645,50 @@ struct OptionPrepareDefault
 };
 
 //----------------------------------------------------------------------------
-template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+template<typename SetType> inline
 std::enable_if_t<is_associative<SetType>::value, bool>
-optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+optionStringRemoveFromSet(const std::string &opt, SetType &s)
 {
-    umba::string::trim(opt);
-
-    if (opt=="-") // 'remove all' marker
-    {
-        s.clear();
-        return true;
-    }
-
-    bool bRemove = false;
-    opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
-    opt = optPrepareHandler(opt);
-
-    if (opt.empty())
-        return false;
-
-    umba::string::case_convert(opt, caseOption);
-
-    if (bRemove)
-        s.erase(opt);
-    else
-        s.insert(opt);
-
+    s.erase(opt);
     return true;
 }
 
 //----------------------------------------------------------------------------
-// Версия для векторов, списков, и тп
+template<typename SetType> inline
+std::enable_if_t<is_associative<SetType>::value, bool>
+optionStringInsertToSet(const std::string &opt, SetType &s)
+{
+    s.insert(opt);
+    return true;
+}
+
+//----------------------------------------------------------------------------
+// Версия optionStringRemoveFromSet для векторов, списков, и тп
 template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
 std::enable_if_t<!is_associative<SetType>::value, bool>
-optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
+optionStringRemoveFromSet(const std::string &opt, SetType &s)
+{
+    auto existingValIt = std::find(s.begin(), s.end(), opt);
+    if (existingValIt!=s.end()) // Элемент существует - удаляем
+        s.erase(existingValIt);
+    return true;
+}
+
+//----------------------------------------------------------------------------
+// Версия optionStringRemoveFromSet для векторов, списков, и тп
+template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+std::enable_if_t<!is_associative<SetType>::value, bool>
+optionStringInsertToSet(const std::string &opt, SetType &s)
+{
+    auto existingValIt = std::find(s.begin(), s.end(), opt);
+    if (existingValIt==s.end()) // Элемент не существует - добавляем
+        s.push_back(opt);
+    return true;
+}
+
+//----------------------------------------------------------------------------
+template<typename SetType, typename OptPrepareHandler=OptionPrepareDefault> inline
+bool optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareHandler=OptionPrepareDefault(), CaseOption caseOption=CaseOption::toLower, bool defaultAdd=true)
 {
     umba::string::trim(opt);
 
@@ -690,27 +700,14 @@ optionStringUpdateSet(std::string opt, SetType &s, OptPrepareHandler optPrepareH
 
     bool bRemove = false;
     opt = optionStringExtractUpdateMarker(opt, bRemove, defaultAdd);
-    
+    opt = optPrepareHandler(opt);
+
     if (opt.empty())
         return false;
 
     umba::string::case_convert(opt, caseOption);
-    opt = optPrepareHandler(opt);
 
-    auto existingValIt = std::find(s.begin(), s.end(), opt);
-    
-    if (bRemove)
-    {
-        if (existingValIt!=s.end()) // Элемент существует - удаляем
-            s.erase(existingValIt);
-    }
-    else
-    {
-        if (existingValIt==s.end()) // Элемент не существует - добавляем
-            s.push_back(opt);
-    }
-
-    return true;
+    return bRemove ? optionStringRemoveFromSet(opt, s) : optionStringInsertToSet(opt, s);
 }
 
 //----------------------------------------------------------------------------

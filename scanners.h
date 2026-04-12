@@ -11,7 +11,8 @@
 #include "filesys_scanners.h"
 
 #if defined(_MSC_VER)
-    #pragma message("!!! Direct using 'umba::scanners' now deprecated, use 'umba::filesys::scanners' and 'umba/filesys_scanners.h' header file instead")
+    // Достало уже
+    // #pragma message("!!! Direct using 'umba::scanners' now deprecated, use 'umba::filesys::scanners' and 'umba/filesys_scanners.h' header file instead")
 #endif
 
 
